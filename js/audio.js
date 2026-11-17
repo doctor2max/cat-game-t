@@ -1,0 +1,347 @@
+window.Game = window.Game || {};
+
+window.Game.Audio = (function () {
+  let ctx = null;
+  let sfxMuted = false;
+  let musicMuted = false;
+  let musicTimer = null;
+  let chaseMode = false;
+  let stepIndex = 0;
+
+  function ensureCtx() {
+    if (!ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) ctx = new AudioCtx();
+    }
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+    return ctx;
+  }
+
+  function playTone(freqStart, freqEnd, duration, type = 'sine', gainVal = 0.15) {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const now = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freqStart, now);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(20, freqEnd), now + duration);
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(gainVal, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    osc.connect(gain);
+    gain.connect(c.destination);
+    osc.start(now);
+    osc.stop(now + duration + 0.02);
+  }
+
+  function playNoise(duration, filterFreq = 800, gainVal = 0.12) {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const bufferSize = Math.floor(c.sampleRate * duration);
+    const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = c.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = c.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = filterFreq;
+
+    const gain = c.createGain();
+    const now = c.currentTime;
+    gain.gain.setValueAtTime(gainVal, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(c.destination);
+    noise.start(now);
+  }
+
+  // Preloaded real audio samples in sounds/ folder (compatible with file://)
+  const catAudioSample = new Audio('sounds/Cat.wav');
+  catAudioSample.preload = 'auto';
+  const catDamageAudioSample = new Audio('sounds/cat-damage.wav');
+  catDamageAudioSample.preload = 'auto';
+  const dogAudioSample = new Audio('sounds/Dog.wav');
+  dogAudioSample.preload = 'auto';
+
+  function playSample(sample, volume = 0.75, fallbackFn) {
+    if (sfxMuted) return;
+    try {
+      const clip = sample.cloneNode();
+      clip.volume = volume;
+      const p = clip.play();
+      if (p && typeof p.catch === 'function') {
+        p.catch(() => {
+          if (fallbackFn) fallbackFn();
+        });
+      }
+    } catch (e) {
+      if (fallbackFn) fallbackFn();
+    }
+  }
+
+  function playMeowSynth() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const now = c.currentTime;
+    const osc = c.createOscillator();
+    const filter = c.createBiquadFilter();
+    const gain = c.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(520, now);
+    osc.frequency.exponentialRampToValueAtTime(840, now + 0.11);
+    osc.frequency.exponentialRampToValueAtTime(430, now + 0.38);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1900, now);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.22, now + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(c.destination);
+    osc.start(now);
+    osc.stop(now + 0.42);
+  }
+
+  function playMeow() {
+    playSample(catAudioSample, 0.75, playMeowSynth);
+  }
+
+  function playJump() {
+    playTone(260, 520, 0.12, 'sine', 0.11);
+  }
+
+  function playWallScratch() {
+    playNoise(0.08, 2200, 0.09);
+  }
+
+  function playSplash() {
+    playNoise(0.32, 950, 0.22);
+    playTone(320, 120, 0.2, 'sine', 0.12);
+  }
+
+  function playBarkSynth() {
+    if (sfxMuted) return;
+    playTone(210, 95, 0.13, 'sawtooth', 0.18);
+    setTimeout(() => playTone(240, 105, 0.14, 'sawtooth', 0.16), 130);
+  }
+
+  function playBark() {
+    playSample(dogAudioSample, 0.75, playBarkSynth);
+  }
+
+  function playPurr() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const now = c.currentTime;
+    const osc = c.createOscillator();
+    const lfo = c.createOscillator();
+    const lfoGain = c.createGain();
+    const gain = c.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(58, now);
+    lfo.frequency.setValueAtTime(24, now);
+    lfoGain.gain.setValueAtTime(0.08, now);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.14, now + 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+
+    lfo.connect(lfoGain);
+    lfoGain.connect(gain.gain);
+    osc.connect(gain);
+    gain.connect(c.destination);
+
+    osc.start(now);
+    lfo.start(now);
+    osc.stop(now + 0.72);
+    lfo.stop(now + 0.72);
+  }
+
+  function playTreat() {
+    playTone(587, 880, 0.1, 'sine', 0.13);
+    setTimeout(() => playTone(880, 1175, 0.16, 'sine', 0.14), 85);
+  }
+
+  function playHurtSynth() {
+    playTone(680, 260, 0.25, 'sawtooth', 0.15);
+  }
+
+  function playHurt() {
+    playSample(catDamageAudioSample, 0.8, playHurtSynth);
+  }
+
+  function playNightVision(on) {
+    if (on) {
+      playTone(420, 860, 0.18, 'sine', 0.1);
+    } else {
+      playTone(760, 380, 0.14, 'sine', 0.08);
+    }
+  }
+
+  // Background music tracks from sounds/ folder (soft, non-intrusive volume)
+  const BG_NORMAL_VOL = 0.16;
+  const BG_CHASE_VOL = 0.21;
+  const cityMusic = new Audio('sounds/Rushofcity.mp3');
+  cityMusic.loop = true;
+  cityMusic.preload = 'auto';
+  cityMusic.volume = BG_NORMAL_VOL;
+
+  const parkMusic = new Audio('sounds/Public-Park.mp3');
+  parkMusic.loop = true;
+  parkMusic.preload = 'auto';
+  parkMusic.volume = BG_NORMAL_VOL;
+
+  const harborMusic = new Audio('sounds/Seaport.mp3');
+  harborMusic.loop = true;
+  harborMusic.preload = 'auto';
+  harborMusic.volume = BG_NORMAL_VOL;
+
+  const rooftopMusic = new Audio('sounds/Building-rooftops.mp3');
+  rooftopMusic.loop = true;
+  rooftopMusic.preload = 'auto';
+  rooftopMusic.volume = BG_NORMAL_VOL;
+
+  const subwayMusic = new Audio('sounds/subway.mp3');
+  subwayMusic.loop = true;
+  subwayMusic.preload = 'auto';
+  subwayMusic.volume = BG_NORMAL_VOL;
+
+  let activeTrackKey = 'city';
+  let bgMusic = cityMusic;
+  let bgMusicStarted = false;
+
+  // Fallback walking-bass synth loop (used only if MP3 fails)
+  const jazzNotes = [110, 130.81, 146.83, 164.81, 146.83, 130.81, 98, 123.47];
+  const chaseNotes = [146.83, 174.61, 196, 220, 196, 174.61, 164.81, 146.83];
+
+  function tickMusic() {
+    if (!musicMuted && ctx && ctx.state === 'running') {
+      const notes = chaseMode ? chaseNotes : jazzNotes;
+      const freq = notes[stepIndex % notes.length];
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(chaseMode ? 0.065 : 0.045, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + (chaseMode ? 0.16 : 0.28));
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.3);
+      stepIndex++;
+    }
+    const interval = chaseMode ? 190 : 380;
+    musicTimer = setTimeout(tickMusic, interval);
+  }
+
+  function setMusicTrack(theme) {
+    const nextKey =
+      theme === 'subway'
+        ? 'subway'
+        : theme === 'rooftop' || theme === 'construction'
+        ? 'rooftop'
+        : theme === 'harbor'
+        ? 'harbor'
+        : theme === 'park'
+        ? 'park'
+        : 'city';
+    if (nextKey === activeTrackKey) return;
+    bgMusic.pause();
+    activeTrackKey = nextKey;
+    bgMusic =
+      nextKey === 'subway'
+        ? subwayMusic
+        : nextKey === 'rooftop'
+        ? rooftopMusic
+        : nextKey === 'harbor'
+        ? harborMusic
+        : nextKey === 'park'
+        ? parkMusic
+        : cityMusic;
+    bgMusic.currentTime = 0;
+    bgMusic.muted = musicMuted;
+    bgMusic.volume = chaseMode ? BG_CHASE_VOL : BG_NORMAL_VOL;
+    if (bgMusicStarted && !musicMuted) {
+      bgMusic.play().catch(() => {
+        if (!musicTimer) tickMusic();
+      });
+    }
+  }
+
+  function startMusic() {
+    ensureCtx();
+    if (bgMusicStarted) {
+      if (bgMusic.paused && !musicMuted) {
+        bgMusic.play().catch(() => {});
+      }
+      return;
+    }
+    bgMusicStarted = true;
+    bgMusic.muted = musicMuted;
+    bgMusic.volume = chaseMode ? BG_CHASE_VOL : BG_NORMAL_VOL;
+    const p = bgMusic.play();
+    if (p && typeof p.catch === 'function') {
+      p.catch(() => {
+        if (!musicTimer) tickMusic();
+      });
+    }
+  }
+
+  function setChaseMode(active) {
+    chaseMode = active;
+    bgMusic.volume = active ? BG_CHASE_VOL : BG_NORMAL_VOL;
+  }
+
+  function toggleSfxMute() {
+    sfxMuted = !sfxMuted;
+    return sfxMuted;
+  }
+
+  function toggleMusicMute() {
+    musicMuted = !musicMuted;
+    bgMusic.muted = musicMuted;
+    if (!musicMuted && bgMusicStarted && bgMusic.paused) {
+      bgMusic.play().catch(() => {});
+    }
+    return musicMuted;
+  }
+
+  return {
+    ensureCtx,
+    playMeow,
+    playJump,
+    playWallScratch,
+    playSplash,
+    playBark,
+    playPurr,
+    playTreat,
+    playHurt,
+    playNightVision,
+    setMusicTrack,
+    startMusic,
+    setChaseMode,
+    toggleMute: toggleSfxMute,
+    toggleSfxMute,
+    toggleMusicMute,
+  };
+})();
