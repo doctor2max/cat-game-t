@@ -717,7 +717,7 @@ canvas {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
+  gap: clamp(10px, 2.5vmin, 16px);
   pointer-events: none;
 }
 
@@ -729,50 +729,50 @@ canvas {
   justify-content: center;
   gap: 2px;
   border-radius: 50%;
-  border: 2px solid rgba(148, 163, 184, 0.55);
+  border: 2px solid rgba(148, 163, 184, 0.58);
   background: rgba(14, 21, 38, 0.52);
   color: #f8fafc;
   font-weight: 800;
-  opacity: 0.8;
+  opacity: 0.82;
   cursor: pointer;
   backdrop-filter: blur(4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.38);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
   transition: transform 0.08s ease, background 0.08s ease, border-color 0.08s ease, opacity 0.08s ease;
   touch-action: none;
 }
 
 .touch-btn span {
-  font-size: 10px;
+  font-size: clamp(11px, 2.8vmin, 13px);
   font-weight: 700;
-  opacity: 0.92;
+  opacity: 0.94;
 }
 
 .touch-dir {
-  width: 64px;
-  height: 64px;
-  font-size: 24px;
+  width: clamp(76px, 19vmin, 98px);
+  height: clamp(76px, 19vmin, 98px);
+  font-size: clamp(28px, 7vmin, 36px);
 }
 
 .touch-crouch {
-  width: 54px;
-  height: 54px;
-  font-size: 18px;
-  border-color: rgba(251, 191, 36, 0.58);
+  width: clamp(64px, 15.5vmin, 84px);
+  height: clamp(64px, 15.5vmin, 84px);
+  font-size: clamp(20px, 5vmin, 26px);
+  border-color: rgba(251, 191, 36, 0.62);
 }
 
 .touch-jump {
-  width: 74px;
-  height: 74px;
-  font-size: 25px;
-  border-color: rgba(245, 155, 66, 0.82);
-  background: rgba(232, 107, 36, 0.36);
+  width: clamp(86px, 21.5vmin, 112px);
+  height: clamp(86px, 21.5vmin, 112px);
+  font-size: clamp(28px, 7vmin, 36px);
+  border-color: rgba(245, 155, 66, 0.85);
+  background: rgba(232, 107, 36, 0.38);
 }
 
 .touch-skill {
-  width: 54px;
-  height: 54px;
-  font-size: 18px;
-  border-color: rgba(108, 229, 255, 0.58);
+  width: clamp(64px, 15.5vmin, 84px);
+  height: clamp(64px, 15.5vmin, 84px);
+  font-size: clamp(20px, 5vmin, 26px);
+  border-color: rgba(108, 229, 255, 0.62);
 }
 
 .touch-btn.pressed,
@@ -878,5 +878,16 @@ canvas {
     right: 12px;
     top: 48px;
     max-height: calc(100dvh - 130px);
+  }
+}
+
+@media (max-width: 560px) and (orientation: portrait) {
+  .touch-left-pad,
+  .touch-right-pad {
+    flex-wrap: wrap;
+    max-width: 48%;
+  }
+  .touch-right-pad {
+    justify-content: flex-end;
   }
 }
