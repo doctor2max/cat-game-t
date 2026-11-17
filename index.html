@@ -9,7 +9,68 @@
 </head>
 <body>
   <div id="game-wrapper">
-    <canvas id="gameCanvas" width="1280" height="720"></canvas>
+    <!-- Top HUD Bar (Dedicated Header, never overlaps canvas) -->
+    <div id="hud" class="hidden">
+      <div class="hud-left">
+        <div class="lives-card">
+          <div class="cat-badge">🐱</div>
+          <div class="lives-info">
+            <div class="lives-label">LIVES</div>
+            <div class="lives-bar" id="livesBar"></div>
+          </div>
+          <div class="lives-count" id="livesCount">6/7</div>
+        </div>
+        <div class="treats-card" title="الأسماك المجمّعة">
+          <span>🐟</span>
+          <span id="treatsCount">0/3</span>
+        </div>
+      </div>
+
+      <div class="hud-center">
+        <div class="stage-badge" id="stageBadge">المرحلة 1: الأزقة</div>
+      </div>
+
+      <div class="hud-right">
+        <div class="skill-pill" id="skillNightVision" title="الرؤية الليلية (E)">
+          <span class="key">E</span>
+          <span>👁️ رؤية ليلية</span>
+        </div>
+        <div class="skill-pill" id="skillMeow" title="المواء المشتت (Q)">
+          <span class="key">Q</span>
+          <span>🔊 مواء</span>
+        </div>
+        <div class="hud-menu-wrap">
+          <button id="btnHudMenu" class="icon-btn menu-toggle-btn" title="القائمة والإعدادات" aria-expanded="false">☰</button>
+          <div id="hudDropdown" class="hud-dropdown hidden">
+            <button id="btnDimBg" class="dropdown-item" title="تعتيم الخلفيات لتقليل التشتيت"><span>🌓</span><span>تعتيم الخلفية</span></button>
+            <button id="btnFullscreen" class="dropdown-item" title="ملء الشاشة"><span>⛶</span><span>ملء الشاشة</span></button>
+            <button id="btnMusic" class="dropdown-item" title="كتم / تشغيل الموسيقى"><span>🎵</span><span>الموسيقى</span></button>
+            <button id="btnAudio" class="dropdown-item" title="كتم / تشغيل المؤثرات الصوتية"><span>🔊</span><span>المؤثرات</span></button>
+            <button id="btnGuide" class="dropdown-item" title="إرشادات اللعبة"><span>📖</span><span>الإرشادات</span></button>
+            <button id="btnMainMenu" class="dropdown-item exit-item" title="الخروج إلى القائمة الرئيسية"><span>🚪</span><span>القائمة الرئيسية</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Game Viewport (Lifted above touch controls) -->
+    <div id="gameViewport" class="game-viewport">
+      <canvas id="gameCanvas" width="1280" height="720"></canvas>
+    </div>
+
+    <!-- Dedicated Bottom Multi-Touch Controls Dock (Never covers gameplay) -->
+    <div id="touchControls" class="touch-controls hidden">
+      <div class="touch-left-pad">
+        <button class="touch-btn touch-dir" data-action="left" aria-label="يسار">◀</button>
+        <button class="touch-btn touch-dir" data-action="right" aria-label="يمين">▶</button>
+        <button class="touch-btn touch-crouch" data-action="down" aria-label="تسلل">⬇<span>تسلل</span></button>
+      </div>
+      <div class="touch-right-pad">
+        <button class="touch-btn touch-skill" data-action="nightvision" aria-label="رؤية ليلية">👁️<span>ليل</span></button>
+        <button class="touch-btn touch-skill" data-action="meow" aria-label="مواء">🔊<span>مواء</span></button>
+        <button class="touch-btn touch-jump" data-action="jump" aria-label="قفز">▲<span>قفز</span></button>
+      </div>
+    </div>
 
     <!-- Intro Video Cutscene Layer -->
     <div id="introLayer" class="intro-layer hidden">
@@ -35,47 +96,6 @@
       <div class="intro-hud">
         <div class="intro-credit">Dr. MAX MOUSA • THE WAY HOME: 7 LIVES</div>
         <button id="btnSkipWin" class="skip-btn">تخطي ⏭</button>
-      </div>
-    </div>
-
-    <!-- Top HUD -->
-    <div id="hud" class="hidden">
-      <div class="hud-left">
-        <div class="lives-card">
-          <div class="cat-badge">🐱</div>
-          <div class="lives-info">
-            <div class="lives-label">LIVES METER</div>
-            <div class="lives-bar" id="livesBar"></div>
-          </div>
-          <div class="lives-count" id="livesCount">6/7</div>
-        </div>
-        <div class="treats-card" title="الأسماك المجمّعة">
-          <span>🐟</span>
-          <span id="treatsCount">0/3</span>
-        </div>
-      </div>
-
-      <div class="hud-center">
-        <div class="stage-badge" id="stageBadge">المرحلة 1: أزقة الشارع الخلفية • The Alleyways</div>
-      </div>
-
-      <div class="hud-right">
-        <div class="skill-pill" id="skillNightVision" title="الرؤية الليلية (E)">
-          <span class="key">E</span>
-          <span>👁️ رؤية ليلية</span>
-        </div>
-        <div class="skill-pill" id="skillMeow" title="المواء المشتت (Q)">
-          <span class="key">Q</span>
-          <span>🔊 مواء</span>
-        </div>
-        <button id="btnDimBg" class="icon-btn" title="تعتيم الخلفيات لتقليل التشتيت">🌓</button>
-        <button id="btnFullscreen" class="icon-btn" title="ملء الشاشة">⛶</button>
-        <button id="btnMusic" class="icon-btn" title="كتم / تشغيل الموسيقى">🎵</button>
-        <button id="btnAudio" class="icon-btn" title="كتم / تشغيل المؤثرات الصوتية">🔊</button>
-        <button id="btnGuide" class="icon-btn" title="إرشادات اللعبة">📖</button>
-        <button id="btnMainMenu" class="icon-btn exit-btn" title="الخروج إلى القائمة الرئيسية">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        </button>
       </div>
     </div>
 
@@ -112,22 +132,6 @@
             <li><strong>الأخطار والأعداء:</strong> تجنب <strong>الكلاب الضالة</strong> (بالانبطاح <kbd>Shift</kbd> أو المواء <kbd>Q</kbd>)، و<strong>القنافذ والغربان</strong> في الحديقة، و<strong>سرطانات البحر وطيور النورس وجرذان الميناء</strong> في الميناء، و<strong>المياه العميقة</strong>.</li>
           </ul>
         </div>
-      </div>
-    </div>
-
-    <!-- Touch Controls Overlay (Multi-Touch Mobile & Tablet) -->
-    <div id="touchControls" class="touch-controls hidden">
-      <div class="touch-left-pad">
-        <button class="touch-btn touch-dir" data-action="left" aria-label="يسار">◀</button>
-        <button class="touch-btn touch-dir" data-action="right" aria-label="يمين">▶</button>
-        <button class="touch-btn touch-crouch" data-action="down" aria-label="تسلل">⬇<span>تسلل</span></button>
-      </div>
-      <div class="touch-right-pad">
-        <div class="touch-skills-row">
-          <button class="touch-btn touch-skill" data-action="nightvision" aria-label="رؤية ليلية">👁️<span>ليل</span></button>
-          <button class="touch-btn touch-skill" data-action="meow" aria-label="مواء">🔊<span>مواء</span></button>
-        </div>
-        <button class="touch-btn touch-jump" data-action="jump" aria-label="قفز">▲<span>قفز</span></button>
       </div>
     </div>
 

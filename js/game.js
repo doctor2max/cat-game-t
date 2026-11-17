@@ -49,6 +49,8 @@ window.Game = window.Game || {};
   const btnFullscreen = document.getElementById('btnFullscreen');
   const btnMusic = document.getElementById('btnMusic');
   const btnAudio = document.getElementById('btnAudio');
+  const btnHudMenu = document.getElementById('btnHudMenu');
+  const hudDropdown = document.getElementById('hudDropdown');
   const touchControls = document.getElementById('touchControls');
   const btnStartGame = document.getElementById('btnStartGame');
   const btnStartStage2 = document.getElementById('btnStartStage2');
@@ -1111,7 +1113,14 @@ window.Game = window.Game || {};
       return;
     }
 
+    const viewZoom = 1.25;
+    const viewW = canvas.width / viewZoom;
+    const viewH = canvas.height / viewZoom;
+
     if (running) {
+      if (touchControls && touchControls.classList.contains('hidden') && (!exitConfirmOverlay || exitConfirmOverlay.classList.contains('hidden'))) {
+        touchControls.classList.remove('hidden');
+      }
       elapsedTime += dt;
       updateMovingPlatforms(timeSec);
       catCtrl.update(dt, input, level);
@@ -1132,16 +1141,24 @@ window.Game = window.Game || {};
 
       const targetCamX = Math.max(
         0,
-        Math.min(level.width - canvas.width, catCtrl.cat.x - canvas.width * 0.38)
+        Math.min(level.width - viewW, catCtrl.cat.x - viewW * 0.38)
+      );
+      const targetCamY = Math.max(
+        0,
+        Math.min(level.height - viewH, catCtrl.cat.y - viewH * 0.58)
       );
       camX += (targetCamX - camX) * Math.min(1, dt * 7);
+      camY += (targetCamY - camY) * Math.min(1, dt * 7);
       updateHUD();
     }
 
     drawBackground(timeSec);
+    ctx.save();
+    ctx.scale(viewZoom, viewZoom);
     drawLevel(timeSec);
     catCtrl.draw(ctx, camX, camY);
     Particles.draw(ctx, camX, camY);
+    ctx.restore();
     drawNightVisionOverlay();
 
     requestAnimationFrame(loop);
@@ -1375,7 +1392,30 @@ window.Game = window.Game || {};
     }
   });
 
-  if (btnMainMenu) btnMainMenu.addEventListener('click', openExitConfirm);
+  function closeHudDropdown() {
+    if (hudDropdown) hudDropdown.classList.add('hidden');
+    if (btnHudMenu) {
+      btnHudMenu.classList.remove('active');
+      btnHudMenu.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  if (btnHudMenu && hudDropdown) {
+    btnHudMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = hudDropdown.classList.contains('hidden');
+      hudDropdown.classList.toggle('hidden', !willOpen);
+      btnHudMenu.classList.toggle('active', willOpen);
+      btnHudMenu.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+    document.addEventListener('pointerdown', (e) => {
+      if (!hudDropdown.classList.contains('hidden') && !hudDropdown.contains(e.target) && e.target !== btnHudMenu) {
+        closeHudDropdown();
+      }
+    });
+  }
+
+  if (btnMainMenu) btnMainMenu.addEventListener('click', () => { closeHudDropdown(); openExitConfirm(); });
   if (btnConfirmExit) btnConfirmExit.addEventListener('click', returnToMainMenu);
   if (btnCancelExit) btnCancelExit.addEventListener('click', cancelExitConfirm);
   if (btnGameOverMenu) btnGameOverMenu.addEventListener('click', returnToMainMenu);
@@ -1394,7 +1434,10 @@ window.Game = window.Game || {};
 
   if (btnDimBg) btnDimBg.addEventListener('click', toggleDimBackground);
 
-  btnGuide.addEventListener('click', () => guidePanel.classList.toggle('hidden'));
+  btnGuide.addEventListener('click', () => {
+    closeHudDropdown();
+    guidePanel.classList.toggle('hidden');
+  });
   btnCloseGuide.addEventListener('click', () => guidePanel.classList.add('hidden'));
 
   btnMusic.addEventListener('click', () => {
@@ -1404,7 +1447,8 @@ window.Game = window.Game || {};
 
   btnAudio.addEventListener('click', () => {
     const isSfxMuted = Audio.toggleSfxMute();
-    btnAudio.textContent = isSfxMuted ? '🔇' : '🔊';
+    const iconSpan = btnAudio.querySelector('span');
+    if (iconSpan) iconSpan.textContent = isSfxMuted ? '🔇' : '🔊';
     btnAudio.classList.toggle('muted', isSfxMuted);
   });
 
