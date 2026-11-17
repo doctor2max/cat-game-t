@@ -138,8 +138,17 @@ window.Game = window.Game || {};
         : currentStage === 2
         ? window.Game.createLevel2()
         : window.Game.createLevel1();
-    stageBadge.textContent =
-      level.title || 'المرحلة 1: أزقة الشارع الخلفية • The Alleyways';
+    const shortStageTitles = {
+      1: 'المرحلة 1: الأزقة',
+      2: 'المرحلة 2: السوق',
+      3: 'المرحلة 3: الحديقة',
+      4: 'المرحلة 4: أعماق الحديقة',
+      5: 'المرحلة 5: الميناء',
+      6: 'المرحلة 6: الأسطح',
+      7: 'المرحلة 7: المترو',
+      8: 'المرحلة 8: الورشة',
+    };
+    stageBadge.textContent = shortStageTitles[currentStage] || `المرحلة ${currentStage}`;
     Audio.setMusicTrack(level.theme);
     catCtrl = window.Game.Cat(level.startX, level.startY);
     Particles.clear();
@@ -1207,6 +1216,8 @@ window.Game = window.Game || {};
 
   btnNextStage.addEventListener('click', () => {
     endOverlay.classList.add('hidden');
+    if (touchControls) touchControls.classList.remove('hidden');
+    clearAllInputs();
     const nextStage = currentStage < 8 ? currentStage + 1 : 8;
     initLevel(nextStage);
     running = true;
