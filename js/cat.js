@@ -377,13 +377,13 @@ window.Game.Cat = function (startX, startY) {
     }
 
     if (cat.onGround) {
-      cat.coyoteTimer = 0.1;
+      cat.coyoteTimer = 0.13;
     } else {
       cat.coyoteTimer = Math.max(0, cat.coyoteTimer - dt);
     }
 
     if (input.jumpPressed) {
-      cat.jumpBufferTimer = 0.12;
+      cat.jumpBufferTimer = 0.15;
     } else {
       cat.jumpBufferTimer = Math.max(0, cat.jumpBufferTimer - dt);
     }

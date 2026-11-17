@@ -1113,7 +1113,7 @@ window.Game = window.Game || {};
       return;
     }
 
-    const viewZoom = 1.25;
+    const viewZoom = 1.3;
     const viewW = canvas.width / viewZoom;
     const viewH = canvas.height / viewZoom;
 
@@ -1321,7 +1321,7 @@ window.Game = window.Game || {};
     updateHUD();
   }
 
-  // Multi-Touch Pointer Controls
+  // Multi-Touch Pointer Controls (with smooth thumb-slide between Left/Right)
   if (touchControls) {
     const activeHoldPointers = new Map(); // pointerId -> { action, btn }
     const syncHeld = () => {
@@ -1338,10 +1338,14 @@ window.Game = window.Game || {};
       input.jumpHeld = j;
     };
 
+    const dirLeftBtn = touchControls.querySelector('.touch-btn[data-action="left"]');
+    const dirRightBtn = touchControls.querySelector('.touch-btn[data-action="right"]');
+
     touchControls.querySelectorAll('.touch-btn').forEach((btn) => {
       const action = btn.getAttribute('data-action');
       btn.addEventListener('pointerdown', (e) => {
-        e.preventDefault();Audio.ensureCtx();
+        e.preventDefault();
+        Audio.ensureCtx();
         if (action === 'meow') {
           btn.classList.add('pressed');
           triggerMeow();
@@ -1358,10 +1362,33 @@ window.Game = window.Game || {};
         btn.classList.add('pressed');
         syncHeld();
       });
+
+      if (action === 'left' || action === 'right') {
+        btn.addEventListener('pointermove', (e) => {
+          const entry = activeHoldPointers.get(e.pointerId);
+          if (!entry) return;
+          const target = document.elementFromPoint(e.clientX, e.clientY);
+          const hoveredBtn = target ? target.closest('.touch-btn[data-action="left"], .touch-btn[data-action="right"]') : null;
+          if (hoveredBtn && hoveredBtn !== entry.btn) {
+            entry.btn.classList.remove('pressed');
+            const newAction = hoveredBtn.getAttribute('data-action');
+            entry.action = newAction;
+            entry.btn = hoveredBtn;
+            hoveredBtn.classList.add('pressed');
+            syncHeld();
+          }
+        });
+      }
+
       const releasePointer = (e) => {
         btn.classList.remove('pressed');
+        if (dirLeftBtn) dirLeftBtn.classList.remove('pressed');
+        if (dirRightBtn) dirRightBtn.classList.remove('pressed');
         if (activeHoldPointers.has(e.pointerId)) {
           activeHoldPointers.delete(e.pointerId);
+          for (const item of activeHoldPointers.values()) {
+            if (item.btn) item.btn.classList.add('pressed');
+          }
           syncHeld();
         }
       };

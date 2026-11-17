@@ -697,12 +697,12 @@ canvas {
   font-family: monospace;
 }
 
-/* Dedicated Bottom Multi-Touch Controls Dock (Never covers gameplay) */
+/* Multi-Touch Controls (Ergonomic Thumb-Sized Targets: 64-74px primary, 54px secondary, 12px gap) */
 .touch-controls {
   flex: 0 0 auto;
   position: relative;
   width: 100%;
-  padding: 6px max(12px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  padding: 10px max(16px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -717,7 +717,8 @@ canvas {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  pointer-events: none;
 }
 
 .touch-btn {
@@ -726,67 +727,72 @@ canvas {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px;
+  gap: 2px;
   border-radius: 50%;
-  border: 1.5px solid rgba(148, 163, 184, 0.42);
-  background: rgba(20, 29, 48, 0.92);
+  border: 2px solid rgba(148, 163, 184, 0.55);
+  background: rgba(14, 21, 38, 0.52);
   color: #f8fafc;
   font-weight: 800;
+  opacity: 0.8;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-  transition: transform 0.08s ease, background 0.08s ease, border-color 0.08s ease;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.38);
+  transition: transform 0.08s ease, background 0.08s ease, border-color 0.08s ease, opacity 0.08s ease;
   touch-action: none;
 }
 
 .touch-btn span {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
-  opacity: 0.9;
+  opacity: 0.92;
 }
 
 .touch-dir {
-  width: 52px;
-  height: 52px;
-  font-size: 19px;
+  width: 64px;
+  height: 64px;
+  font-size: 24px;
 }
 
 .touch-crouch {
-  width: 46px;
-  height: 46px;
-  font-size: 15px;
-  border-color: rgba(251, 191, 36, 0.48);
+  width: 54px;
+  height: 54px;
+  font-size: 18px;
+  border-color: rgba(251, 191, 36, 0.58);
 }
 
 .touch-jump {
-  width: 56px;
-  height: 56px;
-  font-size: 20px;
-  border-color: rgba(245, 155, 66, 0.72);
-  background: rgba(232, 107, 36, 0.35);
+  width: 74px;
+  height: 74px;
+  font-size: 25px;
+  border-color: rgba(245, 155, 66, 0.82);
+  background: rgba(232, 107, 36, 0.36);
 }
 
 .touch-skill {
-  width: 46px;
-  height: 46px;
-  font-size: 15px;
-  border-color: rgba(108, 229, 255, 0.5);
+  width: 54px;
+  height: 54px;
+  font-size: 18px;
+  border-color: rgba(108, 229, 255, 0.58);
 }
 
 .touch-btn.pressed,
 .touch-btn:active {
   transform: scale(0.92);
-  background: rgba(108, 229, 255, 0.38);
+  opacity: 1;
+  background: rgba(108, 229, 255, 0.44);
   border-color: #6ce5ff;
 }
 
 .touch-jump.pressed,
 .touch-jump:active {
-  background: rgba(245, 155, 66, 0.68);
+  opacity: 1;
+  background: rgba(245, 155, 66, 0.72);
   border-color: #ffd36e;
 }
 
 .touch-skill.active {
-  background: rgba(20, 95, 58, 0.82);
+  opacity: 0.95;
+  background: rgba(20, 95, 58, 0.8);
   border-color: #4af2a1;
   color: #8cffc7;
 }
@@ -816,6 +822,37 @@ canvas {
   }
 }
 
+/* Full-bleed Landscape Mobile Layout (like Dead Cells / Rayman mobile) */
+@media (orientation: landscape) and (max-height: 620px) {
+  #hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(180deg, rgba(8, 11, 20, 0.76) 0%, rgba(8, 11, 20, 0) 100%);
+    border-bottom: none;
+    pointer-events: none;
+  }
+  .game-viewport {
+    position: absolute;
+    inset: 0;
+  }
+  canvas {
+    object-fit: cover;
+    object-position: center 84%;
+  }
+  .touch-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: none;
+    border-top: none;
+    pointer-events: none;
+    padding: 8px max(16px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+}
+
 @media (max-width: 900px) {
   .overlay-card {
     max-height: 92dvh;
@@ -841,24 +878,5 @@ canvas {
     right: 12px;
     top: 48px;
     max-height: calc(100dvh - 130px);
-  }
-  .touch-dir {
-    width: 48px;
-    height: 48px;
-    font-size: 18px;
-  }
-  .touch-jump {
-    width: 52px;
-    height: 52px;
-    font-size: 18px;
-  }
-  .touch-crouch,
-  .touch-skill {
-    width: 42px;
-    height: 42px;
-    font-size: 14px;
-  }
-  .touch-btn span {
-    font-size: 8.5px;
   }
 }
