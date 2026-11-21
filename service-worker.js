@@ -1,8 +1,8 @@
-const CACHE_NAME = 'cat-game-touch-v14';
+const CACHE_NAME = 'cat-game-touch-v17';
 const CORE_ASSETS = [
   './',
   './index.html',
-  './style.css',
+  './style.css?v=16',
   './manifest.json',
   './images/icon-192.png',
   './images/icon-512.png',
@@ -11,13 +11,15 @@ const CORE_ASSETS = [
   './images/image-scarf-clean.png',
   './images/image-glass-clean.png',
   './images/image-wings-clean.png',
+  './sounds/save-point.wav',
   './js/store.js?v=14',
-  './js/audio.js?v=5',
+  './js/audio.js?v=15',
   './js/particles.js?v=5',
   './js/art.js?v=10',
   './js/art-extended.js?v=13',
   './js/enemies-extended.js?v=10',
-  './js/cat.js?v=14',
+  './js/cat-procedural.js?v=17',
+  './js/cat.js?v=15',
   './js/level1.js?v=5',
   './js/level2.js?v=5',
   './js/level3.js?v=11',
@@ -33,7 +35,7 @@ const CORE_ASSETS = [
   './js/level13.js?v=5',
   './js/level14.js?v=5',
   './js/level15.js?v=9',
-  './js/game.js?v=12'
+  './js/game.js?v=15'
 ];
 
 self.addEventListener('install', (event) => {

@@ -149,6 +149,43 @@ window.Game = window.Game || {};
     });
   }
 
+  // Cat Render Mode Toggle: 'sprite' (original PNG sheet) vs 'procedural' (articulated code vector cat)
+  const CAT_MODE_KEY = 'theWayHome_catRenderMode';
+  const catModeVal = document.getElementById('catModeVal');
+  const btnCatModeSprite = document.getElementById('btnCatModeSprite');
+  const btnCatModeProc = document.getElementById('btnCatModeProc');
+  let catRenderMode = 'sprite';
+  try {
+    const savedCatMode = localStorage.getItem(CAT_MODE_KEY);
+    if (savedCatMode === 'procedural' || savedCatMode === 'sprite') {
+      catRenderMode = savedCatMode;
+    }
+  } catch (e) {}
+
+  function applyCatRenderMode() {
+    window.Game.catRenderMode = catRenderMode;
+    const isProc = catRenderMode === 'procedural';
+    if (btnCatModeSprite) btnCatModeSprite.classList.toggle('active', !isProc);
+    if (btnCatModeProc) btnCatModeProc.classList.toggle('active', isProc);
+    if (catModeVal) catModeVal.textContent = isProc ? 'رسم برمجي' : 'صورة أصلية';
+  }
+  applyCatRenderMode();
+
+  function selectCatRenderMode(mode) {
+    if (mode !== 'sprite' && mode !== 'procedural') return;
+    catRenderMode = mode;
+    applyCatRenderMode();
+    Audio.playUiClick();
+    haptic(8);
+    try {
+      localStorage.setItem(CAT_MODE_KEY, catRenderMode);
+    } catch (e) {}
+    showToast(mode === 'procedural' ? 'تم التبديل إلى الرسم البرمجي 🐱✨' : 'تم التبديل إلى الصورة الأصلية 🐱');
+  }
+
+  if (btnCatModeSprite) btnCatModeSprite.addEventListener('click', () => selectCatRenderMode('sprite'));
+  if (btnCatModeProc) btnCatModeProc.addEventListener('click', () => selectCatRenderMode('procedural'));
+
   // Subtle mobile haptic helper
   function haptic(ms = 10) {
     try {
@@ -1095,7 +1132,8 @@ window.Game = window.Game || {};
         cp.activated = true;
         c.checkpointX = cp.x;
         c.checkpointY = cp.y - 10;
-        Audio.playPurr();
+        if (Audio.playCheckpoint) Audio.playCheckpoint();
+        else Audio.playPurr();
         haptic(12);
         Particles.spawnHeart(cp.x + 18, cp.y - 16);
         Particles.spawnPopup(cp.x + 18, cp.y - 38, 'نقطة حفظ ✓', '#86efac');

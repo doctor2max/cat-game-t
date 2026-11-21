@@ -73,6 +73,8 @@ window.Game.Audio = (function () {
   catDamageAudioSample.preload = 'auto';
   const dogAudioSample = new Audio('sounds/Dog.wav');
   dogAudioSample.preload = 'auto';
+  const savePointAudioSample = new Audio('sounds/save-point.wav');
+  savePointAudioSample.preload = 'auto';
 
   function playSample(sample, volume = 0.75, fallbackFn) {
     if (sfxMuted) return;
@@ -145,7 +147,7 @@ window.Game.Audio = (function () {
     playSample(dogAudioSample, 0.75, playBarkSynth);
   }
 
-  function playPurr() {
+  function playPurrSynth() {
     if (sfxMuted) return;
     const c = ensureCtx();
     if (!c) return;
@@ -173,6 +175,14 @@ window.Game.Audio = (function () {
     lfo.start(now);
     osc.stop(now + 0.72);
     lfo.stop(now + 0.72);
+  }
+
+  function playCheckpoint() {
+    playSample(savePointAudioSample, 0.82, playPurrSynth);
+  }
+
+  function playPurr() {
+    playCheckpoint();
   }
 
   function playTreat() {
@@ -383,6 +393,7 @@ window.Game.Audio = (function () {
     playSplash,
     playBark,
     playPurr,
+    playCheckpoint,
     playTreat,
     playHurt,
     playNightVision,

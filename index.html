@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png" />
   <link rel="apple-touch-icon" href="images/icon-192.png" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=16" />
 </head>
 <body>
   <div id="game-wrapper">
@@ -187,6 +187,16 @@
               <small>واضح</small>
             </div>
           </div>
+          <div class="tuner-row">
+            <div class="tuner-label">
+              <span>🐱 مظهر القطة</span>
+              <strong id="catModeVal">صورة أصلية</strong>
+            </div>
+            <div class="cat-mode-seg" role="group" aria-label="تبديل مظهر القطة">
+              <button id="btnCatModeSprite" class="cat-mode-btn active" type="button" data-cat-mode="sprite">صورة أصلية</button>
+              <button id="btnCatModeProc" class="cat-mode-btn" type="button" data-cat-mode="procedural">رسم برمجي</button>
+            </div>
+          </div>
         </div>
 
         <div class="pause-toggles-row">
@@ -280,12 +290,13 @@
   </div>
 
   <script defer src="js/store.js?v=14"></script>
-  <script defer src="js/audio.js?v=5"></script>
+  <script defer src="js/audio.js?v=15"></script>
   <script defer src="js/particles.js?v=5"></script>
   <script defer src="js/art.js?v=10"></script>
   <script defer src="js/art-extended.js?v=13"></script>
   <script defer src="js/enemies-extended.js?v=10"></script>
-  <script defer src="js/cat.js?v=14"></script>
+  <script defer src="js/cat-procedural.js?v=17"></script>
+  <script defer src="js/cat.js?v=15"></script>
   <script defer src="js/level1.js?v=5"></script>
   <script defer src="js/level2.js?v=5"></script>
   <script defer src="js/level3.js?v=11"></script>
@@ -301,7 +312,7 @@
   <script defer src="js/level13.js?v=5"></script>
   <script defer src="js/level14.js?v=5"></script>
   <script defer src="js/level15.js?v=9"></script>
-  <script defer src="js/game.js?v=12"></script>
+  <script defer src="js/game.js?v=15"></script>
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       window.addEventListener('load', () => {

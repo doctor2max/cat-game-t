@@ -862,6 +862,11 @@ window.Game.Cat = function (startX, startY) {
       ctx.shadowBlur = 12;
     }
 
+    const useProcedural =
+      window.Game.catRenderMode === 'procedural' &&
+      window.Game.ProceduralCat &&
+      typeof window.Game.ProceduralCat.draw === 'function';
+
     const hasOutfitSheet = !!(
       cat.skin &&
       cat.skin !== 'classic' &&
@@ -884,106 +889,116 @@ window.Game.Cat = function (startX, startY) {
       ctx.fill();
     }
 
-    // Fallback behind-cat vector cosmetics only if dedicated outfit sprite sheet isn't loaded yet
-    if (!hasOutfitSheet) {
-      if (cat.skin === 'wings') {
-        const flap = Math.sin(cat.animTime * (!cat.onGround ? 18 : 7)) * (!cat.onGround ? 0.36 : 0.14);
+    if (useProcedural) {
+      // Pure programmatic vector articulated cat (1:1 reference architecture + palette/outfit hooks)
+      ctx.save();
+      ctx.scale(-cat.facing * cat.scaleX, cat.scaleY);
+      window.Game.ProceduralCat.draw(ctx, cat);
+      ctx.restore();
+    } else {
+      // Fallback behind-cat vector cosmetics only if dedicated outfit sprite sheet isn't loaded yet
+      if (!hasOutfitSheet) {
+        if (cat.skin === 'wings') {
+          const flap = Math.sin(cat.animTime * (!cat.onGround ? 18 : 7)) * (!cat.onGround ? 0.36 : 0.14);
+          ctx.save();
+          ctx.translate(-cat.facing * 8, -28);
+          ctx.rotate(-cat.facing * (0.25 + flap));
+          ctx.fillStyle = 'rgba(255, 251, 235, 0.92)';
+          ctx.strokeStyle = '#fbbf24';
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.quadraticCurveTo(-cat.facing * 24, -18, -cat.facing * 28, -4);
+          ctx.quadraticCurveTo(-cat.facing * 20, 6, -cat.facing * 12, 8);
+          ctx.quadraticCurveTo(-cat.facing * 6, 9, 0, 4);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        } else if (cat.skin === 'scarf') {
+          const wave = Math.sin(cat.animTime * 11) * 5;
+          ctx.save();
+          ctx.strokeStyle = '#dc2626';
+          ctx.lineWidth = 5.5;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(cat.facing * 4, -27);
+          ctx.quadraticCurveTo(-cat.facing * 14, -29 + wave * 0.6, -cat.facing * 30, -24 + wave);
+          ctx.stroke();
+          ctx.strokeStyle = '#fca5a5';
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(-cat.facing * 24, -26 + wave * 0.85);
+          ctx.lineTo(-cat.facing * 30, -24 + wave);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      if (activeFrames) {
+        const { row, col } = getSpriteFrameCoords();
+        const frame = activeFrames[row][col];
+        // Sprite sheet frames face LEFT (-1), so flip with -cat.facing
         ctx.save();
-        ctx.translate(-cat.facing * 8, -28);
-        ctx.rotate(-cat.facing * (0.25 + flap));
-        ctx.fillStyle = 'rgba(255, 251, 235, 0.92)';
-        ctx.strokeStyle = '#fbbf24';
-        ctx.lineWidth = 1.6;
+        ctx.scale(-cat.facing * cat.scaleX, cat.scaleY);
+        const drawW = 88;
+        const drawH = Math.round((frame.height / frame.width) * drawW);
+        ctx.drawImage(frame, -drawW * 0.5, -drawH + 6, drawW, drawH);
+        ctx.restore();
+      } else if (fallbackReady && fallbackImg) {
+        const speedRatio = Math.min(1, Math.abs(cat.vx) / cat.physics.runSpeed);
+        const runBob = cat.onGround && speedRatio > 0.08 ? Math.abs(Math.sin(cat.animTime * 16)) * -4.5 * speedRatio : 0;
+        const crouchScaleY = cat.crouching && cat.onGround ? 0.8 : 1;
+        ctx.save();
+        ctx.scale(-cat.facing * cat.scaleX, cat.scaleY * crouchScaleY);
+        const drawSize = 96;
+        const pawAlignY = -drawSize * (399 / 500);
+        ctx.drawImage(fallbackImg, -drawSize * 0.48, pawAlignY + runBob, drawSize, drawSize);
+        ctx.restore();
+      }
+
+      // Front fallback vector Crown/Cyber if sheet pending
+      const headY = cat.crouching ? -37 : -45;
+      if (!hasOutfitSheet && cat.skin === 'crown') {
+        ctx.save();
+        ctx.translate(cat.facing * 6, headY - 3);
+        ctx.rotate(cat.facing * 0.12);
+        ctx.fillStyle = '#fbbf24';
+        ctx.strokeStyle = '#92400e';
+        ctx.lineWidth = 1.4;
         ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.quadraticCurveTo(-cat.facing * 24, -18, -cat.facing * 28, -4);
-        ctx.quadraticCurveTo(-cat.facing * 20, 6, -cat.facing * 12, 8);
-        ctx.quadraticCurveTo(-cat.facing * 6, 9, 0, 4);
+        ctx.moveTo(-9, 4);
+        ctx.lineTo(-10, -5);
+        ctx.lineTo(-4, 0);
+        ctx.lineTo(0, -8);
+        ctx.lineTo(4, 0);
+        ctx.lineTo(10, -5);
+        ctx.lineTo(9, 4);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(0, -1, 1.8, 0, Math.PI * 2);
+        ctx.fill();
         ctx.restore();
-      } else if (cat.skin === 'scarf') {
-        const wave = Math.sin(cat.animTime * 11) * 5;
+      } else if (!hasOutfitSheet && cat.skin === 'cyber') {
         ctx.save();
-        ctx.strokeStyle = '#dc2626';
-        ctx.lineWidth = 5.5;
-        ctx.lineCap = 'round';
+        ctx.translate(cat.facing * 12, headY + 9);
+        ctx.fillStyle = 'rgba(34, 211, 238, 0.85)';
+        ctx.strokeStyle = '#0e7490';
+        ctx.lineWidth = 1.4;
         ctx.beginPath();
-        ctx.moveTo(cat.facing * 4, -27);
-        ctx.quadraticCurveTo(-cat.facing * 14, -29 + wave * 0.6, -cat.facing * 30, -24 + wave);
+        ctx.roundRect(-8, -3.5, 16, 6.5, 3);
+        ctx.fill();
         ctx.stroke();
-        ctx.strokeStyle = '#fca5a5';
-        ctx.lineWidth = 1.6;
-        ctx.beginPath();
-        ctx.moveTo(-cat.facing * 24, -26 + wave * 0.85);
-        ctx.lineTo(-cat.facing * 30, -24 + wave);
-        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-5, -2, 6, 1.5);
         ctx.restore();
       }
     }
 
-    if (activeFrames) {
-      const { row, col } = getSpriteFrameCoords();
-      const frame = activeFrames[row][col];
-      // Sprite sheet frames face LEFT (-1), so flip with -cat.facing
-      ctx.save();
-      ctx.scale(-cat.facing * cat.scaleX, cat.scaleY);
-      const drawW = 88;
-      const drawH = Math.round((frame.height / frame.width) * drawW);
-      ctx.drawImage(frame, -drawW * 0.5, -drawH + 6, drawW, drawH);
-      ctx.restore();
-    } else if (fallbackReady && fallbackImg) {
-      const speedRatio = Math.min(1, Math.abs(cat.vx) / cat.physics.runSpeed);
-      const runBob = cat.onGround && speedRatio > 0.08 ? Math.abs(Math.sin(cat.animTime * 16)) * -4.5 * speedRatio : 0;
-      const crouchScaleY = cat.crouching && cat.onGround ? 0.8 : 1;
-      ctx.save();
-      ctx.scale(-cat.facing * cat.scaleX, cat.scaleY * crouchScaleY);
-      const drawSize = 96;
-      const pawAlignY = -drawSize * (399 / 500);
-      ctx.drawImage(fallbackImg, -drawSize * 0.48, pawAlignY + runBob, drawSize, drawSize);
-      ctx.restore();
-    }
-
-    // Front cosmetics (Starlight smoothly-chasing bee-style golden stars, plus fallback vector Crown/Cyber if sheet pending)
-    const headY = cat.crouching ? -37 : -45;
-    if (!hasOutfitSheet && cat.skin === 'crown') {
-      ctx.save();
-      ctx.translate(cat.facing * 6, headY - 3);
-      ctx.rotate(cat.facing * 0.12);
-      ctx.fillStyle = '#fbbf24';
-      ctx.strokeStyle = '#92400e';
-      ctx.lineWidth = 1.4;
-      ctx.beginPath();
-      ctx.moveTo(-9, 4);
-      ctx.lineTo(-10, -5);
-      ctx.lineTo(-4, 0);
-      ctx.lineTo(0, -8);
-      ctx.lineTo(4, 0);
-      ctx.lineTo(10, -5);
-      ctx.lineTo(9, 4);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#fef08a';
-      ctx.beginPath();
-      ctx.arc(0, -1, 1.8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    } else if (!hasOutfitSheet && cat.skin === 'cyber') {
-      ctx.save();
-      ctx.translate(cat.facing * 12, headY + 9);
-      ctx.fillStyle = 'rgba(34, 211, 238, 0.85)';
-      ctx.strokeStyle = '#0e7490';
-      ctx.lineWidth = 1.4;
-      ctx.beginPath();
-      ctx.roundRect(-8, -3.5, 16, 6.5, 3);
-      ctx.fill();
-      ctx.stroke();
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(-5, -2, 6, 1.5);
-      ctx.restore();
-    } else if (cat.skin === 'starlight') {
+    if (cat.skin === 'starlight') {
       // Glowing bee-style golden starlight stars/motes (slightly larger than the bee's motes) that smoothly chase Mashmasha!
       const worldOriginX = cat.x + cat.w / 2;
       const worldOriginY = cat.y + cat.h + (cat.ropeDip || 0);
