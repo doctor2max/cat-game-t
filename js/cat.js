@@ -104,7 +104,8 @@ window.Game.Cat = function (startX, startY) {
   // 7x5 Sprite Sheet Loader (Rows: 0=Idle, 1=Walk, 2=Crouch, 3=Hurt, 4=Jump)
   const SHEET_COLS = 7;
   const SHEET_ROWS = 5;
-  let sheetFrames = null; // 2D array [row][col] of cleaned transparent offscreen canvases
+  let sheetFrames = null; // Default classic 2D array [row][col]
+  const skinSheets = {};  // Per-skin 2D array [row][col] for classic, crown, scarf, cyber, wings
 
   function cleanCellBackground(cellCanvas) {
     const w = cellCanvas.width;
@@ -161,20 +162,19 @@ window.Game.Cat = function (startX, startY) {
     octx.putImageData(imgData, 0, 0);
   }
 
-  (function tryLoadSpriteSheet() {
-    const candidates = [
-      'images/cat-sprite-clean.png',
-      'images/cat-sprite.png',
-      'cat-sprite-clean.png',
-      'cat-sprite.png',
-    ];
+  function loadSkinSheet(skinId, candidates) {
     let idx = 0;
     function tryNext() {
       if (idx >= candidates.length) return;
       const src = candidates[idx++];
       const img = new Image();
       img.onload = function () {
-        const isPreCleaned = src.endsWith('cat-sprite-clean.png');
+        const isPreCleaned =
+          src.includes('-clean.png') ||
+          src.includes('image-crown.png') ||
+          src.includes('image-glass.png') ||
+          src.includes('image-scarf.png') ||
+          src.includes('image-wings.png');
         const cellW = Math.floor(img.width / SHEET_COLS);
         const cellH = Math.floor(img.height / SHEET_ROWS);
         const grid = [];
@@ -195,13 +195,47 @@ window.Game.Cat = function (startX, startY) {
           }
           grid.push(rowArr);
         }
-        sheetFrames = grid;
+        skinSheets[skinId] = grid;
+        if (skinId === 'classic') {
+          sheetFrames = grid;
+        }
       };
       img.onerror = tryNext;
       img.src = src;
     }
     tryNext();
-  })();
+  }
+
+  loadSkinSheet('classic', [
+    'images/cat-sprite-clean.png',
+    'images/cat-sprite.png',
+    'cat-sprite-clean.png',
+    'cat-sprite.png',
+  ]);
+  loadSkinSheet('crown', [
+    'images/image-crown-clean.png',
+    'images/image-crown.png',
+    'image-crown-clean.png',
+    'image-crown.png',
+  ]);
+  loadSkinSheet('scarf', [
+    'images/image-scarf-clean.png',
+    'images/image-scarf.png',
+    'image-scarf-clean.png',
+    'image-scarf.png',
+  ]);
+  loadSkinSheet('cyber', [
+    'images/image-glass-clean.png',
+    'images/image-glass.png',
+    'image-glass-clean.png',
+    'image-glass.png',
+  ]);
+  loadSkinSheet('wings', [
+    'images/image-wings-clean.png',
+    'images/image-wings.png',
+    'image-wings-clean.png',
+    'image-wings.png',
+  ]);
 
   const cat = {
     x: startX,
@@ -446,7 +480,7 @@ window.Game.Cat = function (startX, startY) {
             : cat.skin === 'scarf'
             ? '#f87171'
             : cat.skin === 'starlight'
-            ? '#7dd3fc'
+            ? '#fef08a'
             : cat.skin === 'cyber'
             ? '#22d3ee'
             : '#fef3c7';
@@ -692,6 +726,43 @@ window.Game.Cat = function (startX, startY) {
     }
     cat.onSlippery = !!(standing && standing.type === 'oil_deck');
     cat.ropeDip = activeDip;
+
+    // Smoothly update trailing bee-style golden starlight motes/stars for 'starlight' skin
+    const anchorX = cat.x + cat.w * 0.5;
+    const anchorY = cat.y + (cat.crouching ? cat.h * 0.58 : cat.h * 0.42) + (cat.ropeDip || 0);
+    if (!cat.starTrail || cat.starTrail.length === 0) {
+      cat.starTrail = [];
+      for (let i = 0; i < 7; i++) {
+        cat.starTrail.push({
+          x: anchorX - cat.facing * (12 + i * 8),
+          y: anchorY + Math.sin(i * 1.1) * 6,
+        });
+      }
+    } else {
+      // Snap trail near Mashmasha if she respawned far away
+      if (Math.hypot(cat.starTrail[0].x - anchorX, cat.starTrail[0].y - anchorY) > 260) {
+        for (let i = 0; i < cat.starTrail.length; i++) {
+          cat.starTrail[i].x = anchorX - cat.facing * (12 + i * 8);
+          cat.starTrail[i].y = anchorY + Math.sin(i * 1.1) * 6;
+        }
+      }
+      for (let i = 0; i < cat.starTrail.length; i++) {
+        const node = cat.starTrail[i];
+        const t = cat.animTime;
+        let targetX, targetY;
+        if (i === 0) {
+          targetX = anchorX - cat.facing * 14 + Math.cos(t * 3.2) * 7;
+          targetY = anchorY - 4 + Math.sin(t * 5.4) * 6;
+        } else {
+          const prev = cat.starTrail[i - 1];
+          targetX = prev.x - cat.facing * 7.5 + Math.cos(t * 3.8 + i * 1.25) * 3.5;
+          targetY = prev.y + Math.sin(t * 6.2 + i * 1.35) * 4.8;
+        }
+        const followRate = Math.min(1, dt * (15.5 - i * 1.15));
+        node.x += (targetX - node.x) * followRate;
+        node.y += (targetY - node.y) * followRate;
+      }
+    }
   }
 
   function takeDamage(reason, isFall = false) {
@@ -791,46 +862,70 @@ window.Game.Cat = function (startX, startY) {
       ctx.shadowBlur = 12;
     }
 
-    // Behind-cat cosmetics (Angel Wings & Ninja Scarf)
-    if (cat.skin === 'wings') {
-      const flap = Math.sin(cat.animTime * (!cat.onGround ? 18 : 7)) * (!cat.onGround ? 0.36 : 0.14);
-      ctx.save();
-      ctx.translate(-cat.facing * 8, -28);
-      ctx.rotate(-cat.facing * (0.25 + flap));
-      ctx.fillStyle = 'rgba(255, 251, 235, 0.92)';
-      ctx.strokeStyle = '#fbbf24';
-      ctx.lineWidth = 1.6;
+    const hasOutfitSheet = !!(
+      cat.skin &&
+      cat.skin !== 'classic' &&
+      cat.skin !== 'starlight' &&
+      skinSheets[cat.skin]
+    );
+    const activeFrames =
+      (cat.skin && skinSheets[cat.skin]) || skinSheets.classic || sheetFrames;
+
+    // Warm sunlit golden pollen-starlight aura behind Mashmasha when wearing 'starlight'
+    if (cat.skin === 'starlight') {
+      const auraY = cat.crouching ? -19 : -24;
+      const auraG = ctx.createRadialGradient(0, auraY, 6, 0, auraY, 38);
+      auraG.addColorStop(0, 'rgba(254, 240, 138, 0.25)');
+      auraG.addColorStop(0.6, 'rgba(251, 191, 36, 0.11)');
+      auraG.addColorStop(1, 'rgba(251, 191, 36, 0)');
+      ctx.fillStyle = auraG;
       ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.quadraticCurveTo(-cat.facing * 24, -18, -cat.facing * 28, -4);
-      ctx.quadraticCurveTo(-cat.facing * 20, 6, -cat.facing * 12, 8);
-      ctx.quadraticCurveTo(-cat.facing * 6, 9, 0, 4);
-      ctx.closePath();
+      ctx.arc(0, auraY, 38, 0, Math.PI * 2);
       ctx.fill();
-      ctx.stroke();
-      ctx.restore();
-    } else if (cat.skin === 'scarf') {
-      const wave = Math.sin(cat.animTime * 11) * 5;
-      ctx.save();
-      ctx.strokeStyle = '#dc2626';
-      ctx.lineWidth = 5.5;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(cat.facing * 4, -27);
-      ctx.quadraticCurveTo(-cat.facing * 14, -29 + wave * 0.6, -cat.facing * 30, -24 + wave);
-      ctx.stroke();
-      ctx.strokeStyle = '#fca5a5';
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.moveTo(-cat.facing * 24, -26 + wave * 0.85);
-      ctx.lineTo(-cat.facing * 30, -24 + wave);
-      ctx.stroke();
-      ctx.restore();
     }
 
-    if (sheetFrames) {
+    // Fallback behind-cat vector cosmetics only if dedicated outfit sprite sheet isn't loaded yet
+    if (!hasOutfitSheet) {
+      if (cat.skin === 'wings') {
+        const flap = Math.sin(cat.animTime * (!cat.onGround ? 18 : 7)) * (!cat.onGround ? 0.36 : 0.14);
+        ctx.save();
+        ctx.translate(-cat.facing * 8, -28);
+        ctx.rotate(-cat.facing * (0.25 + flap));
+        ctx.fillStyle = 'rgba(255, 251, 235, 0.92)';
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(-cat.facing * 24, -18, -cat.facing * 28, -4);
+        ctx.quadraticCurveTo(-cat.facing * 20, 6, -cat.facing * 12, 8);
+        ctx.quadraticCurveTo(-cat.facing * 6, 9, 0, 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      } else if (cat.skin === 'scarf') {
+        const wave = Math.sin(cat.animTime * 11) * 5;
+        ctx.save();
+        ctx.strokeStyle = '#dc2626';
+        ctx.lineWidth = 5.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(cat.facing * 4, -27);
+        ctx.quadraticCurveTo(-cat.facing * 14, -29 + wave * 0.6, -cat.facing * 30, -24 + wave);
+        ctx.stroke();
+        ctx.strokeStyle = '#fca5a5';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(-cat.facing * 24, -26 + wave * 0.85);
+        ctx.lineTo(-cat.facing * 30, -24 + wave);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    if (activeFrames) {
       const { row, col } = getSpriteFrameCoords();
-      const frame = sheetFrames[row][col];
+      const frame = activeFrames[row][col];
       // Sprite sheet frames face LEFT (-1), so flip with -cat.facing
       ctx.save();
       ctx.scale(-cat.facing * cat.scaleX, cat.scaleY);
@@ -850,9 +945,9 @@ window.Game.Cat = function (startX, startY) {
       ctx.restore();
     }
 
-    // Front cosmetics (Golden Crown, Cyber Visor, Starlight Aura)
+    // Front cosmetics (Starlight smoothly-chasing bee-style golden stars, plus fallback vector Crown/Cyber if sheet pending)
     const headY = cat.crouching ? -37 : -45;
-    if (cat.skin === 'crown') {
+    if (!hasOutfitSheet && cat.skin === 'crown') {
       ctx.save();
       ctx.translate(cat.facing * 6, headY - 3);
       ctx.rotate(cat.facing * 0.12);
@@ -875,7 +970,7 @@ window.Game.Cat = function (startX, startY) {
       ctx.arc(0, -1, 1.8, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
-    } else if (cat.skin === 'cyber') {
+    } else if (!hasOutfitSheet && cat.skin === 'cyber') {
       ctx.save();
       ctx.translate(cat.facing * 12, headY + 9);
       ctx.fillStyle = 'rgba(34, 211, 238, 0.85)';
@@ -889,14 +984,49 @@ window.Game.Cat = function (startX, startY) {
       ctx.fillRect(-5, -2, 6, 1.5);
       ctx.restore();
     } else if (cat.skin === 'starlight') {
-      for (let i = 0; i < 3; i++) {
-        const ang = cat.animTime * 2.8 + (i * Math.PI * 2) / 3;
-        const sx = Math.cos(ang) * 28;
-        const sy = -25 + Math.sin(ang) * 14;
-        ctx.fillStyle = i % 2 === 0 ? '#7dd3fc' : '#fde047';
+      // Glowing bee-style golden starlight stars/motes (slightly larger than the bee's motes) that smoothly chase Mashmasha!
+      const worldOriginX = cat.x + cat.w / 2;
+      const worldOriginY = cat.y + cat.h + (cat.ropeDip || 0);
+      const nodes = cat.starTrail && cat.starTrail.length ? cat.starTrail : [];
+      for (let i = nodes.length - 1; i >= 0; i--) {
+        const sx = nodes[i].x - worldOriginX;
+        const sy = nodes[i].y - worldOriginY;
+        const pulse = 0.84 + 0.16 * Math.sin(cat.animTime * 8.5 + i * 1.35);
+        const baseR = (3.4 - i * 0.24) * pulse; // Larger than bee's 1.3px motes!
+        const glowR = baseR * 3.4;
+
+        // Soft sunlit golden halo around each chasing star (matching the bee's golden pollen glow)
+        const sGlow = ctx.createRadialGradient(sx, sy, baseR * 0.3, sx, sy, glowR);
+        sGlow.addColorStop(0, 'rgba(254, 240, 138, 0.62)');
+        sGlow.addColorStop(0.55, 'rgba(251, 191, 36, 0.24)');
+        sGlow.addColorStop(1, 'rgba(251, 191, 36, 0)');
+        ctx.fillStyle = sGlow;
         ctx.beginPath();
-        ctx.arc(sx, sy, 2.6, 0, Math.PI * 2);
+        ctx.arc(sx, sy, glowR, 0, Math.PI * 2);
         ctx.fill();
+
+        // Sparkling 4-point golden star flare + warm glowing mote disc
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.rotate(Math.sin(cat.animTime * 3.5 + i) * 0.28);
+        const rayL = baseR * 1.95;
+        const rayW = baseR * 0.48;
+        ctx.fillStyle = i % 2 === 0 ? 'rgba(254, 240, 138, 0.92)' : 'rgba(253, 224, 71, 0.88)';
+        ctx.beginPath();
+        ctx.moveTo(0, -rayL);
+        ctx.quadraticCurveTo(rayW * 0.45, -rayW * 0.45, rayL, 0);
+        ctx.quadraticCurveTo(rayW * 0.45, rayW * 0.45, 0, rayL);
+        ctx.quadraticCurveTo(-rayW * 0.45, rayW * 0.45, -rayL, 0);
+        ctx.quadraticCurveTo(-rayW * 0.45, -rayW * 0.45, 0, -rayL);
+        ctx.closePath();
+        ctx.fill();
+
+        // Luminous warm starlight core (just like the bee's golden motes, scaled up)
+        ctx.fillStyle = '#fef9c3';
+        ctx.beginPath();
+        ctx.arc(0, 0, baseR * 0.62, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       }
     }
 

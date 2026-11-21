@@ -83,9 +83,9 @@ window.Game.Store = (function () {
       id: 'starlight',
       name: 'هالة النجوم',
       icon: '✨',
-      perk: 'نجوم سماوية متلألئة تدور حول مشمشة',
+      perk: 'نجوم مضيئة متلألئة تلاحق مشمشة بانسيابية',
       cost: 240,
-      accent: '#38bdf8',
+      accent: '#fde047',
     },
     {
       id: 'cyber',
