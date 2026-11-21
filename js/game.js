@@ -101,6 +101,54 @@ window.Game = window.Game || {};
   } catch (e) {}
   if (btnDimBg) btnDimBg.classList.toggle('active', dimBackground);
 
+  // Ergonomic Touch Control Button Size (92%..118%, default 108%) & Opacity (45%..100%, default 88%)
+  const CTRL_SIZE_KEY = 'theWayHome_ctrlSize';
+  const CTRL_OPACITY_KEY = 'theWayHome_ctrlOpacity';
+  const ctrlSizeSlider = document.getElementById('ctrlSizeSlider');
+  const ctrlSizeVal = document.getElementById('ctrlSizeVal');
+  const ctrlOpacitySlider = document.getElementById('ctrlOpacitySlider');
+  const ctrlOpacityVal = document.getElementById('ctrlOpacityVal');
+
+  let ctrlSizePct = 108;
+  let ctrlOpacityPct = 88;
+  try {
+    const savedSize = parseInt(localStorage.getItem(CTRL_SIZE_KEY), 10);
+    if (!isNaN(savedSize) && savedSize >= 92 && savedSize <= 118) ctrlSizePct = savedSize;
+    const savedOp = parseInt(localStorage.getItem(CTRL_OPACITY_KEY), 10);
+    if (!isNaN(savedOp) && savedOp >= 45 && savedOp <= 100) ctrlOpacityPct = savedOp;
+  } catch (e) {}
+
+  function applyTouchControlSettings() {
+    if (touchControls) {
+      touchControls.style.setProperty('--ctrl-scale', (ctrlSizePct / 100).toFixed(2));
+      touchControls.style.setProperty('--ctrl-opacity', (ctrlOpacityPct / 100).toFixed(2));
+    }
+    if (ctrlSizeSlider) ctrlSizeSlider.value = String(ctrlSizePct);
+    if (ctrlSizeVal) ctrlSizeVal.textContent = `${ctrlSizePct}%`;
+    if (ctrlOpacitySlider) ctrlOpacitySlider.value = String(ctrlOpacityPct);
+    if (ctrlOpacityVal) ctrlOpacityVal.textContent = `${ctrlOpacityPct}%`;
+  }
+  applyTouchControlSettings();
+
+  if (ctrlSizeSlider) {
+    ctrlSizeSlider.addEventListener('input', () => {
+      ctrlSizePct = Math.max(92, Math.min(118, parseInt(ctrlSizeSlider.value, 10) || 108));
+      applyTouchControlSettings();
+      try {
+        localStorage.setItem(CTRL_SIZE_KEY, String(ctrlSizePct));
+      } catch (e) {}
+    });
+  }
+  if (ctrlOpacitySlider) {
+    ctrlOpacitySlider.addEventListener('input', () => {
+      ctrlOpacityPct = Math.max(45, Math.min(100, parseInt(ctrlOpacitySlider.value, 10) || 88));
+      applyTouchControlSettings();
+      try {
+        localStorage.setItem(CTRL_OPACITY_KEY, String(ctrlOpacityPct));
+      } catch (e) {}
+    });
+  }
+
   // Subtle mobile haptic helper
   function haptic(ms = 10) {
     try {
@@ -276,32 +324,43 @@ window.Game = window.Game || {};
   function enforceCheckpointSafeZones(lv) {
     if (!lv || !lv.checkpoints) return;
     const patrolLists = [
-      lv.dogs, lv.hedgehogs, lv.crabs, lv.rats, lv.raccoons,
+      lv.dogs, lv.hedgehogs, lv.crabs, lv.rats, lv.raccoons, lv.porcupines,
       lv.security_bots, lv.foxes, lv.clockwork_beetles, lv.skunks,
       lv.badgers, lv.bridge_rovers, lv.dobermans, lv.rival_cats, lv.hover_saws,
+      lv.crows, lv.pigeons, lv.seagulls, lv.bats, lv.owls, lv.pelicans, lv.hawks, lv.drones, lv.bees,
     ];
     for (const list of patrolLists) {
       if (!list) continue;
-      for (const e of list) {
+      for (let i = list.length - 1; i >= 0; i--) {
+        const e = list[i];
         if (e.minX === undefined || e.maxX === undefined) continue;
         const ew = e.w || 48;
         const eh = e.h || 40;
+        const baseEy = e.baseY !== undefined ? e.baseY : e.y;
+        const maxSwoop = e.amp || e.dip || 0;
         for (const cp of lv.checkpoints) {
           const cpCx = cp.x + 18;
           const cpBottom = cp.y + 32;
-          if (Math.abs((e.y + eh) - cpBottom) >= 75) continue;
-          const safeLeft = cpCx - 96 - ew;
-          const safeRight = cpCx + 96;
+          const lowBottom = baseEy + maxSwoop + eh;
+          const highTop = baseEy - maxSwoop;
+          if (lowBottom < cp.y - 68 || highTop > cpBottom + 48) continue;
+          const safeLeft = cpCx - 98 - ew;
+          const safeRight = cpCx + 98;
           if (e.maxX > safeLeft && e.minX < safeRight) {
-            // Trim patrol range away from the checkpoint safe zone
-            const mid = (e.minX + e.maxX) / 2;
-            if (mid >= cpCx) {
+            const leftRoom = safeLeft - e.minX;
+            const rightRoom = e.maxX - safeRight;
+            if (rightRoom >= leftRoom) {
               e.minX = Math.max(e.minX, safeRight);
-              if (e.x < e.minX) e.x = e.minX;
             } else {
               e.maxX = Math.min(e.maxX, safeLeft);
-              if (e.x > e.maxX) e.x = e.maxX;
             }
+            // If remaining patrol span is too narrow (< 45px), remove the enemy so it never glitches/vibrates!
+            if (e.maxX - e.minX < 45) {
+              list.splice(i, 1);
+              break;
+            }
+            if (e.x < e.minX) e.x = e.minX;
+            if (e.x > e.maxX) e.x = e.maxX;
           }
         }
       }

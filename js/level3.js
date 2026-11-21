@@ -204,21 +204,20 @@ window.Game.createLevel3 = function () {
     },
   ];
 
-  // New Enemy #1: Nocturnal Spiky Hedgehogs (القنافذ الشوكية) patrolling ground & branches
+  // New Enemy #1: Nocturnal Spiky Hedgehogs (القنافذ الشوكية) patrolling ground & branches (kept completely clear of checkpoints!)
   const hedgehogs = [
     { x: 290, y: 604, w: 36, h: 26, minX: 220, maxX: 540, vx: 65, facing: 1 },
     { x: 1390, y: 339, w: 36, h: 26, minX: 1355, maxX: 1460, vx: 45, facing: -1 },
-    { x: 2920, y: 469, w: 36, h: 26, minX: 2895, maxX: 3010, vx: 50, facing: 1 },
     { x: 3920, y: 604, w: 36, h: 26, minX: 3840, maxX: 4230, vx: 75, facing: 1 },
   ];
 
-  // New Enemy #2: Swooping Night Crows (الغربان الليلية) patrolling upper canopy
+  // New Enemy #2: Swooping Night Crows (الغربان الليلية) patrolling upper canopy (kept strictly away from checkpoints!)
   const crows = [
     { x: 640, y: 310, baseY: 310, w: 42, h: 28, minX: 520, maxX: 880, vx: 110, facing: 1, amp: 24, freq: 2.6 },
-    { x: 1860, y: 245, baseY: 245, w: 42, h: 28, minX: 1750, maxX: 2150, vx: 125, facing: -1, amp: 28, freq: 2.9 },
-    { x: 2460, y: 300, baseY: 300, w: 42, h: 28, minX: 2340, maxX: 2740, vx: 120, facing: 1, amp: 26, freq: 2.7 },
+    { x: 2080, y: 245, baseY: 245, w: 42, h: 28, minX: 1985, maxX: 2280, vx: 125, facing: -1, amp: 28, freq: 2.9 },
+    { x: 2480, y: 300, baseY: 300, w: 42, h: 28, minX: 2360, maxX: 2740, vx: 120, facing: 1, amp: 26, freq: 2.7 },
     { x: 3360, y: 325, baseY: 325, w: 42, h: 28, minX: 3180, maxX: 3600, vx: 135, facing: -1, amp: 30, freq: 3.1 },
-    { x: 4220, y: 260, baseY: 260, w: 42, h: 28, minX: 4060, maxX: 4440, vx: 130, facing: 1, amp: 24, freq: 3.0 },
+    { x: 4350, y: 260, baseY: 260, w: 42, h: 28, minX: 4275, maxX: 4470, vx: 130, facing: 1, amp: 24, freq: 3.0 },
   ];
 
   // Checkpoints (Cozy Cat Houses)
