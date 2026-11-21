@@ -251,8 +251,8 @@ window.Game.createLevel8 = function () {
   return {
     stage: 8,
     theme: 'construction',
-    title: 'المرحلة 8: ورشة ناطحة السحاب والرافعة العملاقة (النهاية) • Stormy Construction Finale',
-    goalLabel: 'شرفة المنزل 🏠',
+    title: 'المرحلة 8',
+    goalLabel: 'بوابة المتحف 🏛️',
     width,
     height,
     startX: 85,

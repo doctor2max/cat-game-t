@@ -654,54 +654,64 @@ window.Game.Art = (function () {
         ctx.fillRect(tx + 1, ty + 28, 8, 5);
         ctx.fillRect(tx + 108, ty + 28, 7, 5);
 
-        // Warm glowing headlight + red taillight
-        ctx.fillStyle = '#fff5b8';
-        ctx.fillRect(tx + 3, ty + 19, 5, 5);
-        const beam = ctx.createLinearGradient(tx + 3, ty + 21, tx - 34, ty + 28);
-        beam.addColorStop(0, 'rgba(255, 240, 170, 0.32)');
+        // Warm glowing halogen headlight + soft elliptical light cone + wet asphalt reflection
+        ctx.fillStyle = '#fffbeb';
+        ctx.beginPath(); ctx.roundRect(tx + 2, ty + 18, 6, 5.5, 2); ctx.fill();
+        const beam = ctx.createRadialGradient(tx, ty + 22, 2, tx - 26, ty + 25, 42);
+        beam.addColorStop(0, 'rgba(255, 244, 180, 0.36)');
+        beam.addColorStop(0.55, 'rgba(255, 236, 150, 0.14)');
         beam.addColorStop(1, 'rgba(255, 240, 170, 0)');
         ctx.fillStyle = beam;
         ctx.beginPath();
-        ctx.moveTo(tx + 3, ty + 19);
-        ctx.lineTo(tx - 34, ty + 14);
-        ctx.lineTo(tx - 34, ty + 36);
-        ctx.lineTo(tx + 3, ty + 24);
-        ctx.closePath();
+        ctx.ellipse(tx - 20, ty + 24, 34, 11, -0.08, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = '#ff3838';
-        ctx.fillRect(tx + 109, ty + 19, 4, 6);
+        // Chrome beltline molding & realistic ruby taillight with soft red glow
+        ctx.strokeStyle = 'rgba(241, 245, 249, 0.55)';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.moveTo(tx + 31, ty + 14.2); ctx.lineTo(tx + 89, ty + 14.2); ctx.stroke();
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.28)';
+        ctx.beginPath(); ctx.arc(tx + 111, ty + 22, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.roundRect(tx + 108.5, ty + 18.5, 4.5, 6.5, 1.5); ctx.fill();
 
-        // Realistic wheel wells & alloy wheels
+        // Realistic wheel wells, brake discs & 6-spoke metallic alloy wheels
         for (const wx of [tx + 24, tx + 91]) {
-          ctx.fillStyle = '#0c0e14';
+          ctx.fillStyle = '#07090e';
           ctx.beginPath();
-          ctx.arc(wx, ty + 33, 11.5, Math.PI, 0);
+          ctx.arc(wx, ty + 33, 12, Math.PI, 0);
           ctx.fill();
 
-          ctx.fillStyle = '#151821';
-          ctx.strokeStyle = '#08090d';
-          ctx.lineWidth = 1.5;
+          const tireG = ctx.createRadialGradient(wx, ty + 34, 4, wx, ty + 34, 10);
+          tireG.addColorStop(0, '#1e293b');
+          tireG.addColorStop(0.7, '#0f172a');
+          tireG.addColorStop(1, '#020617');
+          ctx.fillStyle = tireG;
+          ctx.strokeStyle = '#020617';
+          ctx.lineWidth = 1.4;
           ctx.beginPath();
-          ctx.arc(wx, ty + 34, 9.5, 0, Math.PI * 2);
+          ctx.arc(wx, ty + 34, 9.8, 0, Math.PI * 2);
           ctx.fill();
           ctx.stroke();
 
-          ctx.fillStyle = '#b9c2d0';
-          ctx.beginPath();
-          ctx.arc(wx, ty + 34, 5.5, 0, Math.PI * 2);
-          ctx.fill();
+          // Metallic brake rotor & red brake caliper inside rim
+          ctx.fillStyle = '#64748b';
+          ctx.beginPath(); ctx.arc(wx, ty + 34, 6.2, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#dc2626';
+          ctx.beginPath(); ctx.arc(wx - 3.5, ty + 32.5, 1.8, 0, Math.PI * 2); ctx.fill();
 
-          ctx.strokeStyle = '#4a5468';
-          ctx.lineWidth = 1.2;
-          for (let sp = 0; sp < 5; sp++) {
-            const ang = (sp * Math.PI * 2) / 5;
+          // Brushed silver 6-spoke alloy rim
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 1.25;
+          ctx.beginPath(); ctx.arc(wx, ty + 34, 5.8, 0, Math.PI * 2); ctx.stroke();
+          for (let sp = 0; sp < 6; sp++) {
+            const ang = (sp * Math.PI * 2) / 6;
             ctx.beginPath();
             ctx.moveTo(wx, ty + 34);
-            ctx.lineTo(wx + Math.cos(ang) * 5, ty + 34 + Math.sin(ang) * 5);
+            ctx.lineTo(wx + Math.cos(ang) * 5.6, ty + 34 + Math.sin(ang) * 5.6);
             ctx.stroke();
           }
-          ctx.fillStyle = '#262d3b';
+          ctx.fillStyle = '#1e293b';
           ctx.beginPath();
           ctx.arc(wx, ty + 34, 1.8, 0, Math.PI * 2);
           ctx.fill();
@@ -1424,23 +1434,66 @@ window.Game.Art = (function () {
       }
     }
 
-    // Rolling layered park hills
-    ctx.fillStyle = '#122925';
+    // Rolling layered park hills + Shimmering Moonlit Park Lake & Stone Footbridge!
+    ctx.fillStyle = '#0e2422';
     ctx.beginPath();
     ctx.moveTo(0, h);
     for (let x = 0; x <= w + 60; x += 60) {
-      const hillY = h - 220 + Math.sin((x + camX * 0.14) * 0.0045) * 42;
+      const hillY = h - 228 + Math.sin((x + camX * 0.14) * 0.0045) * 42;
       ctx.lineTo(x, hillY);
     }
     ctx.lineTo(w, h);
     ctx.closePath();
     ctx.fill();
 
-    ctx.fillStyle = '#18362e';
+    // Distant silhouette tree line along upper hill ridge
+    ctx.fillStyle = '#0a1c1a';
+    for (let tx = -((camX * 0.16) % 90); tx < w + 90; tx += 45) {
+      const hy = h - 224 + Math.sin((tx + camX * 0.14) * 0.0045) * 42;
+      ctx.beginPath(); ctx.arc(tx, hy - 8, 18 + (Math.abs(Math.round(tx)) % 12), Math.PI, 0); ctx.fill();
+    }
+
+    // Shimmering Moonlit Park Lake & Carved Stone 3-Arch Footbridge
+    const lakeY = h - 165;
+    const lakeG = ctx.createLinearGradient(0, lakeY, 0, h - 90);
+    lakeG.addColorStop(0, '#0f3038');
+    lakeG.addColorStop(0.5, '#134047');
+    lakeG.addColorStop(1, '#091f24');
+    ctx.fillStyle = lakeG;
+    ctx.fillRect(0, lakeY, w, 78);
+    // Moon shimmer ripples on park lake
+    for (let r = 0; r < 6; r++) {
+      const ry = lakeY + 7 + r * 10;
+      const rw = 46 - r * 4 + Math.sin(time * 2.6 + r) * 7;
+      ctx.fillStyle = `rgba(235, 255, 225, ${0.22 - r * 0.025})`;
+      ctx.beginPath(); ctx.ellipse(moonX, ry, rw * 0.5, 1.8, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    // Distant Carved Stone 3-Arch Park Lake Footbridge
+    const brX = 480 - ((camX * 0.18) % 960);
+    for (const bx of [brX, brX + 960]) {
+      if (bx < -220 || bx > w + 220) continue;
+      ctx.fillStyle = '#25383c';
+      ctx.strokeStyle = '#101d20';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(bx - 110, lakeY + 6);
+      ctx.quadraticCurveTo(bx, lakeY - 22, bx + 110, lakeY + 6);
+      ctx.lineTo(bx + 110, lakeY + 14);
+      ctx.lineTo(bx - 110, lakeY + 14);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#0c272e';
+      for (const [ax, aw] of [[-52, 22], [0, 28], [52, 22]]) {
+        ctx.beginPath(); ctx.arc(bx + ax, lakeY + 14, aw, Math.PI, 0); ctx.fill();
+      }
+    }
+
+    // Near rolling grassy park knolls framing the lake shore
+    ctx.fillStyle = '#15332b';
     ctx.beginPath();
     ctx.moveTo(0, h);
     for (let x = 0; x <= w + 50; x += 50) {
-      const hillY = h - 165 + Math.cos((x + camX * 0.25) * 0.006) * 32;
+      const hillY = h - 142 + Math.cos((x + camX * 0.25) * 0.006) * 24;
       ctx.lineTo(x, hillY);
     }
     ctx.lineTo(w, h);
@@ -1500,37 +1553,66 @@ window.Game.Art = (function () {
       ctx.save();
       ctx.translate(bx, groundY);
 
-      // Lush Park Oak / Weeping Willow Tree
+      // Lush Painterly Park Oak & Weeping Willow Tree (Gnarled Roots, Branching Boughs, Volumetric Moonlit Canopy & Hanging Willow Fronds!)
       const treeX = 75;
       const trunkH = 190 + (i % 3) * 28;
-      ctx.fillStyle = '#382214';
+      const trG = ctx.createLinearGradient(treeX - 18, 0, treeX + 18, 0);
+      trG.addColorStop(0, '#24140b'); trG.addColorStop(0.45, '#4d2f1c'); trG.addColorStop(1, '#1c0f08');
+      ctx.fillStyle = trG;
       ctx.beginPath();
-      ctx.moveTo(treeX - 16, 0);
-      ctx.quadraticCurveTo(treeX - 10, -trunkH * 0.5, treeX - 8, -trunkH);
-      ctx.lineTo(treeX + 8, -trunkH);
-      ctx.quadraticCurveTo(treeX + 10, -trunkH * 0.5, treeX + 16, 0);
+      ctx.moveTo(treeX - 22, 0);
+      ctx.quadraticCurveTo(treeX - 11, -trunkH * 0.45, treeX - 9, -trunkH);
+      ctx.lineTo(treeX + 9, -trunkH);
+      ctx.quadraticCurveTo(treeX + 11, -trunkH * 0.45, treeX + 22, 0);
       ctx.closePath();
       ctx.fill();
-      // Bark highlight
-      ctx.strokeStyle = 'rgba(130, 88, 56, 0.35)';
-      ctx.lineWidth = 2;
+      // Spreading oak boughs & moonlit bark ridges
+      ctx.strokeStyle = '#382214';
+      ctx.lineWidth = 6.5;
+      ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(treeX - 4, -8);
-      ctx.lineTo(treeX - 3, -trunkH + 20);
+      ctx.moveTo(treeX - 4, -trunkH + 18); ctx.quadraticCurveTo(treeX - 26, -trunkH - 2, treeX - 44, -trunkH + 4);
+      ctx.moveTo(treeX + 4, -trunkH + 14); ctx.quadraticCurveTo(treeX + 26, -trunkH - 4, treeX + 44, -trunkH + 6);
       ctx.stroke();
-      // Layered leafy canopy
-      const canopyCols = ['#143628', '#1d4d38', '#276447'];
+      ctx.strokeStyle = 'rgba(180, 135, 92, 0.35)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(treeX - 5, -6); ctx.quadraticCurveTo(treeX - 2, -trunkH * 0.5, treeX - 4, -trunkH + 22);
+      ctx.moveTo(treeX + 3, -14); ctx.lineTo(treeX + 2, -trunkH + 34);
+      ctx.stroke();
+
+      // Delicate hanging weeping-willow / moss tendrils swaying gently beneath canopy
+      ctx.strokeStyle = 'rgba(52, 130, 92, 0.55)';
+      ctx.lineWidth = 1.5;
+      for (let wv = -42; wv <= 42; wv += 14) {
+        const sway = Math.sin(time * 2 + wv + i) * 3;
+        const dropH = 22 + (Math.abs(wv) % 14);
+        ctx.beginPath();
+        ctx.moveTo(treeX + wv, -trunkH + 24);
+        ctx.quadraticCurveTo(treeX + wv + sway, -trunkH + 24 + dropH * 0.5, treeX + wv + sway * 1.3, -trunkH + 24 + dropH);
+        ctx.stroke();
+      }
+
+      // Volumetric 3D radial-shaded moonlit foliage puffs (deep forest shadow base -> emerald -> silver-jade moonlit crest!)
       const blobs = [
-        { ox: -38, oy: -trunkH + 10, r: 44 },
-        { ox: 38, oy: -trunkH + 14, r: 42 },
-        { ox: -18, oy: -trunkH - 22, r: 48 },
-        { ox: 22, oy: -trunkH - 18, r: 45 },
-        { ox: 0, oy: -trunkH - 36, r: 50 },
+        { ox: -40, oy: -trunkH + 10, r: 44 },
+        { ox: 40, oy: -trunkH + 12, r: 43 },
+        { ox: -20, oy: -trunkH - 22, r: 49 },
+        { ox: 22, oy: -trunkH - 18, r: 46 },
+        { ox: 0, oy: -trunkH - 38, r: 52 },
       ];
       for (let b = 0; b < blobs.length; b++) {
-        ctx.fillStyle = canopyCols[b % canopyCols.length];
+        const bl = blobs[b];
+        const cx = treeX + bl.ox;
+        const cy = bl.oy;
+        const cG = ctx.createRadialGradient(cx + bl.r * 0.22, cy - bl.r * 0.32, 4, cx, cy, bl.r);
+        cG.addColorStop(0, '#52b788');
+        cG.addColorStop(0.38, '#2d6a4f');
+        cG.addColorStop(0.78, '#1b4332');
+        cG.addColorStop(1, '#0b2118');
+        ctx.fillStyle = cG;
         ctx.beginPath();
-        ctx.arc(treeX + blobs[b].ox, blobs[b].oy, blobs[b].r, 0, Math.PI * 2);
+        ctx.arc(cx, cy, bl.r, 0, Math.PI * 2);
         ctx.fill();
       }
 
@@ -1705,48 +1787,116 @@ window.Game.Art = (function () {
       ctx.fillRect(moonX - rw / 2, ry, rw, 3);
     }
 
-    // Distant Grand Ocean Steamship / Passenger Liner cruising on the horizon
+    // Distant Grand Ocean Steamship / Passenger Liner cruising on the horizon with tiered illuminated decks, raked funnels & water reflections!
     for (let sIdx = 0; sIdx < 2; sIdx++) {
       const shipX = ((sIdx * 760 + 260 - camX * 0.16 - time * (sIdx === 0 ? 14 : 9)) % (w + 480));
       const sx = shipX < -240 ? shipX + w + 480 : shipX;
-      const sy = seaY + 4;
+      const sy = seaY + 4 + Math.sin(time * 1.4 + sIdx * 2) * 1.2;
       ctx.save();
       ctx.translate(sx, sy);
-      ctx.fillStyle = '#121b2b';
+
+      // Shimmering golden deck-light reflections on the dark sea surface beneath the liner
+      for (let rx = -84; rx <= 84; rx += 18) {
+        ctx.fillStyle = 'rgba(255, 220, 130, 0.16)';
+        ctx.fillRect(rx - 5 + Math.sin(time * 3.5 + rx) * 2, 5, 10, 2);
+      }
+
+      // 3D Flared Ocean Liner Steel Hull with raked cruiser bow, crimson boot-topping & white sheer ribbon
+      const hG = ctx.createLinearGradient(0, -18, 0, 5);
+      hG.addColorStop(0, '#1e293b');
+      hG.addColorStop(0.65, '#0f172a');
+      hG.addColorStop(1, '#050811');
+      ctx.fillStyle = hG;
+      ctx.strokeStyle = '#020617';
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.moveTo(-110, -14);
-      ctx.lineTo(118, -14);
-      ctx.lineTo(98, 4);
-      ctx.lineTo(-94, 4);
-      ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#cfd8e8';
-      ctx.fillRect(-76, -26, 150, 12);
-      ctx.fillRect(-58, -36, 114, 10);
-      ctx.fillStyle = 'rgba(255, 220, 130, 0.85)';
-      for (let px = -68; px <= 64; px += 12) {
-        ctx.fillRect(px, -23, 5, 4);
+      ctx.moveTo(-116, -15);
+      ctx.lineTo(128, -16);
+      ctx.quadraticCurveTo(116, -2, 102, 4);
+      ctx.lineTo(-98, 4);
+      ctx.quadraticCurveTo(-110, -2, -116, -15);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#991b1b';
+      ctx.fillRect(-102, 1, 206, 3);
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(-112, -14, 234, 1.5);
+
+      // Illuminated lower hull porthole row
+      ctx.fillStyle = '#fde68a';
+      for (let px = -92; px <= 94; px += 14) {
+        ctx.beginPath(); ctx.arc(px, -7, 1.3, 0, Math.PI * 2); ctx.fill();
       }
-      for (let px = -50; px <= 46; px += 14) {
-        ctx.fillRect(px, -33, 6, 4);
+
+      // Stepped Art-Deco Promenade & Boat Decks with curved bridge front
+      ctx.fillStyle = '#e2e8f0';
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(-84, -27, 168, 12, [4, 6, 0, 0]);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.roundRect(-62, -37, 122, 10, [4, 6, 0, 0]);
+      ctx.fill(); ctx.stroke();
+      // Wheelhouse navigation bridge
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillRect(22, -43, 28, 6);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(26, -41.5, 20, 3);
+
+      // Warm glowing promenade windows
+      ctx.fillStyle = 'rgba(255, 224, 138, 0.9)';
+      for (let px = -74; px <= 72; px += 11) {
+        ctx.fillRect(px, -23.5, 6, 4.5);
       }
-      for (const fx of [-24, 18]) {
-        ctx.fillStyle = '#c93434';
-        ctx.fillRect(fx, -54, 12, 18);
-        ctx.fillStyle = '#141924';
-        ctx.fillRect(fx, -54, 12, 5);
+      for (let px = -54; px <= 48; px += 12) {
+        ctx.fillRect(px, -34, 6.5, 4);
+      }
+      // Tiny orange lifeboats hung along the boat deck
+      ctx.fillStyle = '#ea580c';
+      for (const lbx of [-44, -18, 8, 34]) {
+        ctx.beginPath(); ctx.ellipse(lbx, -27.5, 6, 2, 0, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Twin Raked Red-and-Black Steamship Funnels with Steam Plumes
+      for (const fx of [-24, 14]) {
+        ctx.save();
+        ctx.translate(fx, -37);
+        ctx.transform(1, 0, -0.14, 1, 0, 0); // authentic raked funnel slant!
+        const fG = ctx.createLinearGradient(-7, 0, 7, 0);
+        fG.addColorStop(0, '#991b1b'); fG.addColorStop(0.45, '#ef4444'); fG.addColorStop(1, '#7f1d1d');
+        ctx.fillStyle = fG;
+        ctx.fillRect(-6, -19, 12, 19);
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-6, -19, 12, 5.5);
+        ctx.restore();
         for (let p = 0; p < 4; p++) {
           const drift = ((time * 18 + p * 12 + sIdx * 9) % 45);
           ctx.fillStyle = `rgba(210, 225, 240, ${0.22 * (1 - drift / 45)})`;
           ctx.beginPath();
-          ctx.arc(fx + 6 + drift * 0.9, -58 - drift * 0.45, 5 + drift * 0.2, 0, Math.PI * 2);
+          ctx.arc(fx - 2 - drift * 0.75, -59 - drift * 0.42, 4.5 + drift * 0.18, 0, Math.PI * 2);
           ctx.fill();
         }
       }
+
+      // Fore & Aft Steel Masts with rigging cable & navigation lights
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(74, -27); ctx.lineTo(71, -56);
+      ctx.moveTo(-66, -27); ctx.lineTo(-69, -52);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(226, 232, 240, 0.35)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(-69, -50); ctx.quadraticCurveTo(0, -40, 71, -54);
+      ctx.stroke();
       ctx.fillStyle = '#4af2a1';
-      ctx.beginPath(); ctx.arc(95, -18, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(105, -18, 2, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#fff5b8';
-      ctx.fillRect(-2, -48, 2, 12);
-      ctx.beginPath(); ctx.arc(-1, -50, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(71, -56, 2, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     }
 
@@ -1809,79 +1959,230 @@ window.Game.Art = (function () {
     const count = 14;
     const waterY = h - 90;
 
-    // Hero Close-Up Giant Docked Ocean Liner right at the start of Stage 5
+    // Hero Close-Up Giant Docked Ocean Liner right at the start of Stage 5 (Ultra-Realistic 3D Riveted Hull, Raked Clipper Bow, Curved Art-Deco Decks, Davit Lifeboats & Raked Funnels!)
     const heroX = 390 - camX * 0.45;
     if (heroX > -620 && heroX < w + 620) {
       const hBob = Math.sin(time * 1.25) * 2.5;
       ctx.save();
       ctx.translate(heroX, waterY - 4 + hBob);
       ctx.scale(1.42, 1.42);
-      // Massive dark steel hull
+
+      // 1. Massive Flared Riveted Steel Liner Hull with Raked Cruiser Bow & Sculpted Stern Counter
       const hullG = ctx.createLinearGradient(0, -68, 0, 26);
-      hullG.addColorStop(0, '#1e293b');
-      hullG.addColorStop(0.7, '#0f172a');
-      hullG.addColorStop(1, '#070b14');
+      hullG.addColorStop(0, '#273549');
+      hullG.addColorStop(0.32, '#162032');
+      hullG.addColorStop(0.75, '#0b111e');
+      hullG.addColorStop(1, '#04070d');
       ctx.fillStyle = hullG;
-      ctx.strokeStyle = '#05080f';
-      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#03060c';
+      ctx.lineWidth = 2.4;
       ctx.beginPath();
-      ctx.moveTo(-270, -64);
-      ctx.lineTo(290, -64);
-      ctx.quadraticCurveTo(276, 16, 232, 26);
+      ctx.moveTo(-276, -64);
+      ctx.quadraticCurveTo(0, -60, 304, -68); // graceful sheer curve toward flared bow
+      ctx.quadraticCurveTo(282, -12, 240, 26); // raked clipper bow profile
       ctx.lineTo(-244, 26);
-      ctx.quadraticCurveTo(-266, 6, -270, -64);
-      ctx.closePath(); ctx.fill(); ctx.stroke();
-      // Red Plimsoll waterline & anchor hawsehole + chain
-      ctx.fillStyle = '#b91c1c';
-      ctx.fillRect(-252, 6, 492, 10);
-      ctx.fillStyle = '#475569';
-      ctx.beginPath(); ctx.arc(232, -32, 7, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#64748b'; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(232, -26); ctx.lineTo(238, 22); ctx.stroke();
-      // Glowing hull portholes
-      ctx.fillStyle = 'rgba(255, 222, 140, 0.88)';
-      for (let px = -220; px <= 200; px += 34) {
-        ctx.beginPath(); ctx.arc(px, -38, 4.5, 0, Math.PI * 2); ctx.fill();
+      ctx.quadraticCurveTo(-268, 6, -276, -64);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Crimson anti-fouling Plimsoll waterline boot-topping + white load-line & gold sheer ribbon
+      ctx.fillStyle = '#991b1b';
+      ctx.beginPath();
+      ctx.moveTo(-255, 6); ctx.lineTo(256, 6); ctx.lineTo(240, 22); ctx.lineTo(-246, 22);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-254, 4, 508, 2);
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.moveTo(-272, -55); ctx.quadraticCurveTo(0, -51, 296, -59); ctx.stroke();
+
+      // Horizontal & vertical riveted steel hull plate seams
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.16)';
+      ctx.lineWidth = 1;
+      for (let hy = -44; hy <= -10; hy += 16) {
+        ctx.beginPath(); ctx.moveTo(-262, hy); ctx.lineTo(276, hy); ctx.stroke();
       }
-      // Multi-deck white passenger/bridge superstructure
-      ctx.fillStyle = '#e2e8f0';
+      for (let vx = -220; vx <= 240; vx += 46) {
+        ctx.beginPath(); ctx.moveTo(vx, -54); ctx.lineTo(vx - 6, 4); ctx.stroke();
+      }
+
+      // Recessed Bow Anchor Pocket, Forged Stockless Anchor & Heavy Iron Mooring Chain
+      ctx.fillStyle = '#090d16';
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.ellipse(244, -34, 9, 6.5, -0.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 2.8;
+      ctx.beginPath();
+      ctx.moveTo(244, -32); ctx.lineTo(252, 24);
+      ctx.moveTo(238, -24); ctx.lineTo(250, -24);
+      ctx.stroke();
+
+      // Two Tiers of Brass-Rimmed Illuminated Hull Portholes + Shimmering Water Reflections
+      for (let px = -228; px <= 208; px += 28) {
+        // Upper porthole row
+        ctx.fillStyle = '#fde68a';
+        ctx.strokeStyle = '#b45309';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.arc(px, -38, 4.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Lower porthole row
+        if (px % 56 === 0) {
+          ctx.beginPath(); ctx.arc(px + 14, -20, 3.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        }
+        // Golden reflection ripples on harbor water
+        ctx.fillStyle = 'rgba(253, 224, 71, 0.24)';
+        ctx.beginPath(); ctx.ellipse(px, 26 + Math.sin(time * 3 + px) * 1.5, 9, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // 2. Tiered Streamlined Art-Deco White Passenger Superstructure (Curved Fronts, Teak Promenade Decks & Railings!)
+      // Main Promenade Deck (A-Deck)
+      const deck1G = ctx.createLinearGradient(0, -112, 0, -64);
+      deck1G.addColorStop(0, '#f8fafc'); deck1G.addColorStop(0.7, '#e2e8f0'); deck1G.addColorStop(1, '#94a3b8');
+      ctx.fillStyle = deck1G;
       ctx.strokeStyle = '#334155';
       ctx.lineWidth = 1.6;
-      ctx.fillRect(-195, -112, 360, 48);
-      ctx.strokeRect(-195, -112, 360, 48);
-      ctx.fillStyle = 'rgba(255, 215, 130, 0.78)';
-      for (let wx = -178; wx <= 140; wx += 26) ctx.fillRect(wx, -100, 16, 16);
-      // Upper bridge deck
-      ctx.fillStyle = '#f1f5f9';
-      ctx.fillRect(-125, -152, 220, 40);
-      ctx.strokeRect(-125, -152, 220, 40);
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(-105, -142, 180, 14);
-      ctx.fillStyle = 'rgba(125, 211, 252, 0.55)';
-      for (let bx = -98; bx <= 58; bx += 24) ctx.fillRect(bx, -140, 16, 10);
-      // Lifeboats on davits
-      for (const lbx of [-155, -80, 95]) {
-        ctx.fillStyle = '#ea580c';
-        ctx.beginPath(); ctx.ellipse(lbx, -114, 18, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-205, -64);
+      ctx.lineTo(-195, -112);
+      ctx.lineTo(170, -112);
+      ctx.quadraticCurveTo(188, -112, 194, -64);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      // Teak deck floor strip & dark overhang shadow
+      ctx.fillStyle = '#78350f'; ctx.fillRect(-205, -68, 398, 4);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.28)'; ctx.fillRect(-194, -109, 368, 5);
+      // Warm arched salon & promenade windows with mullion frames
+      for (let wx = -180; wx <= 156; wx += 24) {
+        ctx.fillStyle = '#fffbeb';
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.roundRect(wx, -100, 15, 19, [5, 5, 1, 1]); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(217, 119, 6, 0.35)';
+        ctx.fillRect(wx + 1, -90, 13, 8);
       }
-      // Twin tall red-and-black smokestacks puffing steam
-      for (const sx of [-40, 28]) {
-        ctx.fillStyle = '#dc2626';
-        ctx.fillRect(sx, -205, 30, 53);
+
+      // Upper Boat Deck (B-Deck) + Curved Captain's Navigation Bridge & Wing Cabins
+      ctx.fillStyle = '#f1f5f9';
+      ctx.beginPath();
+      ctx.moveTo(-142, -112);
+      ctx.lineTo(-134, -152);
+      ctx.lineTo(118, -152);
+      ctx.quadraticCurveTo(134, -152, 140, -112);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#78350f'; ctx.fillRect(-142, -115, 282, 3);
+      // Enclosed Wheelhouse & Navigation Bridge Windows
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath(); ctx.roundRect(-118, -143, 232, 15, 3); ctx.fill();
+      for (let bx = -110; bx <= 98; bx += 22) {
+        ctx.fillStyle = bx > 50 ? 'rgba(56, 189, 248, 0.72)' : 'rgba(254, 240, 138, 0.85)';
+        ctx.fillRect(bx, -141, 15, 11);
+      }
+      // Starboard green navigation lantern on bridge wing
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath(); ctx.arc(124, -135, 3.2, 0, Math.PI * 2); ctx.fill();
+
+      // Promenade & Boat Deck Safety Handrails with Stanchions
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(-270, -68); ctx.lineTo(295, -68);
+      ctx.moveTo(-195, -115); ctx.lineTo(182, -115);
+      ctx.stroke();
+      for (let rx = -264; rx <= 288; rx += 18) {
+        ctx.beginPath(); ctx.moveTo(rx, -64); ctx.lineTo(rx, -68); ctx.stroke();
+      }
+
+      // 3. 4 Detailed Clinker-Built Lifeboats Suspended from Curved Steel Gravity Davits!
+      for (const lbx of [-162, -96, 42, 108]) {
+        // Curved steel davit arms & rope falls
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(lbx - 14, -112); ctx.lineTo(lbx - 14, -127); ctx.quadraticCurveTo(lbx - 14, -132, lbx - 9, -131);
+        ctx.moveTo(lbx + 14, -112); ctx.lineTo(lbx + 14, -127); ctx.quadraticCurveTo(lbx + 14, -132, lbx + 9, -131);
+        ctx.stroke();
+        // Double-ended wooden/orange lifeboat hull with canvas cover & grab ropes
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(lbx - 20, -123);
+        ctx.quadraticCurveTo(lbx, -114, lbx + 20, -123);
+        ctx.quadraticCurveTo(lbx, -127, lbx - 20, -123);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ea580c';
+        ctx.beginPath();
+        ctx.moveTo(lbx - 19, -123); ctx.quadraticCurveTo(lbx, -128, lbx + 19, -123); ctx.closePath();
+        ctx.fill();
+      }
+
+      // 4. Twin Raked Red-and-Black Steamship Smokestacks with Steam Whistles, Guy Wires & Volumetric Plumes
+      for (const sx of [-46, 24]) {
+        ctx.save();
+        ctx.translate(sx, -152);
+        ctx.transform(1, 0, -0.13, 1, 0, 0); // authentic raked ocean-liner funnel slant
+        const fG = ctx.createLinearGradient(0, 0, 32, 0);
+        fG.addColorStop(0, '#991b1b'); fG.addColorStop(0.4, '#ef4444'); fG.addColorStop(0.8, '#b91c1c'); fG.addColorStop(1, '#450a0a');
+        ctx.fillStyle = fG;
+        ctx.strokeStyle = '#090d16';
+        ctx.lineWidth = 1.6;
+        ctx.fillRect(0, -56, 32, 56);
+        ctx.strokeRect(0, -56, 32, 56);
+        // Soot-black funnel crown & white company band
         ctx.fillStyle = '#0f172a';
-        ctx.fillRect(sx, -205, 30, 13);
-        ctx.strokeRect(sx, -205, 30, 53);
+        ctx.fillRect(0, -56, 32, 14);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(0, -40, 32, 4);
+        // External brass steam whistle pipe along front of funnel
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(27, -4); ctx.lineTo(27, -46); ctx.stroke();
+        ctx.restore();
+
+        // Diagonal funnel guy-wire stays
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(sx + 6, -195); ctx.lineTo(sx - 22, -152);
+        ctx.moveTo(sx + 26, -195); ctx.lineTo(sx + 52, -152);
+        ctx.stroke();
+
+        // Rolling multi-puff steam clouds
         for (let p = 0; p < 4; p++) {
           const drift = ((time * 18 + p * 22) % 70);
-          ctx.fillStyle = `rgba(215, 225, 240, ${0.22 - (drift / 70) * 0.2})`;
-          ctx.beginPath(); ctx.arc(sx + 12 - drift * 0.45, -212 - drift * 0.65, 9 + drift * 0.2, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = `rgba(215, 225, 240, ${0.24 - (drift / 70) * 0.21})`;
+          ctx.beginPath(); ctx.arc(sx + 6 - drift * 0.5, -214 - drift * 0.65, 9 + drift * 0.22, 0, Math.PI * 2); ctx.fill();
         }
       }
-      // Radar mast & navigation light
-      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2.5;
-      ctx.beginPath(); ctx.moveTo(-72, -152); ctx.lineTo(-72, -215); ctx.stroke();
+
+      // 5. Fore & Aft Steel Masts, Crow's Nest, Radar Scanner & Aerial Rigging with Warm Deck Lights
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      ctx.moveTo(-88, -152); ctx.lineTo(-96, -226); // aft mast
+      ctx.moveTo(156, -112); ctx.lineTo(148, -228); // fore mast
+      ctx.stroke();
+      // Foremast crow's nest lookout basket & signal yardarm
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(144, -192, 11, 9);
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.moveTo(134, -206); ctx.lineTo(164, -206); ctx.stroke();
+      // Aerial radio & festival stay cables between masts
+      ctx.strokeStyle = 'rgba(203, 213, 225, 0.45)';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(-96, -224); ctx.quadraticCurveTo(26, -198, 148, -226);
+      ctx.moveTo(148, -226); ctx.lineTo(292, -68);
+      ctx.moveTo(-96, -224); ctx.lineTo(-266, -64);
+      ctx.stroke();
       ctx.fillStyle = '#38bdf8';
-      ctx.beginPath(); ctx.arc(-72, -216, 3.2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-96, -227, 3.2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath(); ctx.arc(148, -229, 3.4, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     }
 
@@ -1895,94 +2196,274 @@ window.Game.Art = (function () {
 
       const kind = i % 3;
       if (kind === 0) {
-        // 0. Classic Multi-Deck Coastal Steamship / Ferry
+        // 0. Classic Multi-Deck Coastal Steamship / Harbor Passenger Ferry (Detailed Riveted Hull, Timber Wheelhouse, Davit Lifeboats, Raked Funnel & Rigging!)
         const bob = Math.sin(time * 1.9 + i) * 3;
         ctx.save();
         ctx.translate(190, -12 + bob);
-        ctx.fillStyle = '#1b2638';
-        ctx.strokeStyle = '#0c121c';
+
+        // 3D Flared Steel Hull with Raked Bow, Riveted Plate Lines, White Rub-Rail & Anchor Chain
+        const fHullG = ctx.createLinearGradient(0, -28, 0, 18);
+        fHullG.addColorStop(0, '#26354d');
+        fHullG.addColorStop(0.55, '#152033');
+        fHullG.addColorStop(1, '#070c17');
+        ctx.fillStyle = fHullG;
+        ctx.strokeStyle = '#050811';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(-140, -24);
-        ctx.lineTo(148, -24);
-        ctx.quadraticCurveTo(138, 12, 114, 16);
-        ctx.lineTo(-122, 16);
-        ctx.quadraticCurveTo(-136, 4, -140, -24);
-        ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#b83232';
-        ctx.fillRect(-126, 4, 244, 6);
-        ctx.fillStyle = '#dde4ef';
-        ctx.strokeStyle = '#3c4b64';
-        ctx.lineWidth = 1.4;
-        ctx.fillRect(-98, -56, 194, 32);
-        ctx.strokeRect(-98, -56, 194, 32);
-        ctx.fillStyle = 'rgba(255, 212, 120, 0.85)';
-        for (let wx = -86; wx <= 76; wx += 22) {
-          ctx.fillRect(wx, -48, 14, 14);
+        ctx.moveTo(-144, -24);
+        ctx.quadraticCurveTo(0, -21, 156, -28);
+        ctx.quadraticCurveTo(140, 10, 116, 16);
+        ctx.lineTo(-124, 16);
+        ctx.quadraticCurveTo(-139, 4, -144, -24);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // Crimson Plimsoll waterline + white load-line & gold sheer stripe
+        ctx.fillStyle = '#b91c1c';
+        ctx.beginPath();
+        ctx.moveTo(-130, 4); ctx.lineTo(126, 4); ctx.lineTo(116, 15); ctx.lineTo(-124, 15);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(-130, 2.5, 256, 1.5);
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(-140, -22, 290, 2.2);
+        // Bow anchor hawsehole & chain
+        ctx.fillStyle = '#475569';
+        ctx.beginPath(); ctx.arc(124, -13, 4.2, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(124, -10); ctx.lineTo(129, 14); ctx.stroke();
+        // Hull rubber tire fenders & brass portholes with water shimmer
+        for (let px = -108; px <= 100; px += 26) {
+          ctx.fillStyle = '#fde68a';
+          ctx.strokeStyle = '#92400e';
+          ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.arc(px, -10, 3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = 'rgba(253, 230, 138, 0.22)';
+          ctx.beginPath(); ctx.ellipse(px, 20 + Math.sin(time * 3 + px) * 1.2, 7.5, 1.8, 0, 0, Math.PI * 2); ctx.fill();
         }
-        ctx.fillStyle = '#cfd8e6';
-        ctx.fillRect(-52, -82, 92, 26);
-        ctx.strokeRect(-52, -82, 92, 26);
-        ctx.fillStyle = 'rgba(255, 224, 145, 0.9)';
-        ctx.fillRect(-42, -76, 22, 12);
-        ctx.fillRect(-10, -76, 22, 12);
-        for (const lbx of [-78, 62]) {
-          ctx.fillStyle = '#e76f51';
-          ctx.beginPath(); ctx.ellipse(lbx, -58, 14, 5, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Main Passenger Saloon Deck with Arched Windows & Teak Trim
+        const salG = ctx.createLinearGradient(0, -58, 0, -24);
+        salG.addColorStop(0, '#f8fafc'); salG.addColorStop(1, '#cbd5e1');
+        ctx.fillStyle = salG;
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(-104, -56, 206, 32, [6, 10, 0, 0]);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(-106, -27, 210, 3.5);
+        ctx.fillRect(-106, -58, 210, 3);
+        for (let wx = -90; wx <= 82; wx += 21) {
+          ctx.fillStyle = '#fffbeb';
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.roundRect(wx, -49, 14, 16, [4, 4, 1, 1]); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = 'rgba(217, 119, 6, 0.35)';
+          ctx.fillRect(wx + 1, -40, 12, 6);
         }
-        ctx.fillStyle = '#d62828';
-        ctx.fillRect(-12, -118, 22, 36);
-        ctx.fillStyle = '#141a26';
-        ctx.fillRect(-12, -118, 22, 9);
+
+        // Upper Promenade & Teak-Paneled Captain's Wheelhouse Bridge
+        ctx.fillStyle = '#e2e8f0';
+        ctx.beginPath(); ctx.roundRect(-58, -83, 108, 26, [5, 8, 0, 0]); ctx.fill(); ctx.stroke();
+        // Mahogany wheelhouse forward cabin
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(14, -81, 34, 23);
+        ctx.fillStyle = '#fef08a';
+        for (const wx of [-46, -20, 18, 33]) {
+          ctx.fillRect(wx, -76, 12, 11);
+        }
+        // Starboard green navigation light box
+        ctx.fillStyle = '#22c55e';
+        ctx.beginPath(); ctx.arc(46, -66, 2.8, 0, Math.PI * 2); ctx.fill();
+
+        // Deck Stanchion Railings & Davit-Mounted Lifeboats
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.moveTo(-102, -62); ctx.lineTo(100, -62); ctx.stroke();
+        for (const lbx of [-80, 68]) {
+          ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(lbx - 10, -56); ctx.lineTo(lbx - 10, -67);
+          ctx.moveTo(lbx + 10, -56); ctx.lineTo(lbx + 10, -67);
+          ctx.stroke();
+          ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.ellipse(lbx, -63, 14, 4.8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#ea580c';
+          ctx.beginPath(); ctx.ellipse(lbx, -64.5, 13, 2.5, 0, Math.PI, 0); ctx.fill();
+        }
+
+        // Raked Red & Black Steamship Funnel with Brass Whistle Pipe & Steam Plume
+        ctx.save();
+        ctx.translate(-14, -83);
+        ctx.transform(1, 0, -0.12, 1, 0, 0);
+        const funG = ctx.createLinearGradient(0, 0, 22, 0);
+        funG.addColorStop(0, '#991b1b'); funG.addColorStop(0.45, '#ef4444'); funG.addColorStop(1, '#7f1d1d');
+        ctx.fillStyle = funG; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.3;
+        ctx.fillRect(0, -38, 22, 38); ctx.strokeRect(0, -38, 22, 38);
+        ctx.fillStyle = '#0f172a'; ctx.fillRect(0, -38, 22, 10);
+        ctx.fillStyle = '#f8fafc'; ctx.fillRect(0, -26, 22, 3);
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(19, -3); ctx.lineTo(19, -30); ctx.stroke();
+        ctx.restore();
         for (let p = 0; p < 4; p++) {
           const lift = ((time * 22 + p * 14) % 52);
           ctx.fillStyle = `rgba(220, 232, 245, ${0.22 * (1 - lift / 52)})`;
-          ctx.beginPath(); ctx.arc(-1 + lift * 0.45, -124 - lift * 0.7, 6 + lift * 0.2, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(-5 - lift * 0.45, -126 - lift * 0.7, 6 + lift * 0.2, 0, Math.PI * 2); ctx.fill();
         }
+        // Forward mast & warm bow masthead lantern
+        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(78, -56); ctx.lineTo(74, -124); ctx.stroke();
         ctx.fillStyle = '#ffe899';
-        ctx.beginPath(); ctx.arc(128, -32, 3.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(74, -125, 3.2, 0, Math.PI * 2); ctx.arc(134, -32, 3.2, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
       } else if (kind === 1) {
-        // 1. Tall-Mast Wooden Sailing Schooner & Fishing Ship
+        // 1. Tall-Mast Wooden Sailing Schooner & Traditional Harbor Fishing Trawler (Carved Planking, Ratline Shrouds, Furled & Billowing Canvas Sails, Bowsprit Jibs & Fishing Nets!)
         const bob = Math.sin(time * 2.2 + i) * 3.5;
         ctx.save();
         ctx.translate(185, -12 + bob);
-        const hullG = ctx.createLinearGradient(0, -22, 0, 16);
-        hullG.addColorStop(0, '#784824');
-        hullG.addColorStop(1, '#3b200d');
+
+        // 1. Curved Carvel-Planked Oak Hull with Clipper Bowsprit, Golden Sheer Ribbon & Gunwale Ports
+        const hullG = ctx.createLinearGradient(0, -24, 0, 16);
+        hullG.addColorStop(0, '#9c5e31');
+        hullG.addColorStop(0.45, '#6e3f1c');
+        hullG.addColorStop(0.82, '#3d200b');
+        hullG.addColorStop(1, '#1f0f04');
         ctx.fillStyle = hullG;
-        ctx.strokeStyle = '#1c0e04';
+        ctx.strokeStyle = '#140902';
         ctx.lineWidth = 1.8;
         ctx.beginPath();
-        ctx.moveTo(-110, -20);
-        ctx.lineTo(118, -24);
-        ctx.lineTo(92, 16);
-        ctx.lineTo(-92, 16);
-        ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.strokeStyle = '#5c3418';
-        ctx.lineWidth = 4;
-        ctx.beginPath(); ctx.moveTo(114, -22); ctx.lineTo(152, -38); ctx.stroke();
-        ctx.fillStyle = '#543018';
-        ctx.fillRect(-84, -48, 58, 28);
+        ctx.moveTo(-116, -24);
+        ctx.quadraticCurveTo(0, -16, 128, -28);
+        ctx.quadraticCurveTo(108, 12, 92, 16);
+        ctx.lineTo(-96, 16);
+        ctx.quadraticCurveTo(-110, 4, -116, -24);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // Dark green/crimson antifouling waterline & curved oak planking seams
+        ctx.fillStyle = '#7f1d1d';
+        ctx.fillRect(-100, 9, 194, 6);
+        ctx.strokeStyle = 'rgba(20, 9, 2, 0.58)';
+        ctx.lineWidth = 1.1;
+        for (const pyOff of [-10, -2]) {
+          ctx.beginPath(); ctx.moveTo(-106, pyOff); ctx.quadraticCurveTo(0, pyOff + 5, 114, pyOff - 4); ctx.stroke();
+        }
+        // Ornate golden trailboard stripe along upper bulwark + brass scupper ports
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 1.7;
+        ctx.beginPath(); ctx.moveTo(-112, -17); ctx.quadraticCurveTo(0, -10, 122, -22); ctx.stroke();
+        ctx.fillStyle = '#fde68a';
+        for (let px = -84; px <= 76; px += 26) {
+          ctx.beginPath(); ctx.arc(px, -8, 2.3, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Tapered Timber Bowsprit Spar & Chain Bobstays at the Prow
+        ctx.strokeStyle = '#784421';
+        ctx.lineWidth = 4.2;
+        ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(116, -23); ctx.lineTo(164, -42); ctx.stroke();
+        ctx.strokeStyle = 'rgba(203, 213, 225, 0.45)';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(162, -41); ctx.lineTo(114, -6); // bobstay chain to cutwater
+        ctx.stroke();
+
+        // Aft Teak Deckhouse Cabin with Skylight, Ship's Wheel & Glowing Brass Portholes
+        const cabG = ctx.createLinearGradient(0, -52, 0, -20);
+        cabG.addColorStop(0, '#7c4722'); cabG.addColorStop(1, '#43230d');
+        ctx.fillStyle = cabG;
+        ctx.strokeStyle = '#1f0e04';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(-92, -48, 66, 27, [4, 4, 0, 0]); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#b46936';
+        ctx.fillRect(-95, -51, 72, 4);
         ctx.fillStyle = '#ffd166';
-        ctx.beginPath(); ctx.arc(-68, -34, 4, 0, Math.PI * 2); ctx.arc(-48, -34, 4, 0, Math.PI * 2); ctx.fill();
-        for (const mx of [-16, 48]) {
-          ctx.fillStyle = '#4a2912';
-          ctx.fillRect(mx - 3, -155, 6, 135);
-          ctx.fillRect(mx - 36, -128, 72, 4);
-          ctx.fillRect(mx - 42, -88, 84, 4);
-          ctx.fillStyle = '#e8dec8';
-          ctx.beginPath(); ctx.roundRect(mx - 34, -125, 68, 12, 6); ctx.fill();
-          ctx.beginPath(); ctx.roundRect(mx - 40, -85, 80, 13, 6); ctx.fill();
-          ctx.strokeStyle = 'rgba(210, 220, 235, 0.3)';
+        ctx.strokeStyle = '#92400e';
+        ctx.lineWidth = 1;
+        for (const wx of [-76, -56, -38]) {
+          ctx.beginPath(); ctx.arc(wx, -35, 4.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        }
+
+        // 2. Twin Tall Tapered Spruce Masts, Yardarms, Billowing & Furled Canvas Sails, Jib Staysails & Rope Ratline Shrouds!
+        // Triangular fore-staysail / jib sail unfurled toward the bowsprit
+        const jibG = ctx.createLinearGradient(48, -142, 156, -36);
+        jibG.addColorStop(0, 'rgba(245, 238, 220, 0.88)');
+        jibG.addColorStop(1, 'rgba(203, 189, 161, 0.72)');
+        ctx.fillStyle = jibG;
+        ctx.strokeStyle = 'rgba(92, 64, 35, 0.65)';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(52, -138);
+        ctx.quadraticCurveTo(106, -92, 158, -40);
+        ctx.quadraticCurveTo(112, -32, 62, -26);
+        ctx.quadraticCurveTo(64, -82, 52, -138);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        for (const mx of [-16, 50]) {
+          // Tapered wooden mast + crosstree spreader
+          const mG = ctx.createLinearGradient(mx - 3.5, 0, mx + 3.5, 0);
+          mG.addColorStop(0, '#3b1f0b'); mG.addColorStop(0.45, '#8d552b'); mG.addColorStop(1, '#291507');
+          ctx.fillStyle = mG;
+          ctx.beginPath();
+          ctx.moveTo(mx - 3.6, -20); ctx.lineTo(mx - 1.8, -164); ctx.lineTo(mx + 1.8, -164); ctx.lineTo(mx + 3.6, -20);
+          ctx.closePath(); ctx.fill();
+          // Pennant burgee flag fluttering at masthead
+          ctx.fillStyle = mx > 0 ? '#ef4444' : '#fbbf24';
+          const wave = Math.sin(time * 5 + mx) * 3;
+          ctx.beginPath();
+          ctx.moveTo(mx, -164); ctx.lineTo(mx - 18, -160 + wave); ctx.lineTo(mx, -156);
+          ctx.closePath(); ctx.fill();
+
+          // Upper & lower wooden yardarms with semi-billowing cream canvas square sails & reef seams
+          for (const [yy, yw, sh] of [[-132, 72, 28], [-88, 86, 34]]) {
+            ctx.fillStyle = '#4a2912';
+            ctx.fillRect(mx - yw / 2, yy - 3, yw, 4);
+            const sG = ctx.createLinearGradient(mx, yy, mx, yy + sh);
+            sG.addColorStop(0, '#f5efe0'); sG.addColorStop(0.65, '#e2d5be'); sG.addColorStop(1, '#bda988');
+            ctx.fillStyle = sG;
+            ctx.strokeStyle = 'rgba(74, 48, 24, 0.55)';
+            ctx.lineWidth = 1.1;
+            ctx.beginPath();
+            ctx.moveTo(mx - yw * 0.46, yy + 1);
+            ctx.lineTo(mx + yw * 0.46, yy + 1);
+            ctx.quadraticCurveTo(mx + yw * 0.5 + 4, yy + sh * 0.55, mx + yw * 0.42, yy + sh);
+            ctx.quadraticCurveTo(mx, yy + sh - 5, mx - yw * 0.42, yy + sh);
+            ctx.quadraticCurveTo(mx - yw * 0.5 - 4, yy + sh * 0.55, mx - yw * 0.46, yy + 1);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            // Vertical canvas sail panel stitching lines
+            ctx.strokeStyle = 'rgba(120, 92, 60, 0.28)';
+            ctx.lineWidth = 0.8;
+            for (let sx = -yw * 0.3; sx <= yw * 0.3; sx += yw * 0.2) {
+              ctx.beginPath(); ctx.moveTo(mx + sx, yy + 2); ctx.lineTo(mx + sx, yy + sh - 3); ctx.stroke();
+            }
+          }
+
+          // Rope Ratline Shrouds (rope ladder rigging from gunwale up to masthead!)
+          ctx.strokeStyle = 'rgba(210, 220, 235, 0.38)';
           ctx.lineWidth = 1.1;
           ctx.beginPath();
-          ctx.moveTo(mx, -152); ctx.lineTo(mx - 44, -20);
-          ctx.moveTo(mx, -152); ctx.lineTo(mx + 44, -20);
+          ctx.moveTo(mx, -148); ctx.lineTo(mx - 24, -20);
+          ctx.moveTo(mx, -148); ctx.lineTo(mx + 24, -20);
+          for (let ry = -130; ry <= -32; ry += 14) {
+            const spread = ((ry + 148) / 128) * 24;
+            ctx.moveTo(mx - spread, ry); ctx.lineTo(mx + spread, ry);
+          }
           ctx.stroke();
         }
+        // Stay cables between foremast, mainmast, and bowsprit
+        ctx.strokeStyle = 'rgba(210, 220, 235, 0.42)';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(-16, -160); ctx.lineTo(50, -160);
+        ctx.moveTo(50, -160); ctx.lineTo(162, -42);
+        ctx.stroke();
+
+        // Warm Glowing Brass Rigging Lantern
         const lGlow = ctx.createRadialGradient(54, -82, 2, 54, -82, 26);
-        lGlow.addColorStop(0, 'rgba(255, 220, 120, 0.72)');
+        lGlow.addColorStop(0, 'rgba(255, 220, 120, 0.78)');
         lGlow.addColorStop(1, 'rgba(255, 220, 120, 0)');
         ctx.fillStyle = lGlow;
         ctx.beginPath(); ctx.arc(54, -82, 26, 0, Math.PI * 2); ctx.fill();
@@ -2130,50 +2611,118 @@ window.Game.Art = (function () {
     const midOff = -(camX * 0.34) % 560;
     for (let x = midOff - 560; x < w + 560; x += 280) {
       const idx = Math.abs(Math.round((x - midOff) / 280));
-      const bw = 205 + (idx % 3) * 30;
-      const bh = 310 + (idx * 73) % 160;
+      const bw = 212 + (idx % 3) * 28;
+      const bh = 315 + (idx * 73) % 155;
       const by = h - bh;
-      const grad = ctx.createLinearGradient(x, by, x, h);
-      grad.addColorStop(0, '#131b30');
-      grad.addColorStop(1, '#090e1c');
+
+      // Rich Architectural High-Rise Facade with 3D Edge Shading & Masonry Spandrels
+      const grad = ctx.createLinearGradient(x, by, x + bw, h);
+      grad.addColorStop(0, '#18223a');
+      grad.addColorStop(0.5, '#101729');
+      grad.addColorStop(1, '#080c17');
       ctx.fillStyle = grad;
       ctx.fillRect(x, by, bw, bh);
-      ctx.strokeStyle = '#1e2942';
+      // Horizontal floor spandrel bands & vertical structural pilasters
+      ctx.fillStyle = 'rgba(7, 11, 22, 0.55)';
+      for (let fy = by + 18; fy < h - 18; fy += 30) ctx.fillRect(x + 6, fy + 20, bw - 12, 5);
+      ctx.fillStyle = '#0c1222';
+      ctx.fillRect(x, by, 10, bh);
+      ctx.fillRect(x + bw - 10, by, 10, bh);
+      ctx.strokeStyle = '#243252';
       ctx.lineWidth = 2;
       ctx.strokeRect(x, by, bw, bh);
 
-      // Calm architectural glass mullions & sparse, soft interior glow
-      ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)';
-      ctx.lineWidth = 1;
-      for (let wx = x + 22; wx < x + bw - 14; wx += 24) {
-        ctx.beginPath(); ctx.moveTo(wx, by + 16); ctx.lineTo(wx, h); ctx.stroke();
-      }
-      for (let wy = by + 26; wy < h - 30; wy += 28) {
-        for (let wx = x + 16; wx < x + bw - 22; wx += 24) {
-          if (((wx * 11 + wy * 17 + idx) % 19) < 2) {
-            ctx.fillStyle = ((wx + idx) % 3 === 0) ? 'rgba(120, 195, 255, 0.13)' : 'rgba(255, 214, 145, 0.15)';
-            ctx.fillRect(wx + 2, wy, 12, 9);
+      // Realistic Multi-Tone Apartment & Office Windows (Warm Amber Living Rooms, Soft Moonlit Studios, Curtains & Mullions!)
+      for (let row = 0; row < 12; row++) {
+        const wy = by + 24 + row * 30;
+        if (wy > h - 36) break;
+        for (let col = 0; col < 6; col++) {
+          const wx = x + 18 + col * 31;
+          if (wx + 22 > x + bw - 14) break;
+          const seed = (idx * 37 + row * 13 + col * 7) % 17;
+          // Recessed dark window frame
+          ctx.fillStyle = '#060a14';
+          ctx.fillRect(wx - 1, wy - 1, 22, 18);
+
+          if (seed < 5) {
+            // Warm cozy illuminated apartment window (golden-amber radial glow + curtains/blinds!)
+            const wG = ctx.createLinearGradient(wx, wy, wx, wy + 16);
+            if (seed % 2 === 0) {
+              wG.addColorStop(0, '#fef3c7');
+              wG.addColorStop(0.55, '#fbbf24');
+              wG.addColorStop(1, '#b45309');
+            } else {
+              wG.addColorStop(0, '#ffedd5');
+              wG.addColorStop(0.6, '#fb923c');
+              wG.addColorStop(1, '#9a3412');
+            }
+            ctx.fillStyle = wG;
+            ctx.fillRect(wx, wy, 20, 16);
+            // Interior curtain or horizontal blind detail
+            ctx.fillStyle = 'rgba(69, 26, 3, 0.35)';
+            if (seed === 0 || seed === 3) {
+              ctx.fillRect(wx, wy, 5, 16);
+              ctx.fillRect(wx + 15, wy, 5, 16);
+            } else if (seed === 1) {
+              ctx.fillRect(wx, wy, 20, 5);
+            }
+          } else if (seed === 6 || seed === 9) {
+            // Soft cool blue/cyan TV or late-night studio monitor glow
+            const cG = ctx.createLinearGradient(wx, wy, wx, wy + 16);
+            cG.addColorStop(0, 'rgba(186, 230, 253, 0.55)');
+            cG.addColorStop(1, 'rgba(29, 78, 216, 0.32)');
+            ctx.fillStyle = cG;
+            ctx.fillRect(wx, wy, 20, 16);
+          } else {
+            // Unlit dark glass pane catching subtle night sky reflection
+            ctx.fillStyle = '#0d1526';
+            ctx.fillRect(wx, wy, 20, 16);
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.08)';
+            ctx.beginPath();
+            ctx.moveTo(wx + 2, wy); ctx.lineTo(wx + 9, wy); ctx.lineTo(wx + 3, wy + 16); ctx.lineTo(wx, wy + 16);
+            ctx.closePath(); ctx.fill();
           }
+
+          // Window frame cross-mullions & stone sill
+          ctx.strokeStyle = '#1e293b';
+          ctx.lineWidth = 1.2;
+          ctx.strokeRect(wx, wy, 20, 16);
+          ctx.beginPath();
+          ctx.moveTo(wx + 10, wy); ctx.lineTo(wx + 10, wy + 16);
+          ctx.moveTo(wx, wy + 9); ctx.lineTo(wx + 20, wy + 9);
+          ctx.stroke();
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(wx - 1.5, wy + 16, 23, 2.2);
         }
       }
 
-      // Subtle architectural penthouse crown or distant crane
+      // Detailed Rooftop Crown: Illuminated Penthouse Terrace or Stepped Art-Deco Tower & Crane!
       if (idx % 2 === 0) {
-        ctx.fillStyle = '#19233d';
-        ctx.fillRect(x + 26, by - 14, bw - 52, 14);
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.18)';
-        ctx.lineWidth = 1.2;
-        ctx.strokeRect(x + 26, by - 14, bw - 52, 14);
+        ctx.fillStyle = '#1e2942';
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.4;
+        ctx.fillRect(x + 24, by - 22, bw - 48, 22);
+        ctx.strokeRect(x + 24, by - 22, bw - 48, 22);
+        // Glowing penthouse glass clerestory windows
+        ctx.fillStyle = 'rgba(254, 240, 138, 0.75)';
+        for (let px = x + 36; px < x + bw - 46; px += 26) {
+          ctx.fillRect(px, by - 16, 18, 10);
+        }
       } else {
-        ctx.strokeStyle = '#1a2338';
+        // Rooftop mechanical penthouse + steel tower crane with red warning beacon
+        ctx.fillStyle = '#172036';
+        ctx.fillRect(x + 32, by - 16, 68, 16);
+        ctx.strokeStyle = '#1e293b';
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(x + bw * 0.5, by);
-        ctx.lineTo(x + bw * 0.5, by - 72);
-        ctx.lineTo(x + bw * 0.5 + 88, by - 72);
+        ctx.moveTo(x + bw * 0.62, by);
+        ctx.lineTo(x + bw * 0.62, by - 72);
+        ctx.lineTo(x + bw * 0.62 + 88, by - 72);
         ctx.stroke();
         ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(x + bw * 0.5, by - 82); ctx.lineTo(x + bw * 0.5 + 88, by - 72); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x + bw * 0.62, by - 82); ctx.lineTo(x + bw * 0.62 + 88, by - 72); ctx.stroke();
+        ctx.fillStyle = '#ff453a';
+        ctx.beginPath(); ctx.arc(x + bw * 0.62 + 88, by - 72, 2.5, 0, Math.PI * 2); ctx.fill();
       }
     }
   }
@@ -3065,20 +3614,109 @@ window.Game.Art = (function () {
       }
       ctx.restore();
     } else if (p.type === 'dumpster') {
-      ctx.fillStyle = '#255444';
-      ctx.fillRect(px, py + 12, p.w, p.h - 12);
-      ctx.fillStyle = '#1c4034';
-      for (let rx = px + 14; rx < px + p.w - 14; rx += 22) {
-        ctx.fillRect(rx, py + 22, 6, p.h - 34);
+      // Heavy-Duty Industrial Ribbed Steel Green Dumpster (Realistic 3D Corrugations, Hinged Double Plastic Lids, Forklift Trunnion Bars, Caster Wheels & Hazard Decals!)
+      ctx.save();
+      ctx.translate(px, py);
+
+      // Ground contact shadow & heavy steel corner caster wheels
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.beginPath(); ctx.ellipse(p.w / 2, p.h + 1, p.w * 0.52, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+      for (const wx of [10, p.w - 14]) {
+        ctx.fillStyle = '#334155'; ctx.fillRect(wx - 3, p.h - 6, 8, 4);
+        ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.arc(wx + 1, p.h - 1.5, 3.2, 0, Math.PI * 2); ctx.fill();
       }
-      ctx.strokeStyle = '#132b23';
+
+      // Main Painted Emerald-Steel Container Body with 3D Vertical Metallic Shading
+      const bodyTop = 13;
+      const bodyH = p.h - bodyTop - 3;
+      const bodyG = ctx.createLinearGradient(0, bodyTop, 0, p.h - 3);
+      bodyG.addColorStop(0, '#2e6f56');
+      bodyG.addColorStop(0.25, '#235944');
+      bodyG.addColorStop(0.75, '#173d2e');
+      bodyG.addColorStop(1, '#0d241b');
+      ctx.fillStyle = bodyG;
+      ctx.strokeStyle = '#091a13';
       ctx.lineWidth = 2;
-      ctx.strokeRect(px, py + 12, p.w, p.h - 12);
-      ctx.fillStyle = '#163329';
       ctx.beginPath();
-      ctx.roundRect(px - 4, py, p.w + 8, 15, 4);
+      ctx.roundRect(0, bodyTop, p.w, bodyH, [2, 2, 4, 4]);
       ctx.fill();
       ctx.stroke();
+
+      // Side shadow gradient for 3D box depth + top rim shadow cast by lid
+      const sideG = ctx.createLinearGradient(0, 0, p.w, 0);
+      sideG.addColorStop(0, 'rgba(0,0,0,0.28)');
+      sideG.addColorStop(0.15, 'rgba(255,255,255,0.06)');
+      sideG.addColorStop(0.85, 'rgba(0,0,0,0)');
+      sideG.addColorStop(1, 'rgba(0,0,0,0.35)');
+      ctx.fillStyle = sideG;
+      ctx.fillRect(1, bodyTop + 1, p.w - 2, bodyH - 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+      ctx.fillRect(1, bodyTop, p.w - 2, 5);
+
+      // Embossed 3D Vertical Steel Reinforcement Ribs (recessed shadow + raised metallic highlight!)
+      const ribStep = Math.max(18, Math.floor((p.w - 24) / 4));
+      for (let rx = 14; rx < p.w - 14; rx += ribStep) {
+        ctx.fillStyle = '#102b20';
+        ctx.fillRect(rx, bodyTop + 8, 7, bodyH - 15);
+        ctx.fillStyle = '#3b876a';
+        ctx.fillRect(rx + 1, bodyTop + 8, 2.2, bodyH - 15);
+        ctx.fillStyle = 'rgba(167, 243, 208, 0.25)';
+        ctx.fillRect(rx + 1, bodyTop + 8, 1, bodyH - 15);
+      }
+
+      // Horizontal welded steel reinforcement channel & forklift sleeve pockets
+      const midY = bodyTop + Math.round(bodyH * 0.46);
+      ctx.fillStyle = '#1b4736';
+      ctx.strokeStyle = '#0b1f17';
+      ctx.lineWidth = 1.2;
+      ctx.fillRect(-2, midY, p.w + 4, 7);
+      ctx.strokeRect(-2, midY, p.w + 4, 7);
+      ctx.fillStyle = 'rgba(167, 243, 208, 0.24)';
+      ctx.fillRect(-1, midY + 1, p.w + 2, 1.5);
+
+      // Side steel trunnion lifting bars
+      ctx.fillStyle = '#475569';
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.2;
+      ctx.fillRect(-5, bodyTop + 10, 5, 11); ctx.strokeRect(-5, bodyTop + 10, 5, 11);
+      ctx.fillRect(p.w, bodyTop + 10, 5, 11); ctx.strokeRect(p.w, bodyTop + 10, 5, 11);
+
+      // Yellow-and-black reflective safety warning decals & subtle rust wear on lower corners
+      for (const cx of [5, p.w - 17]) {
+        ctx.fillStyle = '#facc15';
+        ctx.fillRect(cx, bodyTop + 6, 12, 4.5);
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(cx + 3, bodyTop + 6, 3, 4.5);
+        ctx.fillRect(cx + 9, bodyTop + 6, 3, 4.5);
+      }
+      ctx.fillStyle = 'rgba(120, 53, 15, 0.32)';
+      ctx.beginPath(); ctx.ellipse(14, p.h - 6, 9, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+
+      // Heavy Hinged Ribbed Charcoal-Black Double Plastic Lids on Top!
+      const lidG = ctx.createLinearGradient(0, 0, 0, 14);
+      lidG.addColorStop(0, '#334155');
+      lidG.addColorStop(0.45, '#1e293b');
+      lidG.addColorStop(1, '#090d16');
+      ctx.fillStyle = lidG;
+      ctx.strokeStyle = '#020617';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.roundRect(-4, 0, p.w + 8, 14, [5, 5, 2, 2]);
+      ctx.fill();
+      ctx.stroke();
+      // Center split seam between left & right hinged lids + molded lid ribs
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(p.w / 2 - 1, 1, 2, 12);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.16)';
+      ctx.fillRect(0, 1.5, p.w, 2);
+      for (let lx = 8; lx < p.w - 6; lx += 14) {
+        if (Math.abs(lx - p.w / 2) < 4) continue;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
+        ctx.fillRect(lx, 3, 4, 8);
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.18)';
+        ctx.fillRect(lx + 1, 3, 1.5, 8);
+      }
+      ctx.restore();
     } else if (p.type === 'awning') {
       ctx.fillStyle = '#d94444';
       ctx.beginPath();
@@ -3384,39 +4022,211 @@ window.Game.Art = (function () {
       }
       ctx.restore();
     } else if (p.type === 'boat') {
+      // Ultra-Detailed Wooden Harbor Motor-Launch & Fishing Boat (3D Clinker Planking, Brass Helm Wheelhouse Console, Exhaust Pipe, Rubber Tire Fenders, Brass Portholes, Lifebuoy, Coiled Rope & Bow Hurricane Lantern!)
       ctx.save();
       ctx.translate(px, py);
-      const hullGrad = ctx.createLinearGradient(0, 0, 0, p.h);
-      hullGrad.addColorStop(0, '#9c5e31');
-      hullGrad.addColorStop(0.55, '#693b1a');
-      hullGrad.addColorStop(1, '#381d0b');
-      ctx.fillStyle = hullGrad;
+
+      // Animated white-foam bow wave & stern wake ripples on the water surface
+      const wavePulse = Math.sin(time * 4.5 + p.x * 0.03) * 2;
+      ctx.fillStyle = 'rgba(186, 230, 253, 0.36)';
+      ctx.beginPath();
+      ctx.ellipse(p.w * 0.5, p.h + 1, p.w * 0.49, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(224, 242, 254, 0.68)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(p.w - 8, p.h);
+      ctx.quadraticCurveTo(p.w + 8 + wavePulse, p.h - 3, p.w + 15 + wavePulse, p.h + 2);
+      ctx.moveTo(10, p.h);
+      ctx.quadraticCurveTo(-8 - wavePulse, p.h - 2, -16 - wavePulse, p.h + 2);
+      ctx.stroke();
+
+      // Recessed dark timber cockpit cavity, vertical oak hull ribs & varnished thwart seats
+      ctx.fillStyle = '#241106';
+      ctx.beginPath();
+      ctx.ellipse(p.w * 0.5, 5, p.w * 0.49, 5.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#4a250e';
+      ctx.lineWidth = 1.4;
+      for (let rx = 18; rx < p.w - 16; rx += 16) {
+        ctx.beginPath(); ctx.moveTo(rx, 1.5); ctx.lineTo(rx, 8); ctx.stroke();
+      }
+      ctx.fillStyle = '#9c5e31';
+      for (const tx of [p.w * 0.24, p.w * 0.5, p.w * 0.74]) {
+        ctx.fillRect(tx - 7, 1.2, 14, 4.2);
+      }
+
+      // Compact Teak-and-Brass Stern Helm Console, Spoked Ship's Wheel & Chugging Brass Exhaust Pipe
+      const helmX = 28;
+      ctx.fillStyle = '#5c3114';
       ctx.strokeStyle = '#1f0e04';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.roundRect(helmX - 10, -10, 20, 12, [4, 4, 0, 0]);
+      ctx.fill(); ctx.stroke();
+      // Brass compass dome on console top
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.arc(helmX, -10, 3.2, Math.PI, 0); ctx.fill();
+      // Spoked brass steering wheel on right side of helm console
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(helmX + 11, -5, 5.5, 0, Math.PI * 2);
+      ctx.moveTo(helmX + 11, -11); ctx.lineTo(helmX + 11, 1);
+      ctx.moveTo(helmX + 5, -5); ctx.lineTo(helmX + 17, -5);
+      ctx.stroke();
+      // Aft brass exhaust stack with tiny drifting steam puffs
+      ctx.fillStyle = '#b45309';
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 1.2;
+      ctx.fillRect(10, -16, 4.5, 18);
+      ctx.strokeRect(10, -16, 4.5, 18);
+      for (let sp = 0; sp < 2; sp++) {
+        const drift = ((time * 18 + sp * 11) % 22);
+        ctx.fillStyle = `rgba(226, 232, 240, ${0.32 * (1 - drift / 22)})`;
+        ctx.beginPath();
+        ctx.arc(11 - drift * 0.45, -19 - drift * 0.6, 2.8 + drift * 0.15, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 3D Sculpted Flared Lapstrake (Clinker-Built) Mahogany & Oak Hull
+      const hullGrad = ctx.createLinearGradient(0, 2, 0, p.h);
+      hullGrad.addColorStop(0, '#ba733e');
+      hullGrad.addColorStop(0.35, '#8c4f23');
+      hullGrad.addColorStop(0.72, '#5c3012');
+      hullGrad.addColorStop(1, '#291205');
+      ctx.fillStyle = hullGrad;
+      ctx.strokeStyle = '#170902';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(-4, 6);
-      ctx.quadraticCurveTo(p.w * 0.5, 9, p.w + 4, 6);
-      ctx.quadraticCurveTo(p.w - 10, p.h - 4, p.w - 24, p.h);
-      ctx.lineTo(24, p.h);
-      ctx.quadraticCurveTo(10, p.h - 4, -4, 6);
-      ctx.closePath(); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#b87642';
-      ctx.beginPath(); ctx.roundRect(-5, 2, p.w + 10, 6, 3); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#d62828';
-      ctx.fillRect(14, p.h - 14, p.w - 28, 4.5);
-      ctx.fillStyle = '#3b2110';
-      ctx.fillRect(p.w - 16, -18, 4, 20);
-      ctx.fillStyle = '#ffe899';
-      ctx.beginPath(); ctx.arc(p.w - 14, -20, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.moveTo(-8, 4);
+      ctx.quadraticCurveTo(p.w * 0.48, 9.5, p.w + 11, 1); // swept sheer line up to raked prow!
+      ctx.quadraticCurveTo(p.w - 3, p.h - 2, p.w - 22, p.h);
+      ctx.lineTo(18, p.h);
+      ctx.quadraticCurveTo(5, p.h - 4, -8, 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Reinforced iron stempost cutwater band at bow prow
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(p.w + 10, 1.5);
+      ctx.quadraticCurveTo(p.w - 3, p.h - 2, p.w - 21, p.h - 1);
+      ctx.stroke();
+
+      // 3 Curved Lapstrake Wooden Plank Strakes with Shadow Overlaps, Specular Edges & Copper Rivets
+      for (const pyOff of [0.28, 0.5, 0.72]) {
+        const sy = p.h * pyOff;
+        ctx.strokeStyle = 'rgba(20, 8, 2, 0.62)';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(4, sy - 2);
+        ctx.quadraticCurveTo(p.w * 0.5, sy + 4.5, p.w - 4, sy - 3.5);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(255, 228, 186, 0.24)';
+        ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(4, sy - 3.2);
+        ctx.quadraticCurveTo(p.w * 0.5, sy + 3.3, p.w - 4, sy - 4.7);
+        ctx.stroke();
+      }
+      // Copper hull rivets along upper strake
+      ctx.fillStyle = '#fbbf24';
+      for (let rx = 16; rx < p.w - 14; rx += 18) {
+        ctx.beginPath(); ctx.arc(rx, p.h * 0.26, 1.1, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Crimson Antifouling Plimsoll Waterline Band + White Load-Line Stripe + Gold Nameplate Trim
+      ctx.fillStyle = '#b91c1c';
+      ctx.beginPath();
+      ctx.moveTo(13, p.h - 7.5);
+      ctx.lineTo(p.w - 14, p.h - 7.5);
+      ctx.lineTo(p.w - 22, p.h - 1);
+      ctx.lineTo(18, p.h - 1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(13, p.h - 9, p.w - 27, 1.5);
+
+      // Varnished Mahogany Gunwale Rub-Rail & Brass Cleats
+      const railG = ctx.createLinearGradient(0, 0, 0, 7);
+      railG.addColorStop(0, '#e09a5c');
+      railG.addColorStop(0.5, '#9c5a28');
+      railG.addColorStop(1, '#4a250c');
+      ctx.fillStyle = railG;
+      ctx.strokeStyle = '#1f0e04';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(-8, 1, p.w + 18, 6.5, 3);
+      ctx.fill();
+      ctx.stroke();
+
+      // Brass-Rimmed Glowing Hull Portholes
+      for (const pxOff of [p.w * 0.54, p.w * 0.72]) {
+        ctx.fillStyle = '#fde68a';
+        ctx.strokeStyle = '#92400e';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.arc(pxOff, p.h * 0.44, 3.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+
+      // Hanging Black Rubber Tire Dock Fenders on Hemp Ropes
+      for (const fx of [p.w * 0.2, p.w * 0.84]) {
+        ctx.strokeStyle = '#d4a373';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(fx, 4); ctx.lineTo(fx, p.h * 0.42); ctx.stroke();
+        ctx.fillStyle = '#1e293b';
+        ctx.strokeStyle = '#090d16';
+        ctx.lineWidth = 2.6;
+        ctx.beginPath(); ctx.arc(fx, p.h * 0.52, 5.2, 0, Math.PI * 2); ctx.stroke();
+      }
+
+      // Coiled Hemp Mooring Rope on Bow Deck
       ctx.strokeStyle = '#d4a373';
-      ctx.lineWidth = 2.6;
-      ctx.beginPath(); ctx.moveTo(24, 1); ctx.lineTo(p.w - 38, 1); ctx.stroke();
-      ctx.strokeStyle = '#f8f9fa';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.ellipse(p.w - 28, 1.2, 9, 2.6, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Detailed Maritime Lifebuoy Ring with 4 Red Quadrants & Grab Rope Loops
+      const lbx = p.w * 0.36;
+      const lby = p.h * 0.5;
+      ctx.fillStyle = 'rgba(0,0,0,0.38)';
+      ctx.beginPath(); ctx.arc(lbx, lby + 1.5, 8.8, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 3.8;
+      ctx.beginPath(); ctx.arc(lbx, lby, 6.6, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 4;
+      for (const a of [0, Math.PI * 0.5, Math.PI, Math.PI * 1.5]) {
+        ctx.beginPath(); ctx.arc(lbx, lby, 6.6, a - 0.24, a + 0.24); ctx.stroke();
+      }
+
+      // Wrought-Iron Bow Davit Post + Swinging Warm Glowing Brass Hurricane Lantern!
+      const postX = p.w - 10;
+      ctx.strokeStyle = '#1e293b';
       ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(p.w * 0.35, 20, 6.5, 0, Math.PI * 2); ctx.stroke();
-      ctx.strokeStyle = '#e63946';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath(); ctx.arc(p.w * 0.35, 20, 6.5, -0.4, 0.4); ctx.stroke();
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(postX, 2);
+      ctx.lineTo(postX, -19);
+      ctx.quadraticCurveTo(postX, -25, postX + 9, -24);
+      ctx.stroke();
+      const lGlow = ctx.createRadialGradient(postX + 9, -17, 1, postX + 9, -17, 20);
+      lGlow.addColorStop(0, 'rgba(255, 248, 195, 0.95)');
+      lGlow.addColorStop(0.45, 'rgba(251, 191, 36, 0.4)');
+      lGlow.addColorStop(1, 'rgba(251, 191, 36, 0)');
+      ctx.fillStyle = lGlow;
+      ctx.beginPath(); ctx.arc(postX + 9, -17, 20, 0, Math.PI * 2); ctx.fill();
+      // Brass lantern cage top & bottom
+      ctx.fillStyle = '#b45309';
+      ctx.fillRect(postX + 5.5, -23, 7, 2.2);
+      ctx.fillRect(postX + 6, -13, 6, 2);
+      ctx.fillStyle = '#fde047';
+      ctx.strokeStyle = '#92400e';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.arc(postX + 9, -17.5, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
       ctx.restore();
     } else if (p.type === 'buoy') {
       ctx.save();
@@ -3597,39 +4407,162 @@ window.Game.Art = (function () {
       ctx.beginPath(); ctx.roundRect(4, -18, p.w - 8, 5, 2); ctx.fill(); ctx.stroke();
       ctx.restore();
     } else if (p.type === 'mushroom') {
+      // Photorealistic 3D Botanical Woodland Toadstool (Amanita muscaria) with Elastic Sponge Compression & Rebound!
       ctx.save();
       ctx.translate(px, py);
-      const stemH = Math.max(20, p.h - 10);
-      // Shaded cream mushroom stem reaching ground
-      const stemGrad = ctx.createLinearGradient(p.w * 0.34, 0, p.w * 0.66, 0);
-      stemGrad.addColorStop(0, '#d8ccb2');
-      stemGrad.addColorStop(0.5, '#f6efe0');
-      stemGrad.addColorStop(1, '#c2b295');
+      const cx = p.w * 0.5;
+      const stemH = Math.max(22, p.h - 10);
+      const baseY = stemH + 10;
+
+      // Sponge squish factor: positive = compressed down & bulging wide like a soft sponge, negative = rebounding upward!
+      const sq =
+        p.spongeSquish !== undefined
+          ? p.spongeSquish
+          : p.bounceAnim
+          ? Math.sin(p.bounceAnim * Math.PI * 2.5) * p.bounceAnim * 0.85
+          : 0;
+      const tilt = p.spongeTilt || 0;
+      const capDip = sq * 12.5;
+      const stalkBulge = 1 + sq * 0.24;
+
+      // Ground shadow & mossy forest-floor collar (stationary at baseY)
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
+      ctx.beginPath(); ctx.ellipse(cx, baseY + 1, p.w * (0.34 + Math.max(0, sq) * 0.08), 4.8, 0, 0, Math.PI * 2); ctx.fill();
+
+      // 1. Sculpted Flared Creamy-Ivory Fibrous Mushroom Stalk (compresses & bulges like a sponge from baseY!)
+      const topStemY = 12 + capDip;
+      const midStemY = (topStemY + baseY) * 0.52;
+      const stemGrad = ctx.createLinearGradient(cx - p.w * 0.22 * stalkBulge, 0, cx + p.w * 0.22 * stalkBulge, 0);
+      stemGrad.addColorStop(0, '#b8a68a');
+      stemGrad.addColorStop(0.32, '#fffbeb');
+      stemGrad.addColorStop(0.68, '#ede0c8');
+      stemGrad.addColorStop(1, '#8c7a61');
       ctx.fillStyle = stemGrad;
-      ctx.strokeStyle = '#5c4b3f';
-      ctx.lineWidth = 1.6;
-      ctx.beginPath(); ctx.roundRect(p.w * 0.35, 10, p.w * 0.3, stemH, 5); ctx.fill(); ctx.stroke();
-      // Mossy grass tuft around stem base
-      ctx.fillStyle = '#2d6a4f';
-      ctx.beginPath(); ctx.ellipse(p.w * 0.5, stemH + 8, p.w * 0.24, 5, 0, 0, Math.PI * 2); ctx.fill();
-      // Glowing spotted red-orange bouncy cap
-      const capGrad = ctx.createLinearGradient(0, -6, 0, 14);
-      capGrad.addColorStop(0, '#ff7575');
-      capGrad.addColorStop(1, '#c92a2a');
-      ctx.fillStyle = capGrad;
-      ctx.strokeStyle = '#5c1414';
-      ctx.lineWidth = 1.8;
+      ctx.strokeStyle = '#4a3b2c';
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(0, 13);
-      ctx.quadraticCurveTo(p.w / 2, -14, p.w, 13);
+      ctx.moveTo(cx - p.w * 0.13 * stalkBulge, topStemY);
+      ctx.bezierCurveTo(
+        cx - p.w * 0.16 * stalkBulge, midStemY,
+        cx - p.w * 0.23 * stalkBulge, baseY - 12,
+        cx - p.w * 0.18, baseY
+      );
+      ctx.quadraticCurveTo(cx, baseY + 3, cx + p.w * 0.18, baseY);
+      ctx.bezierCurveTo(
+        cx + p.w * 0.23 * stalkBulge, baseY - 12,
+        cx + p.w * 0.16 * stalkBulge, midStemY,
+        cx + p.w * 0.13 * stalkBulge, topStemY
+      );
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-      // Cream spots on cap
-      ctx.fillStyle = '#fff8e8';
-      for (const sx of [0.22, 0.45, 0.68, 0.82]) {
-        ctx.beginPath(); ctx.arc(p.w * sx, 5 - (sx === 0.45 ? 3 : 0), 3.8, 0, Math.PI * 2); ctx.fill();
+
+      // Delicate vertical fibrous stem striation lines + cast shadow from cap under-brim
+      ctx.fillStyle = 'rgba(60, 42, 28, 0.38)';
+      ctx.fillRect(cx - p.w * 0.13 * stalkBulge, topStemY + 1, p.w * 0.26 * stalkBulge, 6);
+      ctx.strokeStyle = 'rgba(140, 122, 97, 0.38)';
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(cx - 3 * stalkBulge, topStemY + 7); ctx.lineTo(cx - 5, baseY - 4);
+      ctx.moveTo(cx + 3 * stalkBulge, topStemY + 7); ctx.lineTo(cx + 5, baseY - 4);
+      ctx.stroke();
+
+      // Delicate Ruffled Ivory Skirt Ring (Annulus) below the cap (moves with sponge compression!)
+      const ringY = Math.min(baseY - 7, 23 + capDip * 0.72);
+      ctx.fillStyle = '#f5ebd6';
+      ctx.strokeStyle = '#6b5744';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(cx - p.w * 0.13 * stalkBulge, ringY - 3);
+      ctx.quadraticCurveTo(cx - p.w * 0.21 * stalkBulge, ringY + 4, cx - p.w * 0.08 * stalkBulge, ringY + 5);
+      ctx.quadraticCurveTo(cx, ringY + 7, cx + p.w * 0.08 * stalkBulge, ringY + 5);
+      ctx.quadraticCurveTo(cx + p.w * 0.21 * stalkBulge, ringY + 4, cx + p.w * 0.13 * stalkBulge, ringY - 3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Velvet Emerald Moss Tufts & Tiny Sprouts at Stem Base
+      ctx.fillStyle = '#15803d';
+      for (const [mx, mr] of [[-12, 5.5], [-4, 6.2], [5, 5.8], [13, 5]]) {
+        ctx.beginPath(); ctx.arc(cx + mx, baseY - 1, mr, Math.PI, 0); ctx.fill();
       }
+
+      // Apply Elastic Sponge Deformation to the Cap & Gills (Squishes down & widens on jump impact, stretches on rebound!)
+      ctx.save();
+      ctx.translate(cx, 12 + capDip);
+      ctx.rotate(tilt);
+      ctx.scale(1 + sq * 0.34, Math.max(0.54, 1 - sq * 0.38));
+      ctx.translate(-cx, -12);
+
+      // 2. Shaded Pleated Cream Gills (Lamellae) Visible Beneath the Overhanging Cap Rim!
+      const gillG = ctx.createLinearGradient(0, 10, 0, 17);
+      gillG.addColorStop(0, '#785a3c');
+      gillG.addColorStop(0.5, '#e6d5b8');
+      gillG.addColorStop(1, '#9c8265');
+      ctx.fillStyle = gillG;
+      ctx.strokeStyle = '#4a3520';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.ellipse(cx, 13, p.w * 0.47, 4.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(74, 53, 32, 0.45)';
+      ctx.lineWidth = 0.85;
+      for (let gx = -0.38; gx <= 0.38; gx += 0.095) {
+        ctx.beginPath();
+        ctx.moveTo(cx + gx * p.w * 0.3, 14.5);
+        ctx.lineTo(cx + gx * p.w, 12.5);
+        ctx.stroke();
+      }
+
+      // 3. Rich 3D Spherical Glossy Scarlet-to-Crimson Toadstool Cap!
+      const capGrad = ctx.createRadialGradient(cx - p.w * 0.16, -2, 3, cx, 5, p.w * 0.56);
+      capGrad.addColorStop(0, '#ff8787');
+      capGrad.addColorStop(0.24, '#ef4444');
+      capGrad.addColorStop(0.68, '#b91c1c');
+      capGrad.addColorStop(1, '#580b0b');
+      ctx.fillStyle = capGrad;
+      ctx.strokeStyle = '#3b0707';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(-2, 12.5);
+      ctx.bezierCurveTo(-4, -12, p.w + 4, -12, p.w + 2, 12.5);
+      ctx.quadraticCurveTo(cx, 15.5, -2, 12.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Glossy wet-cuticle specular highlight arc on upper-left dome
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.34)';
+      ctx.beginPath();
+      ctx.ellipse(cx - p.w * 0.2, 0, p.w * 0.14, 3.2, -0.32, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 4. Raised 3D Creamy-Ivory Velum Warts / Spots in Perspective (shaded bottom + bright top!)
+      const spots = [
+        { rx: -0.32, ry: 7.5, rw: 4.2, rh: 2.8, rot: -0.3 },
+        { rx: -0.14, ry: 2.0, rw: 5.2, rh: 3.6, rot: -0.12 },
+        { rx: 0.08, ry: -0.5, rw: 5.5, rh: 3.8, rot: 0.05 },
+        { rx: 0.28, ry: 4.5, rw: 4.8, rh: 3.2, rot: 0.24 },
+        { rx: 0.0, ry: 8.2, rw: 4.4, rh: 2.7, rot: 0 },
+        { rx: -0.24, ry: 9.8, rw: 3.0, rh: 1.9, rot: -0.2 },
+        { rx: 0.38, ry: 9.2, rw: 3.2, rh: 2.0, rot: 0.3 },
+      ];
+      for (const sp of spots) {
+        const sx = cx + sp.rx * p.w;
+        const sy = sp.ry;
+        ctx.save();
+        ctx.translate(sx, sy);
+        ctx.rotate(sp.rot);
+        ctx.fillStyle = 'rgba(69, 10, 10, 0.42)';
+        ctx.beginPath(); ctx.ellipse(0, 1.1, sp.rw, sp.rh, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fffbeb';
+        ctx.strokeStyle = '#d6c7b2';
+        ctx.lineWidth = 0.7;
+        ctx.beginPath(); ctx.ellipse(0, 0, sp.rw, sp.rh, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.restore();
+      }
+      ctx.restore();
       ctx.restore();
     } else if (p.type === 'girder') {
       // Industrial Steel I-Beam Girder (دوامر حديدية)
@@ -4670,57 +5603,82 @@ window.Game.Art = (function () {
       }
       ctx.restore();
     } else if (p.type === 'swing') {
-      // Charming Park Wooden Swing suspended by chains from an overhead timber crossbar
-      const topY = (p.baseY || p.y) - 118;
+      // Charming Wooden Garden/Park Swing suspended by taut chains from an overhead carved timber Pergola Beam (NO side legs!)
+      const baseScreenY = py - (p.y - (p.baseY || p.y));
+      const topY = baseScreenY - 126;
       const swayOffset = p.x - (p.baseX || p.x);
       const topCenterX = px - swayOffset + p.w / 2;
       ctx.save();
-      // Fixed overhead timber crossbar & wrought-iron brackets
-      ctx.fillStyle = '#4a2a14';
-      ctx.strokeStyle = '#241206';
+
+      // Fixed overhead carved oak crossbar beam & wrought-iron suspension brackets (no A-frame legs!)
+      const beamG = ctx.createLinearGradient(0, topY - 14, 0, topY + 2);
+      beamG.addColorStop(0, '#7c4722');
+      beamG.addColorStop(0.5, '#542e14');
+      beamG.addColorStop(1, '#2b1507');
+      ctx.fillStyle = beamG;
+      ctx.strokeStyle = '#1c0c03';
       ctx.lineWidth = 1.8;
       ctx.beginPath();
-      ctx.roundRect(topCenterX - p.w * 0.56, topY - 12, p.w * 1.12, 12, 4);
+      ctx.roundRect(topCenterX - p.w * 0.62, topY - 13, p.w * 1.24, 14, 5);
       ctx.fill(); ctx.stroke();
-      // Cozy leafy vine accents on crossbar
-      ctx.fillStyle = '#2d6a4f';
+
+      // Lush climbing ivy & blooming rose accents wrapped around the top crossbar
+      ctx.fillStyle = '#15803d';
+      for (const vx of [-0.46, -0.18, 0.18, 0.46]) {
+        ctx.beginPath(); ctx.arc(topCenterX + p.w * vx, topY - 7, 6.5, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = '#f472b6';
       ctx.beginPath();
-      ctx.arc(topCenterX - p.w * 0.42, topY - 10, 7, 0, Math.PI * 2);
-      ctx.arc(topCenterX + p.w * 0.42, topY - 10, 7, 0, Math.PI * 2);
+      ctx.arc(topCenterX - p.w * 0.44, topY - 8, 3.2, 0, Math.PI * 2);
+      ctx.arc(topCenterX + p.w * 0.44, topY - 8, 3.2, 0, Math.PI * 2);
       ctx.fill();
-      // Angled steel swing chains from fixed top hooks to moving oak seat
+
+      // Iron eye-hooks on underside of crossbar + taut steel swing chains down to seat
       const leftHookX = topCenterX - p.w * 0.38;
       const rightHookX = topCenterX + p.w * 0.38;
       const leftSeatX = px + 14;
       const rightSeatX = px + p.w - 14;
+      ctx.fillStyle = '#475569';
+      ctx.beginPath();
+      ctx.arc(leftHookX, topY + 2, 3.5, 0, Math.PI * 2);
+      ctx.arc(rightHookX, topY + 2, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
       ctx.strokeStyle = '#94a3b8';
       ctx.lineWidth = 2.6;
       ctx.beginPath();
-      ctx.moveTo(leftHookX, topY); ctx.lineTo(leftSeatX, py + 2);
-      ctx.moveTo(rightHookX, topY); ctx.lineTo(rightSeatX, py + 2);
+      ctx.moveTo(leftHookX, topY + 2); ctx.lineTo(leftSeatX, py + 2);
+      ctx.moveTo(rightHookX, topY + 2); ctx.lineTo(rightSeatX, py + 2);
       ctx.stroke();
-      // Chain link beads
-      ctx.fillStyle = '#cbd5e1';
-      for (let t = 0.15; t <= 0.85; t += 0.175) {
+      // Individual metallic chain links along both suspension lines
+      ctx.fillStyle = '#e2e8f0';
+      for (let t = 0.14; t <= 0.86; t += 0.14) {
         ctx.beginPath();
-        ctx.arc(leftHookX + (leftSeatX - leftHookX) * t, topY + (py + 2 - topY) * t, 2, 0, Math.PI * 2);
-        ctx.arc(rightHookX + (rightSeatX - rightHookX) * t, topY + (py + 2 - topY) * t, 2, 0, Math.PI * 2);
+        ctx.arc(leftHookX + (leftSeatX - leftHookX) * t, topY + 2 + (py - topY) * t, 2.1, 0, Math.PI * 2);
+        ctx.arc(rightHookX + (rightSeatX - rightHookX) * t, topY + 2 + (py - topY) * t, 2.1, 0, Math.PI * 2);
         ctx.fill();
       }
-      // Carved oak wooden swing seat with brass eyelets
+
+      // Carved oak wooden swing seat with beveled edge & brass mounting rings
       const seatG = ctx.createLinearGradient(px, py, px, py + p.h);
-      seatG.addColorStop(0, '#a36738');
-      seatG.addColorStop(1, '#5c3417');
+      seatG.addColorStop(0, '#b4713e');
+      seatG.addColorStop(0.5, '#854d27');
+      seatG.addColorStop(1, '#4a2711');
       ctx.fillStyle = seatG;
       ctx.strokeStyle = '#241206';
       ctx.lineWidth = 1.8;
       ctx.beginPath();
-      ctx.roundRect(px, py, p.w, p.h, 5);
+      ctx.roundRect(px, py, p.w, p.h, 6);
       ctx.fill(); ctx.stroke();
-      ctx.fillStyle = 'rgba(255, 224, 175, 0.28)';
-      ctx.fillRect(px + 4, py + 2, p.w - 8, 2.5);
+      ctx.fillStyle = 'rgba(255, 236, 200, 0.32)';
+      ctx.fillRect(px + 5, py + 2, p.w - 10, 2.5);
       ctx.fillStyle = '#fbbf24';
-      ctx.beginPath(); ctx.arc(leftSeatX, py + 3, 3, 0, Math.PI * 2); ctx.arc(rightSeatX, py + 3, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(leftSeatX, py + 3, 3.4, 0, Math.PI * 2);
+      ctx.arc(rightSeatX, py + 3, 3.4, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
       ctx.restore();
     } else if (p.type === 'secret' && nv) {
       ctx.fillStyle = 'rgba(74, 242, 161, 0.28)';
@@ -5433,88 +6391,185 @@ window.Game.Art = (function () {
 
   function drawMarketGate(ctx, g, gx, gy, time, label) {
     ctx.save();
-    const gateGlow = ctx.createRadialGradient(gx + g.w / 2, gy + g.h / 2, 10, gx + g.w / 2, gy + g.h / 2, 110);
-    gateGlow.addColorStop(0, 'rgba(255, 211, 110, 0.42)');
+    const cx = gx + g.w / 2;
+    const cy = gy + g.h / 2;
+    const pulse = 0.88 + Math.sin(time * 3.2) * 0.12;
+
+    // Smooth circular radial halo (drawn as a true circle so there is NEVER a clipped square box!)
+    const gateGlow = ctx.createRadialGradient(cx, cy, 8, cx, cy, 108);
+    gateGlow.addColorStop(0, `rgba(255, 218, 120, ${(0.38 * pulse).toFixed(2)})`);
+    gateGlow.addColorStop(0.55, `rgba(251, 191, 36, ${(0.14 * pulse).toFixed(2)})`);
     gateGlow.addColorStop(1, 'rgba(255, 211, 110, 0)');
     ctx.fillStyle = gateGlow;
-    ctx.fillRect(gx - 50, gy - 50, g.w + 100, g.h + 100);
+    ctx.beginPath();
+    ctx.arc(cx, cy, 108, 0, Math.PI * 2);
+    ctx.fill();
 
-    ctx.fillStyle = 'rgba(255, 200, 90, 0.22)';
-    ctx.strokeStyle = '#ffd36e';
-    ctx.lineWidth = 3.5;
+    // Ornate Carved Architectural Stone & Gold Portal Frame
+    const frameG = ctx.createLinearGradient(gx - 6, gy, gx + g.w + 6, gy + g.h);
+    frameG.addColorStop(0, '#78350f');
+    frameG.addColorStop(0.5, '#d97706');
+    frameG.addColorStop(1, '#451a03');
+    ctx.fillStyle = frameG;
+    ctx.strokeStyle = '#fde047';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.roundRect(gx - 5, gy - 5, g.w + 10, g.h + 5, [40, 40, 2, 2]);
+    ctx.fill();
+    ctx.stroke();
+
+    // Warm Golden Interior Arch Portal
+    const innerG = ctx.createLinearGradient(gx, gy, gx, gy + g.h);
+    innerG.addColorStop(0, 'rgba(254, 240, 138, 0.55)');
+    innerG.addColorStop(0.5, 'rgba(245, 158, 11, 0.32)');
+    innerG.addColorStop(1, 'rgba(180, 83, 9, 0.45)');
+    ctx.fillStyle = innerG;
+    ctx.strokeStyle = '#fef08a';
+    ctx.lineWidth = 2.6;
     ctx.beginPath();
     ctx.roundRect(gx, gy, g.w, g.h, [36, 36, 0, 0]);
     ctx.fill();
     ctx.stroke();
 
-    const swing = Math.sin(time * 2.5) * 3;
-    ctx.strokeStyle = '#ffd36e';
-    ctx.lineWidth = 1.5;
+    // Swinging Wrought-Iron & Brass Portal Lantern
+    const swing = Math.sin(time * 2.5) * 3.2;
+    ctx.strokeStyle = '#fde047';
+    ctx.lineWidth = 1.8;
     ctx.beginPath();
-    ctx.moveTo(gx + g.w / 2, gy + 4);
-    ctx.lineTo(gx + g.w / 2 + swing, gy + 18);
+    ctx.moveTo(cx, gy + 3);
+    ctx.lineTo(cx + swing, gy + 18);
     ctx.stroke();
-    ctx.fillStyle = '#ffe699';
+    const lanGlow = ctx.createRadialGradient(cx + swing, gy + 23, 1, cx + swing, gy + 23, 16);
+    lanGlow.addColorStop(0, 'rgba(255, 251, 235, 0.95)');
+    lanGlow.addColorStop(0.45, 'rgba(253, 224, 71, 0.55)');
+    lanGlow.addColorStop(1, 'rgba(253, 224, 71, 0)');
+    ctx.fillStyle = lanGlow;
     ctx.beginPath();
-    ctx.arc(gx + g.w / 2 + swing, gy + 22, 6, 0, Math.PI * 2);
+    ctx.arc(cx + swing, gy + 23, 16, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fffbeb';
+    ctx.beginPath();
+    ctx.arc(cx + swing, gy + 23, 4.8, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#ffd36e';
+    // Floating Stage Goal Pill Sign above Archway
+    ctx.fillStyle = '#fef08a';
     ctx.font = 'bold 14px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(label || 'بوابة السوق ←', gx + g.w / 2, gy - 12);
+    ctx.fillText(label || 'بوابة الخروج ←', cx, gy - 14);
     ctx.restore();
   }
 
-  // New Enemy #1: Nocturnal Spiky Hedgehog (القنفذ الشوكي)
+  // New Enemy #1: Ultra-Detailed Woodland Spiky Hedgehog (القنفذ الشوكي الواقعي)
   function drawHedgehog(ctx, hog, hx, hy, time) {
     ctx.save();
     ctx.translate(hx + hog.w / 2, hy + hog.h);
     ctx.scale(hog.facing, 1);
 
-    const scurry = Math.abs(Math.sin(time * 14 + hog.x)) * 1.5;
-    // Ground shadow
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-    ctx.beginPath(); ctx.ellipse(0, 0, 18, 4, 0, 0, Math.PI * 2); ctx.fill();
+    const gait = time * 15 + hog.x * 0.09;
+    const scurry = Math.abs(Math.sin(gait)) * 1.4;
+    const pOff = Math.sin(gait) * 3.5;
 
-    // Tiny scurrying paws
+    // Soft ground contact shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
+    ctx.beginPath(); ctx.ellipse(0, 0, 21, 4.4, 0, 0, Math.PI * 2); ctx.fill();
+
+    // Far shaded scurrying paws
     ctx.fillStyle = '#5c4033';
-    const pOff = Math.sin(time * 16) * 3;
-    ctx.beginPath(); ctx.arc(-8 + pOff, -2, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(7 - pOff, -2, 3, 0, Math.PI * 2); ctx.fill();
-
-    // Spiky quill shell
-    ctx.fillStyle = '#2d2424';
-    ctx.strokeStyle = '#140e0e';
-    ctx.lineWidth = 1.6;
     ctx.beginPath();
-    ctx.arc(-2, -6 - scurry, 16, Math.PI, 0);
-    ctx.closePath();
+    ctx.ellipse(-10 - pOff * 0.7, -2.5, 3.8, 2.2, 0, 0, Math.PI * 2);
+    ctx.ellipse(6 + pOff * 0.7, -2.5, 3.8, 2.2, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.stroke();
 
-    // Sharp protruding quills
-    ctx.strokeStyle = '#d4c3a3';
-    ctx.lineWidth = 1.6;
-    for (let a = Math.PI + 0.25; a < Math.PI * 2 - 0.15; a += 0.32) {
-      ctx.beginPath();
-      ctx.moveTo(-2 + Math.cos(a) * 12, -6 - scurry + Math.sin(a) * 12);
-      ctx.lineTo(-2 + Math.cos(a) * 19, -6 - scurry + Math.sin(a) * 19);
-      ctx.stroke();
+    // Soft furry warm-cream belly & lower flank
+    const bellyG = ctx.createLinearGradient(0, -14 - scurry, 0, -2 - scurry);
+    bellyG.addColorStop(0, '#f5dec4'); bellyG.addColorStop(0.6, '#d6b28c'); bellyG.addColorStop(1, '#9c7856');
+    ctx.fillStyle = bellyG; ctx.strokeStyle = '#4a3222'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.ellipse(-1, -7.5 - scurry, 17, 6.2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+    // Sculpted Domed Quill Mantle Base (deep warm umber shadow under the dense spines)
+    const domeG = ctx.createRadialGradient(-4, -17 - scurry, 3, -3, -11 - scurry, 20);
+    domeG.addColorStop(0, '#574337'); domeG.addColorStop(0.65, '#33241c'); domeG.addColorStop(1, '#1a110d');
+    ctx.fillStyle = domeG; ctx.strokeStyle = '#140c08'; ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(-20, -7 - scurry);
+    ctx.bezierCurveTo(-21, -24 - scurry, -3, -27 - scurry, 10, -17 - scurry);
+    ctx.quadraticCurveTo(2, -9 - scurry, -20, -7 - scurry);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    // 3 Dense Layered Rows of Realistic Banded Hedgehog Quills (Dark Base -> Cream Mid-Band -> Sharp Dark Tip!)
+    const drawQuill = (bx, by, ang, len) => {
+      const tx = bx + Math.cos(ang) * len;
+      const ty = by + Math.sin(ang) * len;
+      const mx = bx + Math.cos(ang) * (len * 0.62);
+      const my = by + Math.sin(ang) * (len * 0.62);
+      const nx = -Math.sin(ang) * 1.45;
+      const ny = Math.cos(ang) * 1.45;
+      // Dark umber spine base
+      ctx.fillStyle = '#2e2018';
+      ctx.beginPath(); ctx.moveTo(bx + nx, by + ny); ctx.lineTo(tx, ty); ctx.lineTo(bx - nx, by - ny); ctx.closePath(); ctx.fill();
+      // Signature creamy-ivory banded midsection
+      ctx.strokeStyle = '#efe0c2'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(bx + Math.cos(ang) * (len * 0.28), by + Math.sin(ang) * (len * 0.28)); ctx.lineTo(mx, my); ctx.stroke();
+      // Fine sharp dark tip
+      ctx.strokeStyle = '#1c120d'; ctx.lineWidth = 1.0;
+      ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(tx, ty); ctx.stroke();
+    };
+
+    // Outer crest quills fanning organically backward along the dome
+    for (let i = 0; i < 15; i++) {
+      const t = i / 14;
+      const a = Math.PI * (0.94 + t * 0.88);
+      const bx = -4 + Math.cos(a) * 13.5;
+      const by = -9 - scurry + Math.sin(a) * 12;
+      const quillAng = a - 0.16 + Math.sin(i * 1.9) * 0.08;
+      drawQuill(bx, by, quillAng, 9.5 + (i % 3) * 1.6);
+    }
+    // Mid-layer overlapping quills for realistic dense spiky texture
+    for (let i = 0; i < 11; i++) {
+      const t = i / 10;
+      const a = Math.PI * (1.02 + t * 0.72);
+      const bx = -4 + Math.cos(a) * 8.5;
+      const by = -9.5 - scurry + Math.sin(a) * 7.5;
+      drawQuill(bx, by, a - 0.22, 8.2 + (i % 2) * 1.4);
     }
 
-    // Tan face & twitching pink nose
-    ctx.fillStyle = '#d9b38c';
+    // Soft Sculpted Woodland Hedgehog Face, Rounded Ear, Whiskers, Glossy Eye & Wet Black Snout!
+    const faceG = ctx.createLinearGradient(5, -18 - scurry, 22, -6 - scurry);
+    faceG.addColorStop(0, '#e8cda8'); faceG.addColorStop(0.55, '#d4ae82'); faceG.addColorStop(1, '#a9825a');
+    ctx.fillStyle = faceG; ctx.strokeStyle = '#4a3222'; ctx.lineWidth = 1.3;
     ctx.beginPath();
-    ctx.moveTo(6, -12 - scurry);
-    ctx.quadraticCurveTo(18, -9 - scurry, 17, -4 - scurry);
-    ctx.lineTo(5, -4 - scurry);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#111';
-    ctx.beginPath(); ctx.arc(11, -8 - scurry, 1.5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ff758f';
-    ctx.beginPath(); ctx.arc(17.5, -5.5 - scurry, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.moveTo(5, -16.5 - scurry);
+    ctx.quadraticCurveTo(14, -16 - scurry, 22.5, -9.5 - scurry);
+    ctx.quadraticCurveTo(19, -4 - scurry, 9, -4.5 - scurry);
+    ctx.quadraticCurveTo(3, -8 - scurry, 5, -16.5 - scurry);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Cute rounded ear tucked at edge of spines
+    ctx.fillStyle = '#c49b72'; ctx.strokeStyle = '#4a3222'; ctx.lineWidth = 1.1;
+    ctx.beginPath(); ctx.arc(6.5, -15 - scurry, 3.3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#e5a3a8'; ctx.beginPath(); ctx.arc(6.8, -14.8 - scurry, 1.7, 0, Math.PI * 2); ctx.fill();
+    // Glossy dark woodland eye with crisp white catchlight
+    ctx.fillStyle = '#0f0a08';
+    ctx.beginPath(); ctx.arc(13.2, -11.4 - scurry, 2.1, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(12.6, -12.1 - scurry, 0.75, 0, Math.PI * 2); ctx.fill();
+    // Shiny wet black button snout + delicate whiskers
+    ctx.fillStyle = '#18110e';
+    ctx.beginPath(); ctx.ellipse(22.6, -9.5 - scurry, 2.3, 1.8, 0.15, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.beginPath(); ctx.arc(22.1, -10.1 - scurry, 0.65, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 248, 238, 0.65)'; ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(18.5, -8.5 - scurry); ctx.lineTo(24.5, -11 - scurry);
+    ctx.moveTo(18.5, -7.8 - scurry); ctx.lineTo(24.5, -7.2 - scurry);
+    ctx.stroke();
+
+    // Near articulated tiny scurrying pink-tan paws
+    ctx.fillStyle = '#b98b68'; ctx.strokeStyle = '#4a3222'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(-8 + pOff, -2.2, 4, 2.3, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(8 - pOff, -2.2, 4, 2.3, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
 
     ctx.restore();
   }
@@ -6201,121 +7256,181 @@ window.Game.Art = (function () {
     ctx.restore();
   }
 
-  // Stage 6 Enemy #2: Realistic Hunched & Fluffy Rooftop Raccoon (الراكون المتسلل)
+  // Stage 6 & 8 Enemy: Photorealistic Nocturnal Raccoon (Continuous Bushy 6-Ringed Tail, Grizzled Guard Fur, Sculpted Bandit Mask & Dexterous Paws!)
   function drawRaccoon(ctx, rac, rx, ry, time) {
     ctx.save();
     ctx.translate(rx + rac.w / 2, ry + rac.h);
     ctx.scale(rac.facing, 1);
     const walk = time * 12 + rac.x * 0.08;
-    const bob = Math.abs(Math.sin(walk)) * 1.3;
-    const stepA = Math.sin(walk) * 4.5;
+    const bob = Math.abs(Math.sin(walk)) * 1.5;
+    const stepA = Math.sin(walk) * 5;
     const stepB = -stepA;
 
-    // Ground shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.46)';
-    ctx.beginPath(); ctx.ellipse(0, 0, 27, 5, 0, 0, Math.PI * 2); ctx.fill();
+    // Soft ambient ground shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.48)';
+    ctx.beginPath(); ctx.ellipse(0, 0, 29, 5.2, 0, 0, Math.PI * 2); ctx.fill();
 
-    // Long, thick, tapering ringed tail (6 alternating charcoal-black & silver-grey bands + black tip)
-    const tailWave = Math.sin(time * 4.2 + rac.x) * 2.5;
+    // 1. Continuous Plump Bushy Ringed Raccoon Tail (clipped with 6 curved 3D charcoal-and-silver bands — NO disconnected ovals!)
+    const tailSway = Math.sin(time * 4.4 + rac.x * 0.05) * 0.1;
     ctx.save();
-    ctx.translate(-17, -18 - bob);
-    ctx.rotate(-0.32 + tailWave * 0.035);
-    for (let s = 0; s < 6; s++) {
-      const rxOff = -s * 4.8;
-      const ryOff = Math.sin(s * 0.5) * 1.8;
-      const radX = 4.8 - s * 0.25;
-      const radY = 6.8 - s * 0.48;
-      ctx.fillStyle = s % 2 === 0 ? '#111827' : '#cbd5e1';
-      ctx.strokeStyle = '#090d16';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.ellipse(rxOff, ryOff, radX, radY, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.translate(-17, -16 - bob);
+    ctx.rotate(-0.22 + tailSway);
+    ctx.beginPath();
+    ctx.moveTo(2, -4);
+    ctx.bezierCurveTo(-10, -14, -30, -13, -36, -2);
+    ctx.bezierCurveTo(-32, 9, -11, 8, 2, 3);
+    ctx.closePath();
+
+    const tailBaseG = ctx.createLinearGradient(0, -11, -36, 6);
+    tailBaseG.addColorStop(0, '#d1d5db');
+    tailBaseG.addColorStop(0.5, '#e5e7eb');
+    tailBaseG.addColorStop(1, '#9ca3af');
+    ctx.fillStyle = tailBaseG;
+    ctx.fill();
+
+    // Clip inside the bushy tail silhouette to paint 6 wrapping charcoal-black rings + dark tip!
+    ctx.save();
+    ctx.clip();
+    ctx.fillStyle = '#111827';
+    for (const [tx, tw] of [[-5, 2.6], [-12, 2.8], [-19, 3.0], [-26, 3.0], [-34, 4.5]]) {
+      ctx.beginPath();
+      ctx.ellipse(tx, -0.5, tw, 12, 0.14, 0, Math.PI * 2);
+      ctx.fill();
     }
+    // Fluffy dorsal highlight along upper tail curve
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.24)';
+    ctx.beginPath(); ctx.ellipse(-16, -6.5, 13, 2.4, -0.05, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = '#090d16';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
     ctx.restore();
 
-    // Far shaded legs & 5-toed dark paws
-    ctx.fillStyle = '#2d333d';
-    ctx.beginPath(); ctx.roundRect(-14 + stepB * 0.6, -13, 7, 11, 3); ctx.fill();
-    ctx.beginPath(); ctx.roundRect(5 + stepA * 0.6, -12, 6, 10, 3); ctx.fill();
-    ctx.fillStyle = '#0f172a';
-    ctx.beginPath(); ctx.ellipse(-10 + stepB * 0.6, -2, 5.2, 2.2, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(8 + stepA * 0.6, -2, 4.5, 2.0, 0, 0, Math.PI * 2); ctx.fill();
+    // 2. Far Shaded Articulated Legs & Nimble Dark Paws
+    ctx.fillStyle = '#1f2937';
+    ctx.beginPath();
+    ctx.roundRect(-15 + stepB * 0.65, -14, 7.5, 12, 3.5);
+    ctx.roundRect(5 + stepA * 0.65, -13, 6.8, 11, 3);
+    ctx.fill();
+    ctx.fillStyle = '#090d16';
+    ctx.beginPath();
+    ctx.ellipse(-10.5 + stepB * 0.65, -1.8, 5, 2.2, 0, 0, Math.PI * 2);
+    ctx.ellipse(8.5 + stepA * 0.65, -1.8, 4.5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    // Classic hunched-back arched raccoon body (high rounded haunches, lowered shoulders)
-    const furG = ctx.createLinearGradient(0, -34 - bob, 0, -4 - bob);
-    furG.addColorStop(0, '#9ca3af');
-    furG.addColorStop(0.45, '#6b7280');
-    furG.addColorStop(1, '#374151');
+    // 3. Sculpted Arched Grizzled Grey-Brown Raccoon Body (high rounded haunches tapering into low prowling shoulders)
+    const furG = ctx.createLinearGradient(0, -35 - bob, 0, -5 - bob);
+    furG.addColorStop(0, '#d1d5db');
+    furG.addColorStop(0.28, '#9ca3af');
+    furG.addColorStop(0.65, '#4b5563');
+    furG.addColorStop(1, '#1f2937');
     ctx.fillStyle = furG;
-    ctx.strokeStyle = '#111827';
+    ctx.strokeStyle = '#0f172a';
     ctx.lineWidth = 1.6;
     ctx.beginPath();
-    ctx.moveTo(-19, -12 - bob);
-    ctx.quadraticCurveTo(-21, -28 - bob, -6, -32 - bob); // high arched rump
-    ctx.quadraticCurveTo(6, -31 - bob, 13, -22 - bob);   // sloping shoulders
-    ctx.quadraticCurveTo(15, -10 - bob, 6, -7 - bob);     // chest
-    ctx.quadraticCurveTo(-8, -5 - bob, -19, -12 - bob);   // belly
+    ctx.moveTo(-21, -13 - bob);
+    ctx.bezierCurveTo(-22, -31 - bob, -7, -35 - bob, 4, -31 - bob);
+    ctx.bezierCurveTo(12, -28 - bob, 17, -21 - bob, 16, -12 - bob);
+    ctx.bezierCurveTo(10, -6 - bob, -8, -6 - bob, -21, -13 - bob);
     ctx.closePath();
-    ctx.fill(); ctx.stroke();
+    ctx.fill();
+    ctx.stroke();
 
-    // Salt-and-pepper shaggy fur texture strokes
-    ctx.strokeStyle = 'rgba(241, 245, 249, 0.3)';
-    ctx.lineWidth = 1.2;
-    for (const [fx, fy] of [[-12, -26], [-5, -29], [2, -27], [-8, -19], [1, -18]]) {
-      ctx.beginPath(); ctx.moveTo(fx, fy - bob); ctx.lineTo(fx - 3.5, fy - 2.5 - bob); ctx.stroke();
+    // Layered grizzled silver & dark guard-hair texture strokes
+    ctx.lineCap = 'round';
+    for (let r = 0; r < 3; r++) {
+      for (let fx = -15; fx <= 7; fx += 6) {
+        const x = fx + (r % 2) * 2.5;
+        const y = -28 + r * 5 - bob;
+        ctx.strokeStyle = r === 0 ? 'rgba(248, 250, 252, 0.5)' : r === 1 ? 'rgba(203, 213, 225, 0.35)' : 'rgba(15, 23, 42, 0.4)';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 4.5, y + 1.2); ctx.stroke();
+      }
     }
 
-    // Near articulated legs & nimble dark paws
-    ctx.fillStyle = '#4b5563';
-    ctx.strokeStyle = '#111827';
-    ctx.lineWidth = 1.3;
-    ctx.beginPath(); ctx.roundRect(-12 + stepA, -14, 7.5, 12, 3.5); ctx.fill(); ctx.stroke();
-    ctx.beginPath(); ctx.roundRect(4 + stepB, -13, 6.5, 11, 3); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#090d16';
-    ctx.beginPath(); ctx.ellipse(-8 + stepA, -2, 5.5, 2.4, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(8 + stepB, -2, 4.8, 2.2, 0, 0, Math.PI * 2); ctx.fill();
-
-    // Broad raccoon head with fluffy white cheek ruffs
-    ctx.fillStyle = '#8b929e';
-    ctx.strokeStyle = '#111827';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.ellipse(15, -19.5 - bob, 11, 9.5, 0.08, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-
-    // Small rounded upright ears with white fur rims
-    for (const ex of [9, 17]) {
-      ctx.fillStyle = '#f8fafc';
-      ctx.beginPath(); ctx.ellipse(ex, -28.5 - bob, 3.8, 4.6, 0.1, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#374151';
-      ctx.beginPath(); ctx.ellipse(ex, -28 - bob, 2.2, 2.8, 0.1, 0, Math.PI * 2); ctx.fill();
+    // 4. Near Articulated Thighs, Forelegs & 5-Toed Dexterous Dark Paws
+    for (const [lx, off, wLeg] of [[-13, stepA, 8], [4.5, stepB, 7]]) {
+      const lG = ctx.createLinearGradient(lx + off, -15, lx + off, -2);
+      lG.addColorStop(0, '#6b7280'); lG.addColorStop(0.6, '#374151'); lG.addColorStop(1, '#111827');
+      ctx.fillStyle = lG; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.roundRect(lx + off, -14, wLeg, 12, 3.5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#090d16';
+      ctx.beginPath(); ctx.ellipse(lx + off + wLeg * 0.6, -1.8, 5.2, 2.3, 0, 0, Math.PI * 2); ctx.fill();
+      // Delicate pale claw/finger tips
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.arc(lx + off + wLeg + 2, -1.5, 0.9, 0, Math.PI * 2);
+      ctx.arc(lx + off + wLeg + 0.5, -0.8, 0.9, 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    // Wide fluffy white cheek tufts & short rounded muzzle
-    ctx.fillStyle = '#f8fafc';
-    ctx.beginPath(); ctx.ellipse(16, -15 - bob, 9.5, 4.8, 0, 0, Math.PI * 2); ctx.fill();
+    // 5. Sculpted Triangular Fox-Like Raccoon Head, Fluffy White Cheek Ruffs, Pointed Snout & Iconic Bandit Mask!
+    // Rounded upright ears with crisp white fur rims (far ear + near ear)
+    for (const [ex, ey, sc] of [[19, -28.5, 0.88], [11.5, -29, 1]]) {
+      ctx.save();
+      ctx.translate(ex, ey - bob);
+      ctx.scale(sc, sc);
+      ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.ellipse(0, 0, 4.2, 5.2, -0.1, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#334155';
+      ctx.beginPath(); ctx.ellipse(0.3, 0.4, 2.5, 3.3, -0.1, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
 
-    // Iconic broad black bandit mask + vertical dark forehead stripe
-    ctx.fillStyle = '#090d16';
-    ctx.beginPath(); ctx.ellipse(17.5, -19.5 - bob, 7.2, 3.8, -0.05, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#090d16'; ctx.lineWidth = 2.4;
-    ctx.beginPath(); ctx.moveTo(19, -20 - bob); ctx.lineTo(15, -26.5 - bob); ctx.stroke();
-
-    // Crisp white eyebrow arcs above the mask
-    ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 1.7;
-    ctx.beginPath(); ctx.moveTo(11, -24 - bob); ctx.quadraticCurveTo(15, -25 - bob, 20, -23.5 - bob); ctx.stroke();
-
-    // Bright glinting dark eye inside mask
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.arc(19, -19.8 - bob, 1.5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#090d16';
-    ctx.beginPath(); ctx.arc(19.3, -19.8 - bob, 0.9, 0, Math.PI * 2); ctx.fill();
-
-    // Short round black nose & fine whiskers
-    ctx.fillStyle = '#090d16';
-    ctx.beginPath(); ctx.arc(24.8, -15.2 - bob, 2.3, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(241, 245, 249, 0.78)';
-    ctx.lineWidth = 0.85;
+    // Sculpted skull & tapered snout
+    const headG = ctx.createLinearGradient(8, -28 - bob, 28, -11 - bob);
+    headG.addColorStop(0, '#9ca3af'); headG.addColorStop(0.55, '#6b7280'); headG.addColorStop(1, '#4b5563');
+    ctx.fillStyle = headG; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(21.5, -15.2 - bob); ctx.lineTo(28.5, -16.8 - bob);
-    ctx.moveTo(21.5, -14.2 - bob); ctx.lineTo(28.5, -12.6 - bob);
+    ctx.moveTo(8, -25 - bob);
+    ctx.bezierCurveTo(15, -29 - bob, 24, -26 - bob, 27, -20 - bob);
+    ctx.lineTo(32, -16 - bob); // pointed raccoon snout
+    ctx.quadraticCurveTo(30, -11 - bob, 22, -11 - bob);
+    ctx.quadraticCurveTo(11, -10 - bob, 7, -16 - bob);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    // Fluffy white cheek ruffs & white muzzle border below mask
+    ctx.fillStyle = '#f8fafc';
+    ctx.beginPath();
+    ctx.moveTo(9, -16 - bob);
+    ctx.quadraticCurveTo(17, -14 - bob, 30, -15 - bob);
+    ctx.quadraticCurveTo(28, -11.2 - bob, 20, -11.2 - bob);
+    ctx.quadraticCurveTo(11, -11 - bob, 9, -16 - bob);
+    ctx.closePath(); ctx.fill();
+
+    // Iconic Contoured Black Bandit Eye-Mask + Dark Forehead Blaze + Crisp White Brow Arch!
+    ctx.fillStyle = '#090d16';
+    ctx.beginPath();
+    ctx.moveTo(10, -21 - bob);
+    ctx.quadraticCurveTo(18, -24 - bob, 26.5, -19.5 - bob);
+    ctx.quadraticCurveTo(24, -14.5 - bob, 16, -15 - bob);
+    ctx.quadraticCurveTo(10, -16 - bob, 10, -21 - bob);
+    ctx.closePath(); ctx.fill();
+    // Dark vertical forehead stripe
+    ctx.strokeStyle = '#111827'; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.moveTo(18, -27 - bob); ctx.lineTo(22, -21 - bob); ctx.stroke();
+    // Crisp white eyebrow arch framing the top of the black mask
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.moveTo(11.5, -22.5 - bob); ctx.quadraticCurveTo(18.5, -25.2 - bob, 25.5, -20.8 - bob); ctx.stroke();
+
+    // Expressive Glossy Amber-Dark Eye with Bright Specular Catchlight
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath(); ctx.arc(20.5, -19.2 - bob, 2.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#020617';
+    ctx.beginPath(); ctx.arc(20.9, -19.2 - bob, 1.25, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(20.0, -19.9 - bob, 0.8, 0, Math.PI * 2); ctx.fill();
+
+    // Wet Shiny Black Nose & Fine White Whiskers
+    ctx.fillStyle = '#090d16';
+    ctx.beginPath(); ctx.ellipse(32, -15.8 - bob, 2.4, 1.9, 0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.beginPath(); ctx.arc(31.4, -16.4 - bob, 0.7, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(248, 250, 252, 0.78)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(27, -14.5 - bob); ctx.lineTo(35, -16 - bob);
+    ctx.moveTo(27, -13.5 - bob); ctx.lineTo(34.5, -12.5 - bob);
     ctx.stroke();
 
     ctx.restore();

@@ -220,6 +220,7 @@ window.Game.Cat = function (startX, startY) {
     maxLives: 7,
     invulnTimer: 0,
     hurtTimer: 0,
+    respawnLockTimer: 0,
     coyoteTimer: 0,
     jumpBufferTimer: 0,
     meowCooldown: 0,
@@ -233,6 +234,13 @@ window.Game.Cat = function (startX, startY) {
     ropeDip: 0,
     checkpointX: startX,
     checkpointY: startY,
+    shieldEnabled: false,
+    shieldActive: false,
+    shieldTimer: 0,
+    shieldRechargeSec: 0,
+    skin: 'classic',
+    hasWingsGlide: false,
+    trailTimer: 0,
     physics: { ...DEFAULT_PHYSICS },
   };
 
@@ -240,11 +248,51 @@ window.Game.Cat = function (startX, startY) {
     cat.physics = { ...DEFAULT_PHYSICS };
   }
 
+  function applyUpgrades(bonuses, preserveCurrentLives = false) {
+    if (!bonuses) return;
+    cat.maxLives = bonuses.maxLives;
+    if (!preserveCurrentLives) {
+      cat.lives = bonuses.startLives;
+    } else if (cat.lives > cat.maxLives) {
+      cat.lives = cat.maxLives;
+    }
+    cat.physics.runSpeed = Math.round(DEFAULT_PHYSICS.runSpeed * (bonuses.speedMult || 1));
+    cat.physics.jumpForce = Math.round(DEFAULT_PHYSICS.jumpForce * (bonuses.jumpMult || 1));
+    cat.shieldEnabled = !!bonuses.hasShield;
+    cat.shieldRechargeSec = bonuses.shieldRechargeSec || 0;
+    if (!preserveCurrentLives) {
+      cat.shieldActive = cat.shieldEnabled;
+      cat.shieldTimer = 0;
+    } else if (cat.shieldEnabled && !cat.shieldActive && cat.shieldTimer <= 0) {
+      cat.shieldActive = true;
+    }
+    cat.skin = bonuses.skin || 'classic';
+    cat.hasWingsGlide = !!bonuses.hasWingsGlide;
+  }
+
+  function refillLives() {
+    cat.lives = cat.maxLives;
+    if (cat.shieldEnabled) {
+      cat.shieldActive = true;
+      cat.shieldTimer = 0;
+    }
+    cat.invulnTimer = 1.6;
+    cat.hurtTimer = 0;
+    cat.respawnLockTimer = 0.55;
+    cat.jumpBufferTimer = 0;
+    cat.x = cat.checkpointX;
+    cat.y = cat.checkpointY;
+    cat.vx = 0;
+    cat.vy = 0;
+  }
+
   function resolveCollisionsX(platforms) {
     cat.wallDir = 0;
     for (const p of platforms) {
       if (p.hiddenInDay && !cat.nightVision) continue;
       if (p.broken) continue;
+      if (p.type === 'wind_zone') continue;
+      if (p.type === 'phase_platform' && p.phaseSolid === false) continue;
       if (p.oneWay) continue;
       if (
         cat.x < p.x + p.w &&
@@ -274,22 +322,52 @@ window.Game.Cat = function (startX, startY) {
     for (const p of platforms) {
       if (p.hiddenInDay && !cat.nightVision) continue;
       if (p.broken) continue;
+      if (p.type === 'wind_zone') continue;
+      if (p.type === 'phase_platform' && p.phaseSolid === false) continue;
       const overlapX = cat.x + 4 < p.x + p.w && cat.x + cat.w - 4 > p.x;
       if (!overlapX) continue;
 
+      const effY = p.y + (p.sinkOffset || 0);
+
       if (p.oneWay) {
-        if (cat.vy >= 0 && prevBottom <= p.y + 8 && cat.y + cat.h >= p.y) {
-          cat.y = p.y - cat.h;
+        if (cat.vy >= 0 && prevBottom <= effY + 10 && cat.y + cat.h >= effY) {
+          cat.y = effY - cat.h;
           if (p.bouncy) {
-            cat.vy = -cat.physics.jumpForce * 1.28;
-            cat.scaleX = 0.86;
-            cat.scaleY = 1.15;
+            const mult = p.type === 'flower_bounce' ? 1.36 : 1.28;
+            cat.vy = -cat.physics.jumpForce * mult;
+            cat.scaleX = 0.84;
+            cat.scaleY = 1.18;
             p.bounceAnim = 1;
             Audio.playJump();
-            Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, 8, '#ffb35c');
+            if (p.type === 'flower_bounce') {
+              // Firm, poised botanical cushion dip (sturdy, no wild shaking!) & lush nectar burst
+              const impactOffset = Math.max(-1, Math.min(1, ((cat.x + cat.w / 2) - (p.x + p.w / 2)) / (p.w * 0.5)));
+              p.stemBend = Math.min(11, (p.stemBend || 0) + 7.5);
+              p.stemBendVel = 48;
+              p.stemLean = Math.max(-0.14, Math.min(0.14, (p.stemLean || 0) + impactOffset * 0.08));
+              p.stemLeanVel = impactOffset * 1.45 + (cat.vx / 330) * 0.45;
+              p.petalSpread = 0.85;
+              if (Particles.spawnNectarBurst) {
+                Particles.spawnNectarBurst(p.x + p.w / 2, p.y + 8);
+              } else {
+                Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, 9, '#fde047');
+              }
+            } else if (p.type === 'mushroom') {
+              // Soft elastic sponge compression & rebound on mushroom jump!
+              const impactOffset = Math.max(-1, Math.min(1, ((cat.x + cat.w / 2) - (p.x + p.w / 2)) / (p.w * 0.5)));
+              p.spongeSquish = 0.92;
+              p.spongeVel = 8.5;
+              p.spongeTilt = impactOffset * 0.14;
+              p.spongeTiltVel = impactOffset * 1.8 + (cat.vx / 330) * 0.6;
+              Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, 11, '#fef08a');
+            } else {
+              Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, 9, '#ffb35c');
+            }
           } else {
             if (wasAirborne && cat.vy > 180) {
               cat.landTimer = 0.14;
+              cat.scaleX = 1.13;
+              cat.scaleY = 0.87;
               Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, 5);
             }
             cat.vy = 0;
@@ -299,11 +377,13 @@ window.Game.Cat = function (startX, startY) {
           }
         }
       } else {
-        if (cat.y < p.y + p.h && cat.y + cat.h > p.y) {
+        if (cat.y < effY + p.h && cat.y + cat.h > effY) {
           if (cat.vy >= 0) {
-            cat.y = p.y - cat.h;
+            cat.y = effY - cat.h;
             if (wasAirborne && cat.vy > 180) {
               cat.landTimer = 0.14;
+              cat.scaleX = 1.13;
+              cat.scaleY = 0.87;
               Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, 5);
             }
             cat.vy = 0;
@@ -311,7 +391,7 @@ window.Game.Cat = function (startX, startY) {
             standingPlatform = p;
             if (p.narrow) currentNarrow = true;
           } else if (cat.vy < 0) {
-            cat.y = p.y + p.h;
+            cat.y = effY + p.h;
             cat.vy = 0;
           }
         }
@@ -341,13 +421,44 @@ window.Game.Cat = function (startX, startY) {
     cat.animTime += dt;
     if (cat.invulnTimer > 0) cat.invulnTimer -= dt;
     if (cat.hurtTimer > 0) cat.hurtTimer = Math.max(0, cat.hurtTimer - dt);
+    if (cat.respawnLockTimer > 0) cat.respawnLockTimer = Math.max(0, cat.respawnLockTimer - dt);
     if (cat.landTimer > 0) cat.landTimer = Math.max(0, cat.landTimer - dt);
     if (cat.meowCooldown > 0) cat.meowCooldown = Math.max(0, cat.meowCooldown - dt);
+
+    // Shield automatic recharge
+    if (cat.shieldEnabled && !cat.shieldActive) {
+      cat.shieldTimer -= dt;
+      if (cat.shieldTimer <= 0) {
+        cat.shieldActive = true;
+        Particles.spawnShieldBurst(cat.x + cat.w / 2, cat.y + cat.h / 2);
+        Particles.spawnPopup(cat.x + cat.w / 2, cat.y - 18, '🛡️ درع جاهز!', '#7dd3fc');
+      }
+    }
+
+    // Cosmetic skin sparkle trails while moving
+    if (cat.skin !== 'classic' && (Math.abs(cat.vx) > 65 || !cat.onGround)) {
+      cat.trailTimer += dt;
+      if (cat.trailTimer >= 0.085) {
+        cat.trailTimer = 0;
+        const trailCol =
+          cat.skin === 'crown'
+            ? '#fde047'
+            : cat.skin === 'scarf'
+            ? '#f87171'
+            : cat.skin === 'starlight'
+            ? '#7dd3fc'
+            : cat.skin === 'cyber'
+            ? '#22d3ee'
+            : '#fef3c7';
+        Particles.spawnTrailDot(cat.x + cat.w / 2 - cat.facing * 12, cat.y + cat.h * 0.55, trailCol);
+      }
+    }
 
     cat.scaleX += (1 - cat.scaleX) * Math.min(1, dt * 14);
     cat.scaleY += (1 - cat.scaleY) * Math.min(1, dt * 14);
 
-    cat.crouching = input.shift || input.down;
+    const lockedByRespawn = cat.respawnLockTimer > 0;
+    cat.crouching = !lockedByRespawn && (input.shift || input.down);
     if (cat.crouching && cat.onGround) {
       cat.crouchTime += dt;
     } else {
@@ -355,8 +466,10 @@ window.Game.Cat = function (startX, startY) {
     }
 
     let moveDir = 0;
-    if (input.left) moveDir -= 1;
-    if (input.right) moveDir += 1;
+    if (!lockedByRespawn) {
+      if (input.left) moveDir -= 1;
+      if (input.right) moveDir += 1;
+    }
     if (moveDir !== 0) cat.facing = moveDir;
 
     let targetSpeed = moveDir * cat.physics.runSpeed;
@@ -369,8 +482,22 @@ window.Game.Cat = function (startX, startY) {
       targetSpeed += Math.sin(cat.balancePhase) * 65;
     }
 
-    const accel = cat.onGround ? 18 : 11;
-    cat.vx += (targetSpeed - cat.vx) * Math.min(1, dt * accel);
+    const accel = cat.onGround ? (cat.onSlippery ? 3.8 : 18) : 11;
+    if (lockedByRespawn) {
+      cat.vx = 0;
+    } else {
+      cat.vx += (targetSpeed - cat.vx) * Math.min(1, dt * accel);
+    }
+
+    // Crosswind Gust Zone physics (crouching anchors Mashmasha against headwinds!)
+    for (const p of level.platforms) {
+      if (p.type === 'wind_zone') {
+        if (cat.x + cat.w > p.x && cat.x < p.x + p.w && cat.y + cat.h > p.y && cat.y < p.y + p.h) {
+          const anchor = cat.crouching && cat.onGround ? 0.22 : 1;
+          cat.vx += (p.windDir || 1) * (p.windForce || 540) * anchor * dt;
+        }
+      }
+    }
 
     if (cat.onGround && Math.abs(cat.vx) > 20) {
       cat.walkTime += dt * (Math.abs(cat.vx) / cat.physics.runSpeed);
@@ -382,7 +509,9 @@ window.Game.Cat = function (startX, startY) {
       cat.coyoteTimer = Math.max(0, cat.coyoteTimer - dt);
     }
 
-    if (input.jumpPressed) {
+    if (lockedByRespawn) {
+      cat.jumpBufferTimer = 0;
+    } else if (input.jumpPressed) {
       cat.jumpBufferTimer = 0.15;
     } else {
       cat.jumpBufferTimer = Math.max(0, cat.jumpBufferTimer - dt);
@@ -394,6 +523,8 @@ window.Game.Cat = function (startX, startY) {
         cat.onGround = false;
         cat.coyoteTimer = 0;
         cat.jumpBufferTimer = 0;
+        cat.scaleX = 0.88;
+        cat.scaleY = 1.14;
         Audio.playJump();
         Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, 5);
       } else if (cat.wallDir !== 0) {
@@ -402,6 +533,8 @@ window.Game.Cat = function (startX, startY) {
         cat.facing = -cat.wallDir;
         cat.wallDir = 0;
         cat.jumpBufferTimer = 0;
+        cat.scaleX = 0.88;
+        cat.scaleY = 1.14;
         Audio.playJump();
         Audio.playWallScratch();
         Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h / 2, 6, '#ffd36e');
@@ -413,6 +546,11 @@ window.Game.Cat = function (startX, startY) {
     }
 
     cat.vy += cat.physics.gravity * dt;
+
+    // Angel Wings smooth glide when holding jump while falling
+    if (cat.hasWingsGlide && input.jumpHeld && !cat.onGround && cat.vy > 195 && cat.wallDir === 0) {
+      cat.vy = Math.min(cat.vy, 215);
+    }
     if (cat.wallDir !== 0 && cat.vy > cat.physics.wallSlideSpeed) {
       const pressingTowardWall =
         (cat.wallDir === 1 && input.right) || (cat.wallDir === -1 && input.left);
@@ -460,16 +598,54 @@ window.Game.Cat = function (startX, startY) {
           activeDip = (baseSag + p.ropeSag) * (2 * (1 - t) * t) + 1;
         }
       }
+      if (p.type === 'flower_bounce') {
+        // Firm, poised, critically-damped botanical spring (smooth gentle flex without excessive wobble!)
+        p.stemBend = p.stemBend || 0;
+        p.stemBendVel = p.stemBendVel || 0;
+        p.stemLean = p.stemLean || 0;
+        p.stemLeanVel = p.stemLeanVel || 0;
+        p.petalSpread = p.petalSpread || 0;
+
+        const bendForce = -p.stemBend * 210;
+        p.stemBendVel = (p.stemBendVel + bendForce * dt) * Math.exp(-13.5 * dt);
+        p.stemBend = Math.max(-3, Math.min(13, p.stemBend + p.stemBendVel * dt));
+
+        const leanForce = -p.stemLean * 120;
+        p.stemLeanVel = (p.stemLeanVel + leanForce * dt) * Math.exp(-10.5 * dt);
+        p.stemLean = Math.max(-0.18, Math.min(0.18, p.stemLean + p.stemLeanVel * dt));
+
+        if (p.petalSpread > 0) {
+          p.petalSpread = Math.max(0, p.petalSpread - dt * 2.4);
+        }
+      }
+      if (p.bounceAnim > 0) {
+        p.bounceAnim = Math.max(0, p.bounceAnim - dt * 2.2);
+      }
+      if (p.type === 'mushroom') {
+        // Elastic sponge spring-damper physics (squishes down & widens like a soft sponge, then springs back with a juicy jiggle!)
+        p.spongeSquish = p.spongeSquish || 0;
+        p.spongeVel = p.spongeVel || 0;
+        p.spongeTilt = p.spongeTilt || 0;
+        p.spongeTiltVel = p.spongeTiltVel || 0;
+
+        const spForce = -p.spongeSquish * 240;
+        p.spongeVel = (p.spongeVel + spForce * dt) * Math.exp(-7.5 * dt);
+        p.spongeSquish = Math.max(-0.45, Math.min(1.05, p.spongeSquish + p.spongeVel * dt));
+
+        const tForce = -p.spongeTilt * 180;
+        p.spongeTiltVel = (p.spongeTiltVel + tForce * dt) * Math.exp(-8.0 * dt);
+        p.spongeTilt = Math.max(-0.22, Math.min(0.22, p.spongeTilt + p.spongeTiltVel * dt));
+      }
       if (p.type === 'crumble') {
         if (p === standing && !p.broken && !p.crumbleTimer) {
-          p.crumbleTimer = 0.55;
+          p.crumbleTimer = 1.25;
         }
         if (p.crumbleTimer > 0) {
           p.crumbleTimer -= dt;
           if (p.crumbleTimer <= 0) {
             p.crumbleTimer = 0;
             p.broken = true;
-            p.respawnTimer = 3.2;
+            p.respawnTimer = 2.0;
             Particles.spawnDust(p.x + p.w / 2, p.y + p.h / 2, 10, '#bae6fd');
           }
         } else if (p.broken) {
@@ -489,15 +665,64 @@ window.Game.Cat = function (startX, startY) {
       if (p.type === 'escalator' && p === standing) {
         cat.x += (p.direction || 1) * (p.speed || 95) * dt;
       }
+      if ((p.type === 'clock_gear' || p.type === 'waterwheel') && p === standing) {
+        cat.x += (p.spinDir || 1) * (p.spinSpeed || 1.15) * 85 * dt;
+      }
+      if (p.type === 'boost_pad' && p === standing) {
+        const bdir = p.boostDir || 1;
+        cat.vx = bdir * Math.max(540, cat.physics.runSpeed * 1.65);
+        cat.facing = bdir;
+        if (Math.random() < dt * 25) {
+          Particles.spawnTrailDot(cat.x + cat.w / 2, cat.y + cat.h - 4, '#22d3ee');
+        }
+      }
+      if (p.type === 'sink_pad') {
+        const targetSink = p === standing ? 40 : 0;
+        p.sinkOffset = p.sinkOffset || 0;
+        const rate = p === standing ? 26 : 56;
+        if (p.sinkOffset < targetSink) {
+          p.sinkOffset = Math.min(targetSink, p.sinkOffset + rate * dt);
+        } else if (p.sinkOffset > targetSink) {
+          p.sinkOffset = Math.max(targetSink, p.sinkOffset - rate * dt);
+        }
+        if (p === standing) {
+          cat.y = p.y + p.sinkOffset - cat.h;
+        }
+      }
     }
+    cat.onSlippery = !!(standing && standing.type === 'oil_deck');
     cat.ropeDip = activeDip;
   }
 
-  function takeDamage(reason) {
-    if (cat.invulnTimer > 0) return false;
+  function takeDamage(reason, isFall = false) {
+    if (cat.invulnTimer > 0 && !isFall) return false;
+
+    // Guardian Shield absorbs the hit without losing a life!
+    if (cat.shieldActive) {
+      cat.shieldActive = false;
+      cat.shieldTimer = cat.shieldRechargeSec || 35;
+      cat.invulnTimer = 1.7;
+      if (Audio.playShieldBreak) Audio.playShieldBreak();
+      Particles.spawnShieldBurst(cat.x + cat.w / 2, cat.y + cat.h / 2);
+      Particles.spawnPopup(cat.x + cat.w / 2, cat.y - 16, '🛡️ صدّ الدرع!', '#7dd3fc');
+      if (isFall) {
+        cat.respawnLockTimer = 0.55;
+        cat.jumpBufferTimer = 0;
+        cat.x = cat.checkpointX;
+        cat.y = cat.checkpointY;
+        cat.vx = 0;
+        cat.vy = 0;
+      } else {
+        cat.vy = -260;
+      }
+      return true;
+    }
+
     cat.lives = Math.max(0, cat.lives - 1);
     cat.invulnTimer = 1.6;
     cat.hurtTimer = 0.72; // Plays full 7-frame Row 3 Hurt animation!
+    cat.respawnLockTimer = 0.55; // Brief movement input lock on checkpoint respawn so Mashmasha never accidentally runs off!
+    cat.jumpBufferTimer = 0;
     Audio.playHurt();
     Particles.spawnPopup(cat.x + cat.w / 2, cat.y - 12, reason || '-1 ❤️', '#ff6b8b');
 
@@ -566,22 +791,127 @@ window.Game.Cat = function (startX, startY) {
       ctx.shadowBlur = 12;
     }
 
+    // Behind-cat cosmetics (Angel Wings & Ninja Scarf)
+    if (cat.skin === 'wings') {
+      const flap = Math.sin(cat.animTime * (!cat.onGround ? 18 : 7)) * (!cat.onGround ? 0.36 : 0.14);
+      ctx.save();
+      ctx.translate(-cat.facing * 8, -28);
+      ctx.rotate(-cat.facing * (0.25 + flap));
+      ctx.fillStyle = 'rgba(255, 251, 235, 0.92)';
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(-cat.facing * 24, -18, -cat.facing * 28, -4);
+      ctx.quadraticCurveTo(-cat.facing * 20, 6, -cat.facing * 12, 8);
+      ctx.quadraticCurveTo(-cat.facing * 6, 9, 0, 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    } else if (cat.skin === 'scarf') {
+      const wave = Math.sin(cat.animTime * 11) * 5;
+      ctx.save();
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 5.5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cat.facing * 4, -27);
+      ctx.quadraticCurveTo(-cat.facing * 14, -29 + wave * 0.6, -cat.facing * 30, -24 + wave);
+      ctx.stroke();
+      ctx.strokeStyle = '#fca5a5';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(-cat.facing * 24, -26 + wave * 0.85);
+      ctx.lineTo(-cat.facing * 30, -24 + wave);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     if (sheetFrames) {
       const { row, col } = getSpriteFrameCoords();
       const frame = sheetFrames[row][col];
       // Sprite sheet frames face LEFT (-1), so flip with -cat.facing
+      ctx.save();
       ctx.scale(-cat.facing * cat.scaleX, cat.scaleY);
       const drawW = 88;
       const drawH = Math.round((frame.height / frame.width) * drawW);
       ctx.drawImage(frame, -drawW * 0.5, -drawH + 6, drawW, drawH);
+      ctx.restore();
     } else if (fallbackReady && fallbackImg) {
       const speedRatio = Math.min(1, Math.abs(cat.vx) / cat.physics.runSpeed);
       const runBob = cat.onGround && speedRatio > 0.08 ? Math.abs(Math.sin(cat.animTime * 16)) * -4.5 * speedRatio : 0;
       const crouchScaleY = cat.crouching && cat.onGround ? 0.8 : 1;
+      ctx.save();
       ctx.scale(-cat.facing * cat.scaleX, cat.scaleY * crouchScaleY);
       const drawSize = 96;
       const pawAlignY = -drawSize * (399 / 500);
       ctx.drawImage(fallbackImg, -drawSize * 0.48, pawAlignY + runBob, drawSize, drawSize);
+      ctx.restore();
+    }
+
+    // Front cosmetics (Golden Crown, Cyber Visor, Starlight Aura)
+    const headY = cat.crouching ? -37 : -45;
+    if (cat.skin === 'crown') {
+      ctx.save();
+      ctx.translate(cat.facing * 6, headY - 3);
+      ctx.rotate(cat.facing * 0.12);
+      ctx.fillStyle = '#fbbf24';
+      ctx.strokeStyle = '#92400e';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(-9, 4);
+      ctx.lineTo(-10, -5);
+      ctx.lineTo(-4, 0);
+      ctx.lineTo(0, -8);
+      ctx.lineTo(4, 0);
+      ctx.lineTo(10, -5);
+      ctx.lineTo(9, 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(0, -1, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    } else if (cat.skin === 'cyber') {
+      ctx.save();
+      ctx.translate(cat.facing * 12, headY + 9);
+      ctx.fillStyle = 'rgba(34, 211, 238, 0.85)';
+      ctx.strokeStyle = '#0e7490';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.roundRect(-8, -3.5, 16, 6.5, 3);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-5, -2, 6, 1.5);
+      ctx.restore();
+    } else if (cat.skin === 'starlight') {
+      for (let i = 0; i < 3; i++) {
+        const ang = cat.animTime * 2.8 + (i * Math.PI * 2) / 3;
+        const sx = Math.cos(ang) * 28;
+        const sy = -25 + Math.sin(ang) * 14;
+        ctx.fillStyle = i % 2 === 0 ? '#7dd3fc' : '#fde047';
+        ctx.beginPath();
+        ctx.arc(sx, sy, 2.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Active Guardian Shield bubble
+    if (cat.shieldActive) {
+      const pulse = 0.82 + Math.sin(cat.animTime * 5) * 0.18;
+      ctx.save();
+      ctx.strokeStyle = `rgba(125, 211, 252, ${0.72 * pulse})`;
+      ctx.fillStyle = `rgba(56, 189, 248, ${0.12 * pulse})`;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(0, -24, 30, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
     }
 
     ctx.restore();
@@ -590,6 +920,8 @@ window.Game.Cat = function (startX, startY) {
   return {
     cat,
     resetPhysics,
+    applyUpgrades,
+    refillLives,
     update,
     takeDamage,
     draw,

@@ -196,32 +196,61 @@ window.Game.Audio = (function () {
     }
   }
 
+  function playCoin(combo = 0) {
+    const semitone = Math.min(8, combo);
+    const base = 987.77 * Math.pow(2, semitone / 12);
+    playTone(base, base * 1.335, 0.09, 'sine', 0.11);
+    setTimeout(() => playTone(base * 1.335, base * 1.5, 0.13, 'triangle', 0.09), 55);
+  }
+
+  function playPurchase() {
+    playTone(523.25, 659.25, 0.09, 'sine', 0.12);
+    setTimeout(() => playTone(659.25, 783.99, 0.1, 'sine', 0.12), 70);
+    setTimeout(() => playTone(783.99, 1046.5, 0.18, 'triangle', 0.13), 140);
+  }
+
+  function playUiClick() {
+    playTone(620, 460, 0.045, 'sine', 0.06);
+  }
+
+  function playShieldBreak() {
+    playTone(920, 340, 0.22, 'triangle', 0.14);
+    playNoise(0.14, 1800, 0.09);
+  }
+
+  function playStageClear() {
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((n, i) => {
+      setTimeout(() => playTone(n, n * 1.02, 0.18, 'triangle', 0.12), i * 85);
+    });
+  }
+
   // Background music tracks from sounds/ folder (soft, non-intrusive volume)
   const BG_NORMAL_VOL = 0.16;
   const BG_CHASE_VOL = 0.21;
   const cityMusic = new Audio('sounds/Rushofcity.mp3');
   cityMusic.loop = true;
-  cityMusic.preload = 'auto';
+  cityMusic.preload = 'none';
   cityMusic.volume = BG_NORMAL_VOL;
 
   const parkMusic = new Audio('sounds/Public-Park.mp3');
   parkMusic.loop = true;
-  parkMusic.preload = 'auto';
+  parkMusic.preload = 'none';
   parkMusic.volume = BG_NORMAL_VOL;
 
   const harborMusic = new Audio('sounds/Seaport.mp3');
   harborMusic.loop = true;
-  harborMusic.preload = 'auto';
+  harborMusic.preload = 'none';
   harborMusic.volume = BG_NORMAL_VOL;
 
   const rooftopMusic = new Audio('sounds/Building-rooftops.mp3');
   rooftopMusic.loop = true;
-  rooftopMusic.preload = 'auto';
+  rooftopMusic.preload = 'none';
   rooftopMusic.volume = BG_NORMAL_VOL;
 
   const subwayMusic = new Audio('sounds/subway.mp3');
   subwayMusic.loop = true;
-  subwayMusic.preload = 'auto';
+  subwayMusic.preload = 'none';
   subwayMusic.volume = BG_NORMAL_VOL;
 
   let activeTrackKey = 'city';
@@ -256,13 +285,13 @@ window.Game.Audio = (function () {
 
   function setMusicTrack(theme) {
     const nextKey =
-      theme === 'subway'
+      theme === 'subway' || theme === 'museum'
         ? 'subway'
-        : theme === 'rooftop' || theme === 'construction'
+        : theme === 'rooftop' || theme === 'construction' || theme === 'rooftop_neon'
         ? 'rooftop'
-        : theme === 'harbor'
+        : theme === 'harbor' || theme === 'harbor_storm' || theme === 'bridge'
         ? 'harbor'
-        : theme === 'park'
+        : theme === 'park' || theme === 'greenhouse'
         ? 'park'
         : 'city';
     if (nextKey === activeTrackKey) return;
@@ -307,6 +336,18 @@ window.Game.Audio = (function () {
     }
   }
 
+  function pauseMusic() {
+    if (bgMusic && !bgMusic.paused) {
+      bgMusic.pause();
+    }
+  }
+
+  function resumeMusic() {
+    if (bgMusicStarted && !musicMuted && bgMusic && bgMusic.paused) {
+      bgMusic.play().catch(() => {});
+    }
+  }
+
   function setChaseMode(active) {
     chaseMode = active;
     bgMusic.volume = active ? BG_CHASE_VOL : BG_NORMAL_VOL;
@@ -326,6 +367,14 @@ window.Game.Audio = (function () {
     return musicMuted;
   }
 
+  function isSfxMuted() {
+    return sfxMuted;
+  }
+
+  function isMusicMuted() {
+    return musicMuted;
+  }
+
   return {
     ensureCtx,
     playMeow,
@@ -337,11 +386,20 @@ window.Game.Audio = (function () {
     playTreat,
     playHurt,
     playNightVision,
+    playCoin,
+    playPurchase,
+    playUiClick,
+    playShieldBreak,
+    playStageClear,
     setMusicTrack,
     startMusic,
+    pauseMusic,
+    resumeMusic,
     setChaseMode,
     toggleMute: toggleSfxMute,
     toggleSfxMute,
     toggleMusicMute,
+    isSfxMuted,
+    isMusicMuted,
   };
 })();

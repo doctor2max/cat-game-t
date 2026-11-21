@@ -4,9 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#080a10" />
-  <title>The Way Home: 7 Lives (Touch) | رحلة العودة: سبعة أرواح</title>
+  <meta name="theme-color" content="#070a14" />
+  <title>رحلة العودة: سبعة أرواح | The Way Home</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png" />
   <link rel="apple-touch-icon" href="images/icon-192.png" />
@@ -14,201 +15,268 @@
 </head>
 <body>
   <div id="game-wrapper">
-    <!-- Top HUD Bar (Dedicated Header, never overlaps canvas) -->
+    <!-- Top iOS Glass HUD -->
     <div id="hud" class="hidden">
       <div class="hud-left">
-        <div class="lives-card">
-          <div class="cat-badge">🐱</div>
+        <div class="hud-pill lives-card">
+          <span class="cat-badge">🐱</span>
           <div class="lives-info">
-            <div class="lives-label">LIVES</div>
             <div class="lives-bar" id="livesBar"></div>
           </div>
-          <div class="lives-count" id="livesCount">6/7</div>
+          <span class="lives-count" id="livesCount">6/7</span>
+          <span id="shieldBadge" class="shield-badge hidden" title="درع الحماية نشط">🛡️</span>
         </div>
-        <div class="treats-card" title="الأسماك المجمّعة">
+        <div class="hud-pill treats-card" title="الأسماك">
           <span>🐟</span>
           <span id="treatsCount">0/3</span>
+        </div>
+        <div class="hud-pill coins-card" id="hudCoinsCard" title="العملات الذهبية">
+          <span class="gold-coin-icon">★</span>
+          <span id="hudCoinsCount">0</span>
         </div>
       </div>
 
       <div class="hud-center">
-        <div class="stage-badge" id="stageBadge">المرحلة 1: الأزقة</div>
+        <div class="stage-pill" id="stageBadge">1</div>
       </div>
 
       <div class="hud-right">
-        <div class="skill-pill" id="skillNightVision" title="الرؤية الليلية (E)">
+        <button class="skill-pill" id="skillNightVision" type="button" title="الرؤية الليلية (E)">
           <span class="key">E</span>
-          <span>👁️ رؤية ليلية</span>
-        </div>
-        <div class="skill-pill" id="skillMeow" title="المواء المشتت (Q)">
+          <span>👁️</span>
+        </button>
+        <button class="skill-pill" id="skillMeow" type="button" title="المواء المشتت (Q)">
           <span class="key">Q</span>
-          <span>🔊 مواء</span>
-        </div>
-        <div class="hud-menu-wrap">
-          <button id="btnHudMenu" class="icon-btn menu-toggle-btn" title="القائمة والإعدادات" aria-expanded="false">☰</button>
-          <div id="hudDropdown" class="hud-dropdown hidden">
-            <button id="btnDimBg" class="dropdown-item" title="تعتيم الخلفيات لتقليل التشتيت"><span>🌓</span><span>تعتيم الخلفية</span></button>
-            <button id="btnFullscreen" class="dropdown-item" title="ملء الشاشة"><span>⛶</span><span>ملء الشاشة</span></button>
-            <button id="btnMusic" class="dropdown-item" title="كتم / تشغيل الموسيقى"><span>🎵</span><span>الموسيقى</span></button>
-            <button id="btnAudio" class="dropdown-item" title="كتم / تشغيل المؤثرات الصوتية"><span>🔊</span><span>المؤثرات</span></button>
-            <button id="btnGuide" class="dropdown-item" title="إرشادات اللعبة"><span>📖</span><span>الإرشادات</span></button>
-            <button id="btnMainMenu" class="dropdown-item exit-item" title="الخروج إلى القائمة الرئيسية"><span>🚪</span><span>القائمة الرئيسية</span></button>
-          </div>
-        </div>
+          <span>🔊</span>
+        </button>
+        <button id="btnPause" class="ios-icon-btn pause-btn" type="button" aria-label="إيقاف مؤقت" title="إيقاف مؤقت (P)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <rect x="6" y="4" width="4.5" height="16" rx="2" />
+            <rect x="13.5" y="4" width="4.5" height="16" rx="2" />
+          </svg>
+        </button>
       </div>
     </div>
 
-    <!-- Middle Game Viewport (Lifted above touch controls) -->
+    <!-- Main Game Viewport -->
     <div id="gameViewport" class="game-viewport">
       <canvas id="gameCanvas" width="1280" height="720"></canvas>
     </div>
 
-    <!-- Dedicated Bottom Multi-Touch Controls Dock (Never covers gameplay) -->
+    <!-- Bottom Ergonomic iOS Glass Multi-Touch Dock -->
     <div id="touchControls" class="touch-controls hidden">
       <div class="touch-left-pad">
-        <button class="touch-btn touch-dir" data-action="left" aria-label="يسار">◀</button>
-        <button class="touch-btn touch-dir" data-action="right" aria-label="يمين">▶</button>
-        <button class="touch-btn touch-crouch" data-action="down" aria-label="تسلل">⬇<span>تسلل</span></button>
+        <button class="touch-btn touch-dir" type="button" data-action="left" aria-label="يسار">◀</button>
+        <button class="touch-btn touch-dir" type="button" data-action="right" aria-label="يمين">▶</button>
+        <button class="touch-btn touch-crouch" type="button" data-action="down" aria-label="تسلل">⬇<span>تسلل</span></button>
       </div>
       <div class="touch-right-pad">
-        <button class="touch-btn touch-skill" data-action="nightvision" aria-label="رؤية ليلية">👁️<span>ليل</span></button>
-        <button class="touch-btn touch-skill" data-action="meow" aria-label="مواء">🔊<span>مواء</span></button>
-        <button class="touch-btn touch-jump" data-action="jump" aria-label="قفز">▲<span>قفز</span></button>
+        <button class="touch-btn touch-skill" type="button" data-action="nightvision" aria-label="رؤية ليلية">👁️<span>ليل</span></button>
+        <button class="touch-btn touch-skill" type="button" data-action="meow" aria-label="مواء">🔊<span>مواء</span></button>
+        <button class="touch-btn touch-jump" type="button" data-action="jump" aria-label="قفز">▲<span>قفز</span></button>
       </div>
     </div>
 
     <!-- Intro Video Cutscene Layer -->
     <div id="introLayer" class="intro-layer hidden">
-      <video id="introVideo" playsinline preload="auto"></video>
+      <video id="introVideo" playsinline preload="none"></video>
     </div>
     <div id="introHud" class="intro-hud hidden">
-      <div class="intro-credit">Dr. MAX MOUSA • THE WAY HOME: 7 LIVES</div>
-      <button id="btnSkipIntro" class="skip-btn">تخطي مشهد البداية ⏭</button>
+      <div class="intro-credit">Dr. MAX MOUSA • THE WAY HOME</div>
+      <button id="btnSkipIntro" class="skip-btn" type="button">تخطي ⏭</button>
     </div>
 
-    <!-- Game Over Video Layer (freezes on last frame as background for Restart button) -->
+    <!-- Game Over Video Layer -->
     <div id="gameOverLayer" class="gameover-layer hidden">
-      <video id="gameOverVideo" playsinline preload="auto" src="videos/game-over.mp4"></video>
+      <video id="gameOverVideo" playsinline preload="none" src="videos/game-over.mp4"></video>
       <div id="gameOverActions" class="gameover-actions hidden">
-        <button id="btnGameOverRestart" class="primary-btn">إعادة المرحلة ↻</button>
-        <button id="btnGameOverMenu" class="secondary-btn">القائمة الرئيسية ↩</button>
+        <button id="btnGameOverRevive" class="ios-btn ios-btn-gold" type="button">❤️ متابعة (50 🪙)</button>
+        <button id="btnGameOverRestart" class="ios-btn ios-btn-primary" type="button">إعادة المرحلة ↻</button>
+        <button id="btnGameOverMenu" class="ios-btn ios-btn-glass" type="button">المراحل ⊞</button>
       </div>
     </div>
 
     <!-- Final Victory Sequential Cutscene Layer (Win1 -> Win2) -->
     <div id="winLayer" class="gameover-layer hidden">
-      <video id="winVideo" playsinline preload="auto"></video>
+      <video id="winVideo" playsinline preload="none"></video>
       <div class="intro-hud">
-        <div class="intro-credit">Dr. MAX MOUSA • THE WAY HOME: 7 LIVES</div>
-        <button id="btnSkipWin" class="skip-btn">تخطي ⏭</button>
+        <div class="intro-credit">Dr. MAX MOUSA • THE WAY HOME</div>
+        <button id="btnSkipWin" class="skip-btn" type="button">تخطي ⏭</button>
       </div>
     </div>
 
-    <!-- Game Guide & Instructions Panel -->
-    <div id="guidePanel" class="guide-panel hidden">
-      <div class="guide-header">
-        <span>📖 دليل وإرشادات اللعبة — المرحلة 1</span>
-        <button id="btnCloseGuide" class="close-btn">✕</button>
-      </div>
-      <div class="guide-body">
-        <div class="guide-section">
-          <h4>🎯 الهدف من المرحلة</h4>
-          <p>ساعد <strong>مشمشة</strong> على عبور أزقة المدينة والوصول إلى <strong>بوابة السوق ←</strong> في نهاية المرحلة، مع الحفاظ على أرواحها (<strong>6/7</strong>) وجمع الأسماك الثلاث (<strong>3/3 🐟</strong>).</p>
-        </div>
+    <!-- Portrait Orientation Soft Hint -->
+    <div id="rotateHint" class="rotate-hint">🔄 أدر الهاتف أفقياً لأفضل تجربة لعب</div>
 
-        <div class="guide-section">
-          <h4>🎮 أزرار التحكم والمهارات</h4>
-          <div class="guide-grid">
-            <div class="guide-item"><kbd>A</kbd> <kbd>D</kbd> أو <kbd>◀</kbd> <kbd>▶</kbd><span>الجري يميناً ويساراً</span></div>
-            <div class="guide-item"><kbd>Space</kbd> / <kbd>W</kbd> / <kbd>▲</kbd><span>القفز، والقفز المتبادل على الجدران الطوبية</span></div>
-            <div class="guide-item"><kbd>Shift</kbd> / <kbd>S</kbd> / <kbd>▼</kbd><span>الانبطاح والتسلل (يقلل مدى رؤية الكلاب ويثبت التوازن على حبال الغسيل)</span></div>
-            <div class="guide-item"><kbd>E</kbd> أو <kbd>N</kbd><span>تفعيل <strong>الرؤية الليلية</strong> لكشف المنصات السرية الخضراء والأسماك المخفية</span></div>
-            <div class="guide-item"><kbd>Q</kbd> أو <kbd>F</kbd><span>إطلاق <strong>مواء</strong> لتشتيت الكلاب القريبة وإبعادها عن طريقك</span></div>
-            <div class="guide-item"><kbd>R</kbd> / <kbd>Tab</kbd><span>إعادة المرحلة من البداية / فتح أو إغلاق الإرشادات</span></div>
+    <!-- iOS Main Menu & Numbered Square Level Selector -->
+    <div id="startOverlay" class="overlay menu-overlay">
+      <div class="ios-sheet menu-sheet">
+        <div class="menu-topbar">
+          <div class="menu-brand">
+            <div class="brand-app-icon">🐱</div>
+            <div class="brand-text">
+              <h1>رحلة العودة</h1>
+              <span class="brand-sub">سبعة أرواح • 15 مرحلة</span>
+            </div>
+          </div>
+          <div class="menu-stats-bar">
+            <div class="stat-chip stars-chip" title="النجوم المجمّعة">
+              <span>★</span>
+              <span id="menuStarsCount">0/45</span>
+            </div>
+            <button id="btnMenuCoins" class="stat-chip coins-chip" type="button" title="رصيد العملات">
+              <span class="gold-coin-icon">★</span>
+              <span id="menuCoinsCount">50</span>
+            </button>
+            <button id="btnOpenShop" class="ios-btn ios-btn-gold shop-trigger-btn" type="button">
+              <span>🛒</span>
+              <span>المتجر</span>
+              <span id="shopBadgeDot" class="badge-dot hidden"></span>
+            </button>
           </div>
         </div>
 
-        <div class="guide-section">
-          <h4>🗺️ عناصر المرحلة والأخطار</h4>
-          <ul class="guide-list">
-            <li><strong>بيوت القطط الخشبية (نقاط الحفظ):</strong> عند المرور بها يضيء الفانوس وتتوهج بصمة الكف، وتُحفظ نقطة عودتك تلقائياً.</li>
-            <li><strong>الأسماك (🐟):</strong> توجد 3 أسماك؛ واحدة ظاهرة على حبل الغسيل الثاني، واثنتان فوق المنصات السرية لا تظهران إلا بالرؤية الليلية (<kbd>E</kbd>).</li>
-            <li><strong>المظلات الحمراء والفطر المضيء وعوامات الميناء:</strong> اقفز فوقها لتقذفك عالياً نحو الأسطح والأغصان وحبال السفن.</li>
-            <li><strong>الأخطار والأعداء:</strong> تجنب <strong>الكلاب الضالة</strong> (بالانبطاح <kbd>Shift</kbd> أو المواء <kbd>Q</kbd>)، و<strong>القنافذ والغربان</strong> في الحديقة، و<strong>سرطانات البحر وطيور النورس وجرذان الميناء</strong> في الميناء، و<strong>المياه العميقة</strong>.</li>
-          </ul>
+        <!-- Pure iOS Numbered Square Grid (Numbers ONLY — no names or images) -->
+        <div id="levelGrid" class="level-square-grid" role="list" aria-label="اختيار المرحلة"></div>
+
+        <div class="menu-bottom-bar">
+          <button id="btnQuickPlay" class="ios-btn ios-btn-primary quick-play-btn" type="button">العب المرحلة 1 ▶</button>
+          <div class="menu-footer">Dr. MAX MOUSA • 2026</div>
         </div>
       </div>
     </div>
 
-    <!-- Portrait Rotate Hint -->
-    <div id="rotateHint" class="rotate-hint">🔄 أدر الشاشة أفقياً لتجربة لعب أفضل</div>
+    <!-- iOS Pause Overlay -->
+    <div id="pauseOverlay" class="overlay hidden">
+      <div class="ios-sheet modal-sheet pause-sheet">
+        <div class="modal-pill-badge" id="pauseStageTag">المرحلة 1</div>
+        <h2 class="modal-title">إيقاف مؤقت</h2>
 
-    <!-- Title / Start Overlay -->
-    <div id="startOverlay" class="overlay">
-      <div class="overlay-card">
-        <div class="dev-credit">تطوير: د. ماكس موسى (Dr. MAX MOUSA) • إصدار 2026</div>
-        <h1>رحلة العودة: سبعة أرواح</h1>
-        <h2>The Way Home: 7 Lives — 8 Stages Adventure</h2>
-        <p class="story-blurb">
-          بعد سقطتها من شرفة المنزل بـ <strong>6 أرواح من أصل 7</strong>، تخوض <strong>مشمشة</strong> مغامرة مليئة بالتحديات عبر <strong>8 مراحل</strong> للعودة إلى البيت.
-        </p>
-        <div class="stage-grid">
-          <button id="btnStartGame" class="primary-btn stage-btn">1. أزقة الشارع الخلفية ▶</button>
-          <button id="btnStartStage2" class="secondary-btn stage-btn">2. السوق الليلي 🏮</button>
-          <button id="btnStartStage3" class="secondary-btn stage-btn">3. الحديقة العامة 🌳</button>
-          <button id="btnStartStage4" class="secondary-btn stage-btn">4. أعماق الحديقة 🌲</button>
-          <button id="btnStartStage5" class="secondary-btn stage-btn">5. الميناء الليلي ⚓</button>
-          <button id="btnStartStage6" class="secondary-btn stage-btn">6. أسطح ناطحات السحاب 🏙️</button>
-          <button id="btnStartStage7" class="secondary-btn stage-btn">7. محطة الأنفاق الكبرى 🚇</button>
-          <button id="btnStartStage8" class="secondary-btn stage-btn">8. الورشة العاصفة (النهاية) 🏗️</button>
+        <div class="pause-primary-stack">
+          <button id="btnResumeGame" class="ios-btn ios-btn-primary full-width" type="button">▶ متابعة اللعب</button>
+          <button id="btnPauseRefill" class="ios-btn ios-btn-gold full-width hidden" type="button">❤️ استعادة كل الأرواح (50 🪙)</button>
         </div>
-        <div class="menu-footer">تطوير: Dr. MAX MOUSA • © 2026</div>
+
+        <div class="pause-actions-row">
+          <button id="btnPauseRestart" class="ios-btn ios-btn-glass" type="button">↻ إعادة</button>
+          <button id="btnPauseShop" class="ios-btn ios-btn-glass" type="button">🛒 المتجر</button>
+          <button id="btnPauseMenu" class="ios-btn ios-btn-danger" type="button">⊞ المراحل</button>
+        </div>
+
+        <div class="pause-toggles-row">
+          <button id="btnMusic" class="ios-toggle-tile" type="button"><span>🎵</span><small>الموسيقى</small></button>
+          <button id="btnAudio" class="ios-toggle-tile" type="button"><span>🔊</span><small>المؤثرات</small></button>
+          <button id="btnDimBg" class="ios-toggle-tile" type="button"><span>🌓</span><small>التعتيم</small></button>
+          <button id="btnGuide" class="ios-toggle-tile" type="button"><span>📖</span><small>الدليل</small></button>
+        </div>
       </div>
     </div>
 
-    <!-- Stage Clear / Game Over Overlay -->
+    <!-- iOS Upgrade & Unlock Shop Modal -->
+    <div id="shopOverlay" class="overlay hidden">
+      <div class="ios-sheet shop-sheet">
+        <div class="shop-header">
+          <div class="shop-title-wrap">
+            <h2>🛒 متجر مشمشة</h2>
+            <span class="shop-subtitle">طوّر قدراتك وافتح الأزياء والمراحل بالعملات</span>
+          </div>
+          <div class="shop-header-left">
+            <div class="stat-chip coins-chip">
+              <span class="gold-coin-icon">★</span>
+              <span id="shopCoinsCount">0</span>
+            </div>
+            <button id="btnCloseShop" class="ios-close-btn" type="button" aria-label="إغلاق">✕</button>
+          </div>
+        </div>
+
+        <div class="ios-segmented" role="tablist">
+          <button class="seg-btn active" type="button" data-shop-tab="upgrades">⚡ التطويرات</button>
+          <button class="seg-btn" type="button" data-shop-tab="skins">✨ الأزياء</button>
+          <button class="seg-btn" type="button" data-shop-tab="boosts">🎟️ المزايا</button>
+        </div>
+
+        <div id="shopContent" class="shop-content"></div>
+      </div>
+    </div>
+
+    <!-- Game Guide Modal -->
+    <div id="guidePanel" class="overlay hidden">
+      <div class="ios-sheet modal-sheet guide-sheet">
+        <div class="shop-header">
+          <div class="shop-title-wrap">
+            <h2>📖 دليل اللعب</h2>
+          </div>
+          <button id="btnCloseGuide" class="ios-close-btn" type="button" aria-label="إغلاق">✕</button>
+        </div>
+        <div class="guide-body">
+          <div class="guide-section">
+            <h4>🎯 الهدف</h4>
+            <p>ساعد <strong>مشمشة</strong> على الوصول إلى البوابة في نهاية كل مرحلة، واجمع <strong>العملات الذهبية 🪙</strong> لتطوير مهاراتك وفتح الأزياء، واجمع <strong>3 أسماك 🐟</strong> لتحقيق <strong>3 نجوم ★</strong>.</p>
+          </div>
+          <div class="guide-section">
+            <h4>🎮 التحكم والمهارات</h4>
+            <div class="guide-grid">
+              <div class="guide-item"><span>◀ ▶</span><span>الجري يميناً ويساراً (أو A / D)</span></div>
+              <div class="guide-item"><span>▲</span><span>القفز والقفز الجداري (أو Space / W)</span></div>
+              <div class="guide-item"><span>⬇</span><span>التسلل لتقليل رؤية الكلاب والتوازن على الحبال (أو Shift)</span></div>
+              <div class="guide-item"><span>👁️</span><span><strong>الرؤية الليلية (E):</strong> تكشف المنصات والأسماك السرية</span></div>
+              <div class="guide-item"><span>🔊</span><span><strong>المواء (Q):</strong> يشتت الكلاب القريبة ويفتح لك الطريق</span></div>
+              <div class="guide-item"><span>⏸</span><span><strong>إيقاف مؤقت (P / Esc):</strong> لإيقاف اللعبة أو فتح المتجر</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage Clear / Victory Overlay -->
     <div id="endOverlay" class="overlay hidden">
-      <div class="overlay-card">
-        <div id="endBadge" class="dev-credit">STAGE 1 COMPLETE</div>
-        <h1 id="endTitle">وصلتِ إلى بوابة السوق!</h1>
-        <p id="endStats" class="story-blurb"></p>
+      <div class="ios-sheet modal-sheet end-sheet">
+        <div id="endBadge" class="modal-pill-badge">المرحلة 1 مكتملة</div>
+        <div id="endStarsRow" class="end-stars-row">
+          <span class="end-star">★</span>
+          <span class="end-star">★</span>
+          <span class="end-star">★</span>
+        </div>
+        <h1 id="endTitle" class="modal-title">أحسنت! 🎉</h1>
+        <div id="endStats" class="end-stats-card"></div>
         <div class="overlay-actions">
-          <button id="btnNextStage" class="primary-btn hidden">الانتقال إلى المرحلة 2 ▶</button>
-          <button id="btnRestartStage" class="secondary-btn">إعادة المرحلة ↻</button>
-          <button id="btnEndMenu" class="secondary-btn">القائمة الرئيسية ↩</button>
+          <button id="btnNextStage" class="ios-btn ios-btn-primary hidden" type="button">المرحلة التالية ▶</button>
+          <button id="btnEndShop" class="ios-btn ios-btn-gold" type="button">🛒 المتجر</button>
+          <button id="btnRestartStage" class="ios-btn ios-btn-glass" type="button">↻ إعادة</button>
+          <button id="btnEndMenu" class="ios-btn ios-btn-glass" type="button">⊞ المراحل</button>
         </div>
       </div>
     </div>
 
-    <!-- Exit to Main Menu Confirmation Modal -->
-    <div id="exitConfirmOverlay" class="overlay hidden">
-      <div class="overlay-card confirm-card">
-        <div class="dev-credit">تأكيد الخروج</div>
-        <h2>هل تريد العودة إلى القائمة الرئيسية؟</h2>
-        <p class="story-blurb">سيتم إيقاف المرحلة الحالية والعودة إلى شاشة اختيار المراحل.</p>
-        <div class="overlay-actions">
-          <button id="btnConfirmExit" class="primary-btn">نعم، خروج</button>
-          <button id="btnCancelExit" class="secondary-btn">متابعة اللعب</button>
-        </div>
-      </div>
-    </div>
+    <!-- Toast Notification -->
+    <div id="toastBanner" class="toast-banner hidden"></div>
   </div>
 
-  <script defer src="js/audio.js"></script>
-  <script defer src="js/particles.js"></script>
-  <script defer src="js/art.js"></script>
-  <script defer src="js/cat.js"></script>
-  <script defer src="js/level1.js"></script>
-  <script defer src="js/level2.js"></script>
-  <script defer src="js/level3.js"></script>
-  <script defer src="js/level4.js"></script>
-  <script defer src="js/level5.js"></script>
-  <script defer src="js/level6.js"></script>
-  <script defer src="js/level7.js"></script>
-  <script defer src="js/level8.js"></script>
-  <script defer src="js/game.js"></script>
+  <script defer src="js/store.js?v=5"></script>
+  <script defer src="js/audio.js?v=5"></script>
+  <script defer src="js/particles.js?v=5"></script>
+  <script defer src="js/art.js?v=10"></script>
+  <script defer src="js/art-extended.js?v=10"></script>
+  <script defer src="js/enemies-extended.js?v=10"></script>
+  <script defer src="js/cat.js?v=10"></script>
+  <script defer src="js/level1.js?v=5"></script>
+  <script defer src="js/level2.js?v=5"></script>
+  <script defer src="js/level3.js?v=5"></script>
+  <script defer src="js/level4.js?v=5"></script>
+  <script defer src="js/level5.js?v=5"></script>
+  <script defer src="js/level6.js?v=5"></script>
+  <script defer src="js/level7.js?v=5"></script>
+  <script defer src="js/level8.js?v=5"></script>
+  <script defer src="js/level9.js?v=5"></script>
+  <script defer src="js/level10.js?v=5"></script>
+  <script defer src="js/level11.js?v=5"></script>
+  <script defer src="js/level12.js?v=5"></script>
+  <script defer src="js/level13.js?v=5"></script>
+  <script defer src="js/level14.js?v=5"></script>
+  <script defer src="js/level15.js?v=9"></script>
+  <script defer src="js/game.js?v=9"></script>
   <script>
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js').catch(() => {});
       });

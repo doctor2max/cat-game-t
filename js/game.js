@@ -2,10 +2,27 @@ window.Game = window.Game || {};
 
 (function () {
   const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
+  const LOGICAL_W = 1280;
+  const LOGICAL_H = 720;
+  const RENDER_SCALE = 0.85; // Crisp Retina look while maintaining locked 60fps on mobile GPUs
+  canvas.width = Math.round(LOGICAL_W * RENDER_SCALE);
+  canvas.height = Math.round(LOGICAL_H * RENDER_SCALE);
+  const ctx = canvas.getContext('2d', { alpha: false });
+  try {
+    // Disable expensive Canvas 2D Gaussian shadowBlur on mobile GPUs
+    Object.defineProperty(ctx, 'shadowBlur', {
+      get() { return 0; },
+      set() {},
+      configurable: true,
+    });
+  } catch (e) {}
+
+  const Store = window.Game.Store;
   const Audio = window.Game.Audio;
   const Particles = window.Game.Particles;
   const Art = window.Game.Art;
+  const EnemiesExt = window.Game.EnemiesExtended;
+  const TOTAL_STAGES = Store.TOTAL_STAGES;
 
   // UI Elements
   const introLayer = document.getElementById('introLayer');
@@ -16,54 +33,67 @@ window.Game = window.Game || {};
   const gameOverLayer = document.getElementById('gameOverLayer');
   const gameOverVideo = document.getElementById('gameOverVideo');
   const gameOverActions = document.getElementById('gameOverActions');
+  const btnGameOverRevive = document.getElementById('btnGameOverRevive');
   const btnGameOverRestart = document.getElementById('btnGameOverRestart');
+  const btnGameOverMenu = document.getElementById('btnGameOverMenu');
 
   const winLayer = document.getElementById('winLayer');
   const winVideo = document.getElementById('winVideo');
   const btnSkipWin = document.getElementById('btnSkipWin');
 
   const hud = document.getElementById('hud');
-  const controlsBar = document.getElementById('controlsBar');
+  const touchControls = document.getElementById('touchControls');
   const startOverlay = document.getElementById('startOverlay');
-  const endOverlay = document.getElementById('endOverlay');
-  const endBadge = document.getElementById('endBadge');
-  const endTitle = document.getElementById('endTitle');
-  const endStats = document.getElementById('endStats');
+  const levelGrid = document.getElementById('levelGrid');
+  const btnQuickPlay = document.getElementById('btnQuickPlay');
+  const menuCoinsCount = document.getElementById('menuCoinsCount');
+  const menuStarsCount = document.getElementById('menuStarsCount');
+  const btnMenuCoins = document.getElementById('btnMenuCoins');
+  const btnOpenShop = document.getElementById('btnOpenShop');
+  const shopBadgeDot = document.getElementById('shopBadgeDot');
 
   const livesBar = document.getElementById('livesBar');
   const livesCount = document.getElementById('livesCount');
+  const shieldBadge = document.getElementById('shieldBadge');
   const treatsCount = document.getElementById('treatsCount');
+  const hudCoinsCard = document.getElementById('hudCoinsCard');
+  const hudCoinsCount = document.getElementById('hudCoinsCount');
+  const stageBadge = document.getElementById('stageBadge');
   const skillNightVision = document.getElementById('skillNightVision');
   const skillMeow = document.getElementById('skillMeow');
+  const btnPause = document.getElementById('btnPause');
 
-  const stageBadge = document.getElementById('stageBadge');
-  const btnGuide = document.getElementById('btnGuide');
-  const btnCloseGuide = document.getElementById('btnCloseGuide');
-  const btnMainMenu = document.getElementById('btnMainMenu');
-  const btnGameOverMenu = document.getElementById('btnGameOverMenu');
-  const btnEndMenu = document.getElementById('btnEndMenu');
-  const exitConfirmOverlay = document.getElementById('exitConfirmOverlay');
-  const btnConfirmExit = document.getElementById('btnConfirmExit');
-  const btnCancelExit = document.getElementById('btnCancelExit');
+  const pauseOverlay = document.getElementById('pauseOverlay');
+  const pauseStageTag = document.getElementById('pauseStageTag');
+  const btnResumeGame = document.getElementById('btnResumeGame');
+  const btnPauseRefill = document.getElementById('btnPauseRefill');
+  const btnPauseRestart = document.getElementById('btnPauseRestart');
+  const btnPauseShop = document.getElementById('btnPauseShop');
+  const btnPauseMenu = document.getElementById('btnPauseMenu');
   const btnDimBg = document.getElementById('btnDimBg');
-  const btnFullscreen = document.getElementById('btnFullscreen');
   const btnMusic = document.getElementById('btnMusic');
   const btnAudio = document.getElementById('btnAudio');
-  const btnHudMenu = document.getElementById('btnHudMenu');
-  const hudDropdown = document.getElementById('hudDropdown');
-  const touchControls = document.getElementById('touchControls');
-  const btnStartGame = document.getElementById('btnStartGame');
-  const btnStartStage2 = document.getElementById('btnStartStage2');
-  const btnStartStage3 = document.getElementById('btnStartStage3');
-  const btnStartStage4 = document.getElementById('btnStartStage4');
-  const btnStartStage5 = document.getElementById('btnStartStage5');
-  const btnStartStage6 = document.getElementById('btnStartStage6');
-  const btnStartStage7 = document.getElementById('btnStartStage7');
-  const btnStartStage8 = document.getElementById('btnStartStage8');
-  const btnNextStage = document.getElementById('btnNextStage');
-  const btnRestartStage = document.getElementById('btnRestartStage');
+  const btnGuide = document.getElementById('btnGuide');
+  const guidePanel = document.getElementById('guidePanel');
+  const btnCloseGuide = document.getElementById('btnCloseGuide');
 
-  const STORAGE_KEY = 'theWayHome_maxUnlockedStage';
+  const shopOverlay = document.getElementById('shopOverlay');
+  const shopCoinsCount = document.getElementById('shopCoinsCount');
+  const shopContent = document.getElementById('shopContent');
+  const btnCloseShop = document.getElementById('btnCloseShop');
+
+  const endOverlay = document.getElementById('endOverlay');
+  const endBadge = document.getElementById('endBadge');
+  const endStarsRow = document.getElementById('endStarsRow');
+  const endTitle = document.getElementById('endTitle');
+  const endStats = document.getElementById('endStats');
+  const btnNextStage = document.getElementById('btnNextStage');
+  const btnEndShop = document.getElementById('btnEndShop');
+  const btnRestartStage = document.getElementById('btnRestartStage');
+  const btnEndMenu = document.getElementById('btnEndMenu');
+
+  const toastBanner = document.getElementById('toastBanner');
+
   const DIM_BG_KEY = 'theWayHome_dimBg';
   let dimBackground = false;
   try {
@@ -71,47 +101,42 @@ window.Game = window.Game || {};
   } catch (e) {}
   if (btnDimBg) btnDimBg.classList.toggle('active', dimBackground);
 
-  let maxUnlockedStage = 1;
-  try {
-    const saved = parseInt(localStorage.getItem(STORAGE_KEY), 10);
-    if (!isNaN(saved) && saved >= 1 && saved <= 8) maxUnlockedStage = saved;
-  } catch (e) {}
+  // Subtle mobile haptic helper
+  function haptic(ms = 10) {
+    try {
+      if (navigator.vibrate) navigator.vibrate(ms);
+    } catch (e) {}
+  }
 
-  const stageButtons = [
-    null,
-    btnStartGame,
-    btnStartStage2,
-    btnStartStage3,
-    btnStartStage4,
-    btnStartStage5,
-    btnStartStage6,
-    btnStartStage7,
-    btnStartStage8,
-  ];
-  const stageBaseLabels = stageButtons.map((b) => (b ? b.textContent : ''));
-
-  function syncStageButtons() {
-    for (let s = 2; s <= 8; s++) {
-      const btn = stageButtons[s];
-      if (!btn) continue;
-      const locked = s > maxUnlockedStage;
-      btn.disabled = locked;
-      btn.classList.toggle('locked', locked);
-      btn.textContent = locked ? `🔒 ${stageBaseLabels[s]}` : stageBaseLabels[s];
-    }
+  let toastTimer = null;
+  function showToast(msg) {
+    if (!toastBanner) return;
+    toastBanner.textContent = msg;
+    toastBanner.classList.remove('hidden');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toastBanner.classList.add('hidden');
+    }, 2200);
   }
 
   let currentStage = 1;
   let level = null;
   let catCtrl = null;
   let running = false;
+  let paused = false;
   let playingCanvasIntro = false;
   let canvasIntroTimer = 0;
   let elapsedTime = 0;
   let collectedTreats = 0;
+  let stageCoinsEarned = 0;
+  let coinCombo = 0;
+  let coinComboTimer = 0;
+  let shakeTimer = 0;
   let camX = 0;
   let camY = 0;
   let lastTime = 0;
+  let shopReturnTarget = 'menu'; // 'menu' | 'pause' | 'end'
+  let activeShopTab = 'upgrades';
 
   const input = {
     left: false,
@@ -122,58 +147,252 @@ window.Game = window.Game || {};
     jumpPressed: false,
   };
 
+  function createLevelByNumber(num) {
+    const fn = window.Game['createLevel' + num];
+    if (typeof fn === 'function') return fn();
+    return window.Game.createLevel1();
+  }
+
+  function hasShopNotification() {
+    if (Store.canClaimDailyBonus()) return true;
+    const coins = Store.getCoins();
+    for (const u of Store.UPGRADES) {
+      const cost = Store.getUpgradeCost(u.id);
+      if (cost !== null && coins >= cost) return true;
+    }
+    return false;
+  }
+
+  function syncCoinDisplays(animateHud = false) {
+    const coins = Store.getCoins();
+    if (menuCoinsCount) menuCoinsCount.textContent = String(coins);
+    if (hudCoinsCount) hudCoinsCount.textContent = String(coins);
+    if (shopCoinsCount) shopCoinsCount.textContent = String(coins);
+    if (menuStarsCount) menuStarsCount.textContent = `${Store.getTotalStars()}/${TOTAL_STAGES * 3}`;
+    if (shopBadgeDot) shopBadgeDot.classList.toggle('hidden', !hasShopNotification());
+    if (animateHud && hudCoinsCard) {
+      hudCoinsCard.classList.remove('pop');
+      void hudCoinsCard.offsetWidth;
+      hudCoinsCard.classList.add('pop');
+      setTimeout(() => hudCoinsCard.classList.remove('pop'), 180);
+    }
+  }
+
+  // Render pure iPhone-style numbered square tiles (Numbers ONLY — no names or images)
+  function renderLevelGrid() {
+    if (!levelGrid) return;
+    levelGrid.innerHTML = '';
+    const maxUnlocked = Store.getMaxUnlockedStage();
+    let nextPlayStage = maxUnlocked;
+    for (let s = 1; s <= maxUnlocked; s++) {
+      if (!Store.isStageCleared(s)) {
+        nextPlayStage = s;
+        break;
+      }
+    }
+
+    for (let s = 1; s <= TOTAL_STAGES; s++) {
+      const locked = s > maxUnlocked;
+      const cleared = Store.isStageCleared(s);
+      const isCurrent = s === nextPlayStage && !cleared;
+      const stars = Store.getStageStars(s);
+
+      const tile = document.createElement('button');
+      tile.type = 'button';
+      tile.className =
+        'level-tile ' +
+        (locked ? 'locked' : isCurrent ? 'current' : cleared ? 'completed' : 'unlocked');
+      tile.setAttribute('aria-label', `المرحلة ${s}`);
+
+      const numSpan = document.createElement('span');
+      numSpan.className = 'level-tile-num';
+      numSpan.textContent = String(s);
+      tile.appendChild(numSpan);
+
+      if (locked) {
+        const lockSpan = document.createElement('span');
+        lockSpan.className = 'tile-lock-icon';
+        lockSpan.textContent = '🔒';
+        tile.appendChild(lockSpan);
+      } else {
+        const starsWrap = document.createElement('div');
+        starsWrap.className = 'level-tile-stars';
+        for (let i = 1; i <= 3; i++) {
+          const st = document.createElement('span');
+          st.className = 'tile-star' + (i <= stars ? ' earned' : '');
+          st.textContent = '★';
+          starsWrap.appendChild(st);
+        }
+        tile.appendChild(starsWrap);
+      }
+
+      tile.addEventListener('click', () => {
+        Audio.ensureCtx();
+        if (locked) {
+          haptic(18);
+          showToast('أكمل المرحلة السابقة أو افتحها من المتجر 🛒');
+          return;
+        }
+        Audio.playUiClick();
+        haptic(10);
+        startStageFromMenu(s);
+      });
+
+      levelGrid.appendChild(tile);
+    }
+
+    if (btnQuickPlay) {
+      btnQuickPlay.textContent = `العب المرحلة ${nextPlayStage} ▶`;
+      btnQuickPlay.dataset.targetStage = String(nextPlayStage);
+    }
+    syncCoinDisplays();
+  }
+
+  function startStageFromMenu(stageNum) {
+    startOverlay.classList.add('hidden');
+    initLevel(stageNum);
+    if (stageNum === 1 && !Store.isStageCleared(1)) {
+      startIntroSequence();
+    } else {
+      enterGameplay();
+    }
+  }
+
+  // Universal Checkpoint Safe Zone Enforcement (guarantees 100% of checkpoints in Stages 1-15 remain completely hazard-free!)
+  function isInCheckpointSafeZone(lv, x, y, w = 48, h = 40) {
+    if (!lv || !lv.checkpoints) return null;
+    const cx = x + w / 2;
+    const bottomY = y + h;
+    for (const cp of lv.checkpoints) {
+      const cpCx = cp.x + 18;
+      const cpBottom = cp.y + 32;
+      if (Math.abs(bottomY - cpBottom) < 75 && Math.abs(cx - cpCx) < 96) {
+        return cp;
+      }
+    }
+    return null;
+  }
+
+  function enforceCheckpointSafeZones(lv) {
+    if (!lv || !lv.checkpoints) return;
+    const patrolLists = [
+      lv.dogs, lv.hedgehogs, lv.crabs, lv.rats, lv.raccoons,
+      lv.security_bots, lv.foxes, lv.clockwork_beetles, lv.skunks,
+      lv.badgers, lv.bridge_rovers, lv.dobermans, lv.rival_cats, lv.hover_saws,
+    ];
+    for (const list of patrolLists) {
+      if (!list) continue;
+      for (const e of list) {
+        if (e.minX === undefined || e.maxX === undefined) continue;
+        const ew = e.w || 48;
+        const eh = e.h || 40;
+        for (const cp of lv.checkpoints) {
+          const cpCx = cp.x + 18;
+          const cpBottom = cp.y + 32;
+          if (Math.abs((e.y + eh) - cpBottom) >= 75) continue;
+          const safeLeft = cpCx - 96 - ew;
+          const safeRight = cpCx + 96;
+          if (e.maxX > safeLeft && e.minX < safeRight) {
+            // Trim patrol range away from the checkpoint safe zone
+            const mid = (e.minX + e.maxX) / 2;
+            if (mid >= cpCx) {
+              e.minX = Math.max(e.minX, safeRight);
+              if (e.x < e.minX) e.x = e.minX;
+            } else {
+              e.maxX = Math.min(e.maxX, safeLeft);
+              if (e.x > e.maxX) e.x = e.maxX;
+            }
+          }
+        }
+      }
+    }
+  }
+
   function initLevel(stageNum) {
     if (typeof stageNum === 'number') currentStage = stageNum;
-    level =
-      currentStage === 8
-        ? window.Game.createLevel8()
-        : currentStage === 7
-        ? window.Game.createLevel7()
-        : currentStage === 6
-        ? window.Game.createLevel6()
-        : currentStage === 5
-        ? window.Game.createLevel5()
-        : currentStage === 4
-        ? window.Game.createLevel4()
-        : currentStage === 3
-        ? window.Game.createLevel3()
-        : currentStage === 2
-        ? window.Game.createLevel2()
-        : window.Game.createLevel1();
-    const shortStageTitles = {
-      1: 'المرحلة 1: الأزقة',
-      2: 'المرحلة 2: السوق',
-      3: 'المرحلة 3: الحديقة',
-      4: 'المرحلة 4: أعماق الحديقة',
-      5: 'المرحلة 5: الميناء',
-      6: 'المرحلة 6: الأسطح',
-      7: 'المرحلة 7: المترو',
-      8: 'المرحلة 8: الورشة',
-    };
-    stageBadge.textContent = shortStageTitles[currentStage] || `المرحلة ${currentStage}`;
+    level = createLevelByNumber(currentStage);
+    enforceCheckpointSafeZones(level);
+    Store.ensureLevelCoins(level, currentStage);
+    stageBadge.textContent = String(currentStage);
+    if (pauseStageTag) pauseStageTag.textContent = `المرحلة ${currentStage}`;
     Audio.setMusicTrack(level.theme);
+
     catCtrl = window.Game.Cat(level.startX, level.startY);
+    catCtrl.applyUpgrades(Store.getBonuses(), false);
+
     Particles.clear();
     elapsedTime = 0;
     collectedTreats = 0;
+    stageCoinsEarned = 0;
+    coinCombo = 0;
+    coinComboTimer = 0;
+    shakeTimer = 0;
+    paused = false;
     camX = 0;
     camY = 0;
+
+    // Reset touch button visuals
+    const nvBtn = document.querySelector('.touch-skill[data-action="nightvision"]');
+    if (nvBtn) nvBtn.classList.remove('active');
+    const meowBtn = document.querySelector('.touch-skill[data-action="meow"]');
+    if (meowBtn) meowBtn.classList.remove('cooldown');
+
+    hudState.lives = -1;
+    hudState.maxLives = -1;
+    hudState.treats = -1;
+    hudState.nv = null;
+    hudState.meowCd = null;
+    hudState.shield = null;
     updateHUD();
+    syncCoinDisplays();
   }
+
+  const hudState = { lives: -1, maxLives: -1, treats: -1, nv: null, meowCd: null, shield: null };
+  let lifeSegs = [];
 
   function updateHUD() {
     if (!catCtrl) return;
     const c = catCtrl.cat;
-    livesCount.textContent = `${c.lives}/${c.maxLives}`;
-    livesBar.innerHTML = '';
-    for (let i = 0; i < c.maxLives; i++) {
-      const seg = document.createElement('div');
-      seg.className = 'life-seg' + (i < c.lives ? ' active' : '');
-      livesBar.appendChild(seg);
+    if (hudState.maxLives !== c.maxLives) {
+      hudState.maxLives = c.maxLives;
+      livesBar.innerHTML = '';
+      lifeSegs = [];
+      for (let i = 0; i < c.maxLives; i++) {
+        const seg = document.createElement('div');
+        seg.className = 'life-seg';
+        livesBar.appendChild(seg);
+        lifeSegs.push(seg);
+      }
+      hudState.lives = -1;
     }
-    treatsCount.textContent = `${collectedTreats}/3`;
-    skillNightVision.classList.toggle('active', c.nightVision);
-    skillMeow.classList.toggle('cooldown', c.meowCooldown > 0);
+    if (hudState.lives !== c.lives) {
+      hudState.lives = c.lives;
+      livesCount.textContent = `${c.lives}/${c.maxLives}`;
+      for (let i = 0; i < lifeSegs.length; i++) {
+        lifeSegs[i].classList.toggle('active', i < c.lives);
+      }
+    }
+    if (hudState.shield !== c.shieldActive) {
+      hudState.shield = c.shieldActive;
+      if (shieldBadge) shieldBadge.classList.toggle('hidden', !c.shieldActive);
+    }
+    if (hudState.treats !== collectedTreats) {
+      hudState.treats = collectedTreats;
+      treatsCount.textContent = `${collectedTreats}/3`;
+    }
+    if (hudState.nv !== c.nightVision) {
+      hudState.nv = c.nightVision;
+      if (skillNightVision) skillNightVision.classList.toggle('active', c.nightVision);
+      const nvBtn = document.querySelector('.touch-skill[data-action="nightvision"]');
+      if (nvBtn) nvBtn.classList.toggle('active', c.nightVision);
+    }
+    const isMeowCd = c.meowCooldown > 0;
+    if (hudState.meowCd !== isMeowCd) {
+      hudState.meowCd = isMeowCd;
+      if (skillMeow) skillMeow.classList.toggle('cooldown', isMeowCd);
+      const meowBtn = document.querySelector('.touch-skill[data-action="meow"]');
+      if (meowBtn) meowBtn.classList.toggle('cooldown', isMeowCd);
+    }
   }
 
   function clearAllInputs() {
@@ -183,77 +402,410 @@ window.Game = window.Game || {};
     input.shift = false;
     input.jumpHeld = false;
     input.jumpPressed = false;
+    if (touchControls) {
+      touchControls.querySelectorAll('.touch-btn.pressed').forEach((b) => b.classList.remove('pressed'));
+    }
   }
 
-  // Official Intro Video Flow (uses intro.mp4 directly)
+  // =========================================================================
+  // PAUSE SYSTEM
+  // =========================================================================
+  function openPauseMenu() {
+    if (!running || paused) return;
+    paused = true;
+    running = false;
+    clearAllInputs();
+    Audio.setChaseMode(false);
+    Audio.pauseMusic();
+    Audio.playUiClick();
+    if (touchControls) touchControls.classList.add('hidden');
+    if (pauseStageTag) pauseStageTag.textContent = `المرحلة ${currentStage}`;
+
+    // Show life refill option if missing lives
+    if (btnPauseRefill && catCtrl) {
+      const needsLives = catCtrl.cat.lives < catCtrl.cat.maxLives;
+      btnPauseRefill.classList.toggle('hidden', !needsLives);
+      btnPauseRefill.disabled = Store.getCoins() < Store.LIFE_REFILL_COST;
+    }
+
+    syncToggleButtons();
+    pauseOverlay.classList.remove('hidden');
+  }
+
+  function resumeFromPause() {
+    if (!paused) return;
+    paused = false;
+    pauseOverlay.classList.add('hidden');
+    if (guidePanel) guidePanel.classList.add('hidden');
+    if (touchControls) touchControls.classList.remove('hidden');
+    Audio.playUiClick();
+    Audio.resumeMusic();
+    lastTime = 0;
+    running = true;
+  }
+
+  function syncToggleButtons() {
+    if (btnDimBg) btnDimBg.classList.toggle('active', dimBackground);
+    if (btnMusic) btnMusic.classList.toggle('muted', Audio.isMusicMuted());
+    if (btnAudio) {
+      const muted = Audio.isSfxMuted();
+      btnAudio.classList.toggle('muted', muted);
+      const icon = btnAudio.querySelector('span');
+      if (icon) icon.textContent = muted ? '🔇' : '🔊';
+    }
+  }
+
+  // Auto-pause if mobile app / tab is backgrounded
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && running && !paused) {
+      openPauseMenu();
+    }
+  });
+
+  // =========================================================================
+  // iOS SHOP SYSTEM
+  // =========================================================================
+  function openShop(from) {
+    shopReturnTarget = from;
+    Audio.playUiClick();
+    if (from === 'menu') startOverlay.classList.add('hidden');
+    if (from === 'pause') pauseOverlay.classList.add('hidden');
+    if (from === 'end') endOverlay.classList.add('hidden');
+    renderShopContent();
+    shopOverlay.classList.remove('hidden');
+  }
+
+  function closeShop() {
+    Audio.playUiClick();
+    shopOverlay.classList.add('hidden');
+    // Live-apply any purchased upgrades/skins if mid-game!
+    if (catCtrl) {
+      catCtrl.applyUpgrades(Store.getBonuses(), true);
+      updateHUD();
+    }
+    if (shopReturnTarget === 'menu') {
+      renderLevelGrid();
+      startOverlay.classList.remove('hidden');
+    } else if (shopReturnTarget === 'pause') {
+      if (btnPauseRefill && catCtrl) {
+        btnPauseRefill.classList.toggle('hidden', catCtrl.cat.lives >= catCtrl.cat.maxLives);
+        btnPauseRefill.disabled = Store.getCoins() < Store.LIFE_REFILL_COST;
+      }
+      pauseOverlay.classList.remove('hidden');
+    } else if (shopReturnTarget === 'end') {
+      endOverlay.classList.remove('hidden');
+    }
+  }
+
+  function renderShopContent() {
+    if (!shopContent) return;
+    syncCoinDisplays();
+    shopContent.innerHTML = '';
+
+    document.querySelectorAll('.seg-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-shop-tab') === activeShopTab);
+    });
+
+    const coins = Store.getCoins();
+
+    if (activeShopTab === 'upgrades') {
+      for (const u of Store.UPGRADES) {
+        const lv = Store.getUpgradeLevel(u.id);
+        const cost = Store.getUpgradeCost(u.id);
+        const isMax = cost === null;
+
+        const card = document.createElement('div');
+        card.className = 'shop-item-card';
+
+        let pipsHtml = '';
+        for (let i = 0; i < u.maxLevel; i++) {
+          pipsHtml += `<span class="lv-pip ${i < lv ? 'filled' : ''}"></span>`;
+        }
+
+        card.innerHTML = `
+          <div class="shop-item-main">
+            <div class="shop-item-icon">${u.icon}</div>
+            <div class="shop-item-info">
+              <div class="shop-item-title">${u.name}</div>
+              <div class="shop-item-desc">${u.desc}</div>
+              <div class="shop-level-pips">
+                ${pipsHtml}
+                <span class="lv-effect-tag">${u.effectLabels[lv]}</span>
+              </div>
+            </div>
+          </div>
+          <button class="ios-btn ${isMax ? 'shop-buy-btn maxed' : 'ios-btn-gold shop-buy-btn'}" type="button" ${isMax || coins < cost ? 'disabled' : ''}>
+            ${isMax ? '✓ مكتمل' : `${cost} <span class="gold-coin-icon">★</span>`}
+          </button>
+        `;
+
+        const buyBtn = card.querySelector('button');
+        if (!isMax) {
+          buyBtn.addEventListener('click', () => {
+            const res = Store.buyUpgrade(u.id);
+            if (res.ok) {
+              Audio.playPurchase();
+              haptic(16);
+              if (catCtrl) {
+                catCtrl.applyUpgrades(Store.getBonuses(), true);
+                updateHUD();
+              }
+              showToast(`تم تطوير ${u.name} إلى المستوى ${res.level}! ⚡`);
+              renderShopContent();
+            }
+          });
+        }
+        shopContent.appendChild(card);
+      }
+    } else if (activeShopTab === 'skins') {
+      const grid = document.createElement('div');
+      grid.className = 'shop-grid';
+      const equipped = Store.getEquippedSkin();
+
+      for (const s of Store.SKINS) {
+        const owned = Store.isSkinOwned(s.id);
+        const isEquipped = equipped === s.id;
+
+        const card = document.createElement('div');
+        card.className = 'shop-item-card skin-card' + (isEquipped ? ' equipped' : '');
+        card.innerHTML = `
+          <div class="shop-item-main">
+            <div class="shop-item-icon" style="border: 1px solid ${s.accent}66;">${s.icon}</div>
+            <div class="shop-item-info">
+              <div class="shop-item-title">${s.name}</div>
+              <div class="shop-item-desc">${s.perk}</div>
+            </div>
+          </div>
+          <button class="ios-btn ${isEquipped ? 'shop-buy-btn maxed' : owned ? 'ios-btn-glass shop-buy-btn' : 'ios-btn-gold shop-buy-btn'}" type="button" ${!owned && coins < s.cost ? 'disabled' : ''}>
+            ${isEquipped ? '✓ مُجهّز' : owned ? 'تجهيز' : `فتح • ${s.cost} <span class="gold-coin-icon">★</span>`}
+          </button>
+        `;
+
+        const btn = card.querySelector('button');
+        btn.addEventListener('click', () => {
+          if (isEquipped) return;
+          const res = Store.buyOrEquipSkin(s.id);
+          if (res.ok) {
+            Audio.playPurchase();
+            haptic(14);
+            if (catCtrl) catCtrl.applyUpgrades(Store.getBonuses(), true);
+            showToast(res.action === 'bought' ? `تم فتح ${s.name}! ✨` : `تم تجهيز ${s.name}`);
+            renderShopContent();
+          }
+        });
+        grid.appendChild(card);
+      }
+      shopContent.appendChild(grid);
+    } else {
+      // Boosts & Tickets Tab
+      const dailyAvailable = Store.canClaimDailyBonus();
+      const dailyCard = document.createElement('div');
+      dailyCard.className = 'shop-item-card';
+      dailyCard.innerHTML = `
+        <div class="shop-item-main">
+          <div class="shop-item-icon">🎁</div>
+          <div class="shop-item-info">
+            <div class="shop-item-title">هدية اليوم المجانية</div>
+            <div class="shop-item-desc">احصل على ${Store.DAILY_BONUS_AMOUNT} عملة ذهبية مجانية كل يوم</div>
+          </div>
+        </div>
+        <button class="ios-btn ${dailyAvailable ? 'ios-btn-gold' : 'maxed'} shop-buy-btn" type="button" ${!dailyAvailable ? 'disabled' : ''}>
+          ${dailyAvailable ? `+${Store.DAILY_BONUS_AMOUNT} <span class="gold-coin-icon">★</span>` : '✓ تم الاستلام'}
+        </button>
+      `;
+      dailyCard.querySelector('button').addEventListener('click', () => {
+        const res = Store.claimDailyBonus();
+        if (res.ok) {
+          Audio.playPurchase();
+          haptic(18);
+          showToast(`تمت إضافة +${res.amount} عملة ذهبية! 🎁`);
+          renderShopContent();
+        }
+      });
+      shopContent.appendChild(dailyCard);
+
+      const nextLocked = Store.getMaxUnlockedStage() + 1;
+      const allUnlocked = Store.getMaxUnlockedStage() >= TOTAL_STAGES;
+      const unlockCard = document.createElement('div');
+      unlockCard.className = 'shop-item-card';
+      unlockCard.innerHTML = `
+        <div class="shop-item-main">
+          <div class="shop-item-icon">🔓</div>
+          <div class="shop-item-info">
+            <div class="shop-item-title">${allUnlocked ? 'جميع المراحل مفتوحة!' : `فتح المرحلة ${nextLocked} فوراً`}</div>
+            <div class="shop-item-desc">تذكرة فتح المرحلة التالية مباشرة بدون انتظار</div>
+          </div>
+        </div>
+        <button class="ios-btn ${allUnlocked ? 'maxed' : 'ios-btn-gold'} shop-buy-btn" type="button" ${allUnlocked || coins < Store.UNLOCK_STAGE_COST ? 'disabled' : ''}>
+          ${allUnlocked ? '✓ مفتوحة' : `${Store.UNLOCK_STAGE_COST} <span class="gold-coin-icon">★</span>`}
+        </button>
+      `;
+      unlockCard.querySelector('button').addEventListener('click', () => {
+        const res = Store.unlockNextStageWithCoins();
+        if (res.ok) {
+          Audio.playPurchase();
+          haptic(20);
+          showToast(`تم فتح المرحلة ${res.unlockedStage}! 🔓`);
+          renderShopContent();
+        }
+      });
+      shopContent.appendChild(unlockCard);
+
+      if (catCtrl && paused) {
+        const full = catCtrl.cat.lives >= catCtrl.cat.maxLives;
+        const refillCard = document.createElement('div');
+        refillCard.className = 'shop-item-card';
+        refillCard.innerHTML = `
+          <div class="shop-item-main">
+            <div class="shop-item-icon">❤️</div>
+            <div class="shop-item-info">
+              <div class="shop-item-title">جرعة استعادة الأرواح</div>
+              <div class="shop-item-desc">تملأ جميع أرواح مشمشة والدرع فوراً في المرحلة الحالية</div>
+            </div>
+          </div>
+          <button class="ios-btn ${full ? 'maxed' : 'ios-btn-gold'} shop-buy-btn" type="button" ${full || coins < Store.LIFE_REFILL_COST ? 'disabled' : ''}>
+            ${full ? '✓ ممتلئة' : `${Store.LIFE_REFILL_COST} 🪙`}
+          </button>
+        `;
+        refillCard.querySelector('button').addEventListener('click', () => {
+          if (Store.spendCoins(Store.LIFE_REFILL_COST)) {
+            catCtrl.cat.lives = catCtrl.cat.maxLives;
+            if (catCtrl.cat.shieldEnabled) catCtrl.cat.shieldActive = true;
+            Audio.playPurchase();
+            haptic(16);
+            updateHUD();
+            showToast('تمت استعادة جميع الأرواح! ❤️');
+            renderShopContent();
+          }
+        });
+        shopContent.appendChild(refillCard);
+      }
+    }
+  }
+
+  document.querySelectorAll('.seg-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      Audio.playUiClick();
+      activeShopTab = btn.getAttribute('data-shop-tab');
+      renderShopContent();
+    });
+  });
+
+  // =========================================================================
+  // INTRO & GAMEPLAY ENTRY
+  // =========================================================================
   function enterGameplay() {
     playingCanvasIntro = false;
+    paused = false;
     introLayer.classList.add('hidden');
     if (introHud) introHud.classList.add('hidden');
     introVideo.pause();
     hud.classList.remove('hidden');
-    if (controlsBar) controlsBar.classList.remove('hidden');
     if (touchControls) touchControls.classList.remove('hidden');
     Audio.startMusic();
+    lastTime = 0;
     running = true;
-    Particles.spawnPopup(catCtrl.cat.x + 20, catCtrl.cat.y - 24, 'LIVES: 6/7', '#6ce5ff');
+    Particles.spawnPopup(catCtrl.cat.x + 20, catCtrl.cat.y - 24, `المرحلة ${currentStage}`, '#7dd3fc');
   }
 
   function startIntroSequence() {
     startOverlay.classList.add('hidden');
     if (introHud) introHud.classList.remove('hidden');
-    const candidates = ['videos/intro.mp4'];
-
-    let idx = 0;
-    function tryNextSource() {
-      if (idx >= candidates.length) {
-        introLayer.classList.add('hidden');
-        playingCanvasIntro = true;
-        canvasIntroTimer = 0;
-        return;
-      }
-      introVideo.src = candidates[idx++];
-      introLayer.classList.remove('hidden');
-      introVideo.play().catch(() => {
-        tryNextSource();
-      });
-    }
+    introVideo.src = 'videos/intro.mp4';
+    introLayer.classList.remove('hidden');
 
     introVideo.onerror = () => {
-      tryNextSource();
+      introLayer.classList.add('hidden');
+      playingCanvasIntro = true;
+      canvasIntroTimer = 0;
     };
     introVideo.onended = () => {
       enterGameplay();
     };
-
-    tryNextSource();
+    introVideo.play().catch(() => {
+      introLayer.classList.add('hidden');
+      playingCanvasIntro = true;
+      canvasIntroTimer = 0;
+    });
   }
 
   btnSkipIntro.addEventListener('click', enterGameplay);
 
+  // =========================================================================
+  // SKILLS & ENEMIES
+  // =========================================================================
   function triggerMeow() {
     if (!catCtrl || !running) return;
     const c = catCtrl.cat;
     if (c.meowCooldown > 0) return;
 
-    c.meowCooldown = 2.4;
+    const bonuses = Store.getBonuses();
+    c.meowCooldown = bonuses.meowCooldown;
     Audio.playMeow();
+    haptic(12);
     const mx = c.x + c.w / 2;
     const my = c.y + c.h / 2;
+    const range = Math.max(280, bonuses.meowRange || 280);
     Particles.spawnMeowRing(mx, my);
-    Particles.spawnPopup(mx, c.y - 16, 'Meow!', '#ffd36e');
+    Particles.spawnPopup(mx, c.y - 16, 'مواء!', '#ffd60a');
 
+    // Repel & push back nearby dogs away from Mashmasha!
     for (const dog of level.dogs) {
-      const dx = mx - (dog.x + dog.w / 2);
-      const dy = my - (dog.y + dog.h / 2);
-      if (Math.hypot(dx, dy) < 360) {
-        dog.state = 'distracted';
-        dog.distractX = Math.max(dog.minX, Math.min(dog.maxX, mx));
-        dog.stateTimer = 3.2;
-        Particles.spawnPopup(dog.x + dog.w / 2, dog.y - 14, '❓', '#6ce5ff');
+      const dogCx = dog.x + dog.w / 2;
+      const dogCy = dog.y + dog.h / 2;
+      if (Math.hypot(mx - dogCx, my - dogCy) < range) {
+        const awayDir = dogCx >= mx ? 1 : -1;
+        dog.state = 'repelled';
+        dog.facing = awayDir;
+        dog.repelDir = awayDir;
+        dog.stateTimer = 2.6;
+        Particles.spawnPopup(dogCx, dog.y - 14, '💨 ابتعد!', '#7dd3fc');
       }
     }
+
+    // Repel all standard ground & flying enemies (hedgehogs, crabs, rats, raccoons, crows, seagulls, falcons, bats, drones)
+    const repelList = (list, isFly = false) => {
+      if (!list) return;
+      for (const e of list) {
+        const ex = e.x + (e.w || 40) / 2;
+        const ey = e.y + (e.h || 32) / 2;
+        if (Math.hypot(mx - ex, my - ey) < range) {
+          const awayDir = ex >= mx ? 1 : -1;
+          e.repelTimer = 2.4;
+          e.repelDir = awayDir;
+          e.facing = awayDir;
+          if (isFly) e.repelLift = -75;
+          Particles.spawnPopup(ex, e.y - 12, '💨', '#7dd3fc');
+        }
+      }
+    };
+    repelList(level.hedgehogs, false);
+    repelList(level.crabs, false);
+    repelList(level.rats, false);
+    repelList(level.raccoons, false);
+    repelList(level.crows, true);
+    repelList(level.seagulls, true);
+    repelList(level.falcons, true);
+    repelList(level.bats, true);
+    repelList(level.drones, true);
+
+    // Repel all extended Stage 9-15 enemies as well!
+    if (EnemiesExt && EnemiesExt.applyMeowRepel) {
+      EnemiesExt.applyMeowRepel(level, mx, my, range, Particles);
+    }
+
     updateHUD();
+  }
+
+  function onCatHit(reason, isFall = false) {
+    if (!isFall && catCtrl && isInCheckpointSafeZone(level, catCtrl.cat.x, catCtrl.cat.y, catCtrl.cat.w, catCtrl.cat.h)) {
+      return;
+    }
+    if (catCtrl.takeDamage(reason, isFall)) {
+      shakeTimer = 0.22;
+      haptic(28);
+      updateHUD();
+    }
   }
 
   function updateDogs(dt) {
@@ -270,16 +822,20 @@ window.Game = window.Game || {};
       const sameHeight = Math.abs(catCy - dogCy) < 85;
       const facingCat = (catCx - dogCx) * dog.facing > -20;
 
-      if (dog.state === 'distracted') {
+      if (dog.state === 'repelled') {
+        dog.stateTimer -= dt;
+        const dir = dog.repelDir || 1;
+        dog.facing = dir;
+        dog.x = Math.max(dog.minX, Math.min(dog.maxX, dog.x + dir * 215 * dt));
+        if (dog.stateTimer <= 0) dog.state = 'patrol';
+      } else if (dog.state === 'distracted') {
         dog.stateTimer -= dt;
         const diff = dog.distractX - dogCx;
         if (Math.abs(diff) > 12) {
           dog.facing = diff > 0 ? 1 : -1;
           dog.x += dog.facing * 85 * dt;
         }
-        if (dog.stateTimer <= 0) {
-          dog.state = 'patrol';
-        }
+        if (dog.stateTimer <= 0) dog.state = 'patrol';
       } else if (dist < sightRange && sameHeight && facingCat && c.invulnTimer <= 0) {
         if (dog.state !== 'alert') {
           dog.state = 'alert';
@@ -306,118 +862,79 @@ window.Game = window.Game || {};
       }
 
       if (
+        dog.state !== 'repelled' &&
+        !isInCheckpointSafeZone(level, c.x, c.y, c.w, c.h) &&
         c.x + 6 < dog.x + dog.w - 6 &&
         c.x + c.w - 6 > dog.x + 6 &&
         c.y + 6 < dog.y + dog.h &&
         c.y + c.h > dog.y + 6
       ) {
-        if (catCtrl.takeDamage('عضّة كلب! -1 ❤️')) {
-          updateHUD();
-        }
+        onCatHit('عضّة كلب! -1 ❤️');
       }
     }
 
-    Audio.setChaseMode(anyChasing);
+    return anyChasing;
   }
 
-  function updateHedgehogs(dt) {
-    if (!level.hedgehogs) return;
+  function updatePatrolEnemies(list, dt, hitMsg, pad = 5) {
+    if (!list) return;
     const c = catCtrl.cat;
-    for (const hog of level.hedgehogs) {
-      hog.x += hog.facing * Math.abs(hog.vx) * dt;
-      if (hog.x <= hog.minX) {
-        hog.x = hog.minX;
-        hog.facing = 1;
-      } else if (hog.x >= hog.maxX) {
-        hog.x = hog.maxX;
-        hog.facing = -1;
+    for (const e of list) {
+      if (e.repelTimer > 0) {
+        e.repelTimer -= dt;
+        const dir = e.repelDir || 1;
+        e.facing = dir;
+        e.x = Math.max(e.minX, Math.min(e.maxX, e.x + dir * Math.max(195, Math.abs(e.vx) * 2.1) * dt));
+        continue;
+      }
+      e.x += e.facing * Math.abs(e.vx) * dt;
+      if (e.x <= e.minX) {
+        e.x = e.minX;
+        e.facing = 1;
+      } else if (e.x >= e.maxX) {
+        e.x = e.maxX;
+        e.facing = -1;
       }
       if (
-        c.x + 6 < hog.x + hog.w - 4 &&
-        c.x + c.w - 6 > hog.x + 4 &&
-        c.y + 6 < hog.y + hog.h &&
-        c.y + c.h > hog.y + 4
+        c.x + 6 < e.x + e.w - pad &&
+        c.x + c.w - 6 > e.x + pad &&
+        c.y + 6 < e.y + e.h &&
+        c.y + c.h > e.y + pad
       ) {
-        if (catCtrl.takeDamage('أشواك القنفذ! -1 ❤️')) {
-          updateHUD();
-        }
-      }
-    }
-  }
-
-  function updateCrows(dt, timeSec) {
-    if (!level.crows) return;
-    const c = catCtrl.cat;
-    for (const crow of level.crows) {
-      crow.x += crow.facing * Math.abs(crow.vx) * dt;
-      if (crow.x <= crow.minX) {
-        crow.x = crow.minX;
-        crow.facing = 1;
-      } else if (crow.x >= crow.maxX) {
-        crow.x = crow.maxX;
-        crow.facing = -1;
-      }
-      crow.y = crow.baseY + Math.sin(timeSec * crow.freq + crow.minX * 0.01) * crow.amp;
-      if (
-        c.x + 8 < crow.x + crow.w - 6 &&
-        c.x + c.w - 8 > crow.x + 6 &&
-        c.y + 6 < crow.y + crow.h - 4 &&
-        c.y + c.h > crow.y + 6
-      ) {
-        if (catCtrl.takeDamage('هجوم غراب! -1 ❤️')) {
-          updateHUD();
-        }
+        onCatHit(hitMsg);
       }
     }
   }
 
-  function updateCrabs(dt) {
-    if (!level.crabs) return;
+  function updateFlyingEnemies(list, dt, timeSec, hitMsg) {
+    if (!list) return;
     const c = catCtrl.cat;
-    for (const crab of level.crabs) {
-      crab.x += crab.facing * Math.abs(crab.vx) * dt;
-      if (crab.x <= crab.minX) {
-        crab.x = crab.minX;
-        crab.facing = 1;
-      } else if (crab.x >= crab.maxX) {
-        crab.x = crab.maxX;
-        crab.facing = -1;
+    for (const f of list) {
+      if (f.repelTimer > 0) {
+        f.repelTimer -= dt;
+        const dir = f.repelDir || 1;
+        f.facing = dir;
+        f.x = Math.max(f.minX, Math.min(f.maxX, f.x + dir * Math.max(210, Math.abs(f.vx) * 2.0) * dt));
+        const lift = (f.repelLift || -75) * Math.min(1, f.repelTimer / 0.8);
+        f.y = f.baseY + lift + Math.sin(timeSec * 8) * 6;
+        continue;
       }
+      f.x += f.facing * Math.abs(f.vx) * dt;
+      if (f.x <= f.minX) {
+        f.x = f.minX;
+        f.facing = 1;
+      } else if (f.x >= f.maxX) {
+        f.x = f.maxX;
+        f.facing = -1;
+      }
+      f.y = f.baseY + Math.sin(timeSec * (f.freq || 2.5) + f.minX * 0.01) * (f.amp || 18);
       if (
-        c.x + 6 < crab.x + crab.w - 4 &&
-        c.x + c.w - 6 > crab.x + 4 &&
-        c.y + 6 < crab.y + crab.h &&
-        c.y + c.h > crab.y + 4
+        c.x + 8 < f.x + f.w - 6 &&
+        c.x + c.w - 8 > f.x + 6 &&
+        c.y + 6 < f.y + f.h - 4 &&
+        c.y + c.h > f.y + 6
       ) {
-        if (catCtrl.takeDamage('كماشة سرطان! -1 ❤️')) {
-          updateHUD();
-        }
-      }
-    }
-  }
-
-  function updateSeagulls(dt, timeSec) {
-    if (!level.seagulls) return;
-    const c = catCtrl.cat;
-    for (const gull of level.seagulls) {
-      gull.x += gull.facing * Math.abs(gull.vx) * dt;
-      if (gull.x <= gull.minX) {
-        gull.x = gull.minX;
-        gull.facing = 1;
-      } else if (gull.x >= gull.maxX) {
-        gull.x = gull.maxX;
-        gull.facing = -1;
-      }
-      gull.y = gull.baseY + Math.sin(timeSec * gull.freq + gull.minX * 0.01) * gull.amp;
-      if (
-        c.x + 8 < gull.x + gull.w - 6 &&
-        c.x + c.w - 8 > gull.x + 6 &&
-        c.y + 6 < gull.y + gull.h - 4 &&
-        c.y + c.h > gull.y + 6
-      ) {
-        if (catCtrl.takeDamage('هجوم نورس! -1 ❤️')) {
-          updateHUD();
-        }
+        onCatHit(hitMsg);
       }
     }
   }
@@ -426,6 +943,13 @@ window.Game = window.Game || {};
     if (!level.rats) return;
     const c = catCtrl.cat;
     for (const rat of level.rats) {
+      if (rat.repelTimer > 0) {
+        rat.repelTimer -= dt;
+        const dir = rat.repelDir || 1;
+        rat.facing = dir;
+        rat.x = Math.max(rat.minX, Math.min(rat.maxX, rat.x + dir * 215 * dt));
+        continue;
+      }
       const sameHeight = Math.abs(c.y + c.h - (rat.y + rat.h)) < 45;
       const near = Math.abs(c.x - rat.x) < 180;
       const speedMult = sameHeight && near ? 1.45 : 1;
@@ -443,204 +967,136 @@ window.Game = window.Game || {};
         c.y + 6 < rat.y + rat.h &&
         c.y + c.h > rat.y + 4
       ) {
-        if (catCtrl.takeDamage('عضّة جرذ! -1 ❤️')) {
-          updateHUD();
-        }
+        onCatHit('عضّة جرذ! -1 ❤️');
       }
     }
   }
 
-  function updateRaccoons(dt) {
-    if (!level.raccoons) return;
-    const c = catCtrl.cat;
-    for (const rac of level.raccoons) {
-      rac.x += rac.facing * Math.abs(rac.vx) * dt;
-      if (rac.x <= rac.minX) {
-        rac.x = rac.minX;
-        rac.facing = 1;
-      } else if (rac.x >= rac.maxX) {
-        rac.x = rac.maxX;
-        rac.facing = -1;
-      }
-      if (
-        c.x + 6 < rac.x + rac.w - 5 &&
-        c.x + c.w - 6 > rac.x + 5 &&
-        c.y + 6 < rac.y + rac.h &&
-        c.y + c.h > rac.y + 5
-      ) {
-        if (catCtrl.takeDamage('هجوم راكون! -1 ❤️')) {
-          updateHUD();
-        }
-      }
-    }
-  }
-
-  function updateFalcons(dt, timeSec) {
-    if (!level.falcons) return;
-    const c = catCtrl.cat;
-    for (const falcon of level.falcons) {
-      falcon.x += falcon.facing * Math.abs(falcon.vx) * dt;
-      if (falcon.x <= falcon.minX) {
-        falcon.x = falcon.minX;
-        falcon.facing = 1;
-      } else if (falcon.x >= falcon.maxX) {
-        falcon.x = falcon.maxX;
-        falcon.facing = -1;
-      }
-      falcon.y = falcon.baseY + Math.sin(timeSec * falcon.freq + falcon.minX * 0.01) * falcon.amp;
-      if (
-        c.x + 8 < falcon.x + falcon.w - 6 &&
-        c.x + c.w - 8 > falcon.x + 6 &&
-        c.y + 6 < falcon.y + falcon.h - 4 &&
-        c.y + c.h > falcon.y + 6
-      ) {
-        if (catCtrl.takeDamage('انقضاض بومة! -1 ❤️')) {
-          updateHUD();
-        }
-      }
-    }
-  }
-
-  function updateBats(dt, timeSec) {
-    if (!level.bats) return;
-    const c = catCtrl.cat;
-    for (const bat of level.bats) {
-      bat.x += bat.facing * Math.abs(bat.vx) * dt;
-      if (bat.x <= bat.minX) {
-        bat.x = bat.minX;
-        bat.facing = 1;
-      } else if (bat.x >= bat.maxX) {
-        bat.x = bat.maxX;
-        bat.facing = -1;
-      }
-      bat.y = bat.baseY + Math.sin(timeSec * bat.freq + bat.minX * 0.01) * bat.amp;
-      if (
-        c.x + 8 < bat.x + bat.w - 6 &&
-        c.x + c.w - 8 > bat.x + 6 &&
-        c.y + 6 < bat.y + bat.h - 4 &&
-        c.y + c.h > bat.y + 6
-      ) {
-        if (catCtrl.takeDamage('خفاش النفق! -1 ❤️')) {
-          updateHUD();
-        }
-      }
-    }
-  }
-
-  function updateDrones(dt, timeSec) {
-    if (!level.drones) return;
-    const c = catCtrl.cat;
-    for (const d of level.drones) {
-      d.x += d.facing * Math.abs(d.vx) * dt;
-      if (d.x <= d.minX) {
-        d.x = d.minX;
-        d.facing = 1;
-      } else if (d.x >= d.maxX) {
-        d.x = d.maxX;
-        d.facing = -1;
-      }
-      d.y = d.baseY + Math.sin(timeSec * (d.freq || 2.5) + d.minX * 0.01) * (d.amp || 14);
-      if (
-        c.x + 8 < d.x + d.w - 6 &&
-        c.x + c.w - 8 > d.x + 6 &&
-        c.y + 6 < d.y + d.h - 4 &&
-        c.y + c.h > d.y + 6
-      ) {
-        if (catCtrl.takeDamage('طائرة المراقبة! -1 ❤️')) {
-          updateHUD();
-        }
-      }
-    }
-  }
-
-  function updateSteamVents(dt, timeSec) {
+  function updatePlatformHazards(dt, timeSec) {
     if (!level.platforms) return;
     const c = catCtrl.cat;
     for (const p of level.platforms) {
-      if (p.type === 'steam_vent') {
+      if (p.type === 'phase_platform') {
+        const cycle = (timeSec + (p.phase || 0)) % 7.0;
+        p.phaseSolid = cycle < 5.4;
+      } else if (p.type === 'steam_vent' || p.type === 'fountain_jet') {
         const cycle = (timeSec + (p.phase || 0)) % 3.6;
-        if (cycle >= 1.1 && cycle <= 2.9) {
-          if (c.x + c.w > p.x - 6 && c.x < p.x + p.w + 6 && c.y + c.h <= p.y + 10 && c.y + c.h >= p.y - 210) {
-            c.vy = Math.max(-520, Math.min(c.vy, -360) - 900 * dt);
+        if (cycle >= 0.8 && cycle <= 3.0) {
+          if (c.x + c.w > p.x - 8 && c.x < p.x + p.w + 8 && c.y + c.h <= p.y + 12 && c.y + c.h >= p.y - 220) {
+            c.vy = Math.max(-540, Math.min(c.vy, -370) - 920 * dt);
             c.onGround = false;
           }
         }
       } else if (p.type === 'third_rail') {
         const cycle = (timeSec + (p.phase || 0)) % 3.4;
         if (cycle >= 1.9 && cycle <= 3.1) {
-          if (
-            c.x + 6 < p.x + p.w - 4 &&
-            c.x + c.w - 6 > p.x + 4 &&
-            c.y + c.h >= p.y - 8 &&
-            c.y <= p.y + p.h
-          ) {
-            if (catCtrl.takeDamage('صعقة القطار الكهربائي! -1 ❤️')) {
-              updateHUD();
-            }
+          if (c.x + 6 < p.x + p.w - 4 && c.x + c.w - 6 > p.x + 4 && c.y + c.h >= p.y - 8 && c.y <= p.y + p.h) {
+            onCatHit('صعقة كهربائية! -1 ❤️');
           }
         }
-      } else if (p.type === 'welding_spark') {
+      } else if (p.type === 'welding_spark' || p.type === 'laser_grid') {
         const cycle = (timeSec + (p.phase || 0)) % 3.2;
         if (cycle >= 1.7 && cycle <= 2.9) {
-          if (
-            c.x + 6 < p.x + p.w - 4 &&
-            c.x + c.w - 6 > p.x + 4 &&
-            c.y + c.h >= p.y - 16 &&
-            c.y <= p.y + p.h
-          ) {
-            if (catCtrl.takeDamage('شرارة لحام كهربائية! -1 ❤️')) {
-              updateHUD();
-            }
+          if (c.x + 6 < p.x + p.w - 4 && c.x + c.w - 6 > p.x + 4 && c.y + c.h >= p.y - 18 && c.y <= p.y + p.h) {
+            onCatHit(p.type === 'laser_grid' ? 'شعاع ليزر! -1 ❤️' : 'شرارة لحام! -1 ❤️');
           }
         }
       }
     }
   }
 
-  function updateInteractions() {
+  function updateInteractions(dt) {
     const c = catCtrl.cat;
+    const bonuses = Store.getBonuses();
+    const catCx = c.x + c.w / 2;
+    const catCy = c.y + c.h / 2;
 
+    if (coinComboTimer > 0) {
+      coinComboTimer -= dt;
+      if (coinComboTimer <= 0) coinCombo = 0;
+    }
+
+    // Water hazards
     for (const p of level.puddles) {
-      if (
-        c.x + 8 < p.x + p.w &&
-        c.x + c.w - 8 > p.x &&
-        c.y + c.h > p.y &&
-        c.y < p.y + p.h
-      ) {
+      if (c.x + 8 < p.x + p.w && c.x + c.w - 8 > p.x && c.y + c.h > p.y && c.y < p.y + p.h) {
         Audio.playSplash();
-        Particles.spawnSplash(c.x + c.w / 2, p.y);
-        if (catCtrl.takeDamage('ماء عميق! -1 ❤️')) {
-          updateHUD();
-        }
+        Particles.spawnSplash(catCx, p.y);
+        onCatHit('ماء عميق! -1 ❤️', true);
       }
     }
 
+    // Abyss fall
     if (c.y > level.height + 60) {
-      if (catCtrl.takeDamage('سقوط! -1 ❤️')) {
-        updateHUD();
-      }
+      onCatHit('سقوط! -1 ❤️', true);
     }
 
+    // Checkpoints
     for (const cp of level.checkpoints) {
       if (!cp.activated && Math.abs(c.x - cp.x) < 42 && Math.abs(c.y - cp.y) < 48) {
         cp.activated = true;
         c.checkpointX = cp.x;
         c.checkpointY = cp.y - 10;
         Audio.playPurr();
+        haptic(12);
         Particles.spawnHeart(cp.x + 18, cp.y - 16);
-        Particles.spawnPopup(cp.x + 18, cp.y - 38, 'نقطة حفظ ✓', '#8cffc7');
+        Particles.spawnPopup(cp.x + 18, cp.y - 38, 'نقطة حفظ ✓', '#86efac');
       }
     }
 
+    // Spinning Gold Coins (+ Coin Magnet pull!)
+    if (level.coins) {
+      for (const coin of level.coins) {
+        if (coin.collected) continue;
+        if (coin.hiddenInDay && !c.nightVision) continue;
+        const dx = catCx - coin.x;
+        const dy = catCy - coin.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (bonuses.magnetRadius > 0 && dist < bonuses.magnetRadius && dist > 1) {
+          const pull = Math.min(dist, 460 * dt);
+          coin.x += (dx / dist) * pull;
+          coin.y += (dy / dist) * pull;
+        }
+
+        if (dist < 31) {
+          coin.collected = true;
+          const gained = Math.max(1, Math.round((coin.value || 1) * bonuses.coinMult));
+          stageCoinsEarned += gained;
+          Store.addCoins(gained);
+          Audio.playCoin(coinCombo);
+          coinCombo = Math.min(8, coinCombo + 1);
+          coinComboTimer = 1.35;
+          Particles.spawnCoinSparkle(coin.x, coin.y);
+          Particles.spawnPopup(coin.x, coin.y - 14, `+${gained} 🪙`, '#fde047');
+          syncCoinDisplays(true);
+        }
+      }
+    }
+
+    // Collectible Fish Treats (+15 Bonus Coins!)
     for (const t of level.treats) {
       if (t.collected) continue;
       if (t.hiddenInDay && !c.nightVision) continue;
-      if (Math.hypot(c.x + c.w / 2 - t.x, c.y + c.h / 2 - t.y) < 32) {
+      const dx = catCx - t.x;
+      const dy = catCy - t.y;
+      const dist = Math.hypot(dx, dy);
+      if (bonuses.magnetRadius > 0 && dist < bonuses.magnetRadius * 0.7 && dist > 1) {
+        const pull = Math.min(dist, 340 * dt);
+        t.x += (dx / dist) * pull;
+        t.y += (dy / dist) * pull;
+      }
+      if (dist < 33) {
         t.collected = true;
         collectedTreats++;
+        const fishCoinBonus = Math.round(15 * bonuses.coinMult);
+        stageCoinsEarned += fishCoinBonus;
+        Store.addCoins(fishCoinBonus);
         Audio.playTreat();
-        Particles.spawnPopup(t.x, t.y - 14, '+1 🐟', '#ffd36e');
+        haptic(14);
+        Particles.spawnCoinSparkle(t.x, t.y);
+        Particles.spawnPopup(t.x, t.y - 16, `+1 🐟 +${fishCoinBonus}🪙`, '#ffd60a');
         updateHUD();
+        syncCoinDisplays(true);
       }
     }
 
@@ -649,169 +1105,168 @@ window.Game = window.Game || {};
       return;
     }
 
+    // Goal Gate
     const g = level.goal;
-    if (
-      c.x + c.w > g.x &&
-      c.x < g.x + g.w &&
-      c.y + c.h > g.y &&
-      c.y < g.y + g.h
-    ) {
+    if (c.x + c.w > g.x && c.x < g.x + g.w && c.y + c.h > g.y && c.y < g.y + g.h) {
       finishStage(true);
     }
   }
 
+  // =========================================================================
+  // STAGE COMPLETE & GAME OVER
+  // =========================================================================
+  function showVictoryOverlay(reward) {
+    endOverlay.classList.remove('hidden');
+    const isFinal = currentStage === TOTAL_STAGES;
+    btnNextStage.classList.toggle('hidden', isFinal);
+    if (!isFinal) {
+      btnNextStage.textContent = `المرحلة ${currentStage + 1} ▶`;
+    }
+    endBadge.textContent = isFinal
+      ? `المرحلة ${TOTAL_STAGES} • نهاية الرحلة`
+      : `المرحلة ${currentStage} مكتملة`;
+    endTitle.textContent = isFinal ? 'عادت مشمشة إلى المنزل! 🏠🏆' : 'مرحلة رائعة! 🎉';
+
+    // Animate 3 golden stars
+    if (endStarsRow) {
+      const stars = endStarsRow.querySelectorAll('.end-star');
+      stars.forEach((st, idx) => {
+        st.classList.remove('earned');
+        if (idx < reward.stars) {
+          setTimeout(() => st.classList.add('earned'), 160 + idx * 180);
+        }
+      });
+    }
+
+    const totalRunCoins = stageCoinsEarned + reward.totalBonus;
+    endStats.innerHTML =
+      `الوقت: <strong>${elapsedTime.toFixed(1)} ث</strong> • ` +
+      `الأرواح: <strong>${catCtrl.cat.lives}/${catCtrl.cat.maxLives} ❤️</strong> • ` +
+      `الأسماك: <strong>${collectedTreats}/3 🐟</strong><br/>` +
+      `<span class="end-coin-highlight">+${totalRunCoins} 🪙 (${stageCoinsEarned} جُمعت + ${reward.totalBonus} مكافأة)</span>`;
+    syncCoinDisplays();
+  }
+
   function finishStage(won) {
     running = false;
+    paused = false;
     clearAllInputs();
     if (touchControls) touchControls.classList.add('hidden');
     Audio.setChaseMode(false);
-    if (won && currentStage >= maxUnlockedStage && currentStage < 8) {
-      maxUnlockedStage = currentStage + 1;
-      try {
-        localStorage.setItem(STORAGE_KEY, String(maxUnlockedStage));
-      } catch (e) {}
-      syncStageButtons();
+
+    if (won) {
+      Audio.playStageClear();
+      haptic(25);
+      const reward = Store.recordStageClear(currentStage, collectedTreats);
+      renderLevelGrid();
+
+      if (currentStage === TOTAL_STAGES) {
+        // Grand Finale Stage 15 plays Win1.mp4 -> Win2.mp4!
+        endOverlay.classList.add('hidden');
+        hud.classList.add('hidden');
+
+        const showFinalSummary = () => {
+          winVideo.pause();
+          winLayer.classList.add('hidden');
+          showVictoryOverlay(reward);
+        };
+
+        const winPlaylist = ['videos/Win1.mp4', 'videos/Win2.mp4'];
+        let winIdx = 0;
+        const playNextWinClip = () => {
+          if (winIdx >= winPlaylist.length) {
+            showFinalSummary();
+            return;
+          }
+          winVideo.src = winPlaylist[winIdx++];
+          winLayer.classList.remove('hidden');
+          winVideo.play().catch(showFinalSummary);
+        };
+
+        winVideo.onended = playNextWinClip;
+        winVideo.onerror = showFinalSummary;
+        if (btnSkipWin) btnSkipWin.onclick = showFinalSummary;
+        playNextWinClip();
+      } else {
+        showVictoryOverlay(reward);
+      }
+      return;
     }
-    endOverlay.classList.remove('hidden');
-    if (won && currentStage === 1) {
-      btnNextStage.classList.remove('hidden');
-      btnNextStage.textContent = 'الانتقال إلى المرحلة 2 ▶';
-      endBadge.textContent = 'STAGE 1 COMPLETE • المرحلة الأولى مكتملة';
-      endTitle.textContent = 'وصلتِ إلى بوابة السوق! 🎉';
-      endStats.innerHTML =
-        `الوقت: <strong>${elapsedTime.toFixed(1)} ثانية</strong> • ` +
-        `الأرواح المتبقية: <strong>${catCtrl.cat.lives}/7</strong> • ` +
-        `الأسماك المجمّعة: <strong>${collectedTreats}/3 🐟</strong>`;
-    } else if (won && currentStage === 2) {
-      btnNextStage.classList.remove('hidden');
-      btnNextStage.textContent = 'الانتقال إلى المرحلة 3 ▶';
-      endBadge.textContent = 'STAGE 2 COMPLETE • المرحلة الثانية مكتملة';
-      endTitle.textContent = 'عبرتِ السوق الشعبي إلى الحديقة! 🏆';
-      endStats.innerHTML =
-        `الوقت: <strong>${elapsedTime.toFixed(1)} ثانية</strong> • ` +
-        `الأرواح المتبقية: <strong>${catCtrl.cat.lives}/7</strong> • ` +
-        `الأسماك المجمّعة: <strong>${collectedTreats}/3 🐟</strong>`;
-    } else if (won && currentStage === 3) {
-      btnNextStage.classList.remove('hidden');
-      btnNextStage.textContent = 'الانتقال إلى المرحلة 4 ▶';
-      endBadge.textContent = 'STAGE 3 COMPLETE • الحديقة العامة مكتملة';
-      endTitle.textContent = 'عبرتِ الحديقة الأولى! 🌳✨';
-      endStats.innerHTML =
-        `الوقت: <strong>${elapsedTime.toFixed(1)} ثانية</strong> • ` +
-        `الأرواح المتبقية: <strong>${catCtrl.cat.lives}/7</strong> • ` +
-        `الأسماك المجمّعة: <strong>${collectedTreats}/3 🐟</strong>`;
-    } else if (won && currentStage === 4) {
-      btnNextStage.classList.remove('hidden');
-      btnNextStage.textContent = 'الانتقال إلى المرحلة 5 ▶';
-      endBadge.textContent = 'STAGE 4 COMPLETE • أعماق الحديقة مكتملة';
-      endTitle.textContent = 'وصلتِ إلى الميناء الليلي! ⚓✨';
-      endStats.innerHTML =
-        `الوقت: <strong>${elapsedTime.toFixed(1)} ثانية</strong> • ` +
-        `الأرواح المتبقية: <strong>${catCtrl.cat.lives}/7</strong> • ` +
-        `الأسماك المجمّعة: <strong>${collectedTreats}/3 🐟</strong>`;
-    } else if (won && currentStage === 5) {
-      btnNextStage.classList.remove('hidden');
-      btnNextStage.textContent = 'الانتقال إلى المرحلة 6 ▶';
-      endBadge.textContent = 'STAGE 5 COMPLETE • الميناء الليلي مكتمل';
-      endTitle.textContent = 'عبرتِ الميناء نحو ناطحات السحاب! ⚓✨';
-      endStats.innerHTML =
-        `الوقت: <strong>${elapsedTime.toFixed(1)} ثانية</strong> • ` +
-        `الأرواح المتبقية: <strong>${catCtrl.cat.lives}/7</strong> • ` +
-        `الأسماك المجمّعة: <strong>${collectedTreats}/3 🐟</strong>`;
-    } else if (won && currentStage === 6) {
-      btnNextStage.classList.remove('hidden');
-      btnNextStage.textContent = 'الانتقال إلى المرحلة 7 ▶';
-      endBadge.textContent = 'STAGE 6 COMPLETE • أسطح المباني الشاهقة مكتملة';
-      endTitle.textContent = 'هبطتِ نحو محطة القطارات والأنفاق! 🏙️✨';
-      endStats.innerHTML =
-        `الوقت: <strong>${elapsedTime.toFixed(1)} ثانية</strong> • ` +
-        `الأرواح المتبقية: <strong>${catCtrl.cat.lives}/7</strong> • ` +
-        `الأسماك المجمّعة: <strong>${collectedTreats}/3 🐟</strong>`;
-    } else if (won && currentStage === 7) {
-      btnNextStage.classList.remove('hidden');
-      btnNextStage.textContent = 'الانتقال إلى المرحلة 8 ▶';
-      endBadge.textContent = 'STAGE 7 COMPLETE • محطة الأنفاق مكتملة';
-      endTitle.textContent = 'خرجتِ من المحطة نحو الورشة الأخيرة! 🚇✨';
-      endStats.innerHTML =
-        `الوقت: <strong>${elapsedTime.toFixed(1)} ثانية</strong> • ` +
-        `الأرواح المتبقية: <strong>${catCtrl.cat.lives}/7</strong> • ` +
-        `الأسماك المجمّعة: <strong>${collectedTreats}/3 🐟</strong>`;
-    } else if (won && currentStage === 8) {
-      // Play Win1.mp4 followed sequentially by Win2.mp4, then show Final Victory Overlay
-      endOverlay.classList.add('hidden');
-      hud.classList.add('hidden');
-      if (controlsBar) controlsBar.classList.add('hidden');
 
-      const showVictorySummary = () => {
-        winVideo.pause();
-        winLayer.classList.add('hidden');
-        endOverlay.classList.remove('hidden');
-        btnNextStage.classList.add('hidden');
-        endBadge.textContent = 'STAGE 8 COMPLETE • نهاية رحلة العودة';
-        endTitle.textContent = 'وصلتِ إلى شرفة المنزل وأكملتِ الرحلة! 🏠🏆';
-        endStats.innerHTML =
-          `الوقت: <strong>${elapsedTime.toFixed(1)} ثانية</strong> • ` +
-          `الأرواح المتبقية: <strong>${catCtrl.cat.lives}/7</strong> • ` +
-          `الأسماك المجمّعة: <strong>${collectedTreats}/3 🐟</strong>`;
-      };
+    // Lost all lives -> Game Over Video + Revive option
+    endOverlay.classList.add('hidden');
+    hud.classList.add('hidden');
+    gameOverActions.classList.add('hidden');
+    gameOverLayer.classList.remove('hidden');
 
-      const winPlaylist = ['videos/Win1.mp4', 'videos/Win2.mp4'];
-      let winIdx = 0;
-      const playNextWinClip = () => {
-        if (winIdx >= winPlaylist.length) {
-          showVictorySummary();
-          return;
-        }
-        winVideo.src = winPlaylist[winIdx++];
-        winLayer.classList.remove('hidden');
-        winVideo.play().catch(showVictorySummary);
-      };
+    if (btnGameOverRevive) {
+      const canRevive = Store.getCoins() >= Store.LIFE_REFILL_COST;
+      btnGameOverRevive.disabled = !canRevive;
+      btnGameOverRevive.textContent = `❤️ متابعة (${Store.LIFE_REFILL_COST} 🪙)`;
+    }
 
-      winVideo.onended = playNextWinClip;
-      winVideo.onerror = showVictorySummary;
-      if (btnSkipWin) btnSkipWin.onclick = showVictorySummary;
-      playNextWinClip();
-    } else {
-      // Play game-over.mp4 and keep its last frame frozen as background with Restart button
-      endOverlay.classList.add('hidden');
-      hud.classList.add('hidden');
-      if (controlsBar) controlsBar.classList.add('hidden');
-      gameOverActions.classList.add('hidden');
-      gameOverLayer.classList.remove('hidden');
+    const showFallbackOverlay = () => {
+      gameOverLayer.classList.add('hidden');
+      endOverlay.classList.remove('hidden');
+      btnNextStage.classList.add('hidden');
+      if (endStarsRow) {
+        endStarsRow.querySelectorAll('.end-star').forEach((s) => s.classList.remove('earned'));
+      }
+      endBadge.textContent = 'انتهت الأرواح';
+      endTitle.textContent = 'حاول مرة أخرى! 🐱';
+      endStats.innerHTML = 'استخدم <strong>المواء</strong> لتشتيت الكلاب وطوّر قدراتك من <strong>المتجر 🛒</strong>.';
+    };
 
-      const showFallbackOverlay = () => {
-        gameOverLayer.classList.add('hidden');
-        endOverlay.classList.remove('hidden');
-        btnNextStage.classList.add('hidden');
-        endBadge.textContent = 'OUT OF LIVES';
-        endTitle.textContent = 'نفدت أرواح مشمشة!';
-        endStats.textContent = 'لا بأس، جرّب استخدام المواء (Q) لتشتيت الكلاب والرؤية الليلية (E) للمسارات الآمنة.';
-      };
-
-      if (gameOverVideo._btnTimer) clearTimeout(gameOverVideo._btnTimer);
-      gameOverVideo._btnTimer = setTimeout(() => {
-        if (!gameOverLayer.classList.contains('hidden')) {
-          gameOverActions.classList.remove('hidden');
-        }
-      }, 1800);
-
-      gameOverVideo.onended = () => {
-        gameOverVideo.pause();
+    if (gameOverVideo._btnTimer) clearTimeout(gameOverVideo._btnTimer);
+    gameOverVideo._btnTimer = setTimeout(() => {
+      if (!gameOverLayer.classList.contains('hidden')) {
         gameOverActions.classList.remove('hidden');
-      };
-      gameOverVideo.onerror = showFallbackOverlay;
-      gameOverVideo.currentTime = 0;
-      gameOverVideo.play().catch(showFallbackOverlay);
-    }
+      }
+    }, 1500);
+
+    gameOverVideo.onended = () => {
+      gameOverVideo.pause();
+      gameOverActions.classList.remove('hidden');
+    };
+    gameOverVideo.onerror = showFallbackOverlay;
+    gameOverVideo.currentTime = 0;
+    gameOverVideo.play().catch(showFallbackOverlay);
   }
 
+  function reviveAtCheckpoint() {
+    if (!Store.spendCoins(Store.LIFE_REFILL_COST)) {
+      showToast('عملات غير كافية! 🪙');
+      return;
+    }
+    Audio.playPurchase();
+    haptic(20);
+    if (gameOverVideo._btnTimer) clearTimeout(gameOverVideo._btnTimer);
+    gameOverVideo.pause();
+    gameOverLayer.classList.add('hidden');
+    gameOverActions.classList.add('hidden');
+    endOverlay.classList.add('hidden');
+    hud.classList.remove('hidden');
+    if (touchControls) touchControls.classList.remove('hidden');
+    clearAllInputs();
+    catCtrl.refillLives();
+    updateHUD();
+    syncCoinDisplays();
+    Particles.spawnShieldBurst(catCtrl.cat.x + catCtrl.cat.w / 2, catCtrl.cat.y + catCtrl.cat.h / 2);
+    Particles.spawnPopup(catCtrl.cat.x + 20, catCtrl.cat.y - 24, '❤️ عودة للحياة!', '#86efac');
+    lastTime = 0;
+    running = true;
+  }
+
+  // =========================================================================
+  // CANVAS INTRO & RENDERING
+  // =========================================================================
   function drawCanvasIntro(t) {
-    const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    const sky = ctx.createLinearGradient(0, 0, 0, LOGICAL_H);
     sky.addColorStop(0, '#2a1d42');
     sky.addColorStop(0.55, '#7e3b56');
     sky.addColorStop(1, '#f39856');
     ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
 
     ctx.fillStyle = '#4c2c2b';
     ctx.fillRect(420, 60, 440, 660);
@@ -820,18 +1275,9 @@ window.Game = window.Game || {};
     ctx.fillStyle = 'rgba(255, 220, 130, 0.7)';
     ctx.fillRect(475, 135, 90, 110);
 
-    ctx.strokeStyle = '#181a24';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(430, 220, 190, 50);
-
     const progress = Math.min(1, t / 4.2);
     const fallY = progress < 0.3 ? 190 : 190 + Math.pow((progress - 0.3) / 0.7, 1.5) * 390;
     const fallX = 530 + Math.sin(t * 6) * (progress > 0.3 ? 18 : 0);
-
-    if (progress < 0.35) {
-      ctx.font = '26px sans-serif';
-      ctx.fillText('🦋', 590 + Math.sin(t * 7) * 12, 165 + Math.cos(t * 5) * 8);
-    }
 
     ctx.fillStyle = '#8b5e34';
     ctx.fillRect(495, 575, 85, 65);
@@ -844,23 +1290,15 @@ window.Game = window.Game || {};
 
     if (t > 3.5) {
       ctx.fillStyle = 'rgba(10, 14, 24, 0.72)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#6ce5ff';
-      ctx.font = 'bold 20px monospace';
+      ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+      ctx.fillStyle = '#7dd3fc';
+      ctx.font = 'bold 20px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('LIVES METER: 6/7', canvas.width / 2, 290);
-      ctx.fillStyle = '#ffd36e';
-      ctx.font = 'bold 46px sans-serif';
-      ctx.fillText('Dr. MAX MOUSA', canvas.width / 2, 355);
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '20px sans-serif';
-      ctx.fillText('THE WAY HOME: 7 LIVES', canvas.width / 2, 400);
+      ctx.fillText('THE WAY HOME • 7 LIVES', LOGICAL_W / 2, 310);
+      ctx.fillStyle = '#ffd60a';
+      ctx.font = 'bold 44px sans-serif';
+      ctx.fillText('Dr. MAX MOUSA', LOGICAL_W / 2, 368);
     }
-
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    ctx.font = '14px sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText('اضغط Space للتخطي ⏭', canvas.width - 24, canvas.height - 22);
   }
 
   function updateMovingPlatforms(timeSec) {
@@ -890,208 +1328,206 @@ window.Game = window.Game || {};
   }
 
   function drawBackground(time) {
-    if (level.theme === 'construction') {
-      Art.drawConstructionSkyAndHorizon(ctx, camX, canvas.width, canvas.height, time);
-      Art.drawConstructionMidground(ctx, camX, canvas.width, canvas.height, time);
-    } else if (level.theme === 'subway') {
-      Art.drawSubwaySkyAndHorizon(ctx, camX, canvas.width, canvas.height, time);
-      Art.drawSubwayMidground(ctx, camX, canvas.width, canvas.height, time);
-    } else if (level.theme === 'rooftop') {
-      Art.drawRooftopSkyAndHorizon(ctx, camX, canvas.width, canvas.height, time);
-      Art.drawRooftopMidground(ctx, camX, canvas.width, canvas.height, time);
-    } else if (level.theme === 'harbor') {
-      Art.drawHarborSkyAndSea(ctx, camX, canvas.width, canvas.height, time);
-      Art.drawHarborMidground(ctx, camX, canvas.width, canvas.height, time);
-    } else if (level.theme === 'park') {
-      Art.drawParkSkyAndHorizon(ctx, camX, canvas.width, canvas.height, time);
-      Art.drawParkMidground(ctx, camX, canvas.width, canvas.height, time);
+    const theme = level.theme;
+    if (theme === 'museum') {
+      Art.drawMuseumSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawMuseumMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'bridge') {
+      Art.drawBridgeSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawBridgeMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'oldtown') {
+      Art.drawOldTownSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawOldTownMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'harbor_storm') {
+      Art.drawHarborStormSkyAndSea(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawHarborStormMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'greenhouse') {
+      Art.drawGreenhouseSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawGreenhouseMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'rooftop_neon') {
+      Art.drawNeonRooftopSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawNeonRooftopMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'homeward') {
+      Art.drawHomewardSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawHomewardMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'construction') {
+      Art.drawConstructionSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawConstructionMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'subway') {
+      Art.drawSubwaySkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawSubwayMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'rooftop') {
+      Art.drawRooftopSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawRooftopMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'harbor') {
+      Art.drawHarborSkyAndSea(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawHarborMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'park') {
+      Art.drawParkSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawParkMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
     } else {
-      Art.drawSkyAndFarCity(ctx, camX, canvas.width, canvas.height, time);
-      if (level.theme === 'market') {
-        Art.drawMarketMidgroundBuildings(ctx, camX, canvas.width, canvas.height, time);
-        Art.drawMarketFestoonLanterns(ctx, camX, canvas.width, time);
+      Art.drawSkyAndFarCity(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      if (theme === 'market') {
+        Art.drawMarketMidgroundBuildings(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+        Art.drawMarketFestoonLanterns(ctx, camX, LOGICAL_W, time);
       } else {
-        Art.drawMidgroundCityBuildings(ctx, camX, canvas.width, canvas.height, time);
+        Art.drawMidgroundCityBuildings(ctx, camX, LOGICAL_W, LOGICAL_H, time);
       }
     }
+
     Art.drawStreetlamps(ctx, level.lamps, camX, time);
 
-    // Floating dust motes
-    ctx.fillStyle = 'rgba(255, 226, 170, 0.28)';
-    for (let i = 0; i < 24; i++) {
-      const dx = (i * 197 + time * 18) % canvas.width;
+    // Lightweight floating dust motes
+    ctx.fillStyle = 'rgba(255, 226, 170, 0.25)';
+    for (let i = 0; i < 10; i++) {
+      const dx = (i * 197 + time * 18) % LOGICAL_W;
       const dy = (i * 89 + Math.sin(time + i) * 25) % 600;
-      ctx.beginPath();
-      ctx.arc(dx, dy, 1.8, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fillRect(dx, dy, 3, 3);
     }
 
     if (dimBackground) {
-      ctx.save();
-      ctx.fillStyle = 'rgba(6, 9, 18, 0.68)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.restore();
+      ctx.fillStyle = 'rgba(6, 9, 18, 0.65)';
+      ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
     }
   }
 
-  function drawLevel(time) {
+  function drawLevel(time, viewW) {
     const nv = catCtrl.cat.nightVision;
+    const cullW = viewW || LOGICAL_W;
 
     for (const p of level.platforms) {
       if (p.hiddenInDay && !nv) continue;
       if (p.bounceAnim && p.bounceAnim > 0) p.bounceAnim = Math.max(0, p.bounceAnim - 0.08);
       const px = p.x - camX;
-      const py = p.y - camY + (p.bounceAnim ? Math.sin(p.bounceAnim * Math.PI) * 6 : 0);
-      if (px + p.w < -40 || px > canvas.width + 40) continue;
+      const py = p.y - camY + (p.type !== 'flower_bounce' && p.bounceAnim ? Math.sin(p.bounceAnim * Math.PI) * 6 : 0);
+      if (px + p.w < -40 || px > cullW + 40) continue;
       Art.drawPlatform(ctx, p, px, py, nv, time);
     }
 
-    // Crashed cardboard box scene only at Stage 1 start
     if (currentStage === 1) {
       Art.drawStartCardboardScene(ctx, camX, camY);
     }
 
-    // Deep water puddles with shimmer
     for (const p of level.puddles) {
-      Art.drawPuddle(ctx, p.x - camX, p.y - camY, p.w, p.h, time, level.theme === 'harbor');
+      const px = p.x - camX;
+      if (px + p.w < -40 || px > cullW + 40) continue;
+      Art.drawPuddle(ctx, px, p.y - camY, p.w, p.h, time, level.theme === 'harbor' || level.theme === 'harbor_storm');
     }
 
-    // Checkpoints (Cozy Cat Houses)
     for (const cp of level.checkpoints) {
-      Art.drawCheckpoint(ctx, cp, cp.x - camX, cp.y - camY, time);
+      const cx = cp.x - camX;
+      if (cx < -100 || cx > cullW + 100) continue;
+      Art.drawCheckpoint(ctx, cp, cx, cp.y - camY, time);
     }
 
-    // Treats (Fish) with golden glow
+    // Spinning Gold Coins
+    if (level.coins && Art.drawCoin) {
+      for (const coin of level.coins) {
+        if (coin.collected) continue;
+        if (coin.hiddenInDay && !nv) continue;
+        const cx = coin.x - camX;
+        if (cx < -30 || cx > cullW + 30) continue;
+        Art.drawCoin(ctx, cx, coin.y - camY, time, coin.phase || 0, coin.value || 1);
+      }
+    }
+
+    // Fish Treats
     for (const t of level.treats) {
       if (t.collected) continue;
       if (t.hiddenInDay && !nv) continue;
       const tx = t.x - camX;
+      if (tx < -40 || tx > cullW + 40) continue;
       const ty = t.y - camY + Math.sin(time * 4 + t.x) * 5;
-      const glow = ctx.createRadialGradient(tx, ty, 2, tx, ty, 22);
-      glow.addColorStop(0, 'rgba(255, 211, 110, 0.45)');
-      glow.addColorStop(1, 'rgba(255, 211, 110, 0)');
-      ctx.fillStyle = glow;
+      ctx.fillStyle = 'rgba(255, 211, 110, 0.25)';
       ctx.beginPath();
-      ctx.arc(tx, ty, 22, 0, Math.PI * 2);
+      ctx.arc(tx, ty, 19, 0, Math.PI * 2);
       ctx.fill();
       ctx.font = '24px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('🐟', tx, ty + 8);
     }
 
-    // Stray Dogs
     for (const dog of level.dogs) {
       const dx = dog.x - camX;
-      const dy = dog.y - camY;
-      if (dx < -100 || dx > canvas.width + 100) continue;
-      Art.drawDog(ctx, dog, dx, dy, nv, time);
+      if (dx < -100 || dx > cullW + 100) continue;
+      Art.drawDog(ctx, dog, dx, dog.y - camY, nv, time);
     }
-
-    // Spiky Hedgehogs
     if (level.hedgehogs) {
       for (const hog of level.hedgehogs) {
         const hx = hog.x - camX;
-        const hy = hog.y - camY;
-        if (hx < -80 || hx > canvas.width + 80) continue;
-        Art.drawHedgehog(ctx, hog, hx, hy, time);
+        if (hx < -80 || hx > cullW + 80) continue;
+        Art.drawHedgehog(ctx, hog, hx, hog.y - camY, time);
       }
     }
-
-    // Swooping Night Crows
     if (level.crows) {
       for (const crow of level.crows) {
         const cx = crow.x - camX;
-        const cy = crow.y - camY;
-        if (cx < -80 || cx > canvas.width + 80) continue;
-        Art.drawCrow(ctx, crow, cx, cy, time);
+        if (cx < -80 || cx > cullW + 80) continue;
+        Art.drawCrow(ctx, crow, cx, crow.y - camY, time);
       }
     }
-
-    // Harbor Crabs
     if (level.crabs) {
       for (const crab of level.crabs) {
         const cx = crab.x - camX;
-        const cy = crab.y - camY;
-        if (cx < -80 || cx > canvas.width + 80) continue;
-        Art.drawCrab(ctx, crab, cx, cy, time);
+        if (cx < -80 || cx > cullW + 80) continue;
+        Art.drawCrab(ctx, crab, cx, crab.y - camY, time);
       }
     }
-
-    // Swooping Seagulls
     if (level.seagulls) {
       for (const gull of level.seagulls) {
         const gx = gull.x - camX;
-        const gy = gull.y - camY;
-        if (gx < -80 || gx > canvas.width + 80) continue;
-        Art.drawSeagull(ctx, gull, gx, gy, time);
+        if (gx < -80 || gx > cullW + 80) continue;
+        Art.drawSeagull(ctx, gull, gx, gull.y - camY, time);
       }
     }
-
-    // Fast Harbor & Rooftop Rats
     if (level.rats) {
       for (const rat of level.rats) {
         const rx = rat.x - camX;
-        const ry = rat.y - camY;
-        if (rx < -80 || rx > canvas.width + 80) continue;
-        Art.drawRat(ctx, rat, rx, ry, time);
+        if (rx < -80 || rx > cullW + 80) continue;
+        Art.drawRat(ctx, rat, rx, rat.y - camY, time);
       }
     }
-
-    // Rooftop Raccoons
     if (level.raccoons) {
       for (const rac of level.raccoons) {
         const rx = rac.x - camX;
-        const ry = rac.y - camY;
-        if (rx < -80 || rx > canvas.width + 80) continue;
-        Art.drawRaccoon(ctx, rac, rx, ry, time);
+        if (rx < -80 || rx > cullW + 80) continue;
+        Art.drawRaccoon(ctx, rac, rx, rac.y - camY, time);
       }
     }
-
-    // Rooftop Peregrine Falcons / Night Owls
     if (level.falcons) {
       for (const falcon of level.falcons) {
         const fx = falcon.x - camX;
-        const fy = falcon.y - camY;
-        if (fx < -80 || fx > canvas.width + 80) continue;
-        Art.drawFalcon(ctx, falcon, fx, fy, time);
+        if (fx < -80 || fx > cullW + 80) continue;
+        Art.drawFalcon(ctx, falcon, fx, falcon.y - camY, time);
       }
     }
-
-    // Subway Tunnel Bats
     if (level.bats) {
       for (const bat of level.bats) {
         const bx = bat.x - camX;
-        const by = bat.y - camY;
-        if (bx < -80 || bx > canvas.width + 80) continue;
-        Art.drawBat(ctx, bat, bx, by, time);
+        if (bx < -80 || bx > cullW + 80) continue;
+        Art.drawBat(ctx, bat, bx, bat.y - camY, time);
       }
     }
-
-    // Construction Site Security Drones
     if (level.drones) {
       for (const drone of level.drones) {
         const dx = drone.x - camX;
-        const dy = drone.y - camY;
-        if (dx < -80 || dx > canvas.width + 80) continue;
-        Art.drawDrone(ctx, drone, dx, dy, time);
+        if (dx < -80 || dx > cullW + 80) continue;
+        Art.drawDrone(ctx, drone, dx, drone.y - camY, time);
       }
     }
 
-    // Exit Gate
+    if (EnemiesExt) {
+      EnemiesExt.drawAll(ctx, level, camX, camY, time, cullW, nv);
+    }
+
     const g = level.goal;
     Art.drawMarketGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
   }
 
   function drawNightVisionOverlay() {
     if (!catCtrl.cat.nightVision) return;
-    ctx.save();
     ctx.fillStyle = 'rgba(20, 95, 58, 0.22)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = 'rgba(74, 242, 161, 0.04)';
-    for (let y = 0; y < canvas.height; y += 6) {
-      ctx.fillRect(0, y, canvas.width, 2);
-    }
-    ctx.restore();
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
   }
 
   function loop(timestamp) {
@@ -1102,8 +1538,11 @@ window.Game = window.Game || {};
 
     if (playingCanvasIntro) {
       canvasIntroTimer += dt;
+      ctx.save();
+      ctx.scale(RENDER_SCALE, RENDER_SCALE);
       drawCanvasIntro(canvasIntroTimer);
-      if (canvasIntroTimer > 5.5) {
+      ctx.restore();
+      if (canvasIntroTimer > 5.2) {
         catCtrl.cat.x = level.startX;
         catCtrl.cat.y = level.startY;
         catCtrl.cat.vy = 0;
@@ -1114,167 +1553,101 @@ window.Game = window.Game || {};
     }
 
     const viewZoom = 1.3;
-    const viewW = canvas.width / viewZoom;
-    const viewH = canvas.height / viewZoom;
+    const viewW = LOGICAL_W / viewZoom;
+    const viewH = LOGICAL_H / viewZoom;
 
-    if (running) {
-      if (touchControls && touchControls.classList.contains('hidden') && (!exitConfirmOverlay || exitConfirmOverlay.classList.contains('hidden'))) {
-        touchControls.classList.remove('hidden');
-      }
+    if (running && !paused) {
       elapsedTime += dt;
+      if (shakeTimer > 0) shakeTimer = Math.max(0, shakeTimer - dt);
+
       updateMovingPlatforms(timeSec);
       catCtrl.update(dt, input, level);
       input.jumpPressed = false;
-      updateDogs(dt);
-      updateHedgehogs(dt);
-      updateCrows(dt, timeSec);
-      updateCrabs(dt);
-      updateSeagulls(dt, timeSec);
+      const dogChasing = updateDogs(dt);
+      updatePatrolEnemies(level.hedgehogs, dt, 'أشواك القنفذ! -1 ❤️', 4);
+      updateFlyingEnemies(level.crows, dt, timeSec, 'هجوم غراب! -1 ❤️');
+      updatePatrolEnemies(level.crabs, dt, 'كماشة سرطان! -1 ❤️', 4);
+      updateFlyingEnemies(level.seagulls, dt, timeSec, 'هجوم نورس! -1 ❤️');
       updateRats(dt);
-      updateRaccoons(dt);
-      updateFalcons(dt, timeSec);
-      updateBats(dt, timeSec);
-      updateDrones(dt, timeSec);
-      updateSteamVents(dt, timeSec);
-      updateInteractions();
+      updatePatrolEnemies(level.raccoons, dt, 'هجوم راكون! -1 ❤️', 5);
+      updateFlyingEnemies(level.falcons, dt, timeSec, 'انقضاض بومة! -1 ❤️');
+      updateFlyingEnemies(level.bats, dt, timeSec, 'خفاش النفق! -1 ❤️');
+      updateFlyingEnemies(level.drones, dt, timeSec, 'طائرة مراقبة! -1 ❤️');
+      const extChasing = EnemiesExt ? EnemiesExt.updateAll(level, catCtrl, dt, timeSec, onCatHit, Audio, Particles) : false;
+      Audio.setChaseMode(!!(dogChasing || extChasing));
+      updatePlatformHazards(dt, timeSec);
+      updateInteractions(dt);
       Particles.update(dt);
 
+      const lookAhead = catCtrl.cat.facing * 42;
       const targetCamX = Math.max(
         0,
-        Math.min(level.width - viewW, catCtrl.cat.x - viewW * 0.38)
+        Math.min(level.width - viewW, catCtrl.cat.x + lookAhead - viewW * 0.38)
       );
-      const targetCamY = Math.max(
+      const normalTargetCamY = Math.max(
         0,
         Math.min(level.height - viewH, catCtrl.cat.y - viewH * 0.58)
       );
-      camX += (targetCamX - camX) * Math.min(1, dt * 7);
-      camY += (targetCamY - camY) * Math.min(1, dt * 7);
+      // Smooth Look-Down Camera when sneaking/crouching ("تسلل") while on elevated platforms!
+      const lookingDown = catCtrl.cat.crouching && catCtrl.cat.onGround;
+      const targetCamY = lookingDown
+        ? Math.min(level.height - viewH, Math.max(normalTargetCamY, catCtrl.cat.y - 66))
+        : normalTargetCamY;
+      camX += (targetCamX - camX) * Math.min(1, dt * 7.5);
+      camY += (targetCamY - camY) * Math.min(1, dt * (lookingDown ? 5.6 : 7.5));
       updateHUD();
     }
 
+    const shakeX = shakeTimer > 0 ? (Math.random() - 0.5) * 8 : 0;
+    const shakeY = shakeTimer > 0 ? (Math.random() - 0.5) * 6 : 0;
+
+    ctx.save();
+    ctx.scale(RENDER_SCALE, RENDER_SCALE);
     drawBackground(timeSec);
     ctx.save();
     ctx.scale(viewZoom, viewZoom);
-    drawLevel(timeSec);
+    ctx.translate(shakeX, shakeY);
+    drawLevel(timeSec, viewW);
     catCtrl.draw(ctx, camX, camY);
     Particles.draw(ctx, camX, camY);
     ctx.restore();
     drawNightVisionOverlay();
+    ctx.restore();
 
     requestAnimationFrame(loop);
   }
 
-  // Input listeners
-  window.addEventListener('keydown', (e) => {
-    if (playingCanvasIntro && (e.code === 'Space' || e.code === 'Enter')) {
-      catCtrl.cat.x = level.startX;
-      catCtrl.cat.y = level.startY;
-      catCtrl.cat.vy = 0;
-      enterGameplay();
-      return;
-    }
-
-    if (e.code === 'ArrowLeft' || e.code === 'KeyA') input.left = true;
-    if (e.code === 'ArrowRight' || e.code === 'KeyD') input.right = true;
-    if (e.code === 'ArrowDown' || e.code === 'KeyS') input.down = true;
-    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') input.shift = true;
-
-    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
-      if (!input.jumpHeld) input.jumpPressed = true;
-      input.jumpHeld = true;
-      e.preventDefault();
-    }
-
-    if (e.code === 'KeyE' || e.code === 'KeyN') {
-      if (catCtrl && running) {
-        catCtrl.cat.nightVision = !catCtrl.cat.nightVision;
-        Audio.playNightVision(catCtrl.cat.nightVision);
-        updateHUD();
-      }
-    }
-
-    if (e.code === 'KeyQ' || e.code === 'KeyF') {
-      triggerMeow();
-    }
-
-    if (e.code === 'KeyR' && running) {
-      initLevel();
-    }
-
-    if (e.code === 'Tab') {
-      e.preventDefault();
-      guidePanel.classList.toggle('hidden');
-    }
-  });
-
-  window.addEventListener('keyup', (e) => {
-    if (e.code === 'ArrowLeft' || e.code === 'KeyA') input.left = false;
-    if (e.code === 'ArrowRight' || e.code === 'KeyD') input.right = false;
-    if (e.code === 'ArrowDown' || e.code === 'KeyS') input.down = false;
-    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') input.shift = false;
-    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') input.jumpHeld = false;
-  });
-
-  btnStartGame.addEventListener('click', () => {
-    initLevel(1);
-    startIntroSequence();
-  });
-
-  for (let s = 2; s <= 8; s++) {
-    const btn = stageButtons[s];
-    if (!btn) continue;
-    btn.addEventListener('click', () => {
-      if (s > maxUnlockedStage) return;
-      startOverlay.classList.add('hidden');
-      initLevel(s);
-      enterGameplay();
-    });
-  }
-
-  btnNextStage.addEventListener('click', () => {
-    endOverlay.classList.add('hidden');
-    if (touchControls) touchControls.classList.remove('hidden');
-    clearAllInputs();
-    const nextStage = currentStage < 8 ? currentStage + 1 : 8;
-    initLevel(nextStage);
-    running = true;
-    const msg =
-      nextStage === 2
-        ? 'المرحلة 2: السوق 🏮'
-        : nextStage === 3
-        ? 'المرحلة 3: الحديقة 🌳'
-        : nextStage === 4
-        ? 'المرحلة 4: أعماق الحديقة 🌲'
-        : nextStage === 5
-        ? 'المرحلة 5: الميناء ⚓'
-        : nextStage === 6
-        ? 'المرحلة 6: الأسطح 🏙️'
-        : nextStage === 7
-        ? 'المرحلة 7: محطة الأنفاق 🚇'
-        : 'المرحلة 8: الورشة (النهاية) 🏗️';
-    Particles.spawnPopup(catCtrl.cat.x + 20, catCtrl.cat.y - 24, msg, '#ffd36e');
-  });
-
+  // =========================================================================
+  // NAVIGATION & INPUT LISTENERS
+  // =========================================================================
   function restartCurrentStage() {
+    Audio.playUiClick();
+    paused = false;
+    pauseOverlay.classList.add('hidden');
     endOverlay.classList.add('hidden');
+    if (gameOverVideo._btnTimer) clearTimeout(gameOverVideo._btnTimer);
     gameOverVideo.pause();
     gameOverLayer.classList.add('hidden');
     gameOverActions.classList.add('hidden');
     if (winVideo) winVideo.pause();
     if (winLayer) winLayer.classList.add('hidden');
     hud.classList.remove('hidden');
-    if (controlsBar) controlsBar.classList.remove('hidden');
     if (touchControls) touchControls.classList.remove('hidden');
     clearAllInputs();
     initLevel(currentStage);
+    Audio.resumeMusic();
+    lastTime = 0;
     running = true;
   }
 
   function returnToMainMenu() {
+    Audio.playUiClick();
     running = false;
+    paused = false;
     playingCanvasIntro = false;
     clearAllInputs();
     Audio.setChaseMode(false);
+    Audio.pauseMusic();
     if (introVideo) introVideo.pause();
     if (introLayer) introLayer.classList.add('hidden');
     if (introHud) introHud.classList.add('hidden');
@@ -1287,43 +1660,76 @@ window.Game = window.Game || {};
     if (winVideo) winVideo.pause();
     if (winLayer) winLayer.classList.add('hidden');
     if (guidePanel) guidePanel.classList.add('hidden');
-    if (exitConfirmOverlay) exitConfirmOverlay.classList.add('hidden');
+    if (pauseOverlay) pauseOverlay.classList.add('hidden');
+    if (shopOverlay) shopOverlay.classList.add('hidden');
     endOverlay.classList.add('hidden');
     hud.classList.add('hidden');
-    if (controlsBar) controlsBar.classList.add('hidden');
     if (touchControls) touchControls.classList.add('hidden');
-    syncStageButtons();
+    renderLevelGrid();
     startOverlay.classList.remove('hidden');
-  }
-
-  function openExitConfirm() {
-    if (!running || !exitConfirmOverlay) return;
-    running = false;
-    clearAllInputs();
-    if (touchControls) touchControls.classList.add('hidden');
-    Audio.setChaseMode(false);
-    exitConfirmOverlay.classList.remove('hidden');
-  }
-
-  function cancelExitConfirm() {
-    if (!exitConfirmOverlay) return;
-    exitConfirmOverlay.classList.add('hidden');
-    if (touchControls) touchControls.classList.remove('hidden');
-    running = true;
   }
 
   function toggleNightVision() {
     if (!catCtrl || !running) return;
     catCtrl.cat.nightVision = !catCtrl.cat.nightVision;
     Audio.playNightVision(catCtrl.cat.nightVision);
-    const nvBtn = document.querySelector('.touch-skill[data-action="nightvision"]');
-    if (nvBtn) nvBtn.classList.toggle('active', catCtrl.cat.nightVision);
+    haptic(10);
     updateHUD();
   }
 
-  // Multi-Touch Pointer Controls (with smooth thumb-slide between Left/Right)
+  // Keyboard Controls
+  window.addEventListener('keydown', (e) => {
+    if (playingCanvasIntro && (e.code === 'Space' || e.code === 'Enter')) {
+      catCtrl.cat.x = level.startX;
+      catCtrl.cat.y = level.startY;
+      catCtrl.cat.vy = 0;
+      enterGameplay();
+      return;
+    }
+
+    if (e.code === 'Escape' || e.code === 'KeyP') {
+      if (!shopOverlay.classList.contains('hidden')) {
+        closeShop();
+        return;
+      }
+      if (guidePanel && !guidePanel.classList.contains('hidden')) {
+        guidePanel.classList.add('hidden');
+        return;
+      }
+      if (running) openPauseMenu();
+      else if (paused) resumeFromPause();
+      return;
+    }
+
+    if (!running || paused) return;
+
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') input.left = true;
+    if (e.code === 'ArrowRight' || e.code === 'KeyD') input.right = true;
+    if (e.code === 'ArrowDown' || e.code === 'KeyS') input.down = true;
+    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') input.shift = true;
+
+    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+      if (!input.jumpHeld) input.jumpPressed = true;
+      input.jumpHeld = true;
+      e.preventDefault();
+    }
+
+    if (e.code === 'KeyE' || e.code === 'KeyN') toggleNightVision();
+    if (e.code === 'KeyQ' || e.code === 'KeyF') triggerMeow();
+    if (e.code === 'KeyR') restartCurrentStage();
+  });
+
+  window.addEventListener('keyup', (e) => {
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') input.left = false;
+    if (e.code === 'ArrowRight' || e.code === 'KeyD') input.right = false;
+    if (e.code === 'ArrowDown' || e.code === 'KeyS') input.down = false;
+    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') input.shift = false;
+    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') input.jumpHeld = false;
+  });
+
+  // Multi-Touch Pointer Controls (Smooth thumb-slide + Haptics)
   if (touchControls) {
-    const activeHoldPointers = new Map(); // pointerId -> { action, btn }
+    const activeHoldPointers = new Map();
     const syncHeld = () => {
       let l = false, r = false, d = false, j = false;
       for (const item of activeHoldPointers.values()) {
@@ -1356,6 +1762,7 @@ window.Game = window.Game || {};
           toggleNightVision();
           return;
         }
+        haptic(8);
         try { btn.setPointerCapture(e.pointerId); } catch (err) {}
         if (action === 'jump' && !input.jumpHeld) input.jumpPressed = true;
         activeHoldPointers.set(e.pointerId, { action, btn });
@@ -1371,10 +1778,10 @@ window.Game = window.Game || {};
           const hoveredBtn = target ? target.closest('.touch-btn[data-action="left"], .touch-btn[data-action="right"]') : null;
           if (hoveredBtn && hoveredBtn !== entry.btn) {
             entry.btn.classList.remove('pressed');
-            const newAction = hoveredBtn.getAttribute('data-action');
-            entry.action = newAction;
+            entry.action = hoveredBtn.getAttribute('data-action');
             entry.btn = hoveredBtn;
             hoveredBtn.classList.add('pressed');
+            haptic(6);
             syncHeld();
           }
         });
@@ -1397,16 +1804,104 @@ window.Game = window.Game || {};
     });
   }
 
+  // Button Wiring
+  if (btnQuickPlay) {
+    btnQuickPlay.addEventListener('click', () => {
+      Audio.ensureCtx();
+      Audio.playUiClick();
+      haptic(12);
+      const target = parseInt(btnQuickPlay.dataset.targetStage, 10) || Store.getMaxUnlockedStage();
+      startStageFromMenu(target);
+    });
+  }
+
+  if (btnOpenShop) btnOpenShop.addEventListener('click', () => openShop('menu'));
+  if (btnMenuCoins) btnMenuCoins.addEventListener('click', () => openShop('menu'));
+  if (btnPauseShop) btnPauseShop.addEventListener('click', () => openShop('pause'));
+  if (btnEndShop) btnEndShop.addEventListener('click', () => openShop('end'));
+  if (btnCloseShop) btnCloseShop.addEventListener('click', closeShop);
+
+  if (btnPause) btnPause.addEventListener('click', openPauseMenu);
+  if (btnResumeGame) btnResumeGame.addEventListener('click', resumeFromPause);
+  if (btnPauseRestart) btnPauseRestart.addEventListener('click', restartCurrentStage);
+  if (btnPauseMenu) btnPauseMenu.addEventListener('click', returnToMainMenu);
+
+  if (btnPauseRefill) {
+    btnPauseRefill.addEventListener('click', () => {
+      if (!catCtrl || catCtrl.cat.lives >= catCtrl.cat.maxLives) return;
+      if (Store.spendCoins(Store.LIFE_REFILL_COST)) {
+        catCtrl.cat.lives = catCtrl.cat.maxLives;
+        if (catCtrl.cat.shieldEnabled) catCtrl.cat.shieldActive = true;
+        Audio.playPurchase();
+        haptic(16);
+        updateHUD();
+        syncCoinDisplays();
+        btnPauseRefill.classList.add('hidden');
+        showToast('تمت استعادة كل الأرواح! ❤️');
+      } else {
+        showToast('عملات غير كافية! 🪙');
+      }
+    });
+  }
+
+  if (btnNextStage) {
+    btnNextStage.addEventListener('click', () => {
+      Audio.playUiClick();
+      endOverlay.classList.add('hidden');
+      if (touchControls) touchControls.classList.remove('hidden');
+      clearAllInputs();
+      const nextStage = Math.min(TOTAL_STAGES, currentStage + 1);
+      initLevel(nextStage);
+      Audio.resumeMusic();
+      lastTime = 0;
+      running = true;
+      Particles.spawnPopup(catCtrl.cat.x + 20, catCtrl.cat.y - 24, `المرحلة ${nextStage}`, '#ffd60a');
+    });
+  }
+
+  if (btnRestartStage) btnRestartStage.addEventListener('click', restartCurrentStage);
+  if (btnGameOverRestart) btnGameOverRestart.addEventListener('click', restartCurrentStage);
+  if (btnGameOverRevive) btnGameOverRevive.addEventListener('click', reviveAtCheckpoint);
+  if (btnGameOverMenu) btnGameOverMenu.addEventListener('click', returnToMainMenu);
+  if (btnEndMenu) btnEndMenu.addEventListener('click', returnToMainMenu);
+
   if (skillNightVision) skillNightVision.addEventListener('click', toggleNightVision);
   if (skillMeow) skillMeow.addEventListener('click', triggerMeow);
-  if (btnFullscreen) {
-    btnFullscreen.addEventListener('click', () => {
-      const el = document.documentElement;
-      if (!document.fullscreenElement) {
-        if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-      } else if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
-      }
+
+  if (btnDimBg) {
+    btnDimBg.addEventListener('click', () => {
+      Audio.playUiClick();
+      dimBackground = !dimBackground;
+      try { localStorage.setItem(DIM_BG_KEY, dimBackground ? '1' : '0'); } catch (e) {}
+      syncToggleButtons();
+    });
+  }
+
+  if (btnMusic) {
+    btnMusic.addEventListener('click', () => {
+      Audio.toggleMusicMute();
+      Audio.playUiClick();
+      syncToggleButtons();
+    });
+  }
+
+  if (btnAudio) {
+    btnAudio.addEventListener('click', () => {
+      Audio.toggleSfxMute();
+      syncToggleButtons();
+    });
+  }
+
+  if (btnGuide) {
+    btnGuide.addEventListener('click', () => {
+      Audio.playUiClick();
+      guidePanel.classList.remove('hidden');
+    });
+  }
+  if (btnCloseGuide) {
+    btnCloseGuide.addEventListener('click', () => {
+      Audio.playUiClick();
+      guidePanel.classList.add('hidden');
     });
   }
 
@@ -1419,67 +1914,8 @@ window.Game = window.Game || {};
     }
   });
 
-  function closeHudDropdown() {
-    if (hudDropdown) hudDropdown.classList.add('hidden');
-    if (btnHudMenu) {
-      btnHudMenu.classList.remove('active');
-      btnHudMenu.setAttribute('aria-expanded', 'false');
-    }
-  }
-
-  if (btnHudMenu && hudDropdown) {
-    btnHudMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const willOpen = hudDropdown.classList.contains('hidden');
-      hudDropdown.classList.toggle('hidden', !willOpen);
-      btnHudMenu.classList.toggle('active', willOpen);
-      btnHudMenu.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-    });
-    document.addEventListener('pointerdown', (e) => {
-      if (!hudDropdown.classList.contains('hidden') && !hudDropdown.contains(e.target) && e.target !== btnHudMenu) {
-        closeHudDropdown();
-      }
-    });
-  }
-
-  if (btnMainMenu) btnMainMenu.addEventListener('click', () => { closeHudDropdown(); openExitConfirm(); });
-  if (btnConfirmExit) btnConfirmExit.addEventListener('click', returnToMainMenu);
-  if (btnCancelExit) btnCancelExit.addEventListener('click', cancelExitConfirm);
-  if (btnGameOverMenu) btnGameOverMenu.addEventListener('click', returnToMainMenu);
-  if (btnEndMenu) btnEndMenu.addEventListener('click', returnToMainMenu);
-
-  btnRestartStage.addEventListener('click', restartCurrentStage);
-  btnGameOverRestart.addEventListener('click', restartCurrentStage);
-
-  function toggleDimBackground() {
-    dimBackground = !dimBackground;
-    try {
-      localStorage.setItem(DIM_BG_KEY, dimBackground ? '1' : '0');
-    } catch (e) {}
-    if (btnDimBg) btnDimBg.classList.toggle('active', dimBackground);
-  }
-
-  if (btnDimBg) btnDimBg.addEventListener('click', toggleDimBackground);
-
-  btnGuide.addEventListener('click', () => {
-    closeHudDropdown();
-    guidePanel.classList.toggle('hidden');
-  });
-  btnCloseGuide.addEventListener('click', () => guidePanel.classList.add('hidden'));
-
-  btnMusic.addEventListener('click', () => {
-    const isMusicMuted = Audio.toggleMusicMute();
-    btnMusic.classList.toggle('muted', isMusicMuted);
-  });
-
-  btnAudio.addEventListener('click', () => {
-    const isSfxMuted = Audio.toggleSfxMute();
-    const iconSpan = btnAudio.querySelector('span');
-    if (iconSpan) iconSpan.textContent = isSfxMuted ? '🔇' : '🔊';
-    btnAudio.classList.toggle('muted', isSfxMuted);
-  });
-
-  syncStageButtons();
-  initLevel();
+  // Boot
+  renderLevelGrid();
+  initLevel(1);
   requestAnimationFrame(loop);
 })();
