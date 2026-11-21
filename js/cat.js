@@ -11,6 +11,16 @@ window.Game.Cat = function (startX, startY) {
     wallSlideSpeed: 110,
   };
 
+  // Reusable 2x supersampled offscreen silhouette buffer for Guardian Shield full-body shimmer
+  const SHIELD_FX_SIZE = 144;
+  const SHIELD_FX_OX = 72;
+  const SHIELD_FX_OY = 114;
+  const SHIELD_FX_DPR = 2;
+  const shieldFxCanvas = document.createElement('canvas');
+  shieldFxCanvas.width = SHIELD_FX_SIZE * SHIELD_FX_DPR;
+  shieldFxCanvas.height = SHIELD_FX_SIZE * SHIELD_FX_DPR;
+  const shieldFxCtx = shieldFxCanvas.getContext('2d');
+
   // Fallback SVG Sprite
   const EXACT_CAT_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
   <defs>
@@ -889,113 +899,175 @@ window.Game.Cat = function (startX, startY) {
       ctx.fill();
     }
 
-    if (useProcedural) {
-      // Pure programmatic vector articulated cat (1:1 reference architecture + palette/outfit hooks)
-      ctx.save();
-      ctx.scale(-cat.facing * cat.scaleX, cat.scaleY);
-      window.Game.ProceduralCat.draw(ctx, cat);
-      ctx.restore();
-    } else {
-      // Fallback behind-cat vector cosmetics only if dedicated outfit sprite sheet isn't loaded yet
-      if (!hasOutfitSheet) {
-        if (cat.skin === 'wings') {
-          const flap = Math.sin(cat.animTime * (!cat.onGround ? 18 : 7)) * (!cat.onGround ? 0.36 : 0.14);
-          ctx.save();
-          ctx.translate(-cat.facing * 8, -28);
-          ctx.rotate(-cat.facing * (0.25 + flap));
-          ctx.fillStyle = 'rgba(255, 251, 235, 0.92)';
-          ctx.strokeStyle = '#fbbf24';
-          ctx.lineWidth = 1.6;
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.quadraticCurveTo(-cat.facing * 24, -18, -cat.facing * 28, -4);
-          ctx.quadraticCurveTo(-cat.facing * 20, 6, -cat.facing * 12, 8);
-          ctx.quadraticCurveTo(-cat.facing * 6, 9, 0, 4);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-          ctx.restore();
-        } else if (cat.skin === 'scarf') {
-          const wave = Math.sin(cat.animTime * 11) * 5;
-          ctx.save();
-          ctx.strokeStyle = '#dc2626';
-          ctx.lineWidth = 5.5;
-          ctx.lineCap = 'round';
-          ctx.beginPath();
-          ctx.moveTo(cat.facing * 4, -27);
-          ctx.quadraticCurveTo(-cat.facing * 14, -29 + wave * 0.6, -cat.facing * 30, -24 + wave);
-          ctx.stroke();
-          ctx.strokeStyle = '#fca5a5';
-          ctx.lineWidth = 1.6;
-          ctx.beginPath();
-          ctx.moveTo(-cat.facing * 24, -26 + wave * 0.85);
-          ctx.lineTo(-cat.facing * 30, -24 + wave);
-          ctx.stroke();
-          ctx.restore();
+    function renderCatFigure(targetCtx) {
+      if (useProcedural) {
+        // Pure programmatic vector articulated cat (1:1 reference architecture + palette/outfit hooks)
+        targetCtx.save();
+        targetCtx.scale(-cat.facing * cat.scaleX, cat.scaleY);
+        window.Game.ProceduralCat.draw(targetCtx, cat);
+        targetCtx.restore();
+      } else {
+        // Fallback behind-cat vector cosmetics only if dedicated outfit sprite sheet isn't loaded yet
+        if (!hasOutfitSheet) {
+          if (cat.skin === 'wings') {
+            const flap = Math.sin(cat.animTime * (!cat.onGround ? 18 : 7)) * (!cat.onGround ? 0.36 : 0.14);
+            targetCtx.save();
+            targetCtx.translate(-cat.facing * 8, -28);
+            targetCtx.rotate(-cat.facing * (0.25 + flap));
+            targetCtx.fillStyle = 'rgba(255, 251, 235, 0.92)';
+            targetCtx.strokeStyle = '#fbbf24';
+            targetCtx.lineWidth = 1.6;
+            targetCtx.beginPath();
+            targetCtx.moveTo(0, 0);
+            targetCtx.quadraticCurveTo(-cat.facing * 24, -18, -cat.facing * 28, -4);
+            targetCtx.quadraticCurveTo(-cat.facing * 20, 6, -cat.facing * 12, 8);
+            targetCtx.quadraticCurveTo(-cat.facing * 6, 9, 0, 4);
+            targetCtx.closePath();
+            targetCtx.fill();
+            targetCtx.stroke();
+            targetCtx.restore();
+          } else if (cat.skin === 'scarf') {
+            const wave = Math.sin(cat.animTime * 11) * 5;
+            targetCtx.save();
+            targetCtx.strokeStyle = '#dc2626';
+            targetCtx.lineWidth = 6.8;
+            targetCtx.lineCap = 'round';
+            targetCtx.beginPath();
+            targetCtx.moveTo(cat.facing * 4, -27);
+            targetCtx.quadraticCurveTo(-cat.facing * 16, -29 + wave * 0.6, -cat.facing * 36, -23 + wave);
+            targetCtx.stroke();
+            targetCtx.strokeStyle = '#fca5a5';
+            targetCtx.lineWidth = 2.0;
+            targetCtx.beginPath();
+            targetCtx.moveTo(-cat.facing * 28, -26 + wave * 0.85);
+            targetCtx.lineTo(-cat.facing * 36, -23 + wave);
+            targetCtx.stroke();
+            targetCtx.restore();
+          }
+        }
+
+        if (activeFrames) {
+          const { row, col } = getSpriteFrameCoords();
+          const frame = activeFrames[row][col];
+          // Sprite sheet frames face LEFT (-1), so flip with -cat.facing
+          targetCtx.save();
+          targetCtx.scale(-cat.facing * cat.scaleX, cat.scaleY);
+          const drawW = 88;
+          const drawH = Math.round((frame.height / frame.width) * drawW);
+          targetCtx.drawImage(frame, -drawW * 0.5, -drawH + 6, drawW, drawH);
+          targetCtx.restore();
+        } else if (fallbackReady && fallbackImg) {
+          const speedRatio = Math.min(1, Math.abs(cat.vx) / cat.physics.runSpeed);
+          const runBob = cat.onGround && speedRatio > 0.08 ? Math.abs(Math.sin(cat.animTime * 16)) * -4.5 * speedRatio : 0;
+          const crouchScaleY = cat.crouching && cat.onGround ? 0.8 : 1;
+          targetCtx.save();
+          targetCtx.scale(-cat.facing * cat.scaleX, cat.scaleY * crouchScaleY);
+          const drawSize = 96;
+          const pawAlignY = -drawSize * (399 / 500);
+          targetCtx.drawImage(fallbackImg, -drawSize * 0.48, pawAlignY + runBob, drawSize, drawSize);
+          targetCtx.restore();
+        }
+
+        // Cardboard-bag shield helmet with real eye-hole cutouts for Sprite Sheet mode
+        if (
+          cat.shieldActive &&
+          window.Game.ProceduralCat &&
+          typeof window.Game.ProceduralCat.drawCardboardBagForSprite === 'function'
+        ) {
+          targetCtx.save();
+          targetCtx.scale(-cat.facing * cat.scaleX, cat.scaleY);
+          window.Game.ProceduralCat.drawCardboardBagForSprite(targetCtx, cat);
+          targetCtx.restore();
+        }
+
+        // Front fallback vector Crown/Cyber if sheet pending
+        const headY = cat.crouching ? -37 : -45;
+        if (!hasOutfitSheet && cat.skin === 'crown') {
+          targetCtx.save();
+          targetCtx.translate(cat.facing * 6, headY - 4);
+          targetCtx.rotate(cat.facing * 0.12);
+          targetCtx.scale(1.24, 1.24);
+          targetCtx.fillStyle = '#fbbf24';
+          targetCtx.strokeStyle = '#92400e';
+          targetCtx.lineWidth = 1.3;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-9, 4);
+          targetCtx.lineTo(-10, -5);
+          targetCtx.lineTo(-4, 0);
+          targetCtx.lineTo(0, -8);
+          targetCtx.lineTo(4, 0);
+          targetCtx.lineTo(10, -5);
+          targetCtx.lineTo(9, 4);
+          targetCtx.closePath();
+          targetCtx.fill();
+          targetCtx.stroke();
+          targetCtx.fillStyle = '#fef08a';
+          targetCtx.beginPath();
+          targetCtx.arc(0, -1, 1.8, 0, Math.PI * 2);
+          targetCtx.fill();
+          targetCtx.restore();
+        } else if (!hasOutfitSheet && cat.skin === 'cyber') {
+          targetCtx.save();
+          targetCtx.translate(cat.facing * 12, headY + 9);
+          targetCtx.fillStyle = 'rgba(34, 211, 238, 0.85)';
+          targetCtx.strokeStyle = '#0e7490';
+          targetCtx.lineWidth = 1.4;
+          targetCtx.beginPath();
+          targetCtx.roundRect(-8, -3.5, 16, 6.5, 3);
+          targetCtx.fill();
+          targetCtx.stroke();
+          targetCtx.fillStyle = '#ffffff';
+          targetCtx.fillRect(-5, -2, 6, 1.5);
+          targetCtx.restore();
         }
       }
+    }
 
-      if (activeFrames) {
-        const { row, col } = getSpriteFrameCoords();
-        const frame = activeFrames[row][col];
-        // Sprite sheet frames face LEFT (-1), so flip with -cat.facing
-        ctx.save();
-        ctx.scale(-cat.facing * cat.scaleX, cat.scaleY);
-        const drawW = 88;
-        const drawH = Math.round((frame.height / frame.width) * drawW);
-        ctx.drawImage(frame, -drawW * 0.5, -drawH + 6, drawW, drawH);
-        ctx.restore();
-      } else if (fallbackReady && fallbackImg) {
-        const speedRatio = Math.min(1, Math.abs(cat.vx) / cat.physics.runSpeed);
-        const runBob = cat.onGround && speedRatio > 0.08 ? Math.abs(Math.sin(cat.animTime * 16)) * -4.5 * speedRatio : 0;
-        const crouchScaleY = cat.crouching && cat.onGround ? 0.8 : 1;
-        ctx.save();
-        ctx.scale(-cat.facing * cat.scaleX, cat.scaleY * crouchScaleY);
-        const drawSize = 96;
-        const pawAlignY = -drawSize * (399 / 500);
-        ctx.drawImage(fallbackImg, -drawSize * 0.48, pawAlignY + runBob, drawSize, drawSize);
-        ctx.restore();
-      }
+    if (cat.shieldActive) {
+      // Render cat (+ cardboard bag shield helmet) into offscreen silhouette buffer,
+      // then apply a gentle full-body warm light shimmer strictly over the cat's shape!
+      const pulse = 0.5 + 0.5 * Math.sin(cat.animTime * 4.2);
+      shieldFxCtx.setTransform(1, 0, 0, 1, 0, 0);
+      shieldFxCtx.clearRect(0, 0, shieldFxCanvas.width, shieldFxCanvas.height);
 
-      // Front fallback vector Crown/Cyber if sheet pending
-      const headY = cat.crouching ? -37 : -45;
-      if (!hasOutfitSheet && cat.skin === 'crown') {
-        ctx.save();
-        ctx.translate(cat.facing * 6, headY - 3);
-        ctx.rotate(cat.facing * 0.12);
-        ctx.fillStyle = '#fbbf24';
-        ctx.strokeStyle = '#92400e';
-        ctx.lineWidth = 1.4;
-        ctx.beginPath();
-        ctx.moveTo(-9, 4);
-        ctx.lineTo(-10, -5);
-        ctx.lineTo(-4, 0);
-        ctx.lineTo(0, -8);
-        ctx.lineTo(4, 0);
-        ctx.lineTo(10, -5);
-        ctx.lineTo(9, 4);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = '#fef08a';
-        ctx.beginPath();
-        ctx.arc(0, -1, 1.8, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      } else if (!hasOutfitSheet && cat.skin === 'cyber') {
-        ctx.save();
-        ctx.translate(cat.facing * 12, headY + 9);
-        ctx.fillStyle = 'rgba(34, 211, 238, 0.85)';
-        ctx.strokeStyle = '#0e7490';
-        ctx.lineWidth = 1.4;
-        ctx.beginPath();
-        ctx.roundRect(-8, -3.5, 16, 6.5, 3);
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-5, -2, 6, 1.5);
-        ctx.restore();
+      shieldFxCtx.save();
+      shieldFxCtx.scale(SHIELD_FX_DPR, SHIELD_FX_DPR);
+      shieldFxCtx.translate(SHIELD_FX_OX, SHIELD_FX_OY);
+      renderCatFigure(shieldFxCtx);
+
+      // Subtle breathing warm illumination wash across entire silhouette
+      shieldFxCtx.globalCompositeOperation = 'source-atop';
+      shieldFxCtx.fillStyle = `rgba(255, 250, 224, ${(0.08 + 0.13 * pulse).toFixed(3)})`;
+      shieldFxCtx.fillRect(-SHIELD_FX_OX, -SHIELD_FX_OY, SHIELD_FX_SIZE, SHIELD_FX_SIZE);
+
+      // Soft diagonal light gleam sweeping gently across the body
+      const sweepPhase = (cat.animTime * 0.65) % 1.6;
+      if (sweepPhase < 1.0) {
+        const gx = -56 + sweepPhase * 112;
+        const gleam = shieldFxCtx.createLinearGradient(gx - 18, -96, gx + 18, 12);
+        gleam.addColorStop(0, 'rgba(255, 253, 242, 0)');
+        gleam.addColorStop(0.5, 'rgba(255, 253, 242, 0.25)');
+        gleam.addColorStop(1, 'rgba(255, 253, 242, 0)');
+        shieldFxCtx.fillStyle = gleam;
+        shieldFxCtx.fillRect(-SHIELD_FX_OX, -SHIELD_FX_OY, SHIELD_FX_SIZE, SHIELD_FX_SIZE);
       }
+      shieldFxCtx.restore();
+
+      ctx.save();
+      if (!cat.nightVision) {
+        ctx.shadowColor = `rgba(255, 246, 206, ${(0.20 + 0.16 * pulse).toFixed(3)})`;
+        ctx.shadowBlur = 4 + 3 * pulse;
+      }
+      ctx.drawImage(
+        shieldFxCanvas,
+        -SHIELD_FX_OX,
+        -SHIELD_FX_OY,
+        SHIELD_FX_SIZE,
+        SHIELD_FX_SIZE
+      );
+      ctx.restore();
+    } else {
+      renderCatFigure(ctx);
     }
 
     if (cat.skin === 'starlight') {
@@ -1043,20 +1115,6 @@ window.Game.Cat = function (startX, startY) {
         ctx.fill();
         ctx.restore();
       }
-    }
-
-    // Active Guardian Shield bubble
-    if (cat.shieldActive) {
-      const pulse = 0.82 + Math.sin(cat.animTime * 5) * 0.18;
-      ctx.save();
-      ctx.strokeStyle = `rgba(125, 211, 252, ${0.72 * pulse})`;
-      ctx.fillStyle = `rgba(56, 189, 248, ${0.12 * pulse})`;
-      ctx.lineWidth = 2.2;
-      ctx.beginPath();
-      ctx.arc(0, -24, 30, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.restore();
     }
 
     ctx.restore();

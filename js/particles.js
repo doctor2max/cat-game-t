@@ -100,20 +100,21 @@ window.Game.Particles = (function () {
       maxRadius: 110,
       life: 0.42,
       maxLife: 0.42,
-      color: '#38bdf8',
+      color: '#fde68a',
     });
-    for (let i = 0; i < 12; i++) {
-      const ang = (Math.PI * 2 * i) / 12;
+    const burstColors = ['#d6a76c', '#b07b42', '#fef08a', '#fffbeb'];
+    for (let i = 0; i < 14; i++) {
+      const ang = (Math.PI * 2 * i) / 14;
       particles.push({
         x,
         y,
-        vx: Math.cos(ang) * 145,
-        vy: Math.sin(ang) * 145,
-        size: 3 + Math.random() * 2,
-        life: 0.4,
-        maxLife: 0.4,
-        color: i % 2 === 0 ? '#7dd3fc' : '#e0f2fe',
-        gravity: 80,
+        vx: Math.cos(ang) * (120 + (i % 3) * 28),
+        vy: Math.sin(ang) * (120 + (i % 3) * 28) - 20,
+        size: 3 + Math.random() * 2.2,
+        life: 0.44,
+        maxLife: 0.44,
+        color: burstColors[i % burstColors.length],
+        gravity: 220,
       });
     }
   }

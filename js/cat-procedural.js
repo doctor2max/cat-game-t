@@ -345,6 +345,7 @@ window.Game.ProceduralCat = (function () {
 
     ctx.save();
     ctx.translate(446, 374);
+    ctx.scale(1.24, 1.20);
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
@@ -394,8 +395,11 @@ window.Game.ProceduralCat = (function () {
   }
 
   function drawScarfCollarWrap(ctx, pal) {
-    // Plush folded crimson ninja collar wrap covering neck collar & bell
+    // Plush folded crimson ninja collar wrap covering neck collar & bell (enlarged 1.18x x 1.22x)
     ctx.save();
+    ctx.translate(378, 405);
+    ctx.scale(1.18, 1.22);
+    ctx.translate(-378, -405);
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
@@ -437,12 +441,14 @@ window.Game.ProceduralCat = (function () {
   }
 
   function drawCrownOutfit(ctx, catState, pal) {
-    const cx = MODEL.sockets.crown[0];
-    const cy = MODEL.sockets.crown[1] + 4;
+    const bagOn = !!catState.shieldActive;
+    const cx = MODEL.sockets.crown[0] + (bagOn ? 24 : 0);
+    const cy = bagOn ? -16 : (MODEL.sockets.crown[1] - 4);
 
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.rotate(-0.14);
+    ctx.rotate(bagOn ? -0.04 : -0.14);
+    ctx.scale(1.24, 1.24);
 
     // Rich shaded golden royal crown matching image-crown-clean.png
     const grad = ctx.createLinearGradient(-58, -72, 58, 22);
@@ -452,7 +458,7 @@ window.Game.ProceduralCat = (function () {
 
     ctx.fillStyle = grad;
     ctx.strokeStyle = pal.outline;
-    ctx.lineWidth = 9.2;
+    ctx.lineWidth = 8.2;
     ctx.lineJoin = 'round';
     ctx.beginPath();
     ctx.moveTo(-54, 18);
@@ -651,12 +657,241 @@ window.Game.ProceduralCat = (function () {
     ctx.restore();
   }
 
+  function addHandCutEyeHole(ctx, cx, cy, rx, ry, rot) {
+    const cosR = Math.cos(rot);
+    const sinR = Math.sin(rot);
+    const steps = 28;
+    for (let i = 0; i <= steps; i++) {
+      const a = (i / steps) * Math.PI * 2;
+      // Subtle scissor-cut irregularity so eye holes feel hand-cut into cardboard
+      const wob = 1 + 0.03 * Math.sin(a * 5 + cx);
+      const lx = Math.cos(a) * rx * wob;
+      const ly = Math.sin(a) * ry * wob;
+      const px = cx + lx * cosR - ly * sinR;
+      const py = cy + lx * sinR + ly * cosR;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+  }
+
+  function drawCardboardBagShield(ctx, catState, pal, pose) {
+    // 3D kraft-paper cardboard bag over Mashmasha's head with genuine evenodd eye-hole cutouts
+    // so her real blinking, squinting, cyber, or wincing eyes peek straight through!
+    ctx.save();
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+
+    const leftHole = { cx: 220, cy: 285, rx: 41, ry: 44, rot: -0.06 };
+    const rightHole = { cx: 362, cy: 285, rx: 52, ry: 48, rot: 0.04 };
+
+    function traceBagOuter(targetCtx) {
+      targetCtx.moveTo(188, 34);
+      // Enclosing top ear-tip tents so 100% of Mashmasha's ears stay tucked cleanly inside the bag
+      targetCtx.quadraticCurveTo(226, 10, 268, 28);
+      targetCtx.quadraticCurveTo(356, 30, 434, 18);
+      targetCtx.quadraticCurveTo(478, -2, 518, 20);
+      targetCtx.lineTo(540, 32);
+      // Right 3D side gusset descending behind cheek
+      targetCtx.quadraticCurveTo(564, 194, 560, 344);
+      // Bottom serrated hand-torn cardboard hem curving cleanly above collar
+      targetCtx.lineTo(532, 356);
+      targetCtx.lineTo(504, 342);
+      targetCtx.lineTo(476, 366);
+      targetCtx.lineTo(446, 358);
+      targetCtx.lineTo(422, 384);
+      targetCtx.lineTo(392, 368);
+      targetCtx.lineTo(364, 394);
+      targetCtx.lineTo(334, 376);
+      targetCtx.lineTo(304, 400);
+      targetCtx.lineTo(274, 380);
+      targetCtx.lineTo(242, 402);
+      targetCtx.lineTo(212, 384);
+      targetCtx.lineTo(186, 400);
+      targetCtx.lineTo(166, 386);
+      // Left front wall rising over muzzle & cheek
+      targetCtx.quadraticCurveTo(156, 214, 188, 34);
+      targetCtx.closePath();
+    }
+
+    // 1. Subtle dark interior shadow peeking right beneath serrated front hem
+    ctx.fillStyle = '#3b1c0b';
+    ctx.beginPath();
+    ctx.moveTo(176, 380);
+    ctx.quadraticCurveTo(286, 422, 474, 370);
+    ctx.lineTo(466, 352);
+    ctx.quadraticCurveTo(290, 386, 180, 364);
+    ctx.closePath();
+    ctx.fill();
+
+    // 2. Main kraft cardboard bag fill with genuine evenodd eye cutouts
+    const kraftFront = ctx.createLinearGradient(160, 36, 472, 398);
+    kraftFront.addColorStop(0, '#e3b378');
+    kraftFront.addColorStop(0.45, '#cd9658');
+    kraftFront.addColorStop(1, '#af763c');
+
+    ctx.beginPath();
+    traceBagOuter(ctx);
+    addHandCutEyeHole(ctx, leftHole.cx, leftHole.cy, leftHole.rx, leftHole.ry, leftHole.rot);
+    addHandCutEyeHole(ctx, rightHole.cx, rightHole.cy, rightHole.rx, rightHole.ry, rightHole.rot);
+    ctx.fillStyle = kraftFront;
+    ctx.fill('evenodd');
+
+    // 3. Clip inner 3D side gusset, paper folds, tape patch & subtle corrugated speckling inside bag
+    ctx.save();
+    ctx.beginPath();
+    traceBagOuter(ctx);
+    addHandCutEyeHole(ctx, leftHole.cx, leftHole.cy, leftHole.rx, leftHole.ry, leftHole.rot);
+    addHandCutEyeHole(ctx, rightHole.cx, rightHole.cy, rightHole.rx, rightHole.ry, rightHole.rot);
+    ctx.clip('evenodd');
+
+    // Darker 3D folded right side gusset face
+    const sideGrad = ctx.createLinearGradient(452, 10, 566, 355);
+    sideGrad.addColorStop(0, '#ba8245');
+    sideGrad.addColorStop(0.55, '#a16a32');
+    sideGrad.addColorStop(1, '#845020');
+    ctx.fillStyle = sideGrad;
+    ctx.beginPath();
+    ctx.moveTo(458, -4);
+    ctx.lineTo(548, -4);
+    ctx.lineTo(570, 365);
+    ctx.lineTo(462, 388);
+    ctx.closePath();
+    ctx.fill();
+
+    // Top-of-bag highlight fold edge + gusset pleat V-crease
+    ctx.fillStyle = 'rgba(255, 240, 212, 0.24)';
+    ctx.beginPath();
+    ctx.moveTo(182, 2);
+    ctx.quadraticCurveTo(320, 34, 462, 10);
+    ctx.lineTo(462, 52);
+    ctx.quadraticCurveTo(320, 68, 180, 46);
+    ctx.closePath();
+    ctx.fill();
+
+    // Front-to-side vertical corner fold line + side gusset V pleat
+    ctx.strokeStyle = 'rgba(72, 34, 12, 0.42)';
+    ctx.lineWidth = 6.5;
+    ctx.beginPath();
+    ctx.moveTo(458, 14);
+    ctx.quadraticCurveTo(466, 200, 468, 364);
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(72, 34, 12, 0.30)';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(506, 12);
+    ctx.lineTo(520, 188);
+    ctx.lineTo(514, 352);
+    ctx.moveTo(198, 146);
+    ctx.quadraticCurveTo(256, 158, 304, 142);
+    ctx.moveTo(398, 188);
+    ctx.quadraticCurveTo(430, 182, 452, 198);
+    ctx.stroke();
+
+    // Cute crooked masking tape patch near upper forehead corner
+    ctx.save();
+    ctx.translate(414, 98);
+    ctx.rotate(-0.34);
+    ctx.fillStyle = 'rgba(254, 243, 199, 0.72)';
+    ctx.strokeStyle = 'rgba(120, 68, 28, 0.45)';
+    ctx.lineWidth = 3.5;
+    ctx.fillRect(-38, -14, 76, 28);
+    ctx.strokeRect(-38, -14, 76, 28);
+    ctx.restore();
+
+    ctx.restore(); // end evenodd clip
+
+    // 4. Outer bag `#301107` crisp ink outline
+    ctx.strokeStyle = pal.outline;
+    ctx.lineWidth = 9.5;
+    ctx.beginPath();
+    traceBagOuter(ctx);
+    ctx.stroke();
+
+    // 5. Cut-cardboard thickness bevel & scissor-cut ink rims around BOTH eye holes
+    for (const h of [leftHole, rightHole]) {
+      ctx.strokeStyle = '#73421a';
+      ctx.lineWidth = 10.5;
+      ctx.beginPath();
+      addHandCutEyeHole(ctx, h.cx, h.cy, h.rx, h.ry, h.rot);
+      ctx.stroke();
+
+      ctx.strokeStyle = pal.outline;
+      ctx.lineWidth = 6.2;
+      ctx.beginPath();
+      addHandCutEyeHole(ctx, h.cx, h.cy, h.rx, h.ry, h.rot);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  /**
+   * Renders the cardboard bag shield aligned onto the Original Sprite Sheet cat head.
+   * Assumes caller has applied `ctx.scale(-cat.facing * cat.scaleX, cat.scaleY)` at ground center.
+   */
+  function drawCardboardBagForSprite(ctx, catState) {
+    let dx = 5.5;
+    let dy = 10.5;
+    let sc = 0.80;
+    let ang = 0;
+
+    if (catState.hurtTimer > 0) {
+      dx = 4.0;
+      dy = 13.0;
+      sc = 0.80;
+      ang = -0.10;
+    } else if (!catState.onGround) {
+      dx = 7.0;
+      dy = 17.0;
+      sc = 0.78;
+      ang = (catState.vy || 0) < 0 ? -0.05 : 0.05;
+    } else if (catState.crouching) {
+      dx = 2.5;
+      dy = 21.5;
+      sc = 0.76;
+      ang = 0.03;
+    } else if (Math.abs(catState.vx || 0) > 25) {
+      dx = 3.5;
+      dy = 16.5;
+      sc = 0.80;
+    }
+
+    ctx.save();
+    ctx.scale(WORLD_SCALE, WORLD_SCALE);
+    ctx.translate(-MODEL.centerX, -MODEL.pawBottomY + 8);
+
+    const hpx = 375;
+    const hpy = 390;
+    ctx.translate(hpx + dx / WORLD_SCALE, hpy + dy / WORLD_SCALE);
+    if (ang) ctx.rotate(ang);
+    ctx.scale(sc, sc);
+    ctx.translate(-hpx, -hpy);
+
+    drawCardboardBagShield(ctx, catState, activePalette, null);
+    ctx.restore();
+  }
+
   function drawWincingHurtEyes(ctx, pal) {
     ctx.save();
-    ctx.strokeStyle = pal.eyeDark;
-    ctx.lineWidth = 10;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
+
+    // Pale rim behind > < strokes so hurt eyes read sharply even inside dark cardboard cutouts
+    ctx.strokeStyle = 'rgba(253, 243, 218, 0.65)';
+    ctx.lineWidth = 17;
+    ctx.beginPath();
+    ctx.moveTo(202, 268);
+    ctx.lineTo(240, 288);
+    ctx.lineTo(204, 308);
+    ctx.moveTo(384, 266);
+    ctx.lineTo(342, 288);
+    ctx.lineTo(386, 310);
+    ctx.stroke();
+
+    ctx.strokeStyle = pal.eyeDark;
+    ctx.lineWidth = 12;
 
     // > < wincing eyes
     ctx.beginPath();
@@ -1126,6 +1361,11 @@ window.Game.ProceduralCat = (function () {
 
     drawWhiskers(ctx, pal);
 
+    // Shield Cardboard Bag Helmet with real cutout eye holes (eyes peek straight through!)
+    if (catState.shieldActive) {
+      drawCardboardBagShield(ctx, catState, pal, pose);
+    }
+
     // Head-mounted outfits & neck Bell OR Ninja Collar Wrap
     if (skin === 'crown') {
       drawCrownOutfit(ctx, catState, pal);
@@ -1158,5 +1398,6 @@ window.Game.ProceduralCat = (function () {
     getPalette,
     registerOutfit,
     draw,
+    drawCardboardBagForSprite,
   };
 })();
