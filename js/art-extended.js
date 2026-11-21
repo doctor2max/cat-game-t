@@ -3063,6 +3063,124 @@ window.Game = window.Game || {};
   // =========================================================================
   // 9. ULTRA-DETAILED TEXTURED PLATFORMS & INTERACTIVE OBSTACLES
   // =========================================================================
+  function drawClimbWallSign(ctx, p, px, py, time) {
+    if (!p || !p.climbable) return;
+    ctx.save();
+    // Position at the bottom of the climbable wall (on the left climbing edge for wide end-walls, centered for narrow pillars)
+    const sx = p.w > 100 ? px + 34 : px + p.w * 0.5;
+    const bottomY = py + p.h;
+    const isGroundWall = (p.y + p.h) >= 570;
+    const signY = isGroundWall ? bottomY - 38 : bottomY - 30;
+    const sw = 88;
+    const sh = 27;
+
+    ctx.translate(sx, signY);
+
+    // 1. Wooden support post (for ground-anchored walls) OR wrought-iron wall brackets (for elevated wall-jump pillars)
+    if (isGroundWall) {
+      const postG = ctx.createLinearGradient(-4, 0, 4, 0);
+      postG.addColorStop(0, '#3b1d0a');
+      postG.addColorStop(0.45, '#7c431e');
+      postG.addColorStop(1, '#291205');
+      ctx.fillStyle = postG;
+      ctx.strokeStyle = '#1a0a02';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.roundRect(-4.5, sh * 0.5 - 2, 9, 39 - sh * 0.5, 2);
+      ctx.fill();
+      ctx.stroke();
+      // Little green grass blades & tiny sprout at post base
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.moveTo(-7, 38); ctx.lineTo(-10, 31); ctx.lineTo(-3, 37);
+      ctx.moveTo(6, 38); ctx.lineTo(10, 32); ctx.lineTo(3, 37);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#090d16';
+      ctx.lineWidth = 1;
+      ctx.fillRect(-20, -4, 5, 6);
+      ctx.fillRect(15, -4, 5, 6);
+    }
+
+    // 2. Drop shadow behind wooden signboard
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+    ctx.beginPath();
+    ctx.roundRect(-sw * 0.5 + 2, -sh * 0.5 + 3, sw, sh, 6);
+    ctx.fill();
+
+    // 3. Cute Hand-Carved Oak Wooden Signboard with Rustic V-Notch & Wood Grain
+    const woodG = ctx.createLinearGradient(0, -sh * 0.5, 0, sh * 0.5);
+    woodG.addColorStop(0, '#c27838');
+    woodG.addColorStop(0.45, '#9a5822');
+    woodG.addColorStop(0.85, '#783f14');
+    woodG.addColorStop(1, '#4f2608');
+    ctx.fillStyle = woodG;
+    ctx.strokeStyle = '#2b1304';
+    ctx.lineWidth = 1.7;
+    ctx.beginPath();
+    ctx.roundRect(-sw * 0.5, -sh * 0.5, sw, sh, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    // Inner beveled wood-plank border & horizontal wood grain lines
+    ctx.strokeStyle = 'rgba(254, 240, 138, 0.28)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(-sw * 0.5 + 2, -sh * 0.5 + 2, sw - 4, sh - 4, 4.5);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(43, 19, 4, 0.35)';
+    ctx.beginPath();
+    ctx.moveTo(-sw * 0.5 + 6, -4); ctx.lineTo(sw * 0.5 - 6, -4);
+    ctx.moveTo(-sw * 0.5 + 8, 5); ctx.lineTo(sw * 0.5 - 8, 5);
+    ctx.stroke();
+
+    // 4 Brass corner rivets / nails + cute little green leaf on upper-right corner
+    ctx.fillStyle = '#fbbf24';
+    for (const [nx, ny] of [[-sw * 0.5 + 5, -sh * 0.5 + 5], [sw * 0.5 - 5, -sh * 0.5 + 5], [-sw * 0.5 + 5, sh * 0.5 - 5], [sw * 0.5 - 5, sh * 0.5 - 5]]) {
+      ctx.beginPath(); ctx.arc(nx, ny, 1.3, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.save();
+    ctx.translate(sw * 0.5 - 3, -sh * 0.5 + 1);
+    ctx.rotate(-0.4);
+    ctx.fillStyle = '#4ade80';
+    ctx.strokeStyle = '#14532d';
+    ctx.lineWidth = 0.9;
+    ctx.beginPath(); ctx.ellipse(0, 0, 5, 2.6, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.restore();
+
+    // 4. Animated Bobbing Golden Upward Arrow pointing up the climbable wall
+    const arrowBob = Math.sin(time * 4.8 + p.x * 0.02) * 2;
+    const ax = -sw * 0.5 + 14;
+    const ay = arrowBob;
+    ctx.fillStyle = '#fde047';
+    ctx.strokeStyle = '#451a03';
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay - 7.5);
+    ctx.lineTo(ax + 6.5, ay - 0.5);
+    ctx.lineTo(ax + 2.6, ay - 0.5);
+    ctx.lineTo(ax + 2.6, ay + 6.5);
+    ctx.lineTo(ax - 2.6, ay + 6.5);
+    ctx.lineTo(ax - 2.6, ay - 0.5);
+    ctx.lineTo(ax - 6.5, ay - 0.5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // 5. Crisp Arabic Label: "تسلق الجدار"
+    ctx.direction = 'rtl';
+    ctx.font = '800 11px "Cairo", "Tajawal", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#291002';
+    ctx.fillText('تسلق الجدار', 8, 1.5);
+    ctx.fillStyle = '#fffbeb';
+    ctx.fillText('تسلق الجدار', 8, 0.5);
+    ctx.restore();
+  }
+
   function drawPlatformExtended(ctx, p, px, py, nv, time) {
     ensureTextures(ctx);
 
@@ -3079,6 +3197,7 @@ window.Game = window.Game || {};
       ctx.fillStyle = '#fef08a'; ctx.fillRect(0, 1.5, p.w, 2.2);
       ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.6; ctx.strokeRect(0, 0, p.w, p.h);
       ctx.restore();
+      if (p.climbable) drawClimbWallSign(ctx, p, px, py, time);
       return;
     }
 
@@ -3934,6 +4053,9 @@ window.Game = window.Game || {};
     }
 
     origDrawPlatform(ctx, p, px, py, nv, time);
+    if (p.climbable) {
+      drawClimbWallSign(ctx, p, px, py, time);
+    }
   }
 
   Art.drawCoin = drawCoin;
