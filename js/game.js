@@ -186,6 +186,20 @@ window.Game = window.Game || {};
     winVideo.addEventListener('loadeddata', () => updateVideoCaption(winVideo, winCaption, activeWinClipKey));
     winVideo.addEventListener('play', () => updateVideoCaption(winVideo, winCaption, activeWinClipKey));
   }
+  if (winLayer && winVideo) {
+    winLayer.addEventListener('pointerdown', (e) => {
+      if (e.target === btnSkipWin) return;
+      if (winVideo.muted) winVideo.muted = false;
+      if (winVideo.paused && !winLayer.classList.contains('hidden')) {
+        winVideo.play().catch(() => {});
+      }
+    });
+  }
+  if (gameOverLayer && gameOverVideo) {
+    gameOverLayer.addEventListener('pointerdown', () => {
+      if (gameOverVideo.muted) gameOverVideo.muted = false;
+    });
+  }
 
   function refreshAllLocalizedUI() {
     if (I18n) I18n.applyDom();
@@ -1307,10 +1321,16 @@ window.Game = window.Game || {};
 
       if (currentStage === TOTAL_STAGES) {
         // Grand Finale Stage 15 plays Win1.mp4 -> Win2.mp4!
+        Audio.pauseMusic();
         endOverlay.classList.add('hidden');
         hud.classList.add('hidden');
 
+        let summaryShown = false;
         const showFinalSummary = () => {
+          if (summaryShown) return;
+          summaryShown = true;
+          winVideo.onended = null;
+          winVideo.onerror = null;
           winVideo.pause();
           winLayer.classList.add('hidden');
           if (winCaption) winCaption.classList.add('hidden');
@@ -1323,20 +1343,44 @@ window.Game = window.Game || {};
         ];
         let winIdx = 0;
         const playNextWinClip = () => {
+          if (summaryShown) return;
           if (winIdx >= winPlaylist.length) {
             showFinalSummary();
             return;
           }
           const clip = winPlaylist[winIdx++];
           activeWinClipKey = clip.key;
+          winVideo.muted = false;
           winVideo.src = clip.src;
+          winVideo.currentTime = 0;
+          winVideo.load();
           winLayer.classList.remove('hidden');
           if (winCaption) winCaption.classList.add('hidden');
-          winVideo.play().catch(showFinalSummary);
+          updateVideoCaption(winVideo, winCaption, activeWinClipKey);
+
+          const p = winVideo.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch(() => {
+              // Autoplay policy may block unmuted play() from requestAnimationFrame:
+              // retry muted immediately so the finale cutscene ALWAYS plays!
+              winVideo.muted = true;
+              const pMuted = winVideo.play();
+              if (pMuted && typeof pMuted.catch === 'function') {
+                pMuted.catch(() => {
+                  // Only skip to next clip / summary if muted playback also fails
+                  if (winIdx < winPlaylist.length) playNextWinClip();
+                  else showFinalSummary();
+                });
+              }
+            });
+          }
         };
 
         winVideo.onended = playNextWinClip;
-        winVideo.onerror = showFinalSummary;
+        winVideo.onerror = () => {
+          if (winIdx < winPlaylist.length) playNextWinClip();
+          else showFinalSummary();
+        };
         if (btnSkipWin) btnSkipWin.onclick = showFinalSummary;
         playNextWinClip();
       } else {
@@ -1382,8 +1426,18 @@ window.Game = window.Game || {};
       gameOverActions.classList.remove('hidden');
     };
     gameOverVideo.onerror = showFallbackOverlay;
+    gameOverVideo.muted = false;
     gameOverVideo.currentTime = 0;
-    gameOverVideo.play().catch(showFallbackOverlay);
+    const goPlay = gameOverVideo.play();
+    if (goPlay && typeof goPlay.catch === 'function') {
+      goPlay.catch(() => {
+        gameOverVideo.muted = true;
+        const goMuted = gameOverVideo.play();
+        if (goMuted && typeof goMuted.catch === 'function') {
+          goMuted.catch(showFallbackOverlay);
+        }
+      });
+    }
   }
 
   function reviveAtCheckpoint() {
