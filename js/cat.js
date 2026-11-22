@@ -12,240 +12,14 @@ window.Game.Cat = function (startX, startY) {
   };
 
   // Reusable 2x supersampled offscreen silhouette buffer for Guardian Shield full-body shimmer
-  const SHIELD_FX_SIZE = 144;
-  const SHIELD_FX_OX = 72;
-  const SHIELD_FX_OY = 114;
+  const SHIELD_FX_SIZE = 156;
+  const SHIELD_FX_OX = 78;
+  const SHIELD_FX_OY = 116;
   const SHIELD_FX_DPR = 2;
   const shieldFxCanvas = document.createElement('canvas');
   shieldFxCanvas.width = SHIELD_FX_SIZE * SHIELD_FX_DPR;
   shieldFxCanvas.height = SHIELD_FX_SIZE * SHIELD_FX_DPR;
   const shieldFxCtx = shieldFxCanvas.getContext('2d');
-
-  // Fallback SVG Sprite
-  const EXACT_CAT_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
-  <defs>
-    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#f2963f"/>
-      <stop offset="65%" stop-color="#e47e28"/>
-      <stop offset="100%" stop-color="#c96519"/>
-    </linearGradient>
-    <radialGradient id="headGrad" cx="46%" cy="44%" r="54%">
-      <stop offset="0%" stop-color="#f6a24b"/>
-      <stop offset="70%" stop-color="#e5812b"/>
-      <stop offset="100%" stop-color="#c96418"/>
-    </radialGradient>
-    <radialGradient id="irisGrad" cx="50%" cy="68%" r="55%">
-      <stop offset="0%" stop-color="#f2c464"/>
-      <stop offset="48%" stop-color="#a45c1b"/>
-      <stop offset="100%" stop-color="#482107"/>
-    </radialGradient>
-    <linearGradient id="earPink" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#f099a6"/>
-      <stop offset="100%" stop-color="#d67181"/>
-    </linearGradient>
-    <radialGradient id="bellGrad" cx="35%" cy="35%" r="65%">
-      <stop offset="0%" stop-color="#fff4a3"/>
-      <stop offset="55%" stop-color="#f2bd34"/>
-      <stop offset="100%" stop-color="#a86a10"/>
-    </radialGradient>
-    <clipPath id="leftEyeClip">
-      <path d="M 135,193 C 134,174 156,170 165,187 C 171,200 163,215 148,214 C 137,213 135,203 135,193 Z"/>
-    </clipPath>
-    <clipPath id="rightEyeClip">
-      <path d="M 190,192 C 193,167 224,163 233,182 C 240,197 226,214 206,214 C 193,214 188,204 190,192 Z"/>
-    </clipPath>
-  </defs>
-  <g stroke-linejoin="round" stroke-linecap="round">
-    <path d="M 326,274 C 362,262 385,222 372,175" fill="none" stroke="#5c280c" stroke-width="30"/>
-    <path d="M 326,274 C 362,262 385,222 372,175" fill="none" stroke="url(#bodyGrad)" stroke-width="24"/>
-    <path d="M 345,264 C 352,256 360,258 364,264" fill="none" stroke="#be5316" stroke-width="8"/>
-    <path d="M 362,240 C 370,234 378,236 382,242" fill="none" stroke="#be5316" stroke-width="9"/>
-    <path d="M 367,212 C 375,207 383,209 386,215" fill="none" stroke="#be5316" stroke-width="9"/>
-    <path d="M 364,187 C 373,182 381,184 384,189" fill="none" stroke="#be5316" stroke-width="8"/>
-    <path d="M 357,183 C 344,165 347,145 358,140 C 370,135 384,152 386,178 L 379,173 L 374,181 L 367,174 L 362,183 Z" fill="#fff8ee" stroke="#5c280c" stroke-width="3.2"/>
-  </g>
-  <g stroke-linejoin="round" stroke-linecap="round">
-    <path d="M 262,315 C 272,336 286,348 278,376 L 296,378 C 304,352 300,334 292,310 Z" fill="#c66018" stroke="#5c280c" stroke-width="3.2"/>
-    <path d="M 277,364 L 283,368 L 289,363 L 296,367 L 294,386 L 272,386 Z" fill="#eadbcf"/>
-    <path d="M 269,386 C 260,386 259,398 269,399 L 290,399 C 296,399 297,392 294,385" fill="#eadbcf" stroke="#5c280c" stroke-width="3.2"/>
-    <path d="M 192,296 L 204,376 L 226,376 L 228,302 Z" fill="#d46d1f" stroke="#5c280c" stroke-width="3.2"/>
-    <path d="M 203,358 L 210,362 L 217,357 L 226,361 L 226,386 L 202,386 Z" fill="#f7efe4"/>
-    <path d="M 198,384 C 188,384 188,399 199,399 L 221,399 C 226,399 227,392 225,384" fill="#f7efe4" stroke="#5c280c" stroke-width="3.2"/>
-  </g>
-  <g stroke-linejoin="round" stroke-linecap="round">
-    <path d="M 195,254 C 235,248 288,255 322,265 C 342,273 344,306 334,322 C 302,326 265,325 225,318 C 195,312 186,282 195,254 Z" fill="url(#bodyGrad)" stroke="#5c280c" stroke-width="3.4"/>
-    <path d="M 258,253 L 271,254 L 265,282 Z" fill="#be5316"/>
-    <path d="M 281,256 L 296,258 L 289,291 Z" fill="#be5316"/>
-    <path d="M 307,260 L 320,264 L 311,288 Z" fill="#be5316"/>
-  </g>
-  <g stroke-linejoin="round" stroke-linecap="round">
-    <path d="M 296,304 C 300,334 316,352 325,376 L 344,376 C 348,350 338,325 336,296" fill="url(#bodyGrad)" stroke="#5c280c" stroke-width="3.2"/>
-    <path d="M 323,363 L 330,367 L 337,362 L 344,366 L 343,386 L 321,386 Z" fill="#fff8ee"/>
-    <path d="M 321,384 C 312,384 312,399 323,399 L 342,399 C 347,399 348,391 344,384" fill="#fff8ee" stroke="#5c280c" stroke-width="3.2"/>
-    <path d="M 192,254 C 182,265 182,276 188,283 L 182,288 C 185,296 190,301 196,304 L 192,310 C 204,321 218,328 236,330 C 238,308 232,276 222,256 Z" fill="#fff8ee" stroke="#5c280c" stroke-width="3.2"/>
-    <path d="M 232,296 C 238,326 240,352 232,376 L 256,376 C 266,352 272,328 268,302" fill="url(#bodyGrad)" stroke="#5c280c" stroke-width="3.2"/>
-    <path d="M 233,356 L 241,361 L 248,355 L 258,360 L 255,386 L 228,386 Z" fill="#fff8ee"/>
-    <path d="M 228,383 C 218,383 218,399 230,399 L 252,399 C 258,399 259,391 255,383" fill="#fff8ee" stroke="#5c280c" stroke-width="3.2"/>
-  </g>
-  <g stroke-linejoin="round" stroke-linecap="round">
-    <path d="M 185,250 C 204,260 228,252 243,237 L 246,246 C 230,263 204,271 187,261 Z" fill="#c82323" stroke="#5c280c" stroke-width="3.2"/>
-    <circle cx="199" cy="272" r="9.5" fill="url(#bellGrad)" stroke="#5c280c" stroke-width="3"/>
-  </g>
-  <g stroke-linejoin="round" stroke-linecap="round">
-    <path d="M 136,178 C 130,152 135,126 142,110 C 156,120 168,134 176,146 Z" fill="url(#headGrad)" stroke="#5c280c" stroke-width="3.4"/>
-    <path d="M 139,172 C 135,152 139,130 144,117 C 154,126 163,138 168,148 Z" fill="url(#earPink)"/>
-    <path d="M 212,142 C 224,122 237,108 248,98 C 262,122 268,156 262,186 Z" fill="url(#headGrad)" stroke="#5c280c" stroke-width="3.4"/>
-    <path d="M 222,146 C 231,130 240,118 247,110 C 257,130 261,156 256,178 Z" fill="url(#earPink)"/>
-    <path d="M 136,175 C 138,156 158,144 182,141 L 178,125 C 184,125 189,130 192,135 L 191,129 C 196,130 200,135 202,140 C 228,142 252,158 262,184 L 276,197 L 266,205 L 272,212 C 258,236 226,252 186,251 C 154,250 132,235 123,215 L 130,212 L 126,206 L 135,202 C 134,192 134,183 136,175 Z" fill="url(#headGrad)" stroke="#5c280c" stroke-width="3.4"/>
-    <g><path d="M 135,193 C 134,174 156,170 165,187 C 171,200 163,215 148,214 C 137,213 135,203 135,193 Z" fill="#fcf4df"/><g clip-path="url(#leftEyeClip)"><ellipse cx="149" cy="195" rx="13.5" ry="16" fill="url(#irisGrad)"/><ellipse cx="149" cy="195" rx="8.5" ry="11" fill="#1b0b04"/><circle cx="144" cy="188" r="4.6" fill="#ffffff"/></g><path d="M 135,193 C 134,174 156,170 165,187 C 171,200 163,215 148,214 C 137,213 135,203 135,193 Z" fill="none" stroke="#2c1205" stroke-width="3"/></g>
-    <g><path d="M 190,192 C 193,167 224,163 233,182 C 240,197 226,214 206,214 C 193,214 188,204 190,192 Z" fill="#fcf4df"/><g clip-path="url(#rightEyeClip)"><ellipse cx="206" cy="192" rx="16.5" ry="18.5" fill="url(#irisGrad)"/><ellipse cx="206" cy="192" rx="10.5" ry="12.8" fill="#1b0b04"/><circle cx="200" cy="184" r="5.5" fill="#ffffff"/></g><path d="M 190,192 C 193,167 224,163 233,182 C 240,197 226,214 206,214 C 193,214 188,204 190,192 Z" fill="none" stroke="#2c1205" stroke-width="3.2"/></g>
-    <path d="M 171,206 C 161,206 156,214 159,223 C 161,232 169,238 179,238 C 191,238 199,231 199,221 C 199,212 191,206 181,206 Z" fill="#fff8ee"/>
-    <path d="M 165,213 C 169,210 175,210 179,213 L 172,221 Z" fill="#ea7b91" stroke="#5c280c" stroke-width="2.6"/>
-    <path d="M 172,221 L 172,225 C 168,229 162,228 160,224 M 172,225 C 177,230 186,229 190,222" fill="none" stroke="#5c280c" stroke-width="2.8"/>
-  </g>
-</svg>`;
-
-  // Fallback SVG image
-  let fallbackImg = new Image();
-  let fallbackReady = false;
-  fallbackImg.onload = function () { fallbackReady = true; };
-  fallbackImg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(EXACT_CAT_SVG);
-
-  // 7x5 Sprite Sheet Loader (Rows: 0=Idle, 1=Walk, 2=Crouch, 3=Hurt, 4=Jump)
-  const SHEET_COLS = 7;
-  const SHEET_ROWS = 5;
-  let sheetFrames = null; // Default classic 2D array [row][col]
-  const skinSheets = {};  // Per-skin 2D array [row][col] for classic, crown, scarf, cyber, wings
-
-  function cleanCellBackground(cellCanvas) {
-    const w = cellCanvas.width;
-    const h = cellCanvas.height;
-    const octx = cellCanvas.getContext('2d');
-    const imgData = octx.getImageData(0, 0, w, h);
-    const d = imgData.data;
-
-    // Edge-seeded flood fill to remove fake checkerboard & divider lines
-    // without touching white fur inside the cat!
-    const visited = new Uint8Array(w * h);
-    const stack = new Int32Array(w * h);
-    let sp = 0;
-
-    function isBgPixel(idx4) {
-      const r = d[idx4], g = d[idx4 + 1], b = d[idx4 + 2], a = d[idx4 + 3];
-      if (a < 20) return true;
-      const max = Math.max(r, g, b);
-      const min = Math.min(r, g, b);
-      // Light neutral grey/white checkerboard or thin grey row-divider line
-      return max > 188 && (max - min) < 22;
-    }
-
-    function pushIfBg(x, y) {
-      const p = y * w + x;
-      if (visited[p]) return;
-      if (isBgPixel(p * 4)) {
-        visited[p] = 1;
-        stack[sp++] = p;
-      }
-    }
-
-    // Seed from all 4 borders of the cell
-    for (let x = 0; x < w; x++) {
-      pushIfBg(x, 0);
-      pushIfBg(x, h - 1);
-    }
-    for (let y = 0; y < h; y++) {
-      pushIfBg(0, y);
-      pushIfBg(w - 1, y);
-    }
-
-    while (sp > 0) {
-      const p = stack[--sp];
-      d[p * 4 + 3] = 0;
-      const x = p % w;
-      const y = (p / w) | 0;
-      if (x > 0) pushIfBg(x - 1, y);
-      if (x < w - 1) pushIfBg(x + 1, y);
-      if (y > 0) pushIfBg(x, y - 1);
-      if (y < h - 1) pushIfBg(x, y + 1);
-    }
-
-    octx.putImageData(imgData, 0, 0);
-  }
-
-  function loadSkinSheet(skinId, candidates) {
-    let idx = 0;
-    function tryNext() {
-      if (idx >= candidates.length) return;
-      const src = candidates[idx++];
-      const img = new Image();
-      img.onload = function () {
-        const isPreCleaned =
-          src.includes('-clean.png') ||
-          src.includes('image-crown.png') ||
-          src.includes('image-glass.png') ||
-          src.includes('image-scarf.png') ||
-          src.includes('image-wings.png');
-        const cellW = Math.floor(img.width / SHEET_COLS);
-        const cellH = Math.floor(img.height / SHEET_ROWS);
-        const grid = [];
-        for (let r = 0; r < SHEET_ROWS; r++) {
-          const rowArr = [];
-          for (let c = 0; c < SHEET_COLS; c++) {
-            const cell = document.createElement('canvas');
-            cell.width = cellW;
-            cell.height = cellH;
-            const cctx = cell.getContext('2d');
-            cctx.drawImage(img, c * cellW, r * cellH, cellW, cellH, 0, 0, cellW, cellH);
-            if (!isPreCleaned) {
-              try {
-                cleanCellBackground(cell);
-              } catch (e) {}
-            }
-            rowArr.push(cell);
-          }
-          grid.push(rowArr);
-        }
-        skinSheets[skinId] = grid;
-        if (skinId === 'classic') {
-          sheetFrames = grid;
-        }
-      };
-      img.onerror = tryNext;
-      img.src = src;
-    }
-    tryNext();
-  }
-
-  loadSkinSheet('classic', [
-    'images/cat-sprite-clean.png',
-    'images/cat-sprite.png',
-    'cat-sprite-clean.png',
-    'cat-sprite.png',
-  ]);
-  loadSkinSheet('crown', [
-    'images/image-crown-clean.png',
-    'images/image-crown.png',
-    'image-crown-clean.png',
-    'image-crown.png',
-  ]);
-  loadSkinSheet('scarf', [
-    'images/image-scarf-clean.png',
-    'images/image-scarf.png',
-    'image-scarf-clean.png',
-    'image-scarf.png',
-  ]);
-  loadSkinSheet('cyber', [
-    'images/image-glass-clean.png',
-    'images/image-glass.png',
-    'image-glass-clean.png',
-    'image-glass.png',
-  ]);
-  loadSkinSheet('wings', [
-    'images/image-wings-clean.png',
-    'images/image-wings.png',
-    'image-wings-clean.png',
-    'image-wings.png',
-  ]);
 
   const cat = {
     x: startX,
@@ -352,6 +126,19 @@ window.Game.Cat = function (startX, startY) {
           cat.x = p.x + p.w;
           cat.vx = 0;
           if (p.climbable !== false && !cat.onGround) cat.wallDir = -1;
+        }
+      } else if (
+        p.climbable !== false &&
+        !cat.onGround &&
+        cat.y + 6 < p.y + p.h &&
+        cat.y + cat.h - 6 > p.y
+      ) {
+        // Stable flush-contact sensor so Mashmasha holds her wall-climb pose without flickering
+        // even on frames where vx === 0 while clinging to a climbable wall
+        if (Math.abs((cat.x + cat.w) - p.x) <= 2.5 && (cat.vx >= 0 || cat.facing === 1)) {
+          cat.wallDir = 1;
+        } else if (Math.abs(cat.x - (p.x + p.w)) <= 2.5 && (cat.vx <= 0 || cat.facing === -1)) {
+          cat.wallDir = -1;
         }
       }
     }
@@ -475,7 +262,8 @@ window.Game.Cat = function (startX, startY) {
       if (cat.shieldTimer <= 0) {
         cat.shieldActive = true;
         Particles.spawnShieldBurst(cat.x + cat.w / 2, cat.y + cat.h / 2);
-        Particles.spawnPopup(cat.x + cat.w / 2, cat.y - 18, '🛡️ درع جاهز!', '#7dd3fc');
+        const readyTxt = window.Game.I18n ? window.Game.I18n.t('popup_shield_ready') : '🛡️ درع جاهز!';
+        Particles.spawnPopup(cat.x + cat.w / 2, cat.y - 18, readyTxt, '#7dd3fc');
       }
     }
 
@@ -567,8 +355,8 @@ window.Game.Cat = function (startX, startY) {
         cat.onGround = false;
         cat.coyoteTimer = 0;
         cat.jumpBufferTimer = 0;
-        cat.scaleX = 0.88;
-        cat.scaleY = 1.14;
+        cat.scaleX = 0.94;
+        cat.scaleY = 1.07;
         Audio.playJump();
         Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, 5);
       } else if (cat.wallDir !== 0) {
@@ -577,8 +365,8 @@ window.Game.Cat = function (startX, startY) {
         cat.facing = -cat.wallDir;
         cat.wallDir = 0;
         cat.jumpBufferTimer = 0;
-        cat.scaleX = 0.88;
-        cat.scaleY = 1.14;
+        cat.scaleX = 0.94;
+        cat.scaleY = 1.07;
         Audio.playJump();
         Audio.playWallScratch();
         Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h / 2, 6, '#ffd36e');
@@ -626,6 +414,12 @@ window.Game.Cat = function (startX, startY) {
     const prevBottom = cat.y + cat.h;
     cat.y += cat.vy * dt;
     const standing = resolveCollisionsY(level.platforms, prevBottom);
+
+    // Advance continuous vertical wall-climb walking cycle while clinging/climbing on a wall
+    if (!cat.onGround && cat.wallDir !== 0) {
+      const climbRate = cat.vy < -25 ? 2.8 : 1.85;
+      cat.wallClimbTime = (cat.wallClimbTime || 0) + dt * climbRate;
+    }
 
     let activeDip = 0;
     for (const p of level.platforms) {
@@ -785,7 +579,8 @@ window.Game.Cat = function (startX, startY) {
       cat.invulnTimer = 1.7;
       if (Audio.playShieldBreak) Audio.playShieldBreak();
       Particles.spawnShieldBurst(cat.x + cat.w / 2, cat.y + cat.h / 2);
-      Particles.spawnPopup(cat.x + cat.w / 2, cat.y - 16, '🛡️ صدّ الدرع!', '#7dd3fc');
+      const blockedTxt = window.Game.I18n ? window.Game.I18n.t('popup_shield_blocked') : '🛡️ صدّ الدرع!';
+      Particles.spawnPopup(cat.x + cat.w / 2, cat.y - 16, blockedTxt, '#7dd3fc');
       if (isFall) {
         cat.respawnLockTimer = 0.55;
         cat.jumpBufferTimer = 0;
@@ -805,46 +600,14 @@ window.Game.Cat = function (startX, startY) {
     cat.respawnLockTimer = 0.55; // Brief movement input lock on checkpoint respawn so Mashmasha never accidentally runs off!
     cat.jumpBufferTimer = 0;
     Audio.playHurt();
-    Particles.spawnPopup(cat.x + cat.w / 2, cat.y - 12, reason || '-1 ❤️', '#ff6b8b');
+    const localizedReason = reason && window.Game.I18n ? window.Game.I18n.translateDynamic(reason) : reason;
+    Particles.spawnPopup(cat.x + cat.w / 2, cat.y - 12, localizedReason || '-1 ❤️', '#ff6b8b');
 
     cat.x = cat.checkpointX;
     cat.y = cat.checkpointY;
     cat.vx = 0;
     cat.vy = 0;
     return true;
-  }
-
-  function getSpriteFrameCoords() {
-    // Rows: 0=Idle, 1=Walk, 2=Crouch, 3=Hurt, 4=Jump
-    if (cat.hurtTimer > 0) {
-      const progress = 1 - cat.hurtTimer / 0.72;
-      const col = Math.min(6, Math.floor(progress * 7));
-      return { row: 3, col };
-    }
-    if (!cat.onGround) {
-      // Map vertical velocity across Jump transition frames 0..5
-      let col = 2;
-      if (cat.vy < -380) col = 1;
-      else if (cat.vy < -100) col = 2;
-      else if (cat.vy < 140) col = 3;
-      else if (cat.vy < 380) col = 4;
-      else col = 5;
-      return { row: 4, col };
-    }
-    if (cat.landTimer > 0) {
-      return { row: 4, col: 6 };
-    }
-    if (cat.crouching) {
-      // Single consistent frame for Crouch (no size flicker)
-      return { row: 2, col: 0 };
-    }
-    if (Math.abs(cat.vx) > 25) {
-      const col = Math.floor(cat.walkTime * 12) % 7;
-      return { row: 1, col };
-    }
-    // Idle (Row 0): gentle loop across consistent side-profile frames 0..5 (skipping mismatched frame 6)
-    const col = Math.floor(cat.animTime * 4.5) % 6;
-    return { row: 0, col };
   }
 
   function draw(ctx, camX, camY) {
@@ -872,20 +635,6 @@ window.Game.Cat = function (startX, startY) {
       ctx.shadowBlur = 12;
     }
 
-    const useProcedural =
-      window.Game.catRenderMode === 'procedural' &&
-      window.Game.ProceduralCat &&
-      typeof window.Game.ProceduralCat.draw === 'function';
-
-    const hasOutfitSheet = !!(
-      cat.skin &&
-      cat.skin !== 'classic' &&
-      cat.skin !== 'starlight' &&
-      skinSheets[cat.skin]
-    );
-    const activeFrames =
-      (cat.skin && skinSheets[cat.skin]) || skinSheets.classic || sheetFrames;
-
     // Warm sunlit golden pollen-starlight aura behind Mashmasha when wearing 'starlight'
     if (cat.skin === 'starlight') {
       const auraY = cat.crouching ? -19 : -24;
@@ -900,127 +649,13 @@ window.Game.Cat = function (startX, startY) {
     }
 
     function renderCatFigure(targetCtx) {
-      if (useProcedural) {
-        // Pure programmatic vector articulated cat (1:1 reference architecture + palette/outfit hooks)
-        targetCtx.save();
-        targetCtx.scale(-cat.facing * cat.scaleX, cat.scaleY);
-        window.Game.ProceduralCat.draw(targetCtx, cat);
-        targetCtx.restore();
-      } else {
-        // Fallback behind-cat vector cosmetics only if dedicated outfit sprite sheet isn't loaded yet
-        if (!hasOutfitSheet) {
-          if (cat.skin === 'wings') {
-            const flap = Math.sin(cat.animTime * (!cat.onGround ? 18 : 7)) * (!cat.onGround ? 0.36 : 0.14);
-            targetCtx.save();
-            targetCtx.translate(-cat.facing * 8, -28);
-            targetCtx.rotate(-cat.facing * (0.25 + flap));
-            targetCtx.fillStyle = 'rgba(255, 251, 235, 0.92)';
-            targetCtx.strokeStyle = '#fbbf24';
-            targetCtx.lineWidth = 1.6;
-            targetCtx.beginPath();
-            targetCtx.moveTo(0, 0);
-            targetCtx.quadraticCurveTo(-cat.facing * 24, -18, -cat.facing * 28, -4);
-            targetCtx.quadraticCurveTo(-cat.facing * 20, 6, -cat.facing * 12, 8);
-            targetCtx.quadraticCurveTo(-cat.facing * 6, 9, 0, 4);
-            targetCtx.closePath();
-            targetCtx.fill();
-            targetCtx.stroke();
-            targetCtx.restore();
-          } else if (cat.skin === 'scarf') {
-            const wave = Math.sin(cat.animTime * 11) * 5;
-            targetCtx.save();
-            targetCtx.strokeStyle = '#dc2626';
-            targetCtx.lineWidth = 6.8;
-            targetCtx.lineCap = 'round';
-            targetCtx.beginPath();
-            targetCtx.moveTo(cat.facing * 4, -27);
-            targetCtx.quadraticCurveTo(-cat.facing * 16, -29 + wave * 0.6, -cat.facing * 36, -23 + wave);
-            targetCtx.stroke();
-            targetCtx.strokeStyle = '#fca5a5';
-            targetCtx.lineWidth = 2.0;
-            targetCtx.beginPath();
-            targetCtx.moveTo(-cat.facing * 28, -26 + wave * 0.85);
-            targetCtx.lineTo(-cat.facing * 36, -23 + wave);
-            targetCtx.stroke();
-            targetCtx.restore();
-          }
-        }
-
-        if (activeFrames) {
-          const { row, col } = getSpriteFrameCoords();
-          const frame = activeFrames[row][col];
-          // Sprite sheet frames face LEFT (-1), so flip with -cat.facing
-          targetCtx.save();
-          targetCtx.scale(-cat.facing * cat.scaleX, cat.scaleY);
-          const drawW = 88;
-          const drawH = Math.round((frame.height / frame.width) * drawW);
-          targetCtx.drawImage(frame, -drawW * 0.5, -drawH + 6, drawW, drawH);
-          targetCtx.restore();
-        } else if (fallbackReady && fallbackImg) {
-          const speedRatio = Math.min(1, Math.abs(cat.vx) / cat.physics.runSpeed);
-          const runBob = cat.onGround && speedRatio > 0.08 ? Math.abs(Math.sin(cat.animTime * 16)) * -4.5 * speedRatio : 0;
-          const crouchScaleY = cat.crouching && cat.onGround ? 0.8 : 1;
-          targetCtx.save();
-          targetCtx.scale(-cat.facing * cat.scaleX, cat.scaleY * crouchScaleY);
-          const drawSize = 96;
-          const pawAlignY = -drawSize * (399 / 500);
-          targetCtx.drawImage(fallbackImg, -drawSize * 0.48, pawAlignY + runBob, drawSize, drawSize);
-          targetCtx.restore();
-        }
-
-        // Cardboard-bag shield helmet with real eye-hole cutouts for Sprite Sheet mode
-        if (
-          cat.shieldActive &&
-          window.Game.ProceduralCat &&
-          typeof window.Game.ProceduralCat.drawCardboardBagForSprite === 'function'
-        ) {
-          targetCtx.save();
-          targetCtx.scale(-cat.facing * cat.scaleX, cat.scaleY);
-          window.Game.ProceduralCat.drawCardboardBagForSprite(targetCtx, cat);
-          targetCtx.restore();
-        }
-
-        // Front fallback vector Crown/Cyber if sheet pending
-        const headY = cat.crouching ? -37 : -45;
-        if (!hasOutfitSheet && cat.skin === 'crown') {
-          targetCtx.save();
-          targetCtx.translate(cat.facing * 6, headY - 4);
-          targetCtx.rotate(cat.facing * 0.12);
-          targetCtx.scale(1.24, 1.24);
-          targetCtx.fillStyle = '#fbbf24';
-          targetCtx.strokeStyle = '#92400e';
-          targetCtx.lineWidth = 1.3;
-          targetCtx.beginPath();
-          targetCtx.moveTo(-9, 4);
-          targetCtx.lineTo(-10, -5);
-          targetCtx.lineTo(-4, 0);
-          targetCtx.lineTo(0, -8);
-          targetCtx.lineTo(4, 0);
-          targetCtx.lineTo(10, -5);
-          targetCtx.lineTo(9, 4);
-          targetCtx.closePath();
-          targetCtx.fill();
-          targetCtx.stroke();
-          targetCtx.fillStyle = '#fef08a';
-          targetCtx.beginPath();
-          targetCtx.arc(0, -1, 1.8, 0, Math.PI * 2);
-          targetCtx.fill();
-          targetCtx.restore();
-        } else if (!hasOutfitSheet && cat.skin === 'cyber') {
-          targetCtx.save();
-          targetCtx.translate(cat.facing * 12, headY + 9);
-          targetCtx.fillStyle = 'rgba(34, 211, 238, 0.85)';
-          targetCtx.strokeStyle = '#0e7490';
-          targetCtx.lineWidth = 1.4;
-          targetCtx.beginPath();
-          targetCtx.roundRect(-8, -3.5, 16, 6.5, 3);
-          targetCtx.fill();
-          targetCtx.stroke();
-          targetCtx.fillStyle = '#ffffff';
-          targetCtx.fillRect(-5, -2, 6, 1.5);
-          targetCtx.restore();
-        }
-      }
+      if (!window.Game.ProceduralCat || typeof window.Game.ProceduralCat.draw !== 'function') return;
+      const isWallClimbing = !cat.onGround && cat.wallDir !== 0;
+      const drawFacing = isWallClimbing ? cat.wallDir : cat.facing;
+      targetCtx.save();
+      targetCtx.scale(-drawFacing * cat.scaleX, cat.scaleY);
+      window.Game.ProceduralCat.draw(targetCtx, cat);
+      targetCtx.restore();
     }
 
     if (cat.shieldActive) {

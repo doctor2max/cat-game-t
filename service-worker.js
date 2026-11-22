@@ -1,25 +1,24 @@
-const CACHE_NAME = 'cat-game-touch-v18';
+const CACHE_NAME = 'cat-game-touch-v23';
 const CORE_ASSETS = [
   './',
   './index.html',
-  './style.css?v=16',
+  './style.css?v=20',
   './manifest.json',
   './images/icon-192.png',
   './images/icon-512.png',
-  './images/cat-sprite-clean.png',
-  './images/image-crown-clean.png',
-  './images/image-scarf-clean.png',
-  './images/image-glass-clean.png',
-  './images/image-wings-clean.png',
+  './sounds/Cat.wav',
+  './sounds/cat-damage.wav',
+  './sounds/Dog.wav',
   './sounds/save-point.wav',
-  './js/store.js?v=14',
-  './js/audio.js?v=15',
+  './js/i18n.js?v=21',
+  './js/store.js?v=23',
+  './js/audio.js?v=20',
   './js/particles.js?v=18',
-  './js/art.js?v=10',
-  './js/art-extended.js?v=13',
+  './js/art.js?v=22',
+  './js/art-extended.js?v=20',
   './js/enemies-extended.js?v=10',
-  './js/cat-procedural.js?v=18',
-  './js/cat.js?v=18',
+  './js/cat-procedural.js?v=20',
+  './js/cat.js?v=21',
   './js/level1.js?v=5',
   './js/level2.js?v=5',
   './js/level3.js?v=11',
@@ -35,7 +34,7 @@ const CORE_ASSETS = [
   './js/level13.js?v=5',
   './js/level14.js?v=5',
   './js/level15.js?v=9',
-  './js/game.js?v=15'
+  './js/game.js?v=22'
 ];
 
 self.addEventListener('install', (event) => {

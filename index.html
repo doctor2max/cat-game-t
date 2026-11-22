@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png" />
   <link rel="apple-touch-icon" href="images/icon-192.png" />
-  <link rel="stylesheet" href="style.css?v=16" />
+  <link rel="stylesheet" href="style.css?v=20" />
 </head>
 <body>
   <div id="game-wrapper">
@@ -24,13 +24,13 @@
             <div class="lives-bar" id="livesBar"></div>
           </div>
           <span class="lives-count" id="livesCount">6/7</span>
-          <span id="shieldBadge" class="shield-badge hidden" title="درع الحماية نشط">🛡️</span>
+          <span id="shieldBadge" class="shield-badge hidden" data-i18n-title="hud_shield_title" title="درع الحماية نشط">🛡️</span>
         </div>
-        <div class="hud-pill treats-card" title="الأسماك">
+        <div class="hud-pill treats-card" data-i18n-title="hud_treats_title" title="الأسماك">
           <span>🐟</span>
           <span id="treatsCount">0/3</span>
         </div>
-        <div class="hud-pill coins-card" id="hudCoinsCard" title="العملات الذهبية">
+        <div class="hud-pill coins-card" id="hudCoinsCard" data-i18n-title="hud_coins_title" title="العملات الذهبية">
           <span class="gold-coin-icon">★</span>
           <span id="hudCoinsCount">0</span>
         </div>
@@ -41,15 +41,15 @@
       </div>
 
       <div class="hud-right">
-        <button class="skill-pill" id="skillNightVision" type="button" title="الرؤية الليلية (E)">
+        <button class="skill-pill" id="skillNightVision" type="button" data-i18n-title="hud_nv_title" title="الرؤية الليلية (E)">
           <span class="key">E</span>
           <span>👁️</span>
         </button>
-        <button class="skill-pill" id="skillMeow" type="button" title="المواء المشتت (Q)">
+        <button class="skill-pill" id="skillMeow" type="button" data-i18n-title="hud_meow_title" title="المواء المشتت (Q)">
           <span class="key">Q</span>
           <span>🔊</span>
         </button>
-        <button id="btnPause" class="ios-icon-btn pause-btn" type="button" aria-label="إيقاف مؤقت" title="إيقاف مؤقت (P)">
+        <button id="btnPause" class="ios-icon-btn pause-btn" type="button" data-i18n-aria="hud_pause_title" data-i18n-title="hud_pause_title" aria-label="إيقاف مؤقت" title="إيقاف مؤقت (P)">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <rect x="6" y="4" width="4.5" height="16" rx="2" />
             <rect x="13.5" y="4" width="4.5" height="16" rx="2" />
@@ -66,47 +66,50 @@
     <!-- Bottom Ergonomic iOS Glass Multi-Touch Dock -->
     <div id="touchControls" class="touch-controls hidden">
       <div class="touch-left-pad">
-        <button class="touch-btn touch-dir" type="button" data-action="left" aria-label="يسار">◀</button>
-        <button class="touch-btn touch-dir" type="button" data-action="right" aria-label="يمين">▶</button>
-        <button class="touch-btn touch-crouch" type="button" data-action="down" aria-label="تسلل">⬇<span>تسلل</span></button>
+        <button class="touch-btn touch-dir" type="button" data-action="left" data-i18n-aria="touch_left" aria-label="يسار">◀</button>
+        <button class="touch-btn touch-dir" type="button" data-action="right" data-i18n-aria="touch_right" aria-label="يمين">▶</button>
+        <button class="touch-btn touch-crouch" type="button" data-action="down" data-i18n-aria="touch_stealth" aria-label="تسلل">⬇<span data-i18n="touch_stealth">تسلل</span></button>
       </div>
       <div class="touch-right-pad">
-        <button class="touch-btn touch-skill" type="button" data-action="nightvision" aria-label="رؤية ليلية">👁️<span>ليل</span></button>
-        <button class="touch-btn touch-skill" type="button" data-action="meow" aria-label="مواء">🔊<span>مواء</span></button>
-        <button class="touch-btn touch-jump" type="button" data-action="jump" aria-label="قفز">▲<span>قفز</span></button>
+        <button class="touch-btn touch-skill" type="button" data-action="nightvision" data-i18n-aria="touch_night" aria-label="رؤية ليلية">👁️<span data-i18n="touch_night">ليل</span></button>
+        <button class="touch-btn touch-skill" type="button" data-action="meow" data-i18n-aria="touch_meow" aria-label="مواء">🔊<span data-i18n="touch_meow">مواء</span></button>
+        <button class="touch-btn touch-jump" type="button" data-action="jump" data-i18n-aria="touch_jump" aria-label="قفز">▲<span data-i18n="touch_jump">قفز</span></button>
       </div>
     </div>
 
     <!-- Intro Video Cutscene Layer -->
     <div id="introLayer" class="intro-layer hidden">
       <video id="introVideo" playsinline preload="none"></video>
+      <div id="introCaption" class="video-caption hidden"></div>
     </div>
     <div id="introHud" class="intro-hud hidden">
       <div class="intro-credit">Dr. MAX MOUSA • THE WAY HOME</div>
-      <button id="btnSkipIntro" class="skip-btn" type="button">تخطي ⏭</button>
+      <button id="btnSkipIntro" class="skip-btn" type="button" data-i18n="skip_video">تخطي ⏭</button>
     </div>
 
     <!-- Game Over Video Layer -->
     <div id="gameOverLayer" class="gameover-layer hidden">
       <video id="gameOverVideo" playsinline preload="none" src="videos/game-over.mp4"></video>
+      <div id="gameOverCaption" class="video-caption video-caption-top hidden"></div>
       <div id="gameOverActions" class="gameover-actions hidden">
         <button id="btnGameOverRevive" class="ios-btn ios-btn-gold" type="button">❤️ متابعة (50 🪙)</button>
-        <button id="btnGameOverRestart" class="ios-btn ios-btn-primary" type="button">إعادة المرحلة ↻</button>
-        <button id="btnGameOverMenu" class="ios-btn ios-btn-glass" type="button">المراحل ⊞</button>
+        <button id="btnGameOverRestart" class="ios-btn ios-btn-primary" type="button" data-i18n="gameover_restart">إعادة المرحلة ↻</button>
+        <button id="btnGameOverMenu" class="ios-btn ios-btn-glass" type="button" data-i18n="gameover_menu">المراحل ⊞</button>
       </div>
     </div>
 
     <!-- Final Victory Sequential Cutscene Layer (Win1 -> Win2) -->
     <div id="winLayer" class="gameover-layer hidden">
       <video id="winVideo" playsinline preload="none"></video>
+      <div id="winCaption" class="video-caption hidden"></div>
       <div class="intro-hud">
         <div class="intro-credit">Dr. MAX MOUSA • THE WAY HOME</div>
-        <button id="btnSkipWin" class="skip-btn" type="button">تخطي ⏭</button>
+        <button id="btnSkipWin" class="skip-btn" type="button" data-i18n="skip_video">تخطي ⏭</button>
       </div>
     </div>
 
     <!-- Portrait Orientation Soft Hint -->
-    <div id="rotateHint" class="rotate-hint">🔄 أدر الهاتف أفقياً لأفضل تجربة لعب</div>
+    <div id="rotateHint" class="rotate-hint" data-i18n="rotate_hint">🔄 أدر الهاتف أفقياً لأفضل تجربة لعب</div>
 
     <!-- iOS Main Menu & Numbered Square Level Selector -->
     <div id="startOverlay" class="overlay menu-overlay">
@@ -115,29 +118,33 @@
           <div class="menu-brand">
             <div class="brand-app-icon">🐱</div>
             <div class="brand-text">
-              <h1>رحلة العودة</h1>
-              <span class="brand-sub">سبعة أرواح • 15 مرحلة</span>
+              <h1 data-i18n="menu_title">رحلة العودة</h1>
+              <span class="brand-sub" data-i18n="menu_sub">سبعة أرواح • 15 مرحلة</span>
             </div>
           </div>
           <div class="menu-stats-bar">
-            <div class="stat-chip stars-chip" title="النجوم المجمّعة">
+            <button id="btnMenuLang" class="stat-chip lang-chip-btn" type="button" data-i18n-title="lang_btn_title" title="Switch to English">
+              <span>🌐</span>
+              <span data-i18n="lang_btn_short">EN</span>
+            </button>
+            <div class="stat-chip stars-chip" data-i18n-title="menu_stars_title" title="النجوم المجمّعة">
               <span>★</span>
               <span id="menuStarsCount">0/45</span>
             </div>
-            <button id="btnMenuCoins" class="stat-chip coins-chip" type="button" title="رصيد العملات">
+            <button id="btnMenuCoins" class="stat-chip coins-chip" type="button" data-i18n-title="menu_coins_title" title="رصيد العملات">
               <span class="gold-coin-icon">★</span>
               <span id="menuCoinsCount">50</span>
             </button>
             <button id="btnOpenShop" class="ios-btn ios-btn-gold shop-trigger-btn" type="button">
               <span>🛒</span>
-              <span>المتجر</span>
+              <span data-i18n="menu_shop">المتجر</span>
               <span id="shopBadgeDot" class="badge-dot hidden"></span>
             </button>
           </div>
         </div>
 
         <!-- Pure iOS Numbered Square Grid (Numbers ONLY — no names or images) -->
-        <div id="levelGrid" class="level-square-grid" role="list" aria-label="اختيار المرحلة"></div>
+        <div id="levelGrid" class="level-square-grid" role="list" data-i18n-aria="menu_grid_aria" aria-label="اختيار المرحلة"></div>
 
         <div class="menu-bottom-bar">
           <button id="btnQuickPlay" class="ios-btn ios-btn-primary quick-play-btn" type="button">العب المرحلة 1 ▶</button>
@@ -150,60 +157,51 @@
     <div id="pauseOverlay" class="overlay hidden">
       <div class="ios-sheet modal-sheet pause-sheet">
         <div class="modal-pill-badge" id="pauseStageTag">المرحلة 1</div>
-        <h2 class="modal-title">إيقاف مؤقت</h2>
+        <h2 class="modal-title" data-i18n="pause_title">إيقاف مؤقت</h2>
 
         <div class="pause-primary-stack">
-          <button id="btnResumeGame" class="ios-btn ios-btn-primary full-width" type="button">▶ متابعة اللعب</button>
+          <button id="btnResumeGame" class="ios-btn ios-btn-primary full-width" type="button" data-i18n="pause_resume">▶ متابعة اللعب</button>
           <button id="btnPauseRefill" class="ios-btn ios-btn-gold full-width hidden" type="button">❤️ استعادة كل الأرواح (50 🪙)</button>
         </div>
 
         <div class="pause-actions-row">
-          <button id="btnPauseRestart" class="ios-btn ios-btn-glass" type="button">↻ إعادة</button>
-          <button id="btnPauseShop" class="ios-btn ios-btn-glass" type="button">🛒 المتجر</button>
-          <button id="btnPauseMenu" class="ios-btn ios-btn-danger" type="button">⊞ المراحل</button>
+          <button id="btnPauseRestart" class="ios-btn ios-btn-glass" type="button" data-i18n="pause_restart">↻ إعادة</button>
+          <button id="btnPauseShop" class="ios-btn ios-btn-glass" type="button" data-i18n="pause_shop">🛒 المتجر</button>
+          <button id="btnPauseMenu" class="ios-btn ios-btn-danger" type="button" data-i18n="pause_menu">⊞ المراحل</button>
         </div>
 
         <!-- Ergonomic Touch Controls Size & Opacity Settings (92%..118% comfortable range, auto-spaced) -->
-        <div class="pause-controls-tuner" aria-label="إعدادات أزرار التحكم">
+        <div class="pause-controls-tuner" data-i18n-aria="tuner_aria" aria-label="إعدادات أزرار التحكم">
           <div class="tuner-row">
             <div class="tuner-label">
-              <span>🎮 حجم الأزرار</span>
+              <span data-i18n="tuner_size">🎮 حجم الأزرار</span>
               <strong id="ctrlSizeVal">108%</strong>
             </div>
             <div class="tuner-slider-wrap">
-              <small>صغير</small>
-              <input id="ctrlSizeSlider" class="ios-slider" type="range" min="92" max="118" step="2" value="108" aria-label="حجم أزرار التحكم" />
-              <small>كبير</small>
+              <small data-i18n="tuner_small">صغير</small>
+              <input id="ctrlSizeSlider" class="ios-slider" type="range" min="92" max="118" step="2" value="108" data-i18n-aria="tuner_size" aria-label="حجم أزرار التحكم" />
+              <small data-i18n="tuner_large">كبير</small>
             </div>
           </div>
           <div class="tuner-row">
             <div class="tuner-label">
-              <span>✨ شفافية الأزرار</span>
+              <span data-i18n="tuner_opacity">✨ شفافية الأزرار</span>
               <strong id="ctrlOpacityVal">88%</strong>
             </div>
             <div class="tuner-slider-wrap">
-              <small>شفاف</small>
-              <input id="ctrlOpacitySlider" class="ios-slider" type="range" min="45" max="100" step="5" value="88" aria-label="شفافية أزرار التحكم" />
-              <small>واضح</small>
-            </div>
-          </div>
-          <div class="tuner-row">
-            <div class="tuner-label">
-              <span>🐱 مظهر القطة</span>
-              <strong id="catModeVal">صورة أصلية</strong>
-            </div>
-            <div class="cat-mode-seg" role="group" aria-label="تبديل مظهر القطة">
-              <button id="btnCatModeSprite" class="cat-mode-btn active" type="button" data-cat-mode="sprite">صورة أصلية</button>
-              <button id="btnCatModeProc" class="cat-mode-btn" type="button" data-cat-mode="procedural">رسم برمجي</button>
+              <small data-i18n="tuner_transparent">شفاف</small>
+              <input id="ctrlOpacitySlider" class="ios-slider" type="range" min="45" max="100" step="5" value="88" data-i18n-aria="tuner_opacity" aria-label="شفافية أزرار التحكم" />
+              <small data-i18n="tuner_clear">واضح</small>
             </div>
           </div>
         </div>
 
         <div class="pause-toggles-row">
-          <button id="btnMusic" class="ios-toggle-tile" type="button"><span>🎵</span><small>الموسيقى</small></button>
-          <button id="btnAudio" class="ios-toggle-tile" type="button"><span>🔊</span><small>المؤثرات</small></button>
-          <button id="btnDimBg" class="ios-toggle-tile" type="button"><span>🌓</span><small>التعتيم</small></button>
-          <button id="btnGuide" class="ios-toggle-tile" type="button"><span>📖</span><small>الدليل</small></button>
+          <button id="btnMusic" class="ios-toggle-tile" type="button"><span>🎵</span><small data-i18n="toggle_music">الموسيقى</small></button>
+          <button id="btnAudio" class="ios-toggle-tile" type="button"><span>🔊</span><small data-i18n="toggle_sfx">المؤثرات</small></button>
+          <button id="btnDimBg" class="ios-toggle-tile" type="button"><span>🌓</span><small data-i18n="toggle_dim">التعتيم</small></button>
+          <button id="btnGuide" class="ios-toggle-tile" type="button"><span>📖</span><small data-i18n="toggle_guide">الدليل</small></button>
+          <button id="btnPauseLang" class="ios-toggle-tile" type="button"><span>🌐</span><small data-i18n="lang_tile_label">English</small></button>
         </div>
       </div>
     </div>
@@ -213,22 +211,22 @@
       <div class="ios-sheet shop-sheet">
         <div class="shop-header">
           <div class="shop-title-wrap">
-            <h2>🛒 متجر مشمشة</h2>
-            <span class="shop-subtitle">طوّر قدراتك وافتح الأزياء والمراحل بالعملات</span>
+            <h2 data-i18n="shop_title">🛒 متجر مشمشة</h2>
+            <span class="shop-subtitle" data-i18n="shop_subtitle">طوّر قدراتك وافتح الأزياء والمراحل بالعملات</span>
           </div>
           <div class="shop-header-left">
             <div class="stat-chip coins-chip">
               <span class="gold-coin-icon">★</span>
               <span id="shopCoinsCount">0</span>
             </div>
-            <button id="btnCloseShop" class="ios-close-btn" type="button" aria-label="إغلاق">✕</button>
+            <button id="btnCloseShop" class="ios-close-btn" type="button" data-i18n-aria="close_aria" aria-label="إغلاق">✕</button>
           </div>
         </div>
 
         <div class="ios-segmented" role="tablist">
-          <button class="seg-btn active" type="button" data-shop-tab="upgrades">⚡ التطويرات</button>
-          <button class="seg-btn" type="button" data-shop-tab="skins">✨ الأزياء</button>
-          <button class="seg-btn" type="button" data-shop-tab="boosts">🎟️ المزايا</button>
+          <button class="seg-btn active" type="button" data-shop-tab="upgrades" data-i18n="shop_tab_upgrades">⚡ التطويرات</button>
+          <button class="seg-btn" type="button" data-shop-tab="skins" data-i18n="shop_tab_skins">✨ الأزياء</button>
+          <button class="seg-btn" type="button" data-shop-tab="boosts" data-i18n="shop_tab_boosts">🎟️ المزايا</button>
         </div>
 
         <div id="shopContent" class="shop-content"></div>
@@ -240,25 +238,25 @@
       <div class="ios-sheet modal-sheet guide-sheet">
         <div class="shop-header">
           <div class="shop-title-wrap">
-            <h2>📖 دليل اللعب</h2>
+            <h2 data-i18n="guide_title">📖 دليل اللعب</h2>
           </div>
-          <button id="btnCloseGuide" class="ios-close-btn" type="button" aria-label="إغلاق">✕</button>
+          <button id="btnCloseGuide" class="ios-close-btn" type="button" data-i18n-aria="close_aria" aria-label="إغلاق">✕</button>
         </div>
         <div class="guide-body">
           <div class="guide-section">
-            <h4>🎯 الهدف</h4>
-            <p>ساعد <strong>مشمشة</strong> على الوصول إلى البوابة في نهاية كل مرحلة (15 مرحلة متنوعة)، واجمع <strong>العملات الذهبية 🪙</strong> لتطوير قدراتك وفتح الأزياء، واجمع <strong>3 أسماك 🐟</strong> في كل مرحلة لتحقيق <strong>3 نجوم ★</strong>.</p>
+            <h4 data-i18n="guide_goal_h">🎯 الهدف</h4>
+            <p data-i18n-html="guide_goal_p">ساعد <strong>مشمشة</strong> على الوصول إلى البوابة في نهاية كل مرحلة (15 مرحلة متنوعة)، واجمع <strong>العملات الذهبية 🪙</strong> لتطوير قدراتك وفتح الأزياء، واجمع <strong>3 أسماك 🐟</strong> في كل مرحلة لتحقيق <strong>3 نجوم ★</strong>.</p>
           </div>
           <div class="guide-section">
-            <h4>🎮 التحكم والمهارات المحدّثة</h4>
+            <h4 data-i18n="guide_ctrl_h">🎮 التحكم والمهارات المحدّثة</h4>
             <div class="guide-grid">
-              <div class="guide-item"><span>◀ ▶</span><span><strong>الحركة (A / D):</strong> الجري يميناً ويساراً والتنقل فوق المنصات والعجلات الدوارة</span></div>
-              <div class="guide-item"><span>▲</span><span><strong>القفز وتسلق الجدار (Space / W):</strong> القفز العادي، وعند الجدران المميزة بلوحة <strong>«⬆ تسلق الجدار»</strong> يمكنك التشبث والقفز المتبادل بين الجدران للصعود</span></div>
-              <div class="guide-item"><span>⬇</span><span><strong>التسلل والنظر للأسفل (Shift / S):</strong> يقلل مدى رؤية الكلاب والدوبرمان، ويثبّت توازنك على الحبال وفي الرياح، <strong>وعند الاستمرار بالضغط عليه في مكان مرتفع تنزل الكاميرا للأسفل لكشف ما تحتك!</strong></span></div>
-              <div class="guide-item"><span>🔊</span><span><strong>المواء الطارد للأعداء (Q):</strong> يدفع ويبعد <strong>جميع الأعداء القريبين</strong> (الكلاب، الدوبرمان، الراكون، الثعالب، القنافذ، والطيور) للخلف ويغلق النباتات المفترسة مؤقتاً</span></div>
-              <div class="guide-item"><span>👁️</span><span><strong>الرؤية الليلية (E):</strong> تكشف المنصات والأسماك السرية وتوضح مخاريط رؤية الكلاب والدوبرمان</span></div>
-              <div class="guide-item"><span>🏠</span><span><strong>نقاط الحفظ والبيئة:</strong> بيوت الحفظ آمنة تماماً ولا يصلها أي خطر (مع قفل لحظي للحركة عند العودة إليها)، والفطر الإسفنجي والزهور البنفسجية ونوافير المياه تقذفك للأعلى</span></div>
-              <div class="guide-item"><span>⏸</span><span><strong>الإيقاف المؤقت والإعدادات (P / Esc):</strong> لضبط <strong>حجم وشفافية أزرار التحكم</strong>، أو كتم الصوت، أو فتح المتجر</span></div>
+              <div class="guide-item"><span>◀ ▶</span><span data-i18n-html="guide_move"><strong>الحركة (A / D):</strong> الجري يميناً ويساراً والتنقل فوق المنصات والعجلات الدوارة</span></div>
+              <div class="guide-item"><span>▲</span><span data-i18n-html="guide_jump"><strong>القفز وتسلق الجدار (Space / W):</strong> القفز العادي، وعند الجدران المميزة بلوحة <strong>«⬆ تسلق الجدار»</strong> يمكنك التشبث والقفز المتبادل بين الجدران للصعود</span></div>
+              <div class="guide-item"><span>⬇</span><span data-i18n-html="guide_stealth"><strong>التسلل والنظر للأسفل (Shift / S):</strong> يقلل مدى رؤية الكلاب والدوبرمان، ويثبّت توازنك على الحبال وفي الرياح، <strong>وعند الاستمرار بالضغط عليه في مكان مرتفع تنزل الكاميرا للأسفل لكشف ما تحتك!</strong></span></div>
+              <div class="guide-item"><span>🔊</span><span data-i18n-html="guide_meow"><strong>المواء الطارد للأعداء (Q):</strong> يدفع ويبعد <strong>جميع الأعداء القريبين</strong> (الكلاب، الدوبرمان، الراكون، الثعالب، القنافذ، والطيور) للخلف ويغلق النباتات المفترسة مؤقتاً</span></div>
+              <div class="guide-item"><span>👁️</span><span data-i18n-html="guide_nv"><strong>الرؤية الليلية (E):</strong> تكشف المنصات والأسماك السرية وتوضح مخاريط رؤية الكلاب والدوبرمان</span></div>
+              <div class="guide-item"><span>🏠</span><span data-i18n-html="guide_cp"><strong>نقاط الحفظ والبيئة:</strong> بيوت الحفظ آمنة تماماً ولا يصلها أي خطر (مع قفل لحظي للحركة عند العودة إليها)، والفطر الإسفنجي والزهور البنفسجية ونوافير المياه تقذفك للأعلى</span></div>
+              <div class="guide-item"><span>⏸</span><span data-i18n-html="guide_pause"><strong>الإيقاف المؤقت والإعدادات (P / Esc):</strong> لضبط <strong>حجم وشفافية أزرار التحكم</strong>، تبديل اللغة، مظهر القطة، الصوت، أو المتجر</span></div>
             </div>
           </div>
         </div>
@@ -278,9 +276,9 @@
         <div id="endStats" class="end-stats-card"></div>
         <div class="overlay-actions">
           <button id="btnNextStage" class="ios-btn ios-btn-primary hidden" type="button">المرحلة التالية ▶</button>
-          <button id="btnEndShop" class="ios-btn ios-btn-gold" type="button">🛒 المتجر</button>
-          <button id="btnRestartStage" class="ios-btn ios-btn-glass" type="button">↻ إعادة</button>
-          <button id="btnEndMenu" class="ios-btn ios-btn-glass" type="button">⊞ المراحل</button>
+          <button id="btnEndShop" class="ios-btn ios-btn-gold" type="button" data-i18n="pause_shop">🛒 المتجر</button>
+          <button id="btnRestartStage" class="ios-btn ios-btn-glass" type="button" data-i18n="pause_restart">↻ إعادة</button>
+          <button id="btnEndMenu" class="ios-btn ios-btn-glass" type="button" data-i18n="pause_menu">⊞ المراحل</button>
         </div>
       </div>
     </div>
@@ -289,14 +287,15 @@
     <div id="toastBanner" class="toast-banner hidden"></div>
   </div>
 
-  <script defer src="js/store.js?v=14"></script>
-  <script defer src="js/audio.js?v=15"></script>
+  <script defer src="js/i18n.js?v=21"></script>
+  <script defer src="js/store.js?v=23"></script>
+  <script defer src="js/audio.js?v=20"></script>
   <script defer src="js/particles.js?v=18"></script>
-  <script defer src="js/art.js?v=10"></script>
-  <script defer src="js/art-extended.js?v=13"></script>
+  <script defer src="js/art.js?v=22"></script>
+  <script defer src="js/art-extended.js?v=20"></script>
   <script defer src="js/enemies-extended.js?v=10"></script>
-  <script defer src="js/cat-procedural.js?v=18"></script>
-  <script defer src="js/cat.js?v=18"></script>
+  <script defer src="js/cat-procedural.js?v=20"></script>
+  <script defer src="js/cat.js?v=21"></script>
   <script defer src="js/level1.js?v=5"></script>
   <script defer src="js/level2.js?v=5"></script>
   <script defer src="js/level3.js?v=11"></script>
@@ -312,7 +311,7 @@
   <script defer src="js/level13.js?v=5"></script>
   <script defer src="js/level14.js?v=5"></script>
   <script defer src="js/level15.js?v=9"></script>
-  <script defer src="js/game.js?v=15"></script>
+  <script defer src="js/game.js?v=22"></script>
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       window.addEventListener('load', () => {

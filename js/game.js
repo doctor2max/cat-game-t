@@ -22,16 +22,20 @@ window.Game = window.Game || {};
   const Particles = window.Game.Particles;
   const Art = window.Game.Art;
   const EnemiesExt = window.Game.EnemiesExtended;
+  const I18n = window.Game.I18n;
+  const t = (key, vars) => (I18n ? I18n.t(key, vars) : key);
   const TOTAL_STAGES = Store.TOTAL_STAGES;
 
   // UI Elements
   const introLayer = document.getElementById('introLayer');
   const introHud = document.getElementById('introHud');
   const introVideo = document.getElementById('introVideo');
+  const introCaption = document.getElementById('introCaption');
   const btnSkipIntro = document.getElementById('btnSkipIntro');
 
   const gameOverLayer = document.getElementById('gameOverLayer');
   const gameOverVideo = document.getElementById('gameOverVideo');
+  const gameOverCaption = document.getElementById('gameOverCaption');
   const gameOverActions = document.getElementById('gameOverActions');
   const btnGameOverRevive = document.getElementById('btnGameOverRevive');
   const btnGameOverRestart = document.getElementById('btnGameOverRestart');
@@ -39,7 +43,10 @@ window.Game = window.Game || {};
 
   const winLayer = document.getElementById('winLayer');
   const winVideo = document.getElementById('winVideo');
+  const winCaption = document.getElementById('winCaption');
   const btnSkipWin = document.getElementById('btnSkipWin');
+  const btnMenuLang = document.getElementById('btnMenuLang');
+  const btnPauseLang = document.getElementById('btnPauseLang');
 
   const hud = document.getElementById('hud');
   const touchControls = document.getElementById('touchControls');
@@ -149,42 +156,65 @@ window.Game = window.Game || {};
     });
   }
 
-  // Cat Render Mode Toggle: 'sprite' (original PNG sheet) vs 'procedural' (articulated code vector cat)
-  const CAT_MODE_KEY = 'theWayHome_catRenderMode';
-  const catModeVal = document.getElementById('catModeVal');
-  const btnCatModeSprite = document.getElementById('btnCatModeSprite');
-  const btnCatModeProc = document.getElementById('btnCatModeProc');
-  let catRenderMode = 'sprite';
-  try {
-    const savedCatMode = localStorage.getItem(CAT_MODE_KEY);
-    if (savedCatMode === 'procedural' || savedCatMode === 'sprite') {
-      catRenderMode = savedCatMode;
+  // Always render Mashmasha using the pure programmatic articulated vector renderer
+  window.Game.catRenderMode = 'procedural';
+
+  // Video Caption Synchronization Helper (for Intro, Game Over, Win1, Win2)
+  let activeWinClipKey = 'win1';
+  function updateVideoCaption(videoEl, captionEl, videoKey) {
+    if (!captionEl || !videoEl || !I18n) return;
+    const text = I18n.getVideoCaption(videoKey, videoEl.currentTime || 0);
+    if (text) {
+      captionEl.textContent = text;
+      captionEl.classList.remove('hidden');
+    } else {
+      captionEl.classList.add('hidden');
     }
-  } catch (e) {}
-
-  function applyCatRenderMode() {
-    window.Game.catRenderMode = catRenderMode;
-    const isProc = catRenderMode === 'procedural';
-    if (btnCatModeSprite) btnCatModeSprite.classList.toggle('active', !isProc);
-    if (btnCatModeProc) btnCatModeProc.classList.toggle('active', isProc);
-    if (catModeVal) catModeVal.textContent = isProc ? 'رسم برمجي' : 'صورة أصلية';
   }
-  applyCatRenderMode();
+  if (introVideo) {
+    introVideo.addEventListener('timeupdate', () => updateVideoCaption(introVideo, introCaption, 'intro'));
+    introVideo.addEventListener('loadeddata', () => updateVideoCaption(introVideo, introCaption, 'intro'));
+    introVideo.addEventListener('play', () => updateVideoCaption(introVideo, introCaption, 'intro'));
+  }
+  if (gameOverVideo) {
+    gameOverVideo.addEventListener('timeupdate', () => updateVideoCaption(gameOverVideo, gameOverCaption, 'gameover'));
+    gameOverVideo.addEventListener('loadeddata', () => updateVideoCaption(gameOverVideo, gameOverCaption, 'gameover'));
+    gameOverVideo.addEventListener('play', () => updateVideoCaption(gameOverVideo, gameOverCaption, 'gameover'));
+  }
+  if (winVideo) {
+    winVideo.addEventListener('timeupdate', () => updateVideoCaption(winVideo, winCaption, activeWinClipKey));
+    winVideo.addEventListener('loadeddata', () => updateVideoCaption(winVideo, winCaption, activeWinClipKey));
+    winVideo.addEventListener('play', () => updateVideoCaption(winVideo, winCaption, activeWinClipKey));
+  }
 
-  function selectCatRenderMode(mode) {
-    if (mode !== 'sprite' && mode !== 'procedural') return;
-    catRenderMode = mode;
-    applyCatRenderMode();
+  function refreshAllLocalizedUI() {
+    if (I18n) I18n.applyDom();
+    if (pauseStageTag) pauseStageTag.textContent = t('stage_n', { n: currentStage });
+    if (btnPauseRefill) {
+      btnPauseRefill.textContent = t('pause_refill', { cost: Store.LIFE_REFILL_COST });
+    }
+    if (btnGameOverRevive) {
+      btnGameOverRevive.textContent = t('gameover_revive', { cost: Store.LIFE_REFILL_COST });
+    }
+    renderLevelGrid();
+    if (shopOverlay && !shopOverlay.classList.contains('hidden')) {
+      renderShopContent();
+    }
+  }
+
+  function toggleLanguage() {
+    if (!I18n) return;
+    const next = I18n.isEn() ? 'ar' : 'en';
+    I18n.setLang(next);
+    Audio.ensureCtx();
     Audio.playUiClick();
     haptic(8);
-    try {
-      localStorage.setItem(CAT_MODE_KEY, catRenderMode);
-    } catch (e) {}
-    showToast(mode === 'procedural' ? 'تم التبديل إلى الرسم البرمجي 🐱✨' : 'تم التبديل إلى الصورة الأصلية 🐱');
+    refreshAllLocalizedUI();
+    showToast(t('toast_lang_switched'));
   }
 
-  if (btnCatModeSprite) btnCatModeSprite.addEventListener('click', () => selectCatRenderMode('sprite'));
-  if (btnCatModeProc) btnCatModeProc.addEventListener('click', () => selectCatRenderMode('procedural'));
+  if (btnMenuLang) btnMenuLang.addEventListener('click', toggleLanguage);
+  if (btnPauseLang) btnPauseLang.addEventListener('click', toggleLanguage);
 
   // Subtle mobile haptic helper
   function haptic(ms = 10) {
@@ -287,7 +317,7 @@ window.Game = window.Game || {};
       tile.className =
         'level-tile ' +
         (locked ? 'locked' : isCurrent ? 'current' : cleared ? 'completed' : 'unlocked');
-      tile.setAttribute('aria-label', `المرحلة ${s}`);
+      tile.setAttribute('aria-label', t('stage_n', { n: s }));
 
       const numSpan = document.createElement('span');
       numSpan.className = 'level-tile-num';
@@ -315,7 +345,7 @@ window.Game = window.Game || {};
         Audio.ensureCtx();
         if (locked) {
           haptic(18);
-          showToast('أكمل المرحلة السابقة أو افتحها من المتجر 🛒');
+          showToast(t('toast_stage_locked'));
           return;
         }
         Audio.playUiClick();
@@ -327,7 +357,7 @@ window.Game = window.Game || {};
     }
 
     if (btnQuickPlay) {
-      btnQuickPlay.textContent = `العب المرحلة ${nextPlayStage} ▶`;
+      btnQuickPlay.textContent = t('menu_quick_play', { n: nextPlayStage });
       btnQuickPlay.dataset.targetStage = String(nextPlayStage);
     }
     syncCoinDisplays();
@@ -336,7 +366,7 @@ window.Game = window.Game || {};
   function startStageFromMenu(stageNum) {
     startOverlay.classList.add('hidden');
     initLevel(stageNum);
-    if (stageNum === 1 && !Store.isStageCleared(1)) {
+    if (stageNum === 1) {
       startIntroSequence();
     } else {
       enterGameplay();
@@ -410,7 +440,7 @@ window.Game = window.Game || {};
     enforceCheckpointSafeZones(level);
     Store.ensureLevelCoins(level, currentStage);
     stageBadge.textContent = String(currentStage);
-    if (pauseStageTag) pauseStageTag.textContent = `المرحلة ${currentStage}`;
+    if (pauseStageTag) pauseStageTag.textContent = t('stage_n', { n: currentStage });
     Audio.setMusicTrack(level.theme);
 
     catCtrl = window.Game.Cat(level.startX, level.startY);
@@ -515,12 +545,13 @@ window.Game = window.Game || {};
     Audio.pauseMusic();
     Audio.playUiClick();
     if (touchControls) touchControls.classList.add('hidden');
-    if (pauseStageTag) pauseStageTag.textContent = `المرحلة ${currentStage}`;
+    if (pauseStageTag) pauseStageTag.textContent = t('stage_n', { n: currentStage });
 
     // Show life refill option if missing lives
     if (btnPauseRefill && catCtrl) {
       const needsLives = catCtrl.cat.lives < catCtrl.cat.maxLives;
       btnPauseRefill.classList.toggle('hidden', !needsLives);
+      btnPauseRefill.textContent = t('pause_refill', { cost: Store.LIFE_REFILL_COST });
       btnPauseRefill.disabled = Store.getCoins() < Store.LIFE_REFILL_COST;
     }
 
@@ -605,7 +636,8 @@ window.Game = window.Game || {};
     const coins = Store.getCoins();
 
     if (activeShopTab === 'upgrades') {
-      for (const u of Store.UPGRADES) {
+      for (const rawU of Store.UPGRADES) {
+        const u = I18n ? I18n.getShopUpgrade(rawU) : rawU;
         const lv = Store.getUpgradeLevel(u.id);
         const cost = Store.getUpgradeCost(u.id);
         const isMax = cost === null;
@@ -631,7 +663,7 @@ window.Game = window.Game || {};
             </div>
           </div>
           <button class="ios-btn ${isMax ? 'shop-buy-btn maxed' : 'ios-btn-gold shop-buy-btn'}" type="button" ${isMax || coins < cost ? 'disabled' : ''}>
-            ${isMax ? '✓ مكتمل' : `${cost} <span class="gold-coin-icon">★</span>`}
+            ${isMax ? t('shop_maxed') : `${cost} <span class="gold-coin-icon">★</span>`}
           </button>
         `;
 
@@ -646,7 +678,7 @@ window.Game = window.Game || {};
                 catCtrl.applyUpgrades(Store.getBonuses(), true);
                 updateHUD();
               }
-              showToast(`تم تطوير ${u.name} إلى المستوى ${res.level}! ⚡`);
+              showToast(t('toast_upgraded', { name: u.name, lv: res.level }));
               renderShopContent();
             }
           });
@@ -658,7 +690,8 @@ window.Game = window.Game || {};
       grid.className = 'shop-grid';
       const equipped = Store.getEquippedSkin();
 
-      for (const s of Store.SKINS) {
+      for (const rawS of Store.SKINS) {
+        const s = I18n ? I18n.getShopSkin(rawS) : rawS;
         const owned = Store.isSkinOwned(s.id);
         const isEquipped = equipped === s.id;
 
@@ -673,7 +706,7 @@ window.Game = window.Game || {};
             </div>
           </div>
           <button class="ios-btn ${isEquipped ? 'shop-buy-btn maxed' : owned ? 'ios-btn-glass shop-buy-btn' : 'ios-btn-gold shop-buy-btn'}" type="button" ${!owned && coins < s.cost ? 'disabled' : ''}>
-            ${isEquipped ? '✓ مُجهّز' : owned ? 'تجهيز' : `فتح • ${s.cost} <span class="gold-coin-icon">★</span>`}
+            ${isEquipped ? t('shop_equipped') : owned ? t('shop_equip') : `${t('shop_unlock_cost', { cost: s.cost })} <span class="gold-coin-icon">★</span>`}
           </button>
         `;
 
@@ -685,7 +718,7 @@ window.Game = window.Game || {};
             Audio.playPurchase();
             haptic(14);
             if (catCtrl) catCtrl.applyUpgrades(Store.getBonuses(), true);
-            showToast(res.action === 'bought' ? `تم فتح ${s.name}! ✨` : `تم تجهيز ${s.name}`);
+            showToast(res.action === 'bought' ? t('toast_skin_bought', { name: s.name }) : t('toast_skin_equipped', { name: s.name }));
             renderShopContent();
           }
         });
@@ -701,12 +734,12 @@ window.Game = window.Game || {};
         <div class="shop-item-main">
           <div class="shop-item-icon">🎁</div>
           <div class="shop-item-info">
-            <div class="shop-item-title">هدية اليوم المجانية</div>
-            <div class="shop-item-desc">احصل على ${Store.DAILY_BONUS_AMOUNT} عملة ذهبية مجانية كل يوم</div>
+            <div class="shop-item-title">${t('shop_daily_title')}</div>
+            <div class="shop-item-desc">${t('shop_daily_desc', { amount: Store.DAILY_BONUS_AMOUNT })}</div>
           </div>
         </div>
         <button class="ios-btn ${dailyAvailable ? 'ios-btn-gold' : 'maxed'} shop-buy-btn" type="button" ${!dailyAvailable ? 'disabled' : ''}>
-          ${dailyAvailable ? `+${Store.DAILY_BONUS_AMOUNT} <span class="gold-coin-icon">★</span>` : '✓ تم الاستلام'}
+          ${dailyAvailable ? `+${Store.DAILY_BONUS_AMOUNT} <span class="gold-coin-icon">★</span>` : t('shop_daily_claimed')}
         </button>
       `;
       dailyCard.querySelector('button').addEventListener('click', () => {
@@ -714,7 +747,7 @@ window.Game = window.Game || {};
         if (res.ok) {
           Audio.playPurchase();
           haptic(18);
-          showToast(`تمت إضافة +${res.amount} عملة ذهبية! 🎁`);
+          showToast(t('toast_daily_claimed', { amount: res.amount }));
           renderShopContent();
         }
       });
@@ -728,12 +761,12 @@ window.Game = window.Game || {};
         <div class="shop-item-main">
           <div class="shop-item-icon">🔓</div>
           <div class="shop-item-info">
-            <div class="shop-item-title">${allUnlocked ? 'جميع المراحل مفتوحة!' : `فتح المرحلة ${nextLocked} فوراً`}</div>
-            <div class="shop-item-desc">تذكرة فتح المرحلة التالية مباشرة بدون انتظار</div>
+            <div class="shop-item-title">${allUnlocked ? t('shop_unlock_all') : t('shop_unlock_next', { n: nextLocked })}</div>
+            <div class="shop-item-desc">${t('shop_unlock_desc')}</div>
           </div>
         </div>
         <button class="ios-btn ${allUnlocked ? 'maxed' : 'ios-btn-gold'} shop-buy-btn" type="button" ${allUnlocked || coins < Store.UNLOCK_STAGE_COST ? 'disabled' : ''}>
-          ${allUnlocked ? '✓ مفتوحة' : `${Store.UNLOCK_STAGE_COST} <span class="gold-coin-icon">★</span>`}
+          ${allUnlocked ? t('shop_unlocked_badge') : `${Store.UNLOCK_STAGE_COST} <span class="gold-coin-icon">★</span>`}
         </button>
       `;
       unlockCard.querySelector('button').addEventListener('click', () => {
@@ -741,7 +774,7 @@ window.Game = window.Game || {};
         if (res.ok) {
           Audio.playPurchase();
           haptic(20);
-          showToast(`تم فتح المرحلة ${res.unlockedStage}! 🔓`);
+          showToast(t('toast_stage_unlocked', { n: res.unlockedStage }));
           renderShopContent();
         }
       });
@@ -755,12 +788,12 @@ window.Game = window.Game || {};
           <div class="shop-item-main">
             <div class="shop-item-icon">❤️</div>
             <div class="shop-item-info">
-              <div class="shop-item-title">جرعة استعادة الأرواح</div>
-              <div class="shop-item-desc">تملأ جميع أرواح مشمشة والدرع فوراً في المرحلة الحالية</div>
+              <div class="shop-item-title">${t('shop_refill_title')}</div>
+              <div class="shop-item-desc">${t('shop_refill_desc')}</div>
             </div>
           </div>
           <button class="ios-btn ${full ? 'maxed' : 'ios-btn-gold'} shop-buy-btn" type="button" ${full || coins < Store.LIFE_REFILL_COST ? 'disabled' : ''}>
-            ${full ? '✓ ممتلئة' : `${Store.LIFE_REFILL_COST} 🪙`}
+            ${full ? t('shop_refill_full') : `${Store.LIFE_REFILL_COST} 🪙`}
           </button>
         `;
         refillCard.querySelector('button').addEventListener('click', () => {
@@ -770,7 +803,7 @@ window.Game = window.Game || {};
             Audio.playPurchase();
             haptic(16);
             updateHUD();
-            showToast('تمت استعادة جميع الأرواح! ❤️');
+            showToast(t('toast_lives_refilled'));
             renderShopContent();
           }
         });
@@ -794,6 +827,7 @@ window.Game = window.Game || {};
     playingCanvasIntro = false;
     paused = false;
     introLayer.classList.add('hidden');
+    if (introCaption) introCaption.classList.add('hidden');
     if (introHud) introHud.classList.add('hidden');
     introVideo.pause();
     hud.classList.remove('hidden');
@@ -801,28 +835,38 @@ window.Game = window.Game || {};
     Audio.startMusic();
     lastTime = 0;
     running = true;
-    Particles.spawnPopup(catCtrl.cat.x + 20, catCtrl.cat.y - 24, `المرحلة ${currentStage}`, '#7dd3fc');
+    Particles.spawnPopup(catCtrl.cat.x + 20, catCtrl.cat.y - 24, t('stage_n', { n: currentStage }), '#7dd3fc');
   }
 
   function startIntroSequence() {
     startOverlay.classList.add('hidden');
+    Audio.pauseMusic();
     if (introHud) introHud.classList.remove('hidden');
+    introVideo.muted = false;
     introVideo.src = 'videos/intro.mp4';
+    introVideo.currentTime = 0;
     introLayer.classList.remove('hidden');
+    updateVideoCaption(introVideo, introCaption, 'intro');
 
-    introVideo.onerror = () => {
+    const fallbackToCanvasIntro = () => {
       introLayer.classList.add('hidden');
+      if (introCaption) introCaption.classList.add('hidden');
       playingCanvasIntro = true;
       canvasIntroTimer = 0;
     };
+
+    introVideo.onerror = fallbackToCanvasIntro;
     introVideo.onended = () => {
       enterGameplay();
     };
-    introVideo.play().catch(() => {
-      introLayer.classList.add('hidden');
-      playingCanvasIntro = true;
-      canvasIntroTimer = 0;
-    });
+    const playPromise = introVideo.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch(() => {
+        // Retry muted if browser autoplay policy blocks unmuted playback
+        introVideo.muted = true;
+        introVideo.play().catch(fallbackToCanvasIntro);
+      });
+    }
   }
 
   btnSkipIntro.addEventListener('click', enterGameplay);
@@ -843,7 +887,7 @@ window.Game = window.Game || {};
     const my = c.y + c.h / 2;
     const range = Math.max(280, bonuses.meowRange || 280);
     Particles.spawnMeowRing(mx, my);
-    Particles.spawnPopup(mx, c.y - 16, 'مواء!', '#ffd60a');
+    Particles.spawnPopup(mx, c.y - 16, t('popup_meow'), '#ffd60a');
 
     // Repel & push back nearby dogs away from Mashmasha!
     for (const dog of level.dogs) {
@@ -855,7 +899,7 @@ window.Game = window.Game || {};
         dog.facing = awayDir;
         dog.repelDir = awayDir;
         dog.stateTimer = 2.6;
-        Particles.spawnPopup(dogCx, dog.y - 14, '💨 ابتعد!', '#7dd3fc');
+        Particles.spawnPopup(dogCx, dog.y - 14, t('popup_repel'), '#7dd3fc');
       }
     }
 
@@ -1136,7 +1180,7 @@ window.Game = window.Game || {};
         else Audio.playPurr();
         haptic(12);
         Particles.spawnHeart(cp.x + 18, cp.y - 16);
-        Particles.spawnPopup(cp.x + 18, cp.y - 38, 'نقطة حفظ ✓', '#86efac');
+        Particles.spawnPopup(cp.x + 18, cp.y - 38, t('popup_checkpoint'), '#86efac');
       }
     }
 
@@ -1217,12 +1261,12 @@ window.Game = window.Game || {};
     const isFinal = currentStage === TOTAL_STAGES;
     btnNextStage.classList.toggle('hidden', isFinal);
     if (!isFinal) {
-      btnNextStage.textContent = `المرحلة ${currentStage + 1} ▶`;
+      btnNextStage.textContent = t('end_next_stage', { n: currentStage + 1 });
     }
     endBadge.textContent = isFinal
-      ? `المرحلة ${TOTAL_STAGES} • نهاية الرحلة`
-      : `المرحلة ${currentStage} مكتملة`;
-    endTitle.textContent = isFinal ? 'عادت مشمشة إلى المنزل! 🏠🏆' : 'مرحلة رائعة! 🎉';
+      ? t('end_final_badge', { n: TOTAL_STAGES })
+      : t('end_stage_done', { n: currentStage });
+    endTitle.textContent = isFinal ? t('end_title_final') : t('end_title_win');
 
     // Animate 3 golden stars
     if (endStarsRow) {
@@ -1236,11 +1280,15 @@ window.Game = window.Game || {};
     }
 
     const totalRunCoins = stageCoinsEarned + reward.totalBonus;
-    endStats.innerHTML =
-      `الوقت: <strong>${elapsedTime.toFixed(1)} ث</strong> • ` +
-      `الأرواح: <strong>${catCtrl.cat.lives}/${catCtrl.cat.maxLives} ❤️</strong> • ` +
-      `الأسماك: <strong>${collectedTreats}/3 🐟</strong><br/>` +
-      `<span class="end-coin-highlight">+${totalRunCoins} 🪙 (${stageCoinsEarned} جُمعت + ${reward.totalBonus} مكافأة)</span>`;
+    endStats.innerHTML = t('end_stats_html', {
+      time: elapsedTime.toFixed(1),
+      lives: catCtrl.cat.lives,
+      maxLives: catCtrl.cat.maxLives,
+      treats: collectedTreats,
+      total: totalRunCoins,
+      earned: stageCoinsEarned,
+      bonus: reward.totalBonus,
+    });
     syncCoinDisplays();
   }
 
@@ -1265,18 +1313,25 @@ window.Game = window.Game || {};
         const showFinalSummary = () => {
           winVideo.pause();
           winLayer.classList.add('hidden');
+          if (winCaption) winCaption.classList.add('hidden');
           showVictoryOverlay(reward);
         };
 
-        const winPlaylist = ['videos/Win1.mp4', 'videos/Win2.mp4'];
+        const winPlaylist = [
+          { src: 'videos/Win1.mp4', key: 'win1' },
+          { src: 'videos/Win2.mp4', key: 'win2' },
+        ];
         let winIdx = 0;
         const playNextWinClip = () => {
           if (winIdx >= winPlaylist.length) {
             showFinalSummary();
             return;
           }
-          winVideo.src = winPlaylist[winIdx++];
+          const clip = winPlaylist[winIdx++];
+          activeWinClipKey = clip.key;
+          winVideo.src = clip.src;
           winLayer.classList.remove('hidden');
+          if (winCaption) winCaption.classList.add('hidden');
           winVideo.play().catch(showFinalSummary);
         };
 
@@ -1299,19 +1354,20 @@ window.Game = window.Game || {};
     if (btnGameOverRevive) {
       const canRevive = Store.getCoins() >= Store.LIFE_REFILL_COST;
       btnGameOverRevive.disabled = !canRevive;
-      btnGameOverRevive.textContent = `❤️ متابعة (${Store.LIFE_REFILL_COST} 🪙)`;
+      btnGameOverRevive.textContent = t('gameover_revive', { cost: Store.LIFE_REFILL_COST });
     }
 
     const showFallbackOverlay = () => {
       gameOverLayer.classList.add('hidden');
+      if (gameOverCaption) gameOverCaption.classList.add('hidden');
       endOverlay.classList.remove('hidden');
       btnNextStage.classList.add('hidden');
       if (endStarsRow) {
         endStarsRow.querySelectorAll('.end-star').forEach((s) => s.classList.remove('earned'));
       }
-      endBadge.textContent = 'انتهت الأرواح';
-      endTitle.textContent = 'حاول مرة أخرى! 🐱';
-      endStats.innerHTML = 'استخدم <strong>المواء</strong> لتشتيت الكلاب وطوّر قدراتك من <strong>المتجر 🛒</strong>.';
+      endBadge.textContent = t('end_out_of_lives');
+      endTitle.textContent = t('end_try_again');
+      endStats.innerHTML = t('end_fail_tip');
     };
 
     if (gameOverVideo._btnTimer) clearTimeout(gameOverVideo._btnTimer);
@@ -1332,7 +1388,7 @@ window.Game = window.Game || {};
 
   function reviveAtCheckpoint() {
     if (!Store.spendCoins(Store.LIFE_REFILL_COST)) {
-      showToast('عملات غير كافية! 🪙');
+      showToast(t('toast_no_coins'));
       return;
     }
     Audio.playPurchase();
@@ -1340,6 +1396,7 @@ window.Game = window.Game || {};
     if (gameOverVideo._btnTimer) clearTimeout(gameOverVideo._btnTimer);
     gameOverVideo.pause();
     gameOverLayer.classList.add('hidden');
+    if (gameOverCaption) gameOverCaption.classList.add('hidden');
     gameOverActions.classList.add('hidden');
     endOverlay.classList.add('hidden');
     hud.classList.remove('hidden');
@@ -1349,7 +1406,7 @@ window.Game = window.Game || {};
     updateHUD();
     syncCoinDisplays();
     Particles.spawnShieldBurst(catCtrl.cat.x + catCtrl.cat.w / 2, catCtrl.cat.y + catCtrl.cat.h / 2);
-    Particles.spawnPopup(catCtrl.cat.x + 20, catCtrl.cat.y - 24, '❤️ عودة للحياة!', '#86efac');
+    Particles.spawnPopup(catCtrl.cat.x + 20, catCtrl.cat.y - 24, t('popup_revive'), '#86efac');
     lastTime = 0;
     running = true;
   }
@@ -1491,6 +1548,11 @@ window.Game = window.Game || {};
   function drawLevel(time, viewW) {
     const nv = catCtrl.cat.nightVision;
     const cullW = viewW || LOGICAL_W;
+
+    // Atmospheric World Teasers (drawn right BEHIND wooden piers/rooftops & water for true occlusion!)
+    if (Art.drawWorldTeasers) {
+      Art.drawWorldTeasers(ctx, level, catCtrl ? catCtrl.cat : null, camX, camY, time, cullW);
+    }
 
     for (const p of level.platforms) {
       if (p.hiddenInDay && !nv) continue;
@@ -1934,9 +1996,9 @@ window.Game = window.Game || {};
         updateHUD();
         syncCoinDisplays();
         btnPauseRefill.classList.add('hidden');
-        showToast('تمت استعادة كل الأرواح! ❤️');
+        showToast(t('toast_lives_refilled'));
       } else {
-        showToast('عملات غير كافية! 🪙');
+        showToast(t('toast_no_coins'));
       }
     });
   }
@@ -1952,7 +2014,7 @@ window.Game = window.Game || {};
       Audio.resumeMusic();
       lastTime = 0;
       running = true;
-      Particles.spawnPopup(catCtrl.cat.x + 20, catCtrl.cat.y - 24, `المرحلة ${nextStage}`, '#ffd60a');
+      Particles.spawnPopup(catCtrl.cat.x + 20, catCtrl.cat.y - 24, t('stage_n', { n: nextStage }), '#ffd60a');
     });
   }
 
@@ -2012,7 +2074,7 @@ window.Game = window.Game || {};
   });
 
   // Boot
-  renderLevelGrid();
+  refreshAllLocalizedUI();
   initLevel(1);
   requestAnimationFrame(loop);
 })();

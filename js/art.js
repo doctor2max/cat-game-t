@@ -1553,66 +1553,205 @@ window.Game.Art = (function () {
       ctx.save();
       ctx.translate(bx, groundY);
 
-      // Lush Painterly Park Oak & Weeping Willow Tree (Gnarled Roots, Branching Boughs, Volumetric Moonlit Canopy & Hanging Willow Fronds!)
-      const treeX = 75;
-      const trunkH = 190 + (i % 3) * 28;
-      const trG = ctx.createLinearGradient(treeX - 18, 0, treeX + 18, 0);
-      trG.addColorStop(0, '#24140b'); trG.addColorStop(0.45, '#4d2f1c'); trG.addColorStop(1, '#1c0f08');
+      // Helper: Organic scalloped multi-lobed botanical foliage cluster (never plain circles!)
+      const drawLeafCrown = (cx, cy, rx, ry, lobes, seed, cTop, cMid, cBase) => {
+        const g = ctx.createRadialGradient(cx + rx * 0.28, cy - ry * 0.34, Math.min(rx, ry) * 0.1, cx, cy, Math.max(rx, ry) * 1.08);
+        g.addColorStop(0, cTop);
+        g.addColorStop(0.45, cMid);
+        g.addColorStop(1, cBase);
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        const pts = lobes * 2;
+        for (let k = 0; k <= pts; k++) {
+          const a = (k / pts) * Math.PI * 2;
+          const isPeak = k % 2 === 0;
+          const jitter = 0.88 + 0.22 * Math.sin(seed * 7.3 + k * 2.1);
+          const rad = (isPeak ? 1.04 : 0.80) * jitter;
+          const px = cx + Math.cos(a) * rx * rad;
+          const py = cy + Math.sin(a) * ry * rad;
+          if (k === 0) ctx.moveTo(px, py);
+          else {
+            const pa = ((k - 0.5) / pts) * Math.PI * 2;
+            const cpx = cx + Math.cos(pa) * rx * (isPeak ? 0.98 : 1.06) * jitter;
+            const cpy = cy + Math.sin(pa) * ry * (isPeak ? 0.98 : 1.06) * jitter;
+            ctx.quadraticCurveTo(cpx, cpy, px, py);
+          }
+        }
+        ctx.closePath();
+        ctx.fill();
+      };
+
+      // Photorealistic Painterly Woodland Trees (3 Botanical Varieties: Ancient Oak, Weeping Willow, Stately Park Elm)
+      const treeX = 76;
+      const treeKind = i % 3;
+      const trunkH = treeKind === 2 ? 232 : (treeKind === 1 ? 202 : 212);
+      const lean = treeKind === 1 ? 12 : (treeKind === 2 ? -6 : 4);
+      const wind = Math.sin(time * 1.45 + i * 1.9) * 3.2;
+
+      // Ground contact shadow & mossy root bed
+      ctx.fillStyle = 'rgba(4, 14, 10, 0.55)';
+      ctx.beginPath();
+      ctx.ellipse(treeX, 2, 46, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 1. Back Midnight-Shadow Foliage Silhouette (creates deep 3D forest volume behind limbs)
+      if (treeKind === 0) {
+        // Ancient Spreading Oak back crown
+        drawLeafCrown(treeX + lean - 54 + wind * 0.4, -trunkH + 4, 54, 42, 9, i + 1, '#1d4d3a', '#113326', '#061610');
+        drawLeafCrown(treeX + lean + 52 + wind * 0.5, -trunkH + 8, 52, 40, 9, i + 2, '#1d4d3a', '#113326', '#061610');
+        drawLeafCrown(treeX + lean + wind * 0.6, -trunkH - 36, 74, 52, 11, i + 3, '#235a44', '#133829', '#071a12');
+      } else if (treeKind === 1) {
+        // Weeping Willow dome back crown
+        drawLeafCrown(treeX + lean - 44 + wind * 0.5, -trunkH - 4, 48, 44, 10, i + 4, '#1b4b3d', '#0f2f25', '#061611');
+        drawLeafCrown(treeX + lean + 48 + wind * 0.6, -trunkH - 2, 50, 44, 10, i + 5, '#1b4b3d', '#0f2f25', '#061611');
+        drawLeafCrown(treeX + lean + 4 + wind * 0.7, -trunkH - 38, 66, 48, 11, i + 6, '#225947', '#12362a', '#071813');
+      } else {
+        // Stately Forest Elm tall tiered back crown
+        drawLeafCrown(treeX + lean - 38 + wind * 0.4, -trunkH + 16, 46, 36, 9, i + 7, '#1a4a36', '#102e22', '#06150f');
+        drawLeafCrown(treeX + lean + 40 + wind * 0.5, -trunkH + 12, 46, 36, 9, i + 8, '#1a4a36', '#102e22', '#06150f');
+        drawLeafCrown(treeX + lean + wind * 0.6, -trunkH - 34, 62, 58, 11, i + 9, '#235942', '#133728', '#071912');
+      }
+
+      // 2. Sculpted Flared Buttress Roots & Organic S-Curved Trunk with Bark Shading
+      const trG = ctx.createLinearGradient(treeX - 24, 0, treeX + 26, 0);
+      trG.addColorStop(0, '#160c07');
+      trG.addColorStop(0.32, '#3c2315');
+      trG.addColorStop(0.68, '#5a3822');
+      trG.addColorStop(0.88, '#382114');
+      trG.addColorStop(1, '#1a0e08');
       ctx.fillStyle = trG;
       ctx.beginPath();
-      ctx.moveTo(treeX - 22, 0);
-      ctx.quadraticCurveTo(treeX - 11, -trunkH * 0.45, treeX - 9, -trunkH);
-      ctx.lineTo(treeX + 9, -trunkH);
-      ctx.quadraticCurveTo(treeX + 11, -trunkH * 0.45, treeX + 22, 0);
+      // Left spreading buttress root gripping the turf
+      ctx.moveTo(treeX - 36, 2);
+      ctx.quadraticCurveTo(treeX - 20, -10, treeX - 16, -34);
+      ctx.bezierCurveTo(treeX - 13, -trunkH * 0.45, treeX + lean * 0.4 - 11, -trunkH * 0.72, treeX + lean - 11, -trunkH + 14);
+      ctx.lineTo(treeX + lean + 11, -trunkH + 14);
+      ctx.bezierCurveTo(treeX + lean * 0.4 + 12, -trunkH * 0.72, treeX + 14, -trunkH * 0.44, treeX + 18, -32);
+      // Right spreading buttress root
+      ctx.quadraticCurveTo(treeX + 22, -10, treeX + 38, 2);
+      ctx.quadraticCurveTo(treeX + 16, -5, treeX + 6, 2);
+      ctx.quadraticCurveTo(treeX - 4, -8, treeX - 16, 2);
       ctx.closePath();
       ctx.fill();
-      // Spreading oak boughs & moonlit bark ridges
-      ctx.strokeStyle = '#382214';
-      ctx.lineWidth = 6.5;
+
+      // Multi-forked primary & secondary gnarled wooden boughs reaching into the crown
+      ctx.strokeStyle = '#361f12';
       ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      const drawLimb = (x0, y0, cx1, cy1, x1, y1, w0) => {
+        ctx.lineWidth = w0;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.quadraticCurveTo(cx1, cy1, x1, y1);
+        ctx.stroke();
+        // Moonlit upper bark rim highlight along each bough
+        ctx.save();
+        ctx.strokeStyle = 'rgba(176, 134, 96, 0.28)';
+        ctx.lineWidth = Math.max(1.2, w0 * 0.28);
+        ctx.beginPath();
+        ctx.moveTo(x0 + 1, y0 - w0 * 0.22);
+        ctx.quadraticCurveTo(cx1 + 1, cy1 - w0 * 0.22, x1, y1 - w0 * 0.22);
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      const forkX = treeX + lean;
+      const forkY = -trunkH + 22;
+      drawLimb(forkX - 4, forkY + 12, forkX - 28, forkY - 4, forkX - 56, forkY - 20, 9.5);
+      drawLimb(forkX - 30, forkY - 6, forkX - 44, forkY - 26, forkX - 58, forkY - 42, 4.8);
+      drawLimb(forkX + 4, forkY + 8, forkX + 30, forkY - 8, forkX + 58, forkY - 22, 9.0);
+      drawLimb(forkX + 32, forkY - 9, forkX + 46, forkY - 28, forkX + 62, forkY - 40, 4.6);
+      drawLimb(forkX, forkY + 4, forkX - 4, forkY - 28, forkX - 12, forkY - 54, 7.2);
+      drawLimb(forkX + 2, forkY + 2, forkX + 14, forkY - 26, forkX + 20, forkY - 52, 6.2);
+
+      // Deep vertical furrowed bark crevices + moonlit right-edge bark highlight
+      ctx.strokeStyle = 'rgba(18, 9, 4, 0.72)';
+      ctx.lineWidth = 1.8;
       ctx.beginPath();
-      ctx.moveTo(treeX - 4, -trunkH + 18); ctx.quadraticCurveTo(treeX - 26, -trunkH - 2, treeX - 44, -trunkH + 4);
-      ctx.moveTo(treeX + 4, -trunkH + 14); ctx.quadraticCurveTo(treeX + 26, -trunkH - 4, treeX + 44, -trunkH + 6);
-      ctx.stroke();
-      ctx.strokeStyle = 'rgba(180, 135, 92, 0.35)';
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.moveTo(treeX - 5, -6); ctx.quadraticCurveTo(treeX - 2, -trunkH * 0.5, treeX - 4, -trunkH + 22);
-      ctx.moveTo(treeX + 3, -14); ctx.lineTo(treeX + 2, -trunkH + 34);
+      ctx.moveTo(treeX - 9, -8); ctx.quadraticCurveTo(treeX - 5, -trunkH * 0.45, forkX - 6, forkY + 16);
+      ctx.moveTo(treeX + 2, -4); ctx.quadraticCurveTo(treeX + 5, -trunkH * 0.5, forkX + 2, forkY + 14);
+      ctx.moveTo(treeX + 10, -10); ctx.quadraticCurveTo(treeX + 11, -trunkH * 0.35, treeX + 8, -trunkH * 0.65);
       ctx.stroke();
 
-      // Delicate hanging weeping-willow / moss tendrils swaying gently beneath canopy
-      ctx.strokeStyle = 'rgba(52, 130, 92, 0.55)';
-      ctx.lineWidth = 1.5;
-      for (let wv = -42; wv <= 42; wv += 14) {
-        const sway = Math.sin(time * 2 + wv + i) * 3;
-        const dropH = 22 + (Math.abs(wv) % 14);
+      ctx.strokeStyle = 'rgba(196, 152, 108, 0.34)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(treeX + 15, -12);
+      ctx.bezierCurveTo(treeX + 12, -trunkH * 0.42, treeX + lean * 0.5 + 10, -trunkH * 0.72, forkX + 9, forkY + 8);
+      ctx.stroke();
+
+      // Subtle mossy emerald root tufts & cozy oak knothole
+      ctx.fillStyle = '#2d6a4f';
+      ctx.beginPath();
+      ctx.ellipse(treeX - 16, -2, 10, 4, -0.15, 0, Math.PI * 2);
+      ctx.ellipse(treeX + 18, -1, 11, 4, 0.15, 0, Math.PI * 2);
+      ctx.fill();
+      if (treeKind === 0) {
+        ctx.fillStyle = '#120804';
+        ctx.strokeStyle = '#5a3822';
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.moveTo(treeX + wv, -trunkH + 24);
-        ctx.quadraticCurveTo(treeX + wv + sway, -trunkH + 24 + dropH * 0.5, treeX + wv + sway * 1.3, -trunkH + 24 + dropH);
+        ctx.ellipse(treeX + 2, -trunkH * 0.44, 5.5, 8.5, 0.08, 0, Math.PI * 2);
+        ctx.fill();
         ctx.stroke();
       }
 
-      // Volumetric 3D radial-shaded moonlit foliage puffs (deep forest shadow base -> emerald -> silver-jade moonlit crest!)
-      const blobs = [
-        { ox: -40, oy: -trunkH + 10, r: 44 },
-        { ox: 40, oy: -trunkH + 12, r: 43 },
-        { ox: -20, oy: -trunkH - 22, r: 49 },
-        { ox: 22, oy: -trunkH - 18, r: 46 },
-        { ox: 0, oy: -trunkH - 38, r: 52 },
-      ];
-      for (let b = 0; b < blobs.length; b++) {
-        const bl = blobs[b];
-        const cx = treeX + bl.ox;
-        const cy = bl.oy;
-        const cG = ctx.createRadialGradient(cx + bl.r * 0.22, cy - bl.r * 0.32, 4, cx, cy, bl.r);
-        cG.addColorStop(0, '#52b788');
-        cG.addColorStop(0.38, '#2d6a4f');
-        cG.addColorStop(0.78, '#1b4332');
-        cG.addColorStop(1, '#0b2118');
-        ctx.fillStyle = cG;
+      // 3. Mid Lush Organic Layered Leaf Clusters (asymmetrical natural canopy with glimpses of inner boughs)
+      if (treeKind === 0) {
+        drawLeafCrown(forkX - 58 + wind * 0.7, forkY - 12, 42, 30, 8, i + 11, '#3b8c68', '#225942', '#0d291e');
+        drawLeafCrown(forkX + 56 + wind * 0.8, forkY - 10, 44, 31, 8, i + 12, '#40916c', '#245e45', '#0e2b1f');
+        drawLeafCrown(forkX - 24 + wind * 0.85, forkY - 36, 46, 34, 9, i + 13, '#4aa37a', '#28684c', '#103022');
+        drawLeafCrown(forkX + 26 + wind * 0.9, forkY - 34, 46, 33, 9, i + 14, '#52b788', '#2d6a4f', '#123425');
+        drawLeafCrown(forkX + 2 + wind, forkY - 58, 48, 34, 9, i + 15, '#64c798', '#347d5c', '#153b2a');
+      } else if (treeKind === 1) {
+        // Cascading swaying Weeping Willow leafy fronds hanging gracefully under canopy
+        for (let wv = -56; wv <= 56; wv += 11) {
+          const sway = Math.sin(time * 2.1 + wv * 0.18 + i) * 5.2;
+          const dropH = 38 + ((Math.abs(wv) * 7 + i * 13) % 28);
+          const startY = forkY - 10 + Math.abs(wv) * 0.14;
+          ctx.strokeStyle = 'rgba(64, 145, 108, 0.72)';
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(forkX + wv, startY);
+          ctx.quadraticCurveTo(forkX + wv + sway * 0.7, startY + dropH * 0.52, forkX + wv + sway * 1.4, startY + dropH);
+          ctx.stroke();
+          // Tiny willow leaves along each swaying vine
+          ctx.fillStyle = 'rgba(116, 198, 157, 0.65)';
+          for (let lf = 0.25; lf <= 0.95; lf += 0.28) {
+            const lx = forkX + wv + sway * lf * 1.25;
+            const ly = startY + dropH * lf;
+            ctx.beginPath();
+            ctx.ellipse(lx + (lf > 0.5 ? 2.2 : -2.2), ly, 3.2, 1.4, lf > 0.5 ? 0.5 : -0.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        drawLeafCrown(forkX - 42 + wind * 0.8, forkY - 22, 42, 32, 9, i + 16, '#40916c', '#225845', '#0d2920');
+        drawLeafCrown(forkX + 44 + wind * 0.9, forkY - 20, 44, 32, 9, i + 17, '#4aa37a', '#26614c', '#0f2d23');
+        drawLeafCrown(forkX + 2 + wind, forkY - 48, 52, 36, 10, i + 18, '#64c798', '#31795c', '#14382a');
+      } else {
+        drawLeafCrown(forkX - 38 + wind * 0.75, forkY - 6, 38, 28, 8, i + 19, '#3b8c68', '#1f543d', '#0c261b');
+        drawLeafCrown(forkX + 40 + wind * 0.8, forkY - 10, 38, 28, 8, i + 20, '#449a73', '#245e45', '#0e2b1f');
+        drawLeafCrown(forkX - 18 + wind * 0.9, forkY - 42, 42, 34, 9, i + 21, '#4ea87e', '#2a6b4e', '#113123');
+        drawLeafCrown(forkX + 20 + wind * 0.95, forkY - 44, 42, 34, 9, i + 22, '#57bd8e', '#2f7354', '#133626');
+        drawLeafCrown(forkX + wind, forkY - 72, 40, 32, 9, i + 23, '#74c69d', '#388561', '#163e2c');
+      }
+
+      // 4. Crisp Moonlit Top-Right Leaf Rim Flecks & Gentle Drifting Golden Fireflies
+      ctx.fillStyle = 'rgba(149, 213, 178, 0.34)';
+      for (let d = 0; d < 7; d++) {
+        const dx = forkX - 24 + d * 12 + wind * 0.9;
+        const dy = forkY - 56 + ((d * 17) % 34);
         ctx.beginPath();
-        ctx.arc(cx, cy, bl.r, 0, Math.PI * 2);
+        ctx.ellipse(dx, dy, 6.5, 3.2, -0.35 + (d % 3) * 0.25, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      for (let ff = 0; ff < 2; ff++) {
+        const ffx = forkX - 35 + ff * 68 + Math.sin(time * 1.8 + i + ff * 3) * 14;
+        const ffy = forkY + 12 + Math.cos(time * 2.3 + i * 2 + ff) * 12;
+        const ffa = 0.35 + 0.55 * (0.5 + 0.5 * Math.sin(time * 4.5 + i + ff * 2));
+        ctx.fillStyle = `rgba(254, 240, 138, ${ffa.toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(ffx, ffy, 2.1, 0, Math.PI * 2);
         ctx.fill();
       }
 
@@ -3179,7 +3318,8 @@ window.Game.Art = (function () {
       const textCenterX = signX + signW / 2 - 4;
       ctx.fillStyle = '#f8fafc';
       ctx.font = 'bold 12px sans-serif';
-      ctx.fillText('محطة الأنفاق المركزية', textCenterX, signY + 18);
+      const metroTxt = window.Game.I18n ? window.Game.I18n.t('sign_metro') : 'محطة الأنفاق المركزية';
+      ctx.fillText(metroTxt, textCenterX, signY + 18);
       ctx.fillStyle = '#7dd3fc';
       ctx.font = 'bold 9.5px monospace';
       ctx.fillText('CENTRAL METRO  •  LINE 7', textCenterX, signY + 34);
@@ -4346,42 +4486,111 @@ window.Game.Art = (function () {
       }
       ctx.restore();
     } else if (p.type === 'branch') {
+      // Realistic Sculpted Oak Canopy Bough with Tapered Bark, Moss Cushions, Hanging Vines & Pointed Leaf Sprigs
       ctx.save();
       ctx.translate(px, py);
-      // Hanging moss & leafy vines underneath for natural canopy feel
-      ctx.strokeStyle = '#2d6a4f';
-      ctx.lineWidth = 2;
-      for (let vx = 22; vx < p.w - 20; vx += 34) {
-        const vLen = 10 + (vx % 12);
+      const sway = Math.sin(time * 2.2 + p.x * 0.02) * 2.2;
+
+      // 1. Soft swaying mossy vines & tiny leaves hanging beneath the oak bough
+      for (let vx = 20; vx < p.w - 18; vx += 30) {
+        const vLen = 14 + ((vx * 7) % 16);
+        const vs = sway * (0.7 + (vx % 5) * 0.14);
+        ctx.strokeStyle = 'rgba(45, 106, 79, 0.85)';
+        ctx.lineWidth = 1.8;
         ctx.beginPath();
-        ctx.moveTo(vx, p.h - 3);
-        ctx.quadraticCurveTo(vx + 3, p.h + vLen * 0.5, vx - 2, p.h + vLen);
+        ctx.moveTo(vx, p.h - 4);
+        ctx.quadraticCurveTo(vx + vs * 0.6, p.h + vLen * 0.5, vx + vs, p.h + vLen);
         ctx.stroke();
+        ctx.fillStyle = '#52b788';
+        ctx.beginPath();
+        ctx.ellipse(vx + vs, p.h + vLen + 1, 3.6, 1.8, 0.4, 0, Math.PI * 2);
+        ctx.fill();
         ctx.fillStyle = '#40916c';
-        ctx.beginPath(); ctx.arc(vx - 2, p.h + vLen, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(vx + vs * 0.5 - 2.5, p.h + vLen * 0.55, 3, 1.5, -0.5, 0, Math.PI * 2);
+        ctx.fill();
       }
-      // Oak bark branch
-      const brGrad = ctx.createLinearGradient(0, 0, 0, p.h);
-      brGrad.addColorStop(0, '#784824');
-      brGrad.addColorStop(0.5, '#593317');
-      brGrad.addColorStop(1, '#3b200d');
+
+      // 2. Organic Gnarled & Gently Bowed Oak Bough Body (replaces flat roundRect!)
+      const brGrad = ctx.createLinearGradient(0, 0, 0, p.h + 2);
+      brGrad.addColorStop(0, '#8d5830');
+      brGrad.addColorStop(0.32, '#693c1c');
+      brGrad.addColorStop(0.75, '#47260f');
+      brGrad.addColorStop(1, '#291306');
       ctx.fillStyle = brGrad;
-      ctx.strokeStyle = '#241206';
-      ctx.lineWidth = 1.6;
-      ctx.beginPath(); ctx.roundRect(0, 2, p.w, p.h - 4, 8); ctx.fill(); ctx.stroke();
-      // Bark ridges
-      ctx.strokeStyle = 'rgba(255, 220, 175, 0.16)';
-      ctx.lineWidth = 1.2;
-      for (let bx = 12; bx < p.w - 18; bx += 26) {
-        ctx.beginPath(); ctx.moveTo(bx, 6); ctx.lineTo(bx + 14, 6); ctx.stroke();
+      ctx.strokeStyle = '#1e0e05';
+      ctx.lineWidth = 1.7;
+      ctx.beginPath();
+      ctx.moveTo(3, 5);
+      ctx.bezierCurveTo(p.w * 0.25, 1, p.w * 0.68, 3, p.w - 4, 4);
+      ctx.quadraticCurveTo(p.w + 2, p.h * 0.5, p.w - 5, p.h - 3);
+      ctx.bezierCurveTo(p.w * 0.72, p.h + 1, p.w * 0.34, p.h - 4, 4, p.h - 2);
+      ctx.quadraticCurveTo(-2, p.h * 0.52, 3, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Deep woodgrain bark furrows & warm moonlit upper edge
+      ctx.strokeStyle = 'rgba(26, 11, 3, 0.55)';
+      ctx.lineWidth = 1.3;
+      for (let bx = 14; bx < p.w - 24; bx += 28) {
+        ctx.beginPath();
+        ctx.moveTo(bx, 9);
+        ctx.quadraticCurveTo(bx + 10, 12, bx + 20, 10);
+        ctx.stroke();
       }
-      // Leafy clusters at ends
-      for (const lx of [8, p.w - 10]) {
+      ctx.strokeStyle = 'rgba(255, 224, 178, 0.25)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(10, 4.5);
+      ctx.quadraticCurveTo(p.w * 0.5, 2.5, p.w - 12, 5);
+      ctx.stroke();
+
+      // 3. Velvety Emerald Moss Cushions resting naturally along the top of the branch
+      for (let mx = 18; mx < p.w - 28; mx += 44) {
         ctx.fillStyle = '#2d6a4f';
-        ctx.beginPath(); ctx.arc(lx, 6, 8, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#40916c';
-        ctx.beginPath(); ctx.arc(lx + 4, 3, 5.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(mx + 10, 4, 15, 3.6, 0, Math.PI, 0);
+        ctx.fill();
+        ctx.fillStyle = '#52b788';
+        ctx.beginPath();
+        ctx.ellipse(mx + 8, 3.2, 9, 2.1, 0, Math.PI, 0);
+        ctx.fill();
       }
+
+      // 4. Sprouting Twig & Realistic Pointed Leaf Sprigs at both ends
+      const drawLeafSprig = (ox, oy, dir) => {
+        ctx.save();
+        ctx.translate(ox, oy);
+        ctx.strokeStyle = '#47260f';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(dir * 8, -4, dir * 15, -7 + sway * 0.4);
+        ctx.stroke();
+        const leafDefs = [
+          { x: dir * 6, y: -3, ang: dir * -0.55, rx: 7, ry: 3.4, col: '#1b4332' },
+          { x: dir * 11, y: -6, ang: dir * 0.28, rx: 7.5, ry: 3.6, col: '#2d6a4f' },
+          { x: dir * 15, y: -8 + sway * 0.3, ang: dir * -0.25, rx: 6.8, ry: 3.2, col: '#52b788' },
+          { x: dir * 9, y: 1, ang: dir * 0.65, rx: 6.2, ry: 3.0, col: '#40916c' },
+        ];
+        for (const lf of leafDefs) {
+          ctx.save();
+          ctx.translate(lf.x, lf.y);
+          ctx.rotate(lf.ang);
+          ctx.fillStyle = lf.col;
+          ctx.beginPath();
+          ctx.moveTo(-lf.rx, 0);
+          ctx.quadraticCurveTo(0, -lf.ry * 1.45, lf.rx, 0);
+          ctx.quadraticCurveTo(0, lf.ry * 1.45, -lf.rx, 0);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+        ctx.restore();
+      };
+      drawLeafSprig(5, 7, -1);
+      drawLeafSprig(p.w - 5, 7, 1);
       ctx.restore();
     } else if (p.type === 'bench') {
       ctx.save();
@@ -6456,7 +6665,9 @@ window.Game.Art = (function () {
     ctx.fillStyle = '#fef08a';
     ctx.font = 'bold 14px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(label || 'بوابة الخروج ←', cx, gy - 14);
+    const rawGate = label || 'بوابة الخروج ←';
+    const gateTxt = window.Game.I18n ? window.Game.I18n.translateDynamic(rawGate) : rawGate;
+    ctx.fillText(gateTxt, cx, gy - 14);
     ctx.restore();
   }
 
@@ -7598,6 +7809,658 @@ window.Game.Art = (function () {
     ctx.restore();
   }
 
+  // =========================================================================
+  // CINEMATIC ATMOSPHERIC WORLD TEASERS (Drawn BEHIND Platforms & Foreground Water!)
+  //   - Stage 5 (Harbor): Giant Kraken/Octopus emerging randomly in water channels
+  //     and gliding smoothly behind the wooden piers (foreshadowing Stage 11 Storm Harbor!)
+  //   - Stage 6 (Rooftops): Giant Cyber Sentinel Patrol Craft rising randomly from
+  //     skyscraper chasms with a sweeping searchlight and gliding behind rooftops
+  //     (foreshadowing Stages 8-13 Security Drones & Cyber Neon Towers!)
+  // =========================================================================
+  function easeInOutSine(t) {
+    const c = Math.max(0, Math.min(1, t));
+    return -(Math.cos(Math.PI * c) - 1) / 2;
+  }
+
+  function drawOctopusTeaserArm(ctx, bx, by, len, baseR, leanAngle, phase, curlSign, time, isBack) {
+    if (len < 6) return;
+    const N = 16;
+    const pts = [];
+    const radii = [];
+    let cx = bx;
+    let cy = by;
+    const segLen = len / N;
+    for (let s = 0; s <= N; s++) {
+      const frac = s / N;
+      pts.push({ x: cx, y: cy, frac });
+      radii.push(Math.max(2.0, baseR * Math.pow(1 - frac * 0.90, 0.78)));
+      const wave = Math.sin(frac * 4.4 - time * 3.8 + phase) * (0.18 + frac * 0.42);
+      const curlZone = Math.max(0, (frac - 0.56) / 0.44);
+      const curl = curlZone * curlZone * 1.55 * curlSign;
+      const ang = -Math.PI / 2 + leanAngle * (1 - frac * 0.35) + wave + curl;
+      cx += Math.cos(ang) * segLen;
+      cy += Math.sin(ang) * segLen;
+    }
+
+    const leftPts = [];
+    const rightPts = [];
+    for (let s = 0; s <= N; s++) {
+      const prev = pts[Math.max(0, s - 1)];
+      const next = pts[Math.min(N, s + 1)];
+      const dx = next.x - prev.x;
+      const dy = next.y - prev.y;
+      const dLen = Math.hypot(dx, dy) || 1;
+      const nx = -dy / dLen;
+      const ny = dx / dLen;
+      const r = radii[s];
+      leftPts.push({ x: pts[s].x + nx * r, y: pts[s].y + ny * r, nx, ny });
+      rightPts.push({ x: pts[s].x - nx * r, y: pts[s].y - ny * r, nx, ny });
+    }
+
+    const grad = ctx.createLinearGradient(bx - baseR, by, pts[N].x + baseR, pts[N].y);
+    if (isBack) {
+      grad.addColorStop(0, '#230516');
+      grad.addColorStop(0.5, '#590b27');
+      grad.addColorStop(1, '#881337');
+    } else {
+      grad.addColorStop(0, '#360721');
+      grad.addColorStop(0.38, '#7f1135');
+      grad.addColorStop(0.75, '#be123c');
+      grad.addColorStop(1, '#fb7185');
+    }
+
+    ctx.fillStyle = grad;
+    ctx.strokeStyle = '#1f0313';
+    ctx.lineWidth = isBack ? 1.6 : 2.1;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(leftPts[0].x, leftPts[0].y);
+    for (let s = 1; s <= N; s++) ctx.lineTo(leftPts[s].x, leftPts[s].y);
+    ctx.arc(pts[N].x, pts[N].y, radii[N], 0, Math.PI * 2);
+    for (let s = N; s >= 0; s--) ctx.lineTo(rightPts[s].x, rightPts[s].y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    if (!isBack) {
+      // Wet glossy moonlight specular ribbon along dorsal ridge
+      ctx.strokeStyle = 'rgba(255, 228, 230, 0.34)';
+      ctx.lineWidth = 2.4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      for (let s = 1; s < N - 1; s++) {
+        const hx = pts[s].x + leftPts[s].nx * (radii[s] * 0.45);
+        const hy = pts[s].y + leftPts[s].ny * (radii[s] * 0.45);
+        if (s === 1) ctx.moveTo(hx, hy); else ctx.lineTo(hx, hy);
+      }
+      ctx.stroke();
+
+      // Double staggered row of 3D pale-rose suction cups along ventral contour
+      for (let s = 2; s < N - 1; s++) {
+        const frac = s / N;
+        const cupR = Math.max(1.5, baseR * 0.27 * (1 - frac * 0.72));
+        const off = s % 2 === 0 ? 0.68 : 0.94;
+        const scx = pts[s].x - rightPts[s].nx * (radii[s] * off);
+        const scy = pts[s].y - rightPts[s].ny * (radii[s] * off);
+        ctx.fillStyle = '#fbcfe8';
+        ctx.strokeStyle = '#831843';
+        ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.arc(scx, scy, cupR, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#9d174d';
+        ctx.beginPath(); ctx.arc(scx, scy, cupR * 0.45, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+
+  function drawStage5OctopusTeaser(ctx, level, cat, camX, camY, time, cullW) {
+    if (!level.puddles || !level.puddles.length) return;
+    if (!level._octoTeaser) {
+      level._octoTeaser = {
+        phase: 'cooldown',
+        phaseStart: time - 1.2, // Quick first appearance so players notice it right away at Channel #1!
+        cooldownDur: 2.2,
+        channelIdx: 0,
+        startX: 820,
+        retreatX: 990,
+        waterY: 636,
+        scale: 1.05,
+        dir: 1,
+        seed: 0.7,
+      };
+    }
+
+    const st = level._octoTeaser;
+    const elapsed = time - st.phaseStart;
+
+    if (st.phase === 'cooldown') {
+      if (elapsed >= st.cooldownDur) {
+        // Pick a random water channel visible on screen (or closest upcoming one)
+        const visible = [];
+        for (let i = 0; i < level.puddles.length; i++) {
+          const p = level.puddles[i];
+          if (p.x + p.w > camX - 40 && p.x < camX + cullW + 80) {
+            visible.push(i);
+          }
+        }
+        let chosenIdx;
+        if (visible.length > 0) {
+          chosenIdx = visible[Math.floor(Math.random() * visible.length)];
+        } else {
+          // Pick closest channel to camera center
+          const camMid = camX + cullW * 0.5;
+          let bestDist = Infinity;
+          chosenIdx = 0;
+          for (let i = 0; i < level.puddles.length; i++) {
+            const p = level.puddles[i];
+            const d = Math.abs(p.x + p.w * 0.5 - camMid);
+            if (d < bestDist) { bestDist = d; chosenIdx = i; }
+          }
+        }
+        const ch = level.puddles[chosenIdx];
+        const margin = Math.min(85, ch.w * 0.28);
+        const startX = ch.x + margin + Math.random() * Math.max(20, ch.w - margin * 2);
+        // Glide sideways to disappear smoothly BEHIND the nearest adjacent wooden pier!
+        const goRight = Math.random() > 0.45;
+        const retreatX = goRight ? (ch.x + ch.w + 95) : (ch.x - 95);
+
+        st.channelIdx = chosenIdx;
+        st.startX = startX;
+        st.retreatX = retreatX;
+        st.waterY = ch.y;
+        st.scale = 0.96 + Math.random() * 0.22;
+        st.dir = goRight ? 1 : -1;
+        st.seed = Math.random() * 10;
+        st.phase = 'bubbles';
+        st.phaseStart = time;
+      }
+      return;
+    }
+
+    const BUBBLE_DUR = 1.05;
+    const EMERGE_DUR = 2.15;
+    const LURK_DUR = 1.75;
+    const RETREAT_DUR = 2.65;
+
+    let emergeAmt = 0;
+    let curWorldX = st.startX;
+    let bubbleIntensity = 0;
+    let tilt = 0;
+
+    if (st.phase === 'bubbles') {
+      const p = elapsed / BUBBLE_DUR;
+      bubbleIntensity = Math.sin(Math.min(1, p) * Math.PI);
+      if (elapsed >= BUBBLE_DUR) {
+        st.phase = 'emerge';
+        st.phaseStart = time;
+      }
+    } else if (st.phase === 'emerge') {
+      const p = Math.min(1, elapsed / EMERGE_DUR);
+      emergeAmt = easeInOutSine(p);
+      bubbleIntensity = 1 - p * 0.5;
+      curWorldX = st.startX + Math.sin(p * Math.PI) * st.dir * 12;
+      tilt = st.dir * 0.05 * Math.sin(p * Math.PI);
+      if (elapsed >= EMERGE_DUR) {
+        st.phase = 'lurk';
+        st.phaseStart = time;
+      }
+    } else if (st.phase === 'lurk') {
+      const p = Math.min(1, elapsed / LURK_DUR);
+      emergeAmt = 1 + Math.sin(p * Math.PI * 2) * 0.04;
+      bubbleIntensity = 0.45;
+      curWorldX = st.startX + Math.sin(p * Math.PI) * st.dir * 18;
+      tilt = Math.sin(p * Math.PI * 2) * 0.06;
+      if (elapsed >= LURK_DUR) {
+        st.phase = 'retreat';
+        st.phaseStart = time;
+      }
+    } else if (st.phase === 'retreat') {
+      const p = Math.min(1, elapsed / RETREAT_DUR);
+      const slide = easeInOutSine(p);
+      curWorldX = st.startX + (st.retreatX - st.startX) * slide;
+      // Smoothly sinks beneath the waves AS it glides horizontally BEHIND the wooden pier!
+      emergeAmt = Math.max(0, 1 - Math.pow(p, 1.35));
+      bubbleIntensity = (1 - p) * 0.85;
+      tilt = st.dir * 0.14 * Math.sin(p * Math.PI);
+      if (elapsed >= RETREAT_DUR) {
+        st.phase = 'cooldown';
+        st.phaseStart = time;
+        st.cooldownDur = 3.2 + Math.random() * 3.4;
+        return;
+      }
+    }
+
+    const sx = curWorldX - camX;
+    const wy = st.waterY + 12 - camY;
+    if (sx < -240 || sx > cullW + 240) return;
+
+    const sc = st.scale;
+
+    ctx.save();
+    // Clip cleanly right at the dark harbor ocean waterline so the Kraken rises authentically out of the sea!
+    ctx.beginPath();
+    ctx.rect(-80, -120, cullW + 160, wy + 122);
+    ctx.clip();
+
+    if (emergeAmt > 0.02) {
+      const risePx = emergeAmt * 116 * sc;
+      const headX = sx;
+      const headY = wy + 44 * sc - risePx;
+
+      // 1. Rear sweeping giant cephalopod tentacles curling behind the mantle
+      drawOctopusTeaserArm(ctx, headX - 42 * sc, wy + 18, emergeAmt * 158 * sc, 16 * sc, -0.46, st.seed + 0.4, -1, time, true);
+      drawOctopusTeaserArm(ctx, headX + 44 * sc, wy + 18, emergeAmt * 165 * sc, 16 * sc, 0.48, st.seed + 2.1, 1, time, true);
+
+      // 2. Massive Glistening Bulbous Octopus Mantle & Brow
+      ctx.save();
+      ctx.translate(headX, headY);
+      ctx.rotate(tilt);
+
+      const mG = ctx.createRadialGradient(-16 * sc, -34 * sc, 6 * sc, 0, -12 * sc, 68 * sc);
+      mG.addColorStop(0, '#e11d48');
+      mG.addColorStop(0.32, '#9f1239');
+      mG.addColorStop(0.72, '#5c0a28');
+      mG.addColorStop(1, '#260414');
+      ctx.fillStyle = mG;
+      ctx.strokeStyle = '#1c0310';
+      ctx.lineWidth = 2.4;
+
+      // Sculpted organic kraken dome + cheek brow swells
+      ctx.beginPath();
+      ctx.moveTo(-44 * sc, 24 * sc);
+      ctx.bezierCurveTo(-56 * sc, -8 * sc, -48 * sc, -66 * sc, 0, -72 * sc);
+      ctx.bezierCurveTo(48 * sc, -66 * sc, 56 * sc, -8 * sc, 44 * sc, 24 * sc);
+      ctx.quadraticCurveTo(0, 38 * sc, -44 * sc, 24 * sc);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Mottled deep-plum chromatophore skin spots across the wet dome
+      ctx.fillStyle = 'rgba(42, 4, 22, 0.44)';
+      const spots = [
+        [-22, -40, 10, 6.5, -0.3], [16, -46, 12, 7, 0.25], [26, -22, 8.5, 5.5, 0.4],
+        [-28, -16, 9, 5, -0.2], [0, -56, 11, 6, 0.1], [-8, -26, 7.5, 4.8, -0.15],
+      ];
+      for (const sp of spots) {
+        ctx.beginPath();
+        ctx.ellipse(sp[0] * sc, sp[1] * sc, sp[2] * sc, sp[3] * sc, sp[4], 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Glistening moonlight wet specular sheen across upper brow & dome
+      ctx.fillStyle = 'rgba(254, 205, 211, 0.28)';
+      ctx.beginPath();
+      ctx.ellipse(-15 * sc, -48 * sc, 16 * sc, 7 * sc, -0.45, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(224, 242, 254, 0.22)';
+      ctx.beginPath();
+      ctx.ellipse(18 * sc, -52 * sc, 10 * sc, 4.2 * sc, 0.38, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Piercing Glowing Amber-Gold Cephalopod Eyes (track gently toward Mashmasha + slow blink!)
+      const catDx = cat ? Math.max(-1, Math.min(1, ((cat.x + cat.w * 0.5) - curWorldX) / 260)) : 0;
+      const blinkCycle = (time + st.seed) % 3.8;
+      const eyeOpen = blinkCycle > 3.62 ? Math.max(0.12, Math.abs(Math.cos(((blinkCycle - 3.62) / 0.18) * Math.PI))) : 1;
+
+      for (const side of [-1, 1]) {
+        const ex = side * 20 * sc;
+        const ey = -4 * sc;
+        // Heavy hooded cephalopod brow ridge
+        ctx.fillStyle = '#3b071e';
+        ctx.beginPath();
+        ctx.ellipse(ex, ey - 5 * sc, 14 * sc, 7 * sc, side * 0.18, Math.PI, 0);
+        ctx.fill();
+
+        // Warm amber ocular glow halo
+        const eg = ctx.createRadialGradient(ex, ey, 2 * sc, ex, ey, 16 * sc);
+        eg.addColorStop(0, 'rgba(253, 224, 71, 0.65)');
+        eg.addColorStop(0.55, 'rgba(245, 158, 11, 0.25)');
+        eg.addColorStop(1, 'rgba(245, 158, 11, 0)');
+        ctx.fillStyle = eg;
+        ctx.beginPath(); ctx.arc(ex, ey, 16 * sc, 0, Math.PI * 2); ctx.fill();
+
+        // Sclera & golden-amber iris
+        ctx.save();
+        ctx.translate(ex, ey);
+        ctx.scale(1, eyeOpen);
+        ctx.fillStyle = '#fbbf24';
+        ctx.strokeStyle = '#240412';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 10.2 * sc, 7.2 * sc, side * 0.14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Characteristic horizontal rectangular octopus pupil tracking Mashmasha
+        ctx.fillStyle = '#18040c';
+        ctx.beginPath();
+        ctx.roundRect((-5.2 + catDx * 2.4) * sc, -2.0 * sc, 10.4 * sc, 4.0 * sc, 2 * sc);
+        ctx.fill();
+        // Wet specular glint on eye
+        ctx.fillStyle = '#fffbeb';
+        ctx.beginPath();
+        ctx.arc((-3.2 + catDx * 1.4) * sc, -2.6 * sc, 2.2 * sc, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Cascading water runoff droplets glistening down the head during emergence
+      if (st.phase === 'emerge' || st.phase === 'lurk') {
+        ctx.fillStyle = 'rgba(224, 242, 254, 0.55)';
+        for (let d = 0; d < 5; d++) {
+          const dropT = ((time * 1.6 + d * 0.37) % 1);
+          const dx = (-28 + d * 14) * sc;
+          const dy = (-42 + dropT * 68) * sc;
+          ctx.beginPath(); ctx.ellipse(dx, dy, 1.5 * sc, 3.2 * sc, 0, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+
+      // 3. Foreground Sweeping Muscular Tentacles with 3D Suction Cups curling fluidly above the waves!
+      drawOctopusTeaserArm(ctx, headX - 58 * sc, wy + 22, emergeAmt * 142 * sc, 15 * sc, -0.68, st.seed + 1.1, -1, time, false);
+      drawOctopusTeaserArm(ctx, headX + 60 * sc, wy + 22, emergeAmt * 138 * sc, 15 * sc, 0.65, st.seed + 3.4, 1, time, false);
+      drawOctopusTeaserArm(ctx, headX - 18 * sc * st.dir, wy + 24, emergeAmt * 102 * sc, 12.5 * sc, -0.22 * st.dir, st.seed + 4.8, st.dir, time, false);
+    }
+
+    ctx.restore(); // end waterline clip
+
+    // 4. Churning Moonlit Water Ripples & Seafoam Collar right on the ocean surface
+    if (bubbleIntensity > 0.04 || emergeAmt > 0.05) {
+      const foamA = Math.min(0.88, Math.max(bubbleIntensity, emergeAmt * 0.78));
+      ctx.save();
+      // Concentric glowing ocean wake rings
+      for (let r = 0; r < 2; r++) {
+        const ringP = (time * 0.9 + r * 0.5) % 1;
+        ctx.strokeStyle = `rgba(186, 230, 253, ${((1 - ringP) * 0.52 * foamA).toFixed(2)})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(sx, wy - 2, (46 + ringP * 76) * sc, (5 + ringP * 5.5) * sc, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      // Frothy splash foam bubbles along the emergence line
+      ctx.fillStyle = `rgba(224, 242, 254, ${(0.72 * foamA).toFixed(2)})`;
+      for (let b = -62; b <= 62; b += 14) {
+        const lift = Math.abs(Math.sin(time * 9 + b * 0.25 + st.seed)) * 7 * foamA;
+        const br = (3.4 + (Math.abs(b) < 28 ? 2.2 : 0.6)) * sc;
+        ctx.beginPath();
+        ctx.arc(sx + b * sc, wy - 2 - lift, br, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawStage6SentinelTeaser(ctx, level, cat, camX, camY, time, cullW) {
+    // Discover rooftop abyss gaps between consecutive solid rooftop buildings
+    if (!level._rooftopGaps) {
+      const roofs = (level.platforms || [])
+        .filter((p) => p.type === 'rooftop' && p.w >= 400)
+        .sort((a, b) => a.x - b.x);
+      const gaps = [];
+      for (let i = 0; i < roofs.length - 1; i++) {
+        const leftR = roofs[i];
+        const rightR = roofs[i + 1];
+        const gx = leftR.x + leftR.w;
+        const gw = rightR.x - gx;
+        if (gw >= 180) {
+          gaps.push({
+            x: gx,
+            w: gw,
+            leftRoofY: leftR.y,
+            rightRoofY: rightR.y,
+            baseY: Math.max(leftR.y, rightR.y),
+          });
+        }
+      }
+      level._rooftopGaps = gaps;
+    }
+    const gaps = level._rooftopGaps;
+    if (!gaps.length) return;
+
+    if (!level._sentinelTeaser) {
+      level._sentinelTeaser = {
+        phase: 'cooldown',
+        phaseStart: time - 1.0,
+        cooldownDur: 2.0,
+        gapIdx: 0,
+        startX: gaps[0].x + gaps[0].w * 0.5,
+        retreatX: gaps[0].x + gaps[0].w + 150,
+        hoverY: 290,
+        abyssY: 660,
+        dir: 1,
+        seed: 1.3,
+      };
+    }
+
+    const st = level._sentinelTeaser;
+    const elapsed = time - st.phaseStart;
+
+    if (st.phase === 'cooldown') {
+      if (elapsed >= st.cooldownDur) {
+        const visible = [];
+        for (let i = 0; i < gaps.length; i++) {
+          const g = gaps[i];
+          if (g.x + g.w > camX - 60 && g.x < camX + cullW + 140) visible.push(i);
+        }
+        let chosen = 0;
+        if (visible.length) {
+          chosen = visible[Math.floor(Math.random() * visible.length)];
+        } else {
+          const camMid = camX + cullW * 0.5;
+          let bestD = Infinity;
+          for (let i = 0; i < gaps.length; i++) {
+            const d = Math.abs(gaps[i].x + gaps[i].w * 0.5 - camMid);
+            if (d < bestD) { bestD = d; chosen = i; }
+          }
+        }
+        const gap = gaps[chosen];
+        const goRight = Math.random() > 0.45;
+        st.gapIdx = chosen;
+        st.startX = gap.x + gap.w * (0.35 + Math.random() * 0.30);
+        st.retreatX = goRight ? (gap.x + gap.w + 190) : (gap.x - 190);
+        st.hoverY = Math.min(gap.leftRoofY, gap.rightRoofY) - 185 - Math.random() * 45;
+        st.abyssY = 670;
+        st.dir = goRight ? 1 : -1;
+        st.seed = Math.random() * 10;
+        st.phase = 'sweep';
+        st.phaseStart = time;
+      }
+      return;
+    }
+
+    const SWEEP_DUR = 1.0;
+    const RISE_DUR = 2.0;
+    const SCAN_DUR = 2.0;
+    const RETREAT_DUR = 2.5;
+
+    let curX = st.startX;
+    let curY = st.abyssY;
+    let beamAlpha = 0;
+    let beamAngle = 0;
+    let bankAngle = 0;
+    let hullAlpha = 1;
+
+    if (st.phase === 'sweep') {
+      const p = Math.min(1, elapsed / SWEEP_DUR);
+      curY = st.abyssY - p * 45;
+      beamAlpha = p * 0.72;
+      beamAngle = -0.35 + p * 0.70;
+      if (elapsed >= SWEEP_DUR) { st.phase = 'rise'; st.phaseStart = time; }
+    } else if (st.phase === 'rise') {
+      const p = Math.min(1, elapsed / RISE_DUR);
+      const e = easeInOutSine(p);
+      curY = (st.abyssY - 45) + (st.hoverY - (st.abyssY - 45)) * e;
+      curX = st.startX + Math.sin(p * Math.PI) * st.dir * 24;
+      beamAlpha = 0.72 + e * 0.25;
+      beamAngle = 0.35 - e * 0.55;
+      bankAngle = st.dir * 0.08 * Math.sin(p * Math.PI);
+      if (elapsed >= RISE_DUR) { st.phase = 'scan'; st.phaseStart = time; }
+    } else if (st.phase === 'scan') {
+      const p = Math.min(1, elapsed / SCAN_DUR);
+      curY = st.hoverY + Math.sin(time * 3.1) * 9;
+      curX = st.startX + Math.sin(p * Math.PI * 2) * 18;
+      beamAlpha = 0.95;
+      const targetAng = cat ? Math.max(-0.58, Math.min(0.58, ((cat.x - curX) / 420))) : 0;
+      beamAngle = targetAng + Math.sin(p * Math.PI * 2) * 0.24;
+      bankAngle = Math.sin(p * Math.PI * 2) * 0.05;
+      if (elapsed >= SCAN_DUR) { st.phase = 'retreat'; st.phaseStart = time; }
+    } else if (st.phase === 'retreat') {
+      const p = Math.min(1, elapsed / RETREAT_DUR);
+      const e = easeInOutSine(p);
+      // Banks smoothly sideways & dips BEHIND the neighboring skyscraper rooftop!
+      curX = st.startX + (st.retreatX - st.startX) * e;
+      curY = st.hoverY + e * 290;
+      beamAlpha = Math.max(0, (1 - p * 1.15) * 0.9);
+      beamAngle = st.dir * 0.38;
+      bankAngle = st.dir * 0.22 * Math.sin(p * Math.PI);
+      hullAlpha = Math.max(0, 1 - Math.max(0, (p - 0.72) / 0.28));
+      if (elapsed >= RETREAT_DUR) {
+        st.phase = 'cooldown';
+        st.phaseStart = time;
+        st.cooldownDur = 3.6 + Math.random() * 3.5;
+        return;
+      }
+    }
+
+    const sx = curX - camX;
+    const sy = curY - camY;
+    if (sx < -280 || sx > cullW + 280) return;
+
+    ctx.save();
+    ctx.globalAlpha = hullAlpha;
+
+    // 1. Volumetric Cyan-White Scanning Searchlight Cone sweeping across the night sky
+    if (beamAlpha > 0.02) {
+      ctx.save();
+      ctx.translate(sx, sy + 14);
+      ctx.rotate(beamAngle);
+      const coneG = ctx.createLinearGradient(0, 0, 0, 290);
+      coneG.addColorStop(0, `rgba(103, 232, 249, ${(0.38 * beamAlpha).toFixed(2)})`);
+      coneG.addColorStop(0.45, `rgba(56, 189, 248, ${(0.16 * beamAlpha).toFixed(2)})`);
+      coneG.addColorStop(1, 'rgba(56, 189, 248, 0)');
+      ctx.fillStyle = coneG;
+      ctx.beginPath();
+      ctx.moveTo(-10, 0);
+      ctx.lineTo(-105, 290);
+      ctx.lineTo(105, 290);
+      ctx.lineTo(10, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 2. Massive Sleek Armored Cyber Sentinel Patrol Craft
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.rotate(bankAngle);
+
+    // Twin Glowing Anti-Gravity Ring Turbines on wing pods
+    for (const side of [-1, 1]) {
+      const tx = side * 62;
+      // Downward cyan plasma thruster plume
+      const plumeH = 26 + Math.sin(time * 24 + side) * 6;
+      const plG = ctx.createLinearGradient(tx, 6, tx, 6 + plumeH);
+      plG.addColorStop(0, 'rgba(125, 211, 252, 0.78)');
+      plG.addColorStop(0.55, 'rgba(14, 165, 233, 0.34)');
+      plG.addColorStop(1, 'rgba(14, 165, 233, 0)');
+      ctx.fillStyle = plG;
+      ctx.beginPath();
+      ctx.moveTo(tx - 14, 6);
+      ctx.lineTo(tx, 6 + plumeH);
+      ctx.lineTo(tx + 14, 6);
+      ctx.closePath();
+      ctx.fill();
+
+      // Armored turbine nacelle ring
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#090d16';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(tx, 2, 22, 9, side * 0.08, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Glowing cyan rotor core
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.ellipse(tx, 2, 15, 5.2, side * 0.08, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Blinking wingtip navigation beacon
+      const ledOn = Math.sin(time * 7 + side * 2) > -0.15;
+      if (ledOn) {
+        ctx.fillStyle = side < 0 ? '#ef4444' : '#22c55e';
+        ctx.beginPath();
+        ctx.arc(tx + side * 22, -1, 3.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Swept stealth titanium wing spars
+    const hullG = ctx.createLinearGradient(0, -24, 0, 22);
+    hullG.addColorStop(0, '#475569');
+    hullG.addColorStop(0.42, '#1e293b');
+    hullG.addColorStop(1, '#090d16');
+    ctx.fillStyle = hullG;
+    ctx.strokeStyle = '#020617';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.moveTo(-66, -2);
+    ctx.lineTo(-34, -14);
+    ctx.quadraticCurveTo(0, -28, 34, -14);
+    ctx.lineTo(66, -2);
+    ctx.lineTo(54, 10);
+    ctx.lineTo(24, 18);
+    ctx.quadraticCurveTo(0, 24, -24, 18);
+    ctx.lineTo(-54, 10);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Specular armor bevel highlight along top canopy
+    ctx.strokeStyle = 'rgba(186, 230, 253, 0.34)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(-30, -13);
+    ctx.quadraticCurveTo(0, -24, 30, -13);
+    ctx.stroke();
+
+    // Central Glowing Cyber Optical Scanner Lens
+    const eyeGlow = ctx.createRadialGradient(0, 6, 2, 0, 6, 22);
+    eyeGlow.addColorStop(0, 'rgba(34, 211, 238, 0.85)');
+    eyeGlow.addColorStop(0.55, 'rgba(6, 182, 212, 0.28)');
+    eyeGlow.addColorStop(1, 'rgba(6, 182, 212, 0)');
+    ctx.fillStyle = eyeGlow;
+    ctx.beginPath(); ctx.arc(0, 6, 22, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#082f49';
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.ellipse(0, 6, 13, 8.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Pulsing crimson-cyan inner scanner pupil
+    const scanShift = Math.sin(beamAngle) * 5;
+    ctx.fillStyle = '#22d3ee';
+    ctx.beginPath(); ctx.arc(scanShift, 6, 4.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath(); ctx.arc(scanShift - 1.2, 4.8, 1.6, 0, Math.PI * 2); ctx.fill();
+
+    ctx.restore();
+    ctx.restore();
+  }
+
+  function drawWorldTeasers(ctx, level, cat, camX, camY, time, cullW) {
+    if (!level) return;
+    if (level.stage === 5) {
+      drawStage5OctopusTeaser(ctx, level, cat, camX, camY, time, cullW);
+    } else if (level.stage === 6) {
+      drawStage6SentinelTeaser(ctx, level, cat, camX, camY, time, cullW);
+    }
+  }
+
   return {
     drawSkyAndFarCity,
     drawMidgroundCityBuildings,
@@ -7629,5 +8492,6 @@ window.Game.Art = (function () {
     drawCheckpoint,
     drawMarketFestoonLanterns,
     drawMarketGate,
+    drawWorldTeasers,
   };
 })();

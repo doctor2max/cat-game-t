@@ -3169,15 +3169,17 @@ window.Game = window.Game || {};
     ctx.fill();
     ctx.stroke();
 
-    // 5. Crisp Arabic Label: "تسلق الجدار"
-    ctx.direction = 'rtl';
-    ctx.font = '800 11px "Cairo", "Tajawal", system-ui, sans-serif';
+    // 5. Crisp Localized Label: "تسلق الجدار" / "Wall Climb"
+    const isEn = window.Game.I18n && window.Game.I18n.isEn();
+    const climbTxt = window.Game.I18n ? window.Game.I18n.t('sign_wall_climb') : 'تسلق الجدار';
+    ctx.direction = isEn ? 'ltr' : 'rtl';
+    ctx.font = isEn ? '800 10px system-ui, sans-serif' : '800 11px "Cairo", "Tajawal", system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#291002';
-    ctx.fillText('تسلق الجدار', 8, 1.5);
+    ctx.fillText(climbTxt, 8, 1.5);
     ctx.fillStyle = '#fffbeb';
-    ctx.fillText('تسلق الجدار', 8, 0.5);
+    ctx.fillText(climbTxt, 8, 0.5);
     ctx.restore();
   }
 

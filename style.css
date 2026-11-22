@@ -360,6 +360,25 @@ canvas {
   transform: scale(0.93);
 }
 
+.lang-chip-btn {
+  cursor: pointer;
+  font-family: inherit;
+  color: #bae6fd;
+  background: rgba(56, 189, 248, 0.14);
+  border-color: rgba(56, 189, 248, 0.42);
+  padding: 6px 11px;
+  font-size: 12.5px;
+  transition: transform 0.15s var(--ios-spring), background 0.15s ease;
+}
+
+.lang-chip-btn:hover {
+  background: rgba(56, 189, 248, 0.24);
+}
+
+.lang-chip-btn:active {
+  transform: scale(0.93);
+}
+
 /* =========================================================
    OVERLAYS & iOS FROSTED SHEETS
    ========================================================= */
@@ -800,8 +819,8 @@ canvas {
 
 .pause-toggles-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -1187,13 +1206,97 @@ canvas {
 .gameover-actions {
   position: relative;
   z-index: 2;
-  margin-bottom: max(36px, env(safe-area-inset-bottom) + 24px);
+  margin-bottom: max(14px, env(safe-area-inset-bottom) + 10px);
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   justify-content: center;
   padding: 0 14px;
   animation: sheetPopIn 0.3s var(--ios-spring);
+}
+
+/* Semi-transparent glass buttons on Game Over video so sleeping Mashmasha stays clearly visible! */
+.gameover-actions .ios-btn {
+  padding: 9px 15px;
+  font-size: 13.5px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0.78;
+  transition: opacity 0.18s ease, transform 0.16s var(--ios-spring), background 0.16s ease;
+}
+
+.gameover-actions .ios-btn:hover,
+.gameover-actions .ios-btn:active {
+  opacity: 0.96;
+}
+
+.gameover-actions .ios-btn:disabled {
+  opacity: 0.42;
+}
+
+.gameover-actions .ios-btn-gold {
+  background: linear-gradient(180deg, rgba(255, 214, 10, 0.58) 0%, rgba(245, 158, 11, 0.54) 100%);
+  border: 1px solid rgba(254, 240, 138, 0.52);
+  color: #1e1304;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 4px 14px rgba(0, 0, 0, 0.28);
+}
+
+.gameover-actions .ios-btn-primary {
+  background: linear-gradient(180deg, rgba(255, 159, 10, 0.56) 0%, rgba(255, 107, 0, 0.52) 100%);
+  border: 1px solid rgba(255, 210, 160, 0.48);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 4px 14px rgba(0, 0, 0, 0.28);
+}
+
+.gameover-actions .ios-btn-glass {
+  background: rgba(15, 23, 42, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #f8fafc;
+}
+
+/* Synchronized Cinema Video Captions / Translation Subtitles */
+.video-caption {
+  position: absolute;
+  left: 50%;
+  top: auto;
+  bottom: max(18px, env(safe-area-inset-bottom) + 12px);
+  transform: translateX(-50%);
+  z-index: 44;
+  width: max-content;
+  height: auto;
+  max-width: min(88vw, 660px);
+  padding: 7px 16px;
+  border-radius: 14px;
+  background: rgba(8, 12, 24, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fef9c3;
+  font-size: clamp(12.5px, 2vw, 16px);
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: center;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.video-caption-top {
+  bottom: auto;
+  top: max(14px, env(safe-area-inset-top) + 10px);
+}
+
+/* LTR (English) Alignment Polish */
+html[dir="ltr"] .shop-title-wrap,
+html[dir="ltr"] .shop-item-card,
+html[dir="ltr"] .guide-sheet,
+html[dir="ltr"] .menu-brand .brand-text {
+  text-align: left;
+}
+
+html[dir="ltr"] .lv-effect-tag {
+  margin-right: 0;
+  margin-left: 4px;
 }
 
 .intro-hud {

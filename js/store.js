@@ -4,7 +4,7 @@ window.Game.Store = (function () {
   const SAVE_KEY = 'theWayHome_saveData_v2';
   const LEGACY_UNLOCK_KEY = 'theWayHome_maxUnlockedStage';
   const TOTAL_STAGES = 15;
-  const TEMP_UNLOCK_ALL = true; // مؤقت لمعاينة جميع المراحل (أعدها إلى false لإعادة القفل)
+  const TEMP_UNLOCK_ALL = false; // قفل المراحل الافتراضي للإصدار النهائي (تُفتح تدريجياً أو من المتجر)
 
   const UPGRADES = [
     {

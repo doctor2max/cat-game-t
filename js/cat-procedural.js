@@ -843,8 +843,8 @@ window.Game.ProceduralCat = (function () {
       sc = 0.80;
       ang = -0.10;
     } else if (!catState.onGround) {
-      dx = 7.0;
-      dy = 17.0;
+      dx = 2.0;
+      dy = 12.0;
       sc = 0.78;
       ang = (catState.vy || 0) < 0 ? -0.05 : 0.05;
     } else if (catState.crouching) {
@@ -994,6 +994,7 @@ window.Game.ProceduralCat = (function () {
         bodyDx: 0,
         bodyDy: -6,
         torsoAng: 0.22,
+        torsoSx: 1,
         torsoSy: 0.96,
         headDx: 0,
         headDy: -2,
@@ -1018,78 +1019,104 @@ window.Game.ProceduralCat = (function () {
     }
 
     if (isWall) {
+      // Vertical crouch-like wall climbing:
+      // Low, sleek, belly-hugged vertical silhouette (~88 deg flush against the wall)
+      // with a clear, lively 4-paw alternating climbing walk stride!
+      const climbCyc = cat.wallClimbTime !== undefined ? cat.wallClimbTime : (t * 2.1);
+      const stride = climbCyc * Math.PI * 2;
+      const sA = Math.sin(stride);
+      const sB = -sA;
+      const liftA = Math.max(0, Math.cos(stride));
+      const liftB = Math.max(0, -Math.cos(stride));
+
       return {
         crouchBlend: 0,
         crouchStepL: 0,
         crouchStepR: 0,
-        bodyDx: 0,
-        bodyDy: -4,
-        torsoAng: 0.34,
-        torsoSy: 1,
-        headDx: 10,
-        headDy: 8,
-        headAng: -0.24,
-        headScale: 1,
+        bodyDx: -80,
+        bodyDy: -26 + Math.sin(stride * 2) * 5,
+        torsoAng: 1.54 + sA * 0.032,
+        torsoSx: 1.07,
+        torsoSy: 0.87,
+        headDx: -12,
+        headDy: 34,
+        headAng: -0.22 + sA * 0.04,
+        headScale: 0.98,
         tailDx: 0,
         tailDy: 0,
         tailScale: 1,
-        tailAng: -0.22 + Math.sin(t * 7) * 0.08,
-        bellAng: 0.24,
-        nfU: 0.64, nfL: -0.24,
-        ffU: 0.52, ffL: -0.18,
-        nhU: 0.18, nhL: -0.44,
-        fhU: 0.10, fhL: -0.36,
-        wingFlap: Math.sin(t * 14) * 0.22,
-        wingFold: 0,
-        wingSpread: 1.04,
-        scarfLift: -42,
-        eyeSy: 0.92,
+        tailAng: 0.14 + Math.sin(stride) * 0.18,
+        bellAng: -0.68 + sA * 0.12,
+        nfU: 0.68 + sA * 0.54, nfL: -1.52 - liftA * 0.28,
+        ffU: 0.68 + sB * 0.54, ffL: -1.52 - liftB * 0.28,
+        nhU: 0.42 + sB * 0.48, nhL: -1.18 + liftB * 0.26,
+        fhU: 0.42 + sA * 0.48, fhL: -1.18 + liftA * 0.26,
+        wingFlap: Math.sin(stride) * 0.16,
+        wingFold: 0.55,
+        wingSpread: 0.92,
+        scarfLift: 40 + Math.sin(stride) * 12,
+        eyeSy: Math.min(blinkSy, 0.88),
         isHurt: false,
       };
     }
 
     if (isAir) {
       const vy = cat.vy || 0;
-      // Smooth continuous vertical blend: up in [-520..-80], apex [-80..120], fall [120..520]
-      const up = clamp(-vy / 460, 0, 1);
-      const dn = clamp(vy / 460, 0, 1);
-      const airW = Math.max(up, dn);
-      const wingFlutter = -0.14 + Math.sin(t * 21) * (cat.hasWingsGlide && vy > 110 ? 0.34 : 0.24);
+      // Fluid, realistic feline leap modeled after Row 5 jump frames:
+      //   up   (vy < 0): sleek upward stretch, BOTH front paws folded cleanly under chest, hind legs stretched straight back-down!
+      //   apex (vy ~ 0): graceful weightless hover arch transitioning smoothly
+      //   dn   (vy > 0): soft forward-down landing reach with hind legs gathering cleanly & rudder tail floating high!
+      const upRaw = clamp(-vy / 460, 0, 1);
+      const dnRaw = clamp(vy / 460, 0, 1);
+      const up = Math.pow(upRaw, 0.78);
+      const dn = Math.pow(dnRaw, 0.85);
+      const apex = Math.max(0, 1 - up - dn);
+      const gliding = !!(cat.hasWingsGlide && vy > 110);
+      const airPulse = Math.sin(t * 14) * 0.055;
+      const tailWave = Math.sin(t * 11) * 0.10;
+      const wingFlutter = gliding
+        ? (-0.22 + Math.sin(t * 16) * 0.30)
+        : (-0.16 + Math.sin(t * 22) * 0.24);
 
-      // Blend smoothly between Leap Ascent, Floating Apex, and Landing Anticipation
-      const torsoAng = up * 0.20 - dn * 0.14;
-      const bodyDy = lerp(-8, -16, up) - dn * 2;
-      const nfU = lerp(0.42, 0.44, up) * (1 - dn) + dn * 0.42;
-      const nfL = lerp(-0.92, -1.32, up) * (1 - dn) + dn * -0.22;
-      const ffU = lerp(0.50, 0.58, up) * (1 - dn) + dn * 0.24;
-      const ffL = lerp(-0.80, -1.14, up) * (1 - dn) + dn * -0.16;
-      const nhU = lerp(-0.50, -0.78, up) * (1 - dn) + dn * -0.16;
-      const nhL = lerp(-0.14, -0.30, up) * (1 - dn) + dn * 0.38;
-      const fhU = lerp(-0.38, -0.62, up) * (1 - dn) + dn * -0.06;
-      const fhL = lerp(-0.10, -0.24, up) * (1 - dn) + dn * 0.28;
+      const torsoAng = up * 0.28 + apex * 0.04 - dn * (gliding ? 0.04 : 0.18);
+      const torsoSx = 1 + up * 0.09 + apex * 0.04 - dn * 0.01;
+      const torsoSy = 1 - up * 0.08 - apex * 0.04 + dn * 0.01;
+      const bodyDy = -up * 18 - apex * 14 + dn * 2;
+
+      // Natural Row-5 2-bone feline leap legs (folded-under front paws + streamlined straight hind legs!)
+      const nfU = up * (0.78 + airPulse) + apex * 0.56 + dn * 0.54;
+      const nfL = up * -2.10 + apex * -1.24 + dn * -0.06;
+      const ffU = up * (0.94 - airPulse) + apex * 0.70 + dn * 0.38;
+      const ffL = up * -1.95 + apex * -1.10 + dn * -0.10;
+
+      const nhU = up * (-0.72 - airPulse) + apex * -0.44 + dn * -0.26;
+      const nhL = up * -0.84 + apex * -0.48 + dn * -0.12;
+      const fhU = up * (-0.54 + airPulse) + apex * -0.32 + dn * -0.14;
+      const fhL = up * -0.74 + apex * -0.40 + dn * -0.08;
 
       return {
         crouchBlend: 0,
         crouchStepL: 0,
         crouchStepR: 0,
         bodyDx: 0,
-        bodyDy: bodyDy * airW,
+        bodyDy,
         torsoAng,
-        torsoSy: 1,
-        headDx: 0,
-        headDy: lerp(-6, -12, up) + dn * 8,
-        headAng: up * -0.06 + dn * 0.05,
+        torsoSx,
+        torsoSy,
+        headDx: up * -6 + dn * 4,
+        headDy: -up * 10 - apex * 5 + dn * 6,
+        headAng: up * 0.06 - dn * (gliding ? 0.01 : 0.05),
         headScale: 1,
         tailDx: 0,
         tailDy: 0,
         tailScale: 1,
-        tailAng: up * 0.34 - dn * 0.30,
-        bellAng: up * 0.24 - dn * 0.24,
+        tailAng: up * 0.42 + apex * 0.08 - dn * (gliding ? 0.22 : 0.44) + tailWave,
+        bellAng: up * 0.28 - dn * 0.24 + airPulse * 1.4,
         nfU, nfL, ffU, ffL, nhU, nhL, fhU, fhL,
         wingFlap: wingFlutter,
         wingFold: 0,
-        wingSpread: cat.hasWingsGlide && vy > 110 ? 1.18 : 1.08,
-        scarfLift: clamp(vy * 0.085, -36, 44),
+        wingSpread: gliding ? 1.22 : 1.10,
+        scarfLift: clamp(vy * 0.095, -42, 48),
         eyeSy: Math.min(blinkSy, up > 0.35 ? 0.88 : 1),
         isHurt: false,
       };
@@ -1110,6 +1137,7 @@ window.Game.ProceduralCat = (function () {
         bodyDx: 0,
         bodyDy: stalkBob,
         torsoAng: sneaking ? Math.sin(stepPhase) * 0.015 : 0,
+        torsoSx: 1,
         torsoSy: 1 + (sneaking ? 0 : Math.sin(t * 3.0) * 0.012),
         headDx: cr.headDx,
         headDy: cr.headDy + stalkBob * 0.85,
@@ -1149,6 +1177,7 @@ window.Game.ProceduralCat = (function () {
         bodyDx: 0,
         bodyDy: bounce,
         torsoAng: spinePitch,
+        torsoSx: 1,
         torsoSy: 1,
         headDx: 0,
         headDy: bounce * 0.72 + Math.sin(strideRad * 2 + 0.6) * 3.5 * spdBlend,
@@ -1182,6 +1211,7 @@ window.Game.ProceduralCat = (function () {
       bodyDx: 0,
       bodyDy: land * 18,
       torsoAng: land * -0.04,
+      torsoSx: 1 + land * 0.04,
       torsoSy: 1 - land * 0.04 + breath * 0.013,
       headDx: 0,
       headDy: land * 22 + breath * 4.2,
@@ -1218,14 +1248,16 @@ window.Game.ProceduralCat = (function () {
     const dt = clamp(t - st.lastT, 0, 0.05);
     st.lastT = t;
 
-    const rateFast = 22;
-    const rateMed = 17;
+    const isAirState = !cat.onGround;
+    const rateFast = isAirState ? 30 : 22;
+    const rateMed = isAirState ? 24 : 17;
     st.crouchBlend = damp(st.crouchBlend, target.crouchBlend, 20, dt);
     st.crouchStepL = damp(st.crouchStepL, target.crouchStepL, rateFast, dt);
     st.crouchStepR = damp(st.crouchStepR, target.crouchStepR, rateFast, dt);
     st.bodyDx = damp(st.bodyDx, target.bodyDx, rateMed, dt);
     st.bodyDy = damp(st.bodyDy, target.bodyDy, rateFast, dt);
     st.torsoAng = damp(st.torsoAng, target.torsoAng, rateMed, dt);
+    st.torsoSx = damp(st.torsoSx === undefined ? 1 : st.torsoSx, target.torsoSx === undefined ? 1 : target.torsoSx, rateMed, dt);
     st.torsoSy = damp(st.torsoSy, target.torsoSy, rateMed, dt);
     st.headDx = damp(st.headDx, target.headDx, rateFast, dt);
     st.headDy = damp(st.headDy, target.headDy, rateFast, dt);
@@ -1304,11 +1336,11 @@ window.Game.ProceduralCat = (function () {
       drawLegChain(ctx, parts.farHindUpper, parts.farHindLower, pose.fhU, pose.fhL);
       drawLegChain(ctx, parts.farFrontUpper, parts.farFrontLower, pose.ffU, pose.ffL);
 
-      drawCompiledPart(ctx, parts.torso, 0, 0, 0, 1, pose.torsoSy);
+      drawCompiledPart(ctx, parts.torso, 0, 0, 0, pose.torsoSx || 1, pose.torsoSy);
 
       drawLegChain(ctx, parts.nearHindUpper, parts.nearHindLower, pose.nhU, pose.nhL);
       drawLegChain(ctx, parts.nearFrontUpper, parts.nearFrontLower, pose.nfU, pose.nfL);
-      drawCompiledPart(ctx, parts.chestRuffOverlay, 0, 0, 0, 1, pose.torsoSy);
+      drawCompiledPart(ctx, parts.chestRuffOverlay, 0, 0, 0, pose.torsoSx || 1, pose.torsoSy);
     }
 
     // 3. Crimson Ninja Scarf Ribbons (anchored behind collar/neck shoulder!)

@@ -16,6 +16,7 @@ window.Game.Audio = (function () {
     if (ctx && ctx.state === 'suspended') {
       ctx.resume().catch(() => {});
     }
+    decodePendingSamples();
     return ctx;
   }
 
@@ -66,30 +67,194 @@ window.Game.Audio = (function () {
     noise.start(now);
   }
 
-  // Preloaded real audio samples in sounds/ folder (compatible with file://)
-  const catAudioSample = new Audio('sounds/Cat.wav');
-  catAudioSample.preload = 'auto';
-  const catDamageAudioSample = new Audio('sounds/cat-damage.wav');
-  catDamageAudioSample.preload = 'auto';
-  const dogAudioSample = new Audio('sounds/Dog.wav');
-  dogAudioSample.preload = 'auto';
-  const savePointAudioSample = new Audio('sounds/save-point.wav');
-  savePointAudioSample.preload = 'auto';
+  // =========================================================================
+  // BULLETPROOF REAL WAV SAMPLE ENGINE (Web Audio AudioBuffer + Pre-Unlocked Pool)
+  // Eliminates cloneNode() autoplay rejections so real WAVs NEVER drop to synth beeps!
+  // =========================================================================
+  const SAMPLE_URLS = {
+    cat: 'sounds/Cat.wav',
+    catDamage: 'sounds/cat-damage.wav',
+    dog: 'sounds/Dog.wav',
+    savePoint: 'sounds/save-point.wav',
+  };
 
-  function playSample(sample, volume = 0.75, fallbackFn) {
-    if (sfxMuted) return;
+  const rawBuffers = {};
+  const decodedBuffers = {};
+  const decodingKeys = {};
+  const htmlPools = {};
+  const htmlPoolIdx = {};
+  let audioUnlocked = false;
+
+  // 1. Pre-create a 3-slot reusable HTMLAudio pool per sample (never cloneNode()!)
+  Object.keys(SAMPLE_URLS).forEach((key) => {
+    const url = SAMPLE_URLS[key];
+    const pool = [];
+    for (let i = 0; i < 3; i++) {
+      const a = new Audio(url);
+      a.preload = 'auto';
+      a.playsInline = true;
+      pool.push(a);
+    }
+    htmlPools[key] = pool;
+    htmlPoolIdx[key] = 0;
+  });
+
+  // 2. Immediately fetch raw WAV bytes into memory for zero-latency Web Audio decoding
+  function preloadSampleBytes(key) {
+    if (rawBuffers[key] || decodedBuffers[key]) return;
+    if (typeof fetch !== 'function') return;
+    fetch(SAMPLE_URLS[key])
+      .then((res) => (res.ok ? res.arrayBuffer() : null))
+      .then((buf) => {
+        if (!buf) return;
+        rawBuffers[key] = buf;
+        if (ctx) decodeSampleKey(key);
+      })
+      .catch(() => {});
+  }
+
+  function decodeSampleKey(key) {
+    if (!ctx || decodedBuffers[key] || decodingKeys[key] || !rawBuffers[key]) return;
+    decodingKeys[key] = true;
     try {
-      const clip = sample.cloneNode();
-      clip.volume = volume;
-      const p = clip.play();
-      if (p && typeof p.catch === 'function') {
-        p.catch(() => {
-          if (fallbackFn) fallbackFn();
-        });
+      const copy = rawBuffers[key].slice(0);
+      const result = ctx.decodeAudioData(
+        copy,
+        (audioBuf) => {
+          decodedBuffers[key] = audioBuf;
+          decodingKeys[key] = false;
+        },
+        () => {
+          decodingKeys[key] = false;
+        }
+      );
+      if (result && typeof result.then === 'function') {
+        result
+          .then((audioBuf) => {
+            decodedBuffers[key] = audioBuf;
+            decodingKeys[key] = false;
+          })
+          .catch(() => {
+            decodingKeys[key] = false;
+          });
       }
     } catch (e) {
-      if (fallbackFn) fallbackFn();
+      decodingKeys[key] = false;
     }
+  }
+
+  function decodePendingSamples() {
+    if (!ctx) return;
+    Object.keys(SAMPLE_URLS).forEach((key) => {
+      if (rawBuffers[key] && !decodedBuffers[key]) {
+        decodeSampleKey(key);
+      } else if (!rawBuffers[key] && !decodedBuffers[key]) {
+        preloadSampleBytes(key);
+      }
+    });
+  }
+
+  // Kick off background WAV fetches right away
+  Object.keys(SAMPLE_URLS).forEach(preloadSampleBytes);
+
+  // Unlock AudioContext + silently warm up HTMLAudio pools on the very first user gesture
+  function unlockAllAudio() {
+    if (audioUnlocked) {
+      ensureCtx();
+      return;
+    }
+    audioUnlocked = true;
+    ensureCtx();
+    Object.keys(htmlPools).forEach((key) => {
+      htmlPools[key].forEach((clip) => {
+        try {
+          if (clip.readyState === 0) clip.load();
+          const prevMuted = clip.muted;
+          clip.muted = true;
+          const p = clip.play();
+          if (p && typeof p.then === 'function') {
+            p.then(() => {
+              clip.pause();
+              clip.currentTime = 0;
+              clip.muted = prevMuted;
+            }).catch(() => {
+              clip.muted = prevMuted;
+            });
+          } else {
+            clip.pause();
+            clip.currentTime = 0;
+            clip.muted = prevMuted;
+          }
+        } catch (e) {}
+      });
+    });
+  }
+
+  ['pointerdown', 'touchstart', 'keydown', 'click'].forEach((evName) => {
+    window.addEventListener(evName, unlockAllAudio, { capture: true, passive: true });
+  });
+
+  function playWebAudioBuffer(c, buffer, volume) {
+    const startBuffer = () => {
+      try {
+        const src = c.createBufferSource();
+        const gain = c.createGain();
+        src.buffer = buffer;
+        gain.gain.setValueAtTime(volume, c.currentTime);
+        src.connect(gain);
+        gain.connect(c.destination);
+        src.start(0);
+      } catch (e) {}
+    };
+    if (c.state === 'suspended') {
+      c.resume().then(startBuffer).catch(startBuffer);
+    } else {
+      startBuffer();
+    }
+  }
+
+  function playSample(key, volume = 0.78, fallbackFn) {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+
+    // Primary path: decoded Web Audio AudioBuffer (100% reliable, instant, zero autoplay blocks!)
+    if (c && decodedBuffers[key]) {
+      playWebAudioBuffer(c, decodedBuffers[key], volume);
+      return;
+    }
+
+    // Trigger decoding if raw bytes already arrived
+    if (c && rawBuffers[key]) {
+      decodeSampleKey(key);
+    }
+
+    // Secondary path: pre-created, pre-unlocked reusable HTMLAudio pool (compatible with file://)
+    const pool = htmlPools[key];
+    if (pool && pool.length) {
+      const idx = htmlPoolIdx[key] % pool.length;
+      htmlPoolIdx[key] = (idx + 1) % pool.length;
+      const clip = pool[idx];
+      try {
+        clip.pause();
+        clip.currentTime = 0;
+        clip.muted = false;
+        clip.volume = Math.max(0, Math.min(1, volume));
+        const p = clip.play();
+        if (p && typeof p.catch === 'function') {
+          p.catch(() => {
+            // If AudioBuffer finished decoding in the meantime, prefer it over synth!
+            if (c && decodedBuffers[key]) {
+              playWebAudioBuffer(c, decodedBuffers[key], volume);
+            } else if (fallbackFn && clip.error) {
+              fallbackFn();
+            }
+          });
+        }
+        return;
+      } catch (e) {}
+    }
+
+    if (fallbackFn) fallbackFn();
   }
 
   function playMeowSynth() {
@@ -121,7 +286,7 @@ window.Game.Audio = (function () {
   }
 
   function playMeow() {
-    playSample(catAudioSample, 0.75, playMeowSynth);
+    playSample('cat', 0.80, playMeowSynth);
   }
 
   function playJump() {
@@ -144,7 +309,7 @@ window.Game.Audio = (function () {
   }
 
   function playBark() {
-    playSample(dogAudioSample, 0.75, playBarkSynth);
+    playSample('dog', 0.78, playBarkSynth);
   }
 
   function playPurrSynth() {
@@ -178,7 +343,7 @@ window.Game.Audio = (function () {
   }
 
   function playCheckpoint() {
-    playSample(savePointAudioSample, 0.82, playPurrSynth);
+    playSample('savePoint', 0.85, playPurrSynth);
   }
 
   function playPurr() {
@@ -195,7 +360,7 @@ window.Game.Audio = (function () {
   }
 
   function playHurt() {
-    playSample(catDamageAudioSample, 0.8, playHurtSynth);
+    playSample('catDamage', 0.85, playHurtSynth);
   }
 
   function playNightVision(on) {
