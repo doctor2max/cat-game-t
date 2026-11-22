@@ -121,14 +121,14 @@ window.Game.Cat = function (startX, startY) {
         if (cat.vx > 0) {
           cat.x = p.x - cat.w;
           cat.vx = 0;
-          if (p.climbable !== false && !cat.onGround) cat.wallDir = 1;
+          if (p.climbable === true && !cat.onGround) cat.wallDir = 1;
         } else if (cat.vx < 0) {
           cat.x = p.x + p.w;
           cat.vx = 0;
-          if (p.climbable !== false && !cat.onGround) cat.wallDir = -1;
+          if (p.climbable === true && !cat.onGround) cat.wallDir = -1;
         }
       } else if (
-        p.climbable !== false &&
+        p.climbable === true &&
         !cat.onGround &&
         cat.y + 6 < p.y + p.h &&
         cat.y + cat.h - 6 > p.y
@@ -195,11 +195,12 @@ window.Game.Cat = function (startX, startY) {
               Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, 9, '#ffb35c');
             }
           } else {
-            if (wasAirborne && cat.vy > 180) {
-              cat.landTimer = 0.14;
-              cat.scaleX = 1.13;
-              cat.scaleY = 0.87;
-              Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, 5);
+            if (wasAirborne && cat.vy > 160) {
+              const impact = Math.min(1, (cat.vy - 160) / 540);
+              cat.landTimer = 0.16 + impact * 0.08;
+              cat.scaleX = 1.14 + impact * 0.12;
+              cat.scaleY = 0.86 - impact * 0.12;
+              Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, Math.round(4 + impact * 6));
             }
             cat.vy = 0;
             landed = true;
@@ -211,11 +212,12 @@ window.Game.Cat = function (startX, startY) {
         if (cat.y < effY + p.h && cat.y + cat.h > effY) {
           if (cat.vy >= 0) {
             cat.y = effY - cat.h;
-            if (wasAirborne && cat.vy > 180) {
-              cat.landTimer = 0.14;
-              cat.scaleX = 1.13;
-              cat.scaleY = 0.87;
-              Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, 5);
+            if (wasAirborne && cat.vy > 160) {
+              const impact = Math.min(1, (cat.vy - 160) / 540);
+              cat.landTimer = 0.16 + impact * 0.08;
+              cat.scaleX = 1.14 + impact * 0.12;
+              cat.scaleY = 0.86 - impact * 0.12;
+              Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, Math.round(4 + impact * 6));
             }
             cat.vy = 0;
             landed = true;
@@ -286,8 +288,8 @@ window.Game.Cat = function (startX, startY) {
       }
     }
 
-    cat.scaleX += (1 - cat.scaleX) * Math.min(1, dt * 14);
-    cat.scaleY += (1 - cat.scaleY) * Math.min(1, dt * 14);
+    cat.scaleX += (1 - cat.scaleX) * Math.min(1, dt * 10);
+    cat.scaleY += (1 - cat.scaleY) * Math.min(1, dt * 10);
 
     const lockedByRespawn = cat.respawnLockTimer > 0;
     cat.crouching = !lockedByRespawn && (input.shift || input.down);
@@ -314,7 +316,7 @@ window.Game.Cat = function (startX, startY) {
       targetSpeed += Math.sin(cat.balancePhase) * 65;
     }
 
-    const accel = cat.onGround ? (cat.onSlippery ? 3.8 : 18) : 11;
+    const accel = cat.onGround ? (cat.onSlippery ? 3.8 : 18) : 13;
     if (lockedByRespawn) {
       cat.vx = 0;
     } else {
@@ -352,11 +354,14 @@ window.Game.Cat = function (startX, startY) {
     if (cat.jumpBufferTimer > 0) {
       if (cat.coyoteTimer > 0) {
         cat.vy = -cat.physics.jumpForce;
+        if (Math.abs(cat.vx) > 80) {
+          cat.vx = Math.sign(cat.vx) * Math.min(cat.physics.runSpeed * 1.12, Math.abs(cat.vx) * 1.07);
+        }
         cat.onGround = false;
         cat.coyoteTimer = 0;
         cat.jumpBufferTimer = 0;
-        cat.scaleX = 0.94;
-        cat.scaleY = 1.07;
+        cat.scaleX = 0.84;
+        cat.scaleY = 1.16;
         Audio.playJump();
         Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h, 5);
       } else if (cat.wallDir !== 0) {
@@ -365,8 +370,8 @@ window.Game.Cat = function (startX, startY) {
         cat.facing = -cat.wallDir;
         cat.wallDir = 0;
         cat.jumpBufferTimer = 0;
-        cat.scaleX = 0.94;
-        cat.scaleY = 1.07;
+        cat.scaleX = 0.84;
+        cat.scaleY = 1.16;
         Audio.playJump();
         Audio.playWallScratch();
         Particles.spawnDust(cat.x + cat.w / 2, cat.y + cat.h / 2, 6, '#ffd36e');
@@ -374,10 +379,16 @@ window.Game.Cat = function (startX, startY) {
     }
 
     if (!input.jumpHeld && cat.vy < -220) {
-      cat.vy += cat.physics.gravity * 1.4 * dt;
+      cat.vy += cat.physics.gravity * 1.45 * dt;
     }
 
-    cat.vy += cat.physics.gravity * dt;
+    let gravMult = 1;
+    if (!cat.onGround && Math.abs(cat.vy) < 145) {
+      gravMult = 0.68;
+    } else if (!cat.onGround && cat.vy > 145 && !(cat.hasWingsGlide && input.jumpHeld)) {
+      gravMult = 1.20;
+    }
+    cat.vy += cat.physics.gravity * gravMult * dt;
 
     // Angel Wings smooth glide when holding jump while falling
     if (cat.hasWingsGlide && input.jumpHeld && !cat.onGround && cat.vy > 195 && cat.wallDir === 0) {

@@ -38,22 +38,33 @@ window.Game.Art = (function () {
     });
     patterns.brick = ctx.createPattern(brickCanvas, 'repeat');
 
-    // 2. Darker alley facade brick
-    const darkBrickCanvas = createOffscreen(64, 32, (c, w, h) => {
-      c.fillStyle = '#1f1722';
-      c.fillRect(0, 0, w, h);
-      const colors = ['#2b1f2b', '#322430', '#261b26', '#382834'];
-      for (let row = 0; row < 2; row++) {
-        const y = row * 16;
-        const offset = row % 2 === 0 ? 0 : 16;
-        for (let col = -1; col < 3; col++) {
-          const x = col * 32 + offset;
-          c.fillStyle = colors[(row * 2 + col + 4) % colors.length];
-          c.fillRect(x + 1, y + 1, 30, 14);
+    // 2. Classic NYC red-brick alley facades (two rich tones for alternating buildings)
+    const makeRedBrick = (mortar, cols) =>
+      createOffscreen(64, 32, (c, w, h) => {
+        c.fillStyle = mortar;
+        c.fillRect(0, 0, w, h);
+        for (let row = 0; row < 2; row++) {
+          const y = row * 16;
+          const offset = row % 2 === 0 ? 0 : 16;
+          for (let col = -1; col < 3; col++) {
+            const x = col * 32 + offset;
+            c.fillStyle = cols[(row * 3 + col + 4) % cols.length];
+            c.fillRect(x + 1.5, y + 1.5, 29, 13);
+            c.fillStyle = 'rgba(255, 200, 175, 0.12)';
+            c.fillRect(x + 1.5, y + 1.5, 29, 2);
+            c.fillStyle = 'rgba(0, 0, 0, 0.16)';
+            c.fillRect(x + 1.5, y + 12.5, 29, 2);
+          }
         }
-      }
-    });
-    patterns.darkBrick = ctx.createPattern(darkBrickCanvas, 'repeat');
+      });
+    patterns.redBrick = ctx.createPattern(
+      makeRedBrick('#2a1414', ['#7a2c26', '#8a352c', '#6c2520', '#963c32']),
+      'repeat'
+    );
+    patterns.darkBrick = ctx.createPattern(
+      makeRedBrick('#231011', ['#63231f', '#732a24', '#581e1b', '#7d3028']),
+      'repeat'
+    );
 
     // 3. Textured asphalt
     const asphaltCanvas = createOffscreen(64, 64, (c, w, h) => {
@@ -252,8 +263,8 @@ window.Game.Art = (function () {
       ctx.save();
       ctx.translate(bx, topY);
 
-      // Brick tenement or brownstone facade
-      ctx.fillStyle = i % 2 === 0 ? patterns.darkBrick : '#2a2029';
+      // Classic warm red-brick tenement facade (matching the intro video)
+      ctx.fillStyle = i % 2 === 0 ? patterns.redBrick : patterns.darkBrick;
       ctx.fillRect(0, 0, buildingW - 10, bh);
 
       const edgeGrad = ctx.createLinearGradient(buildingW - 42, 0, buildingW - 10, 0);
@@ -263,9 +274,9 @@ window.Game.Art = (function () {
       ctx.fillRect(buildingW - 42, 0, 32, bh);
 
       // Ornate NYC stone parapet cornice
-      ctx.fillStyle = '#473845';
+      ctx.fillStyle = '#5c3c36';
       ctx.fillRect(-4, 0, buildingW - 2, 16);
-      ctx.fillStyle = '#5e4b5b';
+      ctx.fillStyle = '#7a524a';
       ctx.fillRect(-4, 0, buildingW - 2, 4);
 
       // Large NYC Rooftop Illuminated Billboard (every 2nd building)
@@ -3856,6 +3867,87 @@ window.Game.Art = (function () {
         ctx.fillStyle = 'rgba(148, 163, 184, 0.18)';
         ctx.fillRect(lx + 1, 3, 1.5, 8);
       }
+
+      // Piled Glossy Trash Bags & Scattered Empty Cans Around the Dumpster
+      const drawTrashBag = (bx, by, rx, ry, fillTop, fillBot, tieCol) => {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.44)';
+        ctx.beginPath(); ctx.ellipse(bx, by + 2, rx * 1.05, 3.6, 0, 0, Math.PI * 2); ctx.fill();
+        const bg = ctx.createRadialGradient(bx - rx * 0.25, by - ry * 1.1, 2, bx, by - ry * 0.7, Math.max(rx, ry) * 1.3);
+        bg.addColorStop(0, fillTop);
+        bg.addColorStop(1, fillBot);
+        ctx.fillStyle = bg;
+        ctx.strokeStyle = '#020617';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(bx - rx, by);
+        ctx.bezierCurveTo(bx - rx * 1.08, by - ry * 0.9, bx - rx * 0.55, by - ry * 1.55, bx - 3, by - ry * 1.65);
+        ctx.lineTo(bx + 3, by - ry * 1.65);
+        ctx.bezierCurveTo(bx + rx * 0.55, by - ry * 1.55, bx + rx * 1.08, by - ry * 0.9, bx + rx, by);
+        ctx.quadraticCurveTo(bx, by + 3, bx - rx, by);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Pinched bag ears above knot
+        ctx.fillStyle = fillBot;
+        ctx.beginPath();
+        ctx.moveTo(bx - 2, by - ry * 1.65); ctx.lineTo(bx - 7, by - ry * 1.98); ctx.lineTo(bx + 1, by - ry * 1.72);
+        ctx.lineTo(bx + 6, by - ry * 1.95); ctx.lineTo(bx + 3, by - ry * 1.62);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Drawstring tie
+        ctx.strokeStyle = tieCol;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.moveTo(bx - 4, by - ry * 1.64); ctx.lineTo(bx + 4, by - ry * 1.64); ctx.stroke();
+        // Glossy plastic crinkle highlight
+        ctx.strokeStyle = 'rgba(226, 232, 240, 0.24)';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(bx - rx * 0.45, by - ry * 1.15);
+        ctx.quadraticCurveTo(bx - rx * 0.65, by - ry * 0.6, bx - rx * 0.35, by - ry * 0.25);
+        ctx.stroke();
+      };
+
+      const drawEmptyCan = (cx, cy, rot, bodyCol, stripeCol, isTin) => {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.36)';
+        ctx.beginPath(); ctx.ellipse(0, 3.2, 6.5, 2, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.rotate(rot);
+        ctx.fillStyle = bodyCol;
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.roundRect(-3.8, -5.5, 7.6, 11, 1.4); ctx.fill(); ctx.stroke();
+        if (isTin) {
+          ctx.strokeStyle = 'rgba(15, 23, 42, 0.45)';
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(-3.4, -2); ctx.lineTo(3.4, -2);
+          ctx.moveTo(-3.4, 1); ctx.lineTo(3.4, 1);
+          ctx.moveTo(-3.4, 3.5); ctx.lineTo(3.4, 3.5);
+          ctx.stroke();
+          // Open curled tin lid
+          ctx.fillStyle = '#cbd5e1';
+          ctx.beginPath(); ctx.ellipse(2.5, -6.5, 3.2, 1.4, -0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        } else {
+          ctx.fillStyle = stripeCol;
+          ctx.fillRect(-3.4, -2, 6.8, 4.5);
+          ctx.fillStyle = '#e2e8f0';
+          ctx.fillRect(-3.2, -5.5, 6.4, 1.8);
+        }
+        ctx.restore();
+      };
+
+      // Left side: two tied garbage bags + tipped soda & tin cans
+      drawTrashBag(-15, p.h - 1, 16, 17, '#334155', '#0f172a', '#ef4444');
+      drawTrashBag(-32, p.h, 12, 12, '#1f2937', '#090d16', '#facc15');
+      drawEmptyCan(-47, p.h - 2, -1.35, '#dc2626', '#f8fafc', false);
+      drawEmptyCan(-5, p.h - 2, 1.25, '#94a3b8', '#cbd5e1', true);
+
+      // Right side: leaning dark-green trash bag + upright & fallen empty cans
+      drawTrashBag(p.w + 15, p.h - 1, 15, 16, '#1e3a34', '#081815', '#fb923c');
+      drawEmptyCan(p.w + 33, p.h - 5, 0.08, '#2563eb', '#e0f2fe', false);
+      drawEmptyCan(p.w + 43, p.h - 2, 1.48, '#16a34a', '#fef08a', false);
+      drawEmptyCan(p.w - 8, p.h - 2, -1.45, '#cbd5e1', '#94a3b8', true);
+
       ctx.restore();
     } else if (p.type === 'awning') {
       ctx.fillStyle = '#d94444';

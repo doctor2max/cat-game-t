@@ -1042,10 +1042,10 @@ window.Game.ProceduralCat = (function () {
         headDy: 34,
         headAng: -0.22 + sA * 0.04,
         headScale: 0.98,
-        tailDx: 0,
-        tailDy: 0,
+        tailDx: 4,
+        tailDy: 8,
         tailScale: 1,
-        tailAng: 0.14 + Math.sin(stride) * 0.18,
+        tailAng: 0.58 + Math.sin(stride) * 0.14,
         bellAng: -0.68 + sA * 0.12,
         nfU: 0.68 + sA * 0.54, nfL: -1.52 - liftA * 0.28,
         ffU: 0.68 + sB * 0.54, ffL: -1.52 - liftB * 0.28,
@@ -1062,37 +1062,39 @@ window.Game.ProceduralCat = (function () {
 
     if (isAir) {
       const vy = cat.vy || 0;
-      // Fluid, realistic feline leap modeled after Row 5 jump frames:
-      //   up   (vy < 0): sleek upward stretch, BOTH front paws folded cleanly under chest, hind legs stretched straight back-down!
-      //   apex (vy ~ 0): graceful weightless hover arch transitioning smoothly
-      //   dn   (vy > 0): soft forward-down landing reach with hind legs gathering cleanly & rudder tail floating high!
-      const upRaw = clamp(-vy / 460, 0, 1);
-      const dnRaw = clamp(vy / 460, 0, 1);
-      const up = Math.pow(upRaw, 0.78);
-      const dn = Math.pow(dnRaw, 0.85);
+      // Expressive 7-frame feline jump choreography:
+      //   Launch/Rise (up, vy < 0): upper chest lifts steeply (+44 deg), front paws tuck & curl neatly under chest, hind legs push straight down-back
+      //   Apex (vy ~ 0): smooth arched hover as front paws start unfolding downward & hind legs trail
+      //   Descent/Dive (dn, vy > 0): upper front dips down & rump/hind legs rise high (-38 deg), front legs stretch straight down-forward to land, hind legs kick high-back, tail sweeps high-back
+      const upRaw = clamp(-vy / 480, 0, 1);
+      const dnRaw = clamp(vy / 440, 0, 1);
+      const up = Math.pow(upRaw, 0.72);
+      const dn = Math.pow(dnRaw, 0.74);
       const apex = Math.max(0, 1 - up - dn);
+      const fwdMomentum = clamp(speed / 330, 0, 1);
       const gliding = !!(cat.hasWingsGlide && vy > 110);
-      const airPulse = Math.sin(t * 14) * 0.055;
-      const tailWave = Math.sin(t * 11) * 0.10;
+      const airPulse = Math.sin(t * 13) * 0.03;
+      const tailWave = Math.sin(t * 10) * 0.08;
       const wingFlutter = gliding
         ? (-0.22 + Math.sin(t * 16) * 0.30)
         : (-0.16 + Math.sin(t * 22) * 0.24);
 
-      const torsoAng = up * 0.28 + apex * 0.04 - dn * (gliding ? 0.04 : 0.18);
-      const torsoSx = 1 + up * 0.09 + apex * 0.04 - dn * 0.01;
-      const torsoSy = 1 - up * 0.08 - apex * 0.04 + dn * 0.01;
-      const bodyDy = -up * 18 - apex * 14 + dn * 2;
+      const torsoAng = up * (0.76 + fwdMomentum * 0.06) + apex * 0.14 - dn * (gliding ? 0.14 : (0.66 + fwdMomentum * 0.05));
+      const torsoSx = 1 + up * (0.13 + fwdMomentum * 0.03) + apex * 0.06 + dn * 0.06;
+      const torsoSy = 1 - up * 0.09 - apex * 0.04 - dn * 0.04;
+      const bodyDy = -up * 22 - apex * 16 + dn * 10;
 
-      // Natural Row-5 2-bone feline leap legs (folded-under front paws + streamlined straight hind legs!)
-      const nfU = up * (0.78 + airPulse) + apex * 0.56 + dn * 0.54;
-      const nfL = up * -2.10 + apex * -1.24 + dn * -0.06;
-      const ffU = up * (0.94 - airPulse) + apex * 0.70 + dn * 0.38;
-      const ffL = up * -1.95 + apex * -1.10 + dn * -0.10;
+      // Front legs: tucked & curled under chest during launch/rise, unfolding at apex, stretched straight down-forward on descent
+      const nfU = up * (0.24 + airPulse) + apex * 0.56 + dn * 1.18;
+      const nfL = up * -1.18 + apex * -0.46 + dn * 0.06;
+      const ffU = up * (0.04 - airPulse) + apex * 0.36 + dn * 0.96;
+      const ffL = up * -1.06 + apex * -0.38 + dn * 0.04;
 
-      const nhU = up * (-0.72 - airPulse) + apex * -0.44 + dn * -0.26;
-      const nhL = up * -0.84 + apex * -0.48 + dn * -0.12;
-      const fhU = up * (-0.54 + airPulse) + apex * -0.32 + dn * -0.14;
-      const fhL = up * -0.74 + apex * -0.40 + dn * -0.08;
+      // Hind legs: pushing straight down-back on takeoff, trailing at apex, kicked high & back behind raised rump on descent
+      const nhU = up * (-0.82 - airPulse) + apex * -0.76 + dn * -0.40;
+      const nhL = up * 0.16 + apex * 0.22 + dn * 0.16;
+      const fhU = up * (-0.64 + airPulse) + apex * -0.56 + dn * -0.24;
+      const fhL = up * 0.12 + apex * 0.18 + dn * 0.12;
 
       return {
         crouchBlend: 0,
@@ -1103,21 +1105,23 @@ window.Game.ProceduralCat = (function () {
         torsoAng,
         torsoSx,
         torsoSy,
-        headDx: up * -6 + dn * 4,
-        headDy: -up * 10 - apex * 5 + dn * 6,
-        headAng: up * 0.06 - dn * (gliding ? 0.01 : 0.05),
+        headDx: up * -4 + dn * 4,
+        headDy: up * -4 + dn * 4,
+        // Keep head nearly level across launch, apex, and landing dive
+        headAng: -torsoAng * 0.44,
         headScale: 1,
         tailDx: 0,
         tailDy: 0,
         tailScale: 1,
-        tailAng: up * 0.42 + apex * 0.08 - dn * (gliding ? 0.22 : 0.44) + tailWave,
-        bellAng: up * 0.28 - dn * 0.24 + airPulse * 1.4,
+        // Positive tailAng tilts tail back/up away from head; negative tilts forward
+        tailAng: up * -0.22 + apex * 0.08 + dn * (gliding ? 0.26 : 0.58) + tailWave,
+        bellAng: up * 0.32 - dn * 0.32 + airPulse * 1.4,
         nfU, nfL, ffU, ffL, nhU, nhL, fhU, fhL,
         wingFlap: wingFlutter,
         wingFold: 0,
         wingSpread: gliding ? 1.22 : 1.10,
-        scarfLift: clamp(vy * 0.095, -42, 48),
-        eyeSy: Math.min(blinkSy, up > 0.35 ? 0.88 : 1),
+        scarfLift: clamp(vy * 0.10, -44, 50),
+        eyeSy: Math.min(blinkSy, up > 0.35 ? 0.90 : 1),
         isHurt: false,
       };
     }
@@ -1160,6 +1164,7 @@ window.Game.ProceduralCat = (function () {
 
     if (isWalk) {
       const spdBlend = clamp((speed - 14) / 145, 0, 1);
+      const land = clamp((cat.landTimer || 0) / 0.16, 0, 1);
       const cyc = (cat.walkTime || 0) * 1.95;
       const nf = felineLegCycle(cyc, true);
       const fh = felineLegCycle(cyc + 0.15, false);
@@ -1167,8 +1172,8 @@ window.Game.ProceduralCat = (function () {
       const nh = felineLegCycle(cyc + 0.65, false);
 
       const strideRad = (cyc * Math.PI * 2);
-      const bounce = -Math.abs(Math.sin(strideRad)) * 10 * spdBlend;
-      const spinePitch = Math.sin(strideRad * 2) * 0.025 * spdBlend;
+      const bounce = -Math.abs(Math.sin(strideRad)) * 10 * spdBlend + land * 16;
+      const spinePitch = Math.sin(strideRad * 2) * 0.025 * spdBlend - land * 0.05;
 
       return {
         crouchBlend: 0,
@@ -1177,21 +1182,21 @@ window.Game.ProceduralCat = (function () {
         bodyDx: 0,
         bodyDy: bounce,
         torsoAng: spinePitch,
-        torsoSx: 1,
-        torsoSy: 1,
+        torsoSx: 1 + land * 0.05,
+        torsoSy: 1 - land * 0.05,
         headDx: 0,
-        headDy: bounce * 0.72 + Math.sin(strideRad * 2 + 0.6) * 3.5 * spdBlend,
-        headAng: Math.sin(strideRad) * 0.024 * spdBlend,
+        headDy: bounce * 0.72 + Math.sin(strideRad * 2 + 0.6) * 3.5 * spdBlend + land * 10,
+        headAng: Math.sin(strideRad) * 0.024 * spdBlend + land * 0.05,
         headScale: 1,
         tailDx: 0,
         tailDy: 0,
         tailScale: 1,
-        tailAng: Math.sin(strideRad) * 0.16 - 0.05,
+        tailAng: Math.sin(strideRad) * 0.16 - 0.05 - land * 0.12,
         bellAng: -Math.sin(strideRad) * 0.24 * spdBlend,
-        nfU: nf.u * spdBlend, nfL: nf.l * spdBlend,
-        ffU: ff.u * spdBlend, ffL: ff.l * spdBlend,
-        nhU: nh.u * spdBlend, nhL: nh.l * spdBlend,
-        fhU: fh.u * spdBlend, fhL: fh.l * spdBlend,
+        nfU: nf.u * spdBlend + land * 0.14, nfL: nf.l * spdBlend - land * 0.30,
+        ffU: ff.u * spdBlend + land * 0.10, ffL: ff.l * spdBlend - land * 0.24,
+        nhU: nh.u * spdBlend + land * 0.12, nhL: nh.l * spdBlend - land * 0.20,
+        fhU: fh.u * spdBlend + land * 0.08, fhL: fh.l * spdBlend - land * 0.16,
         wingFlap: Math.sin(strideRad) * 0.14 * spdBlend,
         wingFold: 0,
         wingSpread: 1,
@@ -1201,31 +1206,31 @@ window.Game.ProceduralCat = (function () {
       };
     }
 
-    // Idle (+ subtle landing squash absorption right after hitting a platform)
-    const land = clamp((cat.landTimer || 0) / 0.14, 0, 1);
+    // Idle (+ smooth cushioned landing absorption right after touchdown)
+    const land = clamp((cat.landTimer || 0) / 0.16, 0, 1);
     const breath = Math.sin(t * 3.0);
     return {
       crouchBlend: 0,
       crouchStepL: 0,
       crouchStepR: 0,
       bodyDx: 0,
-      bodyDy: land * 18,
-      torsoAng: land * -0.04,
-      torsoSx: 1 + land * 0.04,
-      torsoSy: 1 - land * 0.04 + breath * 0.013,
+      bodyDy: land * 26,
+      torsoAng: land * -0.08,
+      torsoSx: 1 + land * 0.06,
+      torsoSy: 1 - land * 0.06 + breath * 0.013,
       headDx: 0,
-      headDy: land * 22 + breath * 4.2,
-      headAng: land * 0.05,
+      headDy: land * 24 + breath * 4.2,
+      headAng: land * 0.08,
       headScale: 1,
       tailDx: 0,
       tailDy: 0,
       tailScale: 1,
-      tailAng: Math.sin(t * 2.2) * 0.14,
+      tailAng: Math.sin(t * 2.2) * 0.14 + land * 0.14,
       bellAng: Math.sin(t * 3.0 - 0.5) * 0.05,
-      nfU: land * 0.18, nfL: land * -0.34,
-      ffU: land * 0.14, ffL: land * -0.26,
-      nhU: land * 0.14, nhL: land * -0.22,
-      fhU: land * 0.10, fhL: land * -0.18,
+      nfU: land * 0.32, nfL: land * -0.52,
+      ffU: land * 0.24, ffL: land * -0.42,
+      nhU: land * -0.12, nhL: land * -0.24,
+      fhU: land * -0.08, fhL: land * -0.18,
       wingFlap: Math.sin(t * 5.2) * 0.08,
       wingFold: 0,
       wingSpread: 1,
@@ -1249,8 +1254,8 @@ window.Game.ProceduralCat = (function () {
     st.lastT = t;
 
     const isAirState = !cat.onGround;
-    const rateFast = isAirState ? 30 : 22;
-    const rateMed = isAirState ? 24 : 17;
+    const rateFast = isAirState ? 36 : 24;
+    const rateMed = isAirState ? 30 : 19;
     st.crouchBlend = damp(st.crouchBlend, target.crouchBlend, 20, dt);
     st.crouchStepL = damp(st.crouchStepL, target.crouchStepL, rateFast, dt);
     st.crouchStepR = damp(st.crouchStepR, target.crouchStepR, rateFast, dt);
