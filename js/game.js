@@ -4,10 +4,13 @@ window.Game = window.Game || {};
   const canvas = document.getElementById('gameCanvas');
   const LOGICAL_W = 1280;
   const LOGICAL_H = 720;
-  const RENDER_SCALE = 0.85; // Crisp Retina look while maintaining locked 60fps on mobile GPUs
+  const DEVICE_DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const RENDER_SCALE = Math.min(1.5, Math.max(1.15, DEVICE_DPR * 0.75)); // High-clarity Retina canvas while keeping smooth 60fps
   canvas.width = Math.round(LOGICAL_W * RENDER_SCALE);
   canvas.height = Math.round(LOGICAL_H * RENDER_SCALE);
   const ctx = canvas.getContext('2d', { alpha: false });
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   try {
     // Disable expensive Canvas 2D Gaussian shadowBlur on mobile GPUs
     Object.defineProperty(ctx, 'shadowBlur', {
@@ -25,6 +28,7 @@ window.Game = window.Game || {};
   const I18n = window.Game.I18n;
   const t = (key, vars) => (I18n ? I18n.t(key, vars) : key);
   const TOTAL_STAGES = Store.TOTAL_STAGES;
+  const STORY1_END = 15;
 
   // UI Elements
   const introLayer = document.getElementById('introLayer');
@@ -79,6 +83,8 @@ window.Game = window.Game || {};
   const btnPauseMenu = document.getElementById('btnPauseMenu');
   const btnDimBg = document.getElementById('btnDimBg');
   const btnMusic = document.getElementById('btnMusic');
+  const btnHudMusic = document.getElementById('btnHudMusic');
+  const hudMusicIcon = document.getElementById('hudMusicIcon');
   const btnAudio = document.getElementById('btnAudio');
   const btnGuide = document.getElementById('btnGuide');
   const guidePanel = document.getElementById('guidePanel');
@@ -171,10 +177,11 @@ window.Game = window.Game || {};
       captionEl.classList.add('hidden');
     }
   }
+  let activeIntroCaptionKey = 'intro';
   if (introVideo) {
-    introVideo.addEventListener('timeupdate', () => updateVideoCaption(introVideo, introCaption, 'intro'));
-    introVideo.addEventListener('loadeddata', () => updateVideoCaption(introVideo, introCaption, 'intro'));
-    introVideo.addEventListener('play', () => updateVideoCaption(introVideo, introCaption, 'intro'));
+    introVideo.addEventListener('timeupdate', () => updateVideoCaption(introVideo, introCaption, activeIntroCaptionKey));
+    introVideo.addEventListener('loadeddata', () => updateVideoCaption(introVideo, introCaption, activeIntroCaptionKey));
+    introVideo.addEventListener('play', () => updateVideoCaption(introVideo, introCaption, activeIntroCaptionKey));
   }
   if (gameOverVideo) {
     gameOverVideo.addEventListener('timeupdate', () => updateVideoCaption(gameOverVideo, gameOverCaption, 'gameover'));
@@ -294,10 +301,18 @@ window.Game = window.Game || {};
 
   function syncCoinDisplays(animateHud = false) {
     const coins = Store.getCoins();
+    const visibleStages = Store.getVisibleStages ? Store.getVisibleStages() : TOTAL_STAGES;
     if (menuCoinsCount) menuCoinsCount.textContent = String(coins);
     if (hudCoinsCount) hudCoinsCount.textContent = String(coins);
     if (shopCoinsCount) shopCoinsCount.textContent = String(coins);
-    if (menuStarsCount) menuStarsCount.textContent = `${Store.getTotalStars()}/${TOTAL_STAGES * 3}`;
+    if (menuStarsCount) menuStarsCount.textContent = `${Store.getTotalStars()}/${visibleStages * 3}`;
+    const brandSub = document.querySelector('.brand-sub');
+    if (brandSub) {
+      const isEn = I18n && I18n.getLang && I18n.getLang() === 'en';
+      brandSub.textContent = isEn
+        ? `Seven Lives • ${visibleStages} Stages`
+        : `سبعة أرواح • ${visibleStages} مرحلة`;
+    }
     if (shopBadgeDot) shopBadgeDot.classList.toggle('hidden', !hasShopNotification());
     if (animateHud && hudCoinsCard) {
       hudCoinsCard.classList.remove('pop');
@@ -320,7 +335,14 @@ window.Game = window.Game || {};
       }
     }
 
-    for (let s = 1; s <= TOTAL_STAGES; s++) {
+    const visibleStages = Store.getVisibleStages ? Store.getVisibleStages() : TOTAL_STAGES;
+    for (let s = 1; s <= visibleStages; s++) {
+      if (s === 1 || s === STORY1_END + 1) {
+        const hdr = document.createElement('div');
+        hdr.className = 'level-chapter-header' + (s > STORY1_END ? ' chapter-2' : '');
+        hdr.textContent = s === 1 ? t('chapter_1_title') : t('chapter_2_title');
+        levelGrid.appendChild(hdr);
+      }
       const locked = s > maxUnlocked;
       const cleared = Store.isStageCleared(s);
       const isCurrent = s === nextPlayStage && !cleared;
@@ -378,55 +400,137 @@ window.Game = window.Game || {};
   }
 
   function startStageFromMenu(stageNum) {
+    const visibleStages = Store.getVisibleStages ? Store.getVisibleStages() : TOTAL_STAGES;
+    if (stageNum > visibleStages) return;
     startOverlay.classList.add('hidden');
     initLevel(stageNum);
     if (stageNum === 1) {
       startIntroSequence();
+    } else if (stageNum === STORY1_END + 1) {
+      startSeason2IntroSequence();
     } else {
       enterGameplay();
     }
   }
 
-  // Universal Checkpoint Safe Zone Enforcement (guarantees 100% of checkpoints in Stages 1-15 remain completely hazard-free!)
+  // Universal Checkpoint Safe Zone Enforcement (guarantees 100% of checkpoints in ALL Stages 1-23 remain completely enemy-free & hazard-free!)
+  const CP_SAFE_HALF_W = 108;
+
   function isInCheckpointSafeZone(lv, x, y, w = 48, h = 40) {
     if (!lv || !lv.checkpoints) return null;
     const cx = x + w / 2;
     const bottomY = y + h;
     for (const cp of lv.checkpoints) {
-      const cpCx = cp.x + 18;
+      const cpCx = cp.x + 20;
       const cpBottom = cp.y + 32;
-      if (Math.abs(bottomY - cpBottom) < 75 && Math.abs(cx - cpCx) < 96) {
+      if (Math.abs(bottomY - cpBottom) < 80 && Math.abs(cx - cpCx) < CP_SAFE_HALF_W) {
         return cp;
       }
     }
     return null;
   }
 
+  // Runtime barrier ensuring no moving, chasing, repelled, distracted, rolling, or swooping enemy can ever enter a checkpoint zone
+  function guardCheckpointZone(lv, e, isCenterBased = false) {
+    if (!lv || !lv.checkpoints || !e) return;
+    if (isCenterBased && e.x === undefined) return;
+    const ew = isCenterBased ? (e.r || 18) * 2 : (e.w || 44);
+    const eh = isCenterBased ? (e.r || 18) * 2 : (e.h || 38);
+    const left = isCenterBased ? e.x - ew * 0.5 : e.x;
+    const rawY = isCenterBased
+      ? (e.curY !== undefined ? e.curY : e.y) - eh * 0.5
+      : (e.y !== undefined ? e.y : (e.baseY || 0)) - (e.hopY || 0);
+
+    for (const cp of lv.checkpoints) {
+      const cpCx = cp.x + 20;
+      const cpTop = cp.y - 82;
+      const cpBottom = cp.y + 52;
+      if (rawY + eh < cpTop || rawY > cpBottom) continue;
+
+      const zoneLeft = cpCx - CP_SAFE_HALF_W;
+      const zoneRight = cpCx + CP_SAFE_HALF_W;
+      if (left + ew > zoneLeft && left < zoneRight) {
+        const enemyCx = left + ew * 0.5;
+        if (enemyCx <= cpCx) {
+          const clampedLeft = zoneLeft - ew;
+          e.x = isCenterBased ? clampedLeft + ew * 0.5 : clampedLeft;
+          e.facing = -1;
+          if (e.vx !== undefined) e.vx = -Math.abs(e.vx);
+          if (e.dir !== undefined) e.dir = -1;
+          if (e.repelTimer > 0) e.repelDir = -1;
+        } else {
+          const clampedLeft = zoneRight;
+          e.x = isCenterBased ? clampedLeft + ew * 0.5 : clampedLeft;
+          e.facing = 1;
+          if (e.vx !== undefined) e.vx = Math.abs(e.vx);
+          if (e.dir !== undefined) e.dir = 1;
+          if (e.repelTimer > 0) e.repelDir = 1;
+        }
+        if (e.alert) e.alert = false;
+        if (e.state === 'alert' || e.state === 'distracted') e.state = 'patrol';
+        if (e.awake) {
+          e.awake = false;
+          if (e.homeX !== undefined) e.returning = Math.abs(e.homeX - e.x) > 3;
+        }
+        if (e.swooping) {
+          e.swooping = false;
+          if (e.baseY !== undefined) e.y = e.baseY;
+        }
+        if (isCenterBased && e.waiting !== undefined) {
+          e.waiting = true;
+          e.waitTimer = e.respawnDelay || 1.4;
+        }
+      }
+    }
+  }
+  window.Game.guardCheckpointZone = guardCheckpointZone;
+
   function enforceCheckpointSafeZones(lv) {
     if (!lv || !lv.checkpoints) return;
-    const patrolLists = [
-      lv.dogs, lv.hedgehogs, lv.crabs, lv.rats, lv.raccoons, lv.porcupines,
-      lv.security_bots, lv.foxes, lv.clockwork_beetles, lv.skunks,
-      lv.badgers, lv.bridge_rovers, lv.dobermans, lv.rival_cats, lv.hover_saws,
-      lv.crows, lv.pigeons, lv.seagulls, lv.bats, lv.owls, lv.pelicans, lv.hawks, lv.drones, lv.bees,
+
+    // 1. Standard minX..maxX Ground Patrols, Chasers, & Flyers across ALL 24 Stages
+    const patrolEntries = [
+      { list: lv.dogs }, { list: lv.hedgehogs }, { list: lv.crabs }, { list: lv.rats },
+      { list: lv.raccoons }, { list: lv.porcupines }, { list: lv.security_bots },
+      { list: lv.foxes, hop: 46 }, { list: lv.clockwork_beetles }, { list: lv.skunks, extraX: 58 },
+      { list: lv.badgers }, { list: lv.bridge_rovers }, { list: lv.dobermans },
+      { list: lv.rival_cats }, { list: lv.hover_saws }, { list: lv.penguins },
+      { list: lv.seals, hop: 28 }, { list: lv.unicycle_monkeys }, { list: lv.circus_clowns },
+      { list: lv.sleeping_lions }, { list: lv.scorpions }, { list: lv.sand_vipers },
+      { list: lv.desert_falcons, swoop: 160 }, { list: lv.dust_devils },
+      { list: lv.tanuki_rascals }, { list: lv.shiba_guards }, { list: lv.samurai_crows, swoop: 160 },
+      { list: lv.rail_inspectors }, { list: lv.mail_owls },
+      { list: lv.carnival_jesters }, { list: lv.canal_crabs }, { list: lv.venice_gulls },
+      { list: lv.paris_poodles }, { list: lv.paris_bakers }, { list: lv.paris_pigeons },
+      { list: lv.morocco_monkeys }, { list: lv.morocco_merchants }, { list: lv.morocco_storks },
+      { list: lv.maya_jaguars }, { list: lv.maya_warriors }, { list: lv.maya_quetzals, swoop: 150 },
+      { list: lv.greece_goats }, { list: lv.greece_hoplites }, { list: lv.greece_owls, swoop: 0 },
+      { list: lv.battir_porcupines }, { list: lv.battir_hyraxes }, { list: lv.battir_kestrels, swoop: 0 },
+      { list: lv.crows }, { list: lv.pigeons }, { list: lv.seagulls },
+      { list: lv.falcons }, { list: lv.bats }, { list: lv.owls },
+      { list: lv.pelicans }, { list: lv.hawks }, { list: lv.drones },
     ];
-    for (const list of patrolLists) {
+
+    for (const entry of patrolEntries) {
+      const list = entry.list;
       if (!list) continue;
+      const extraX = entry.extraX || 0;
       for (let i = list.length - 1; i >= 0; i--) {
         const e = list[i];
         if (e.minX === undefined || e.maxX === undefined) continue;
         const ew = e.w || 48;
         const eh = e.h || 40;
         const baseEy = e.baseY !== undefined ? e.baseY : e.y;
-        const maxSwoop = e.amp || e.dip || 0;
+        const downSwoop = Math.max(e.amp || 0, e.dip || 0, e.bobAmp || 0, e.ampY || 0, entry.swoop || 0);
+        const upReach = Math.max(e.amp || 0, e.bobAmp || 0, e.ampY || 0, entry.hop || 0);
         for (const cp of lv.checkpoints) {
-          const cpCx = cp.x + 18;
+          const cpCx = cp.x + 20;
           const cpBottom = cp.y + 32;
-          const lowBottom = baseEy + maxSwoop + eh;
-          const highTop = baseEy - maxSwoop;
-          if (lowBottom < cp.y - 68 || highTop > cpBottom + 48) continue;
-          const safeLeft = cpCx - 98 - ew;
-          const safeRight = cpCx + 98;
+          const lowBottom = baseEy + downSwoop + eh;
+          const highTop = baseEy - upReach;
+          if (lowBottom < cp.y - 82 || highTop > cpBottom + 50) continue;
+          const safeLeft = cpCx - CP_SAFE_HALF_W - extraX - ew;
+          const safeRight = cpCx + CP_SAFE_HALF_W + extraX;
           if (e.maxX > safeLeft && e.minX < safeRight) {
             const leftRoom = safeLeft - e.minX;
             const rightRoom = e.maxX - safeRight;
@@ -435,17 +539,115 @@ window.Game = window.Game || {};
             } else {
               e.maxX = Math.min(e.maxX, safeLeft);
             }
-            // If remaining patrol span is too narrow (< 45px), remove the enemy so it never glitches/vibrates!
             if (e.maxX - e.minX < 45) {
               list.splice(i, 1);
               break;
             }
             if (e.x < e.minX) e.x = e.minX;
             if (e.x > e.maxX) e.x = e.maxX;
+            if (e.homeX !== undefined) {
+              e.homeX = Math.max(e.minX, Math.min(e.maxX, e.homeX));
+            }
           }
         }
       }
     }
+
+    // 2. Center-based Rolling & Hopping Hazards (snowballs, daruma_rollers, coal_sparks)
+    const rollerLists = [lv.snowballs, lv.daruma_rollers, lv.coal_sparks];
+    for (const list of rollerLists) {
+      if (!list) continue;
+      for (let i = list.length - 1; i >= 0; i--) {
+        const rObj = list[i];
+        const rad = rObj.r || 18;
+        const topY = rObj.y - rad - 28;
+        const botY = rObj.y + rad;
+        for (const cp of lv.checkpoints) {
+          const cpCx = cp.x + 20;
+          if (botY < cp.y - 82 || topY > cp.y + 82) continue;
+          const safeLeft = cpCx - CP_SAFE_HALF_W - rad;
+          const safeRight = cpCx + CP_SAFE_HALF_W + rad;
+          if (rObj.maxX > safeLeft && rObj.minX < safeRight) {
+            const leftRoom = safeLeft - rObj.minX;
+            const rightRoom = rObj.maxX - safeRight;
+            if (rightRoom >= leftRoom) {
+              rObj.minX = Math.max(rObj.minX, safeRight);
+            } else {
+              rObj.maxX = Math.min(rObj.maxX, safeLeft);
+            }
+            if (rObj.maxX - rObj.minX < 65) {
+              list.splice(i, 1);
+              break;
+            }
+            if (rObj.startX !== undefined) {
+              rObj.startX = (rObj.dir || -1) < 0 ? rObj.maxX : rObj.minX;
+            }
+            if (rObj.x !== undefined) {
+              rObj.x = Math.max(rObj.minX, Math.min(rObj.maxX, rObj.x));
+            }
+          }
+        }
+      }
+    }
+
+    // 3. Figure-8 Oscillating Flyers (bees, luna_moths using baseX / rx)
+    const oscLists = [lv.bees, lv.luna_moths];
+    for (const list of oscLists) {
+      if (!list) continue;
+      for (let i = list.length - 1; i >= 0; i--) {
+        const b = list[i];
+        const rx = b.rx || 115;
+        const ry = b.ry || 38;
+        const bw = b.w || 36;
+        const bh = b.h || 32;
+        for (const cp of lv.checkpoints) {
+          const cpCx = cp.x + 20;
+          if (b.baseY + ry + bh < cp.y - 82 || b.baseY - ry > cp.y + 82) continue;
+          const minBx = b.baseX - rx;
+          const maxBx = b.baseX + rx + bw;
+          const zoneL = cpCx - CP_SAFE_HALF_W;
+          const zoneR = cpCx + CP_SAFE_HALF_W;
+          if (maxBx > zoneL && minBx < zoneR) {
+            if (b.baseX <= cpCx) {
+              b.baseX = zoneL - bw - rx;
+            } else {
+              b.baseX = zoneR + rx;
+            }
+            if (b.baseX < 120 || b.baseX > (lv.width || 5000) - 120) {
+              list.splice(i, 1);
+              break;
+            }
+            b.x = b.baseX;
+          }
+        }
+      }
+    }
+
+    // 4. Stationary / Vertical / Sweeping Hazards near Checkpoints
+    const trimNearCp = (list, getBounds) => {
+      if (!list) return;
+      for (let i = list.length - 1; i >= 0; i--) {
+        const b = getBounds(list[i]);
+        for (const cp of lv.checkpoints) {
+          const cpCx = cp.x + 20;
+          if (b.bottom < cp.y - 82 || b.top > cp.y + 82) continue;
+          if (b.right > cpCx - CP_SAFE_HALF_W && b.left < cpCx + CP_SAFE_HALF_W) {
+            list.splice(i, 1);
+            break;
+          }
+        }
+      }
+    };
+    trimNearCp(lv.venus_traps, (v) => ({ left: v.x - 10, right: v.x + (v.w || 40) + 10, top: v.y - 26, bottom: v.y + (v.h || 36) }));
+    trimNearCp(lv.fire_hoops, (f) => ({ left: f.x - (f.r || 36), right: f.x + (f.r || 36), top: f.y - (f.r || 36), bottom: f.y + (f.r || 36) }));
+    trimNearCp(lv.falling_icicles, (ic) => ({ left: ic.x - 16, right: ic.x + 16, top: ic.y, bottom: ic.floorY || ic.y + 260 }));
+    trimNearCp(lv.cyber_spiders, (sp) => ({ left: sp.x, right: sp.x + (sp.w || 36), top: sp.topY, bottom: sp.topY + (sp.dropDist || 180) + (sp.h || 32) }));
+    trimNearCp(lv.tentacles, (t) => ({ left: t.x - 24, right: t.x + 24, top: t.baseY - (t.maxH || 130), bottom: t.baseY }));
+    trimNearCp(lv.leaping_fish, (f) => ({ left: f.x - 24, right: f.x + 24, top: f.baseY - (f.jumpH || 220), bottom: f.baseY }));
+    trimNearCp(lv.sweeping_lasers, (l) => {
+      const span = Math.sin(l.sweep || 0.65) * (l.len || 240);
+      return { left: l.x - span, right: l.x + span, top: l.y, bottom: l.y + (l.len || 240) };
+    });
   }
 
   function initLevel(stageNum) {
@@ -459,6 +661,17 @@ window.Game = window.Game || {};
 
     catCtrl = window.Game.Cat(level.startX, level.startY);
     catCtrl.applyUpgrades(Store.getBonuses(), false);
+    catCtrl.cat.winterOutfit = !!level.winterOutfit;
+    catCtrl.cat.circusOutfit = !!level.circusOutfit;
+    catCtrl.cat.desertOutfit = !!level.desertOutfit;
+    catCtrl.cat.japanOutfit = !!level.japanOutfit;
+    catCtrl.cat.conductorOutfit = !!level.conductorOutfit;
+    catCtrl.cat.veniceOutfit = !!level.veniceOutfit;
+    catCtrl.cat.parisOutfit = !!level.parisOutfit;
+    catCtrl.cat.moroccoOutfit = !!level.moroccoOutfit;
+    catCtrl.cat.mayaOutfit = !!level.mayaOutfit;
+    catCtrl.cat.greeceOutfit = !!level.greeceOutfit;
+    catCtrl.cat.battirOutfit = !!level.battirOutfit;
 
     Particles.clear();
     elapsedTime = 0;
@@ -586,8 +799,11 @@ window.Game = window.Game || {};
   }
 
   function syncToggleButtons() {
+    const mMuted = Audio.isMusicMuted();
     if (btnDimBg) btnDimBg.classList.toggle('active', dimBackground);
-    if (btnMusic) btnMusic.classList.toggle('muted', Audio.isMusicMuted());
+    if (btnMusic) btnMusic.classList.toggle('muted', mMuted);
+    if (btnHudMusic) btnHudMusic.classList.toggle('muted', mMuted);
+    if (hudMusicIcon) hudMusicIcon.textContent = mMuted ? '🔇' : '🎵';
     if (btnAudio) {
       const muted = Audio.isSfxMuted();
       btnAudio.classList.toggle('muted', muted);
@@ -843,6 +1059,8 @@ window.Game = window.Game || {};
     introLayer.classList.add('hidden');
     if (introCaption) introCaption.classList.add('hidden');
     if (introHud) introHud.classList.add('hidden');
+    introVideo.onended = null;
+    introVideo.onerror = null;
     introVideo.pause();
     hud.classList.remove('hidden');
     if (touchControls) touchControls.classList.remove('hidden');
@@ -855,6 +1073,7 @@ window.Game = window.Game || {};
   function startIntroSequence() {
     startOverlay.classList.add('hidden');
     Audio.pauseMusic();
+    activeIntroCaptionKey = 'intro';
     if (introHud) introHud.classList.remove('hidden');
     introVideo.muted = false;
     introVideo.src = 'videos/intro.mp4';
@@ -881,6 +1100,47 @@ window.Game = window.Game || {};
         introVideo.play().catch(fallbackToCanvasIntro);
       });
     }
+  }
+
+  function startSeason2IntroSequence() {
+    startOverlay.classList.add('hidden');
+    Audio.pauseMusic();
+    if (introHud) introHud.classList.remove('hidden');
+    introLayer.classList.remove('hidden');
+    if (introCaption) introCaption.classList.add('hidden');
+
+    const clips = ['videos/introS2-1.mp4', 'videos/introS2-2.mp4'];
+    let idx = 0;
+
+    const playNextClip = () => {
+      if (idx >= clips.length) {
+        enterGameplay();
+        return;
+      }
+      activeIntroCaptionKey = idx === 0 ? 'introS2_1' : 'introS2_2';
+      introVideo.muted = false;
+      introVideo.src = clips[idx];
+      introVideo.currentTime = 0;
+      if (introVideo.load) introVideo.load();
+      updateVideoCaption(introVideo, introCaption, activeIntroCaptionKey);
+
+      const advance = () => {
+        idx += 1;
+        playNextClip();
+      };
+      introVideo.onended = advance;
+      introVideo.onerror = advance;
+
+      const playPromise = introVideo.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => {
+          introVideo.muted = true;
+          introVideo.play().catch(advance);
+        });
+      }
+    };
+
+    playNextClip();
   }
 
   btnSkipIntro.addEventListener('click', enterGameplay);
@@ -943,9 +1203,57 @@ window.Game = window.Game || {};
     repelList(level.bats, true);
     repelList(level.drones, true);
 
-    // Repel all extended Stage 9-15 enemies as well!
+    // Repel all extended Stage 9-24 enemies as well!
     if (EnemiesExt && EnemiesExt.applyMeowRepel) {
       EnemiesExt.applyMeowRepel(level, mx, my, range, Particles);
+    }
+
+    // Shatter nearby Mayan blowgun darts & counter Greek Stage 25 hazards with Repelling Meow!
+    if (level && level.platforms) {
+      const isEn = window.Game.I18n && window.Game.I18n.isEn();
+      for (const p of level.platforms) {
+        if (p.type === 'maya_dart_totem' && p.darts && p.darts.length) {
+          for (let di = p.darts.length - 1; di >= 0; di--) {
+            const d = p.darts[di];
+            if (Math.hypot(mx - d.x, my - d.y) < range) {
+              Particles.spawnDust(d.x, d.y, 8, d.high ? '#38bdf8' : '#fde047');
+              Particles.spawnPopup(d.x, d.y - 10, '💥', '#34d399');
+              p.darts.splice(di, 1);
+            }
+          }
+        } else if (p.type === 'greece_medusa_aegis') {
+          const mCx = p.x + p.w * 0.5, mCy = p.y + p.h * 0.45;
+          if (Math.hypot(mx - mCx, my - mCy) < range + 28 && !(p.stunTimer > 0.2)) {
+            p.stunTimer = 3.2;
+            p.gazeState = 'stunned';
+            Particles.spawnDust(mCx, mCy, 10, '#34d399');
+            Particles.spawnPopup(mCx, p.y - 12, isEn ? '✨ Aegis Blinded!' : '✨ أُغلقت عين ميدوسا!', '#6ee7b7');
+          }
+        } else if (p.type === 'greece_discobolus' && p.discActive && !p.deflected) {
+          if (Math.hypot(mx - (p.discX || 0), my - (p.discY || 0)) < range + 16) {
+            p.deflected = true;
+            p.discActive = false;
+            Particles.spawnDust(p.discX, p.discY, 10, '#fde047');
+            Particles.spawnPopup(p.discX, p.discY - 12, isEn ? '💥 Deflected!' : '💥 ارتدّ القرص!', '#fde047');
+          }
+        } else if (p.type === 'greece_zeus_obelisk' && (p.boltState === 'track' || p.boltState === 'lock')) {
+          const zCx = p.strikeX !== undefined ? p.strikeX : (p.x + p.w * 0.5);
+          if (Math.hypot(mx - zCx, my - (p.y + p.h - 32)) < range + 26) {
+            p.boltState = 'cooldown';
+            p.boltTimer = 2.6;
+            Particles.spawnDust(zCx, p.y - 40, 10, '#7dd3fc');
+            Particles.spawnPopup(zCx, p.y - 16, isEn ? '⚡ Cloud Dispersed!' : '⚡ تبددت الصاعقة!', '#7dd3fc');
+          }
+        } else if (p.type === 'battir_roman_bath_vent') {
+          const bCx = p.x + p.w * 0.5;
+          const bCy = p.y + p.h - 24;
+          if (Math.hypot(mx - bCx, my - bCy) < range + 45) {
+            p.boostTimer = 3.6;
+            Particles.spawnDust(bCx, bCy - 18, 12, '#fef08a');
+            Particles.spawnPopup(bCx, bCy - 36, isEn ? '♨️ Roman Bath Steam!' : '♨️ بخار الحمام الروماني!', '#fde047');
+          }
+        }
+      }
     }
 
     updateHUD();
@@ -987,10 +1295,10 @@ window.Game = window.Game || {};
         const diff = dog.distractX - dogCx;
         if (Math.abs(diff) > 12) {
           dog.facing = diff > 0 ? 1 : -1;
-          dog.x += dog.facing * 85 * dt;
+          dog.x = Math.max(dog.minX, Math.min(dog.maxX, dog.x + dog.facing * 85 * dt));
         }
         if (dog.stateTimer <= 0) dog.state = 'patrol';
-      } else if (dist < sightRange && sameHeight && facingCat && c.invulnTimer <= 0) {
+      } else if (dist < sightRange && sameHeight && facingCat && c.invulnTimer <= 0 && !isInCheckpointSafeZone(level, c.x, c.y, c.w, c.h)) {
         if (dog.state !== 'alert') {
           dog.state = 'alert';
           Audio.playBark();
@@ -1014,6 +1322,8 @@ window.Game = window.Game || {};
           dog.facing = -1;
         }
       }
+
+      guardCheckpointZone(level, dog, false);
 
       if (
         dog.state !== 'repelled' &&
@@ -1039,6 +1349,7 @@ window.Game = window.Game || {};
         const dir = e.repelDir || 1;
         e.facing = dir;
         e.x = Math.max(e.minX, Math.min(e.maxX, e.x + dir * Math.max(195, Math.abs(e.vx) * 2.1) * dt));
+        guardCheckpointZone(level, e, false);
         continue;
       }
       e.x += e.facing * Math.abs(e.vx) * dt;
@@ -1049,6 +1360,7 @@ window.Game = window.Game || {};
         e.x = e.maxX;
         e.facing = -1;
       }
+      guardCheckpointZone(level, e, false);
       if (
         c.x + 6 < e.x + e.w - pad &&
         c.x + c.w - 6 > e.x + pad &&
@@ -1071,6 +1383,7 @@ window.Game = window.Game || {};
         f.x = Math.max(f.minX, Math.min(f.maxX, f.x + dir * Math.max(210, Math.abs(f.vx) * 2.0) * dt));
         const lift = (f.repelLift || -75) * Math.min(1, f.repelTimer / 0.8);
         f.y = f.baseY + lift + Math.sin(timeSec * 8) * 6;
+        guardCheckpointZone(level, f, false);
         continue;
       }
       f.x += f.facing * Math.abs(f.vx) * dt;
@@ -1082,6 +1395,7 @@ window.Game = window.Game || {};
         f.facing = -1;
       }
       f.y = f.baseY + Math.sin(timeSec * (f.freq || 2.5) + f.minX * 0.01) * (f.amp || 18);
+      guardCheckpointZone(level, f, false);
       if (
         c.x + 8 < f.x + f.w - 6 &&
         c.x + c.w - 8 > f.x + 6 &&
@@ -1102,6 +1416,7 @@ window.Game = window.Game || {};
         const dir = rat.repelDir || 1;
         rat.facing = dir;
         rat.x = Math.max(rat.minX, Math.min(rat.maxX, rat.x + dir * 215 * dt));
+        guardCheckpointZone(level, rat, false);
         continue;
       }
       const sameHeight = Math.abs(c.y + c.h - (rat.y + rat.h)) < 45;
@@ -1115,6 +1430,7 @@ window.Game = window.Game || {};
         rat.x = rat.maxX;
         rat.facing = -1;
       }
+      guardCheckpointZone(level, rat, false);
       if (
         c.x + 6 < rat.x + rat.w - 4 &&
         c.x + c.w - 6 > rat.x + 4 &&
@@ -1154,6 +1470,251 @@ window.Game = window.Game || {};
           if (c.x + 6 < p.x + p.w - 4 && c.x + c.w - 6 > p.x + 4 && c.y + c.h >= p.y - 18 && c.y <= p.y + p.h) {
             onCatHit(p.type === 'laser_grid' ? 'شعاع ليزر! -1 ❤️' : 'شرارة لحام! -1 ❤️');
           }
+        }
+      } else if (p.type === 'pendulum_censer') {
+        const ang = Math.sin(timeSec * (p.swingSpeed || 2.0) + (p.phase || 0)) * (p.maxAngle || 0.90);
+        const len = p.chainLen || 168;
+        const px0 = p.pivotX !== undefined ? p.pivotX : p.x + p.w / 2;
+        const py0 = p.pivotY !== undefined ? p.pivotY : p.y;
+        const bx = px0 + Math.sin(ang) * len;
+        const by = py0 + Math.cos(ang) * len;
+        p.bobX = bx;
+        p.bobY = by;
+        p.curAngle = ang;
+        const topY = c.crouching ? c.y + 18 : c.y + 6;
+        const nearX = Math.max(c.x + 6, Math.min(bx, c.x + c.w - 6));
+        const nearY = Math.max(topY, Math.min(by, c.y + c.h - 4));
+        if (Math.hypot(bx - nearX, by - nearY) < (p.bobR || 22) - 3) {
+          onCatHit('مبخرة متأرجحة! -1 ❤️');
+        }
+      } else if (p.type === 'carnival_bell_swing') {
+        const ang = Math.sin(timeSec * (p.swingSpeed || 1.9) + (p.phase || 0)) * (p.maxAngle || 0.84);
+        const len = p.chainLen || 182;
+        const px0 = p.pivotX !== undefined ? p.pivotX : p.x + p.w / 2;
+        const py0 = p.pivotY !== undefined ? p.pivotY : p.y;
+        const bx = px0 + Math.sin(ang) * len;
+        const by = py0 + Math.cos(ang) * len;
+        p.bobX = bx; p.bobY = by; p.curAngle = ang;
+        const topY = c.crouching ? c.y + 18 : c.y + 6;
+        const nearX = Math.max(c.x + 6, Math.min(bx, c.x + c.w - 6));
+        const nearY = Math.max(topY, Math.min(by, c.y + c.h - 4));
+        if (Math.hypot(bx - nearX, by - nearY) < (p.bobR || 23) - 3) {
+          onCatHit('جرس البندقية المتأرجح! -1 ❤️');
+        }
+      } else if (p.type === 'maya_dart_totem') {
+        // Carved Mayan Chaac Blowgun Totem: alternates LOW (jump over!) & HIGH (crouch/sneak under!) obsidian darts!
+        if (!p.darts) p.darts = [];
+        const period = p.period || 2.35;
+        const cyc = (timeSec + (p.phase || 0)) % period;
+        const shotIdx = Math.floor((timeSec + (p.phase || 0)) / period);
+        const nextIsHigh = p.dartMode === 'high' ? true : p.dartMode === 'low' ? false : (shotIdx % 2 === 1);
+        p.warnHigh = nextIsHigh;
+        p.warnRatio = cyc >= period - 0.62 ? (cyc - (period - 0.62)) / 0.62 : 0;
+        if (p.lastShotIdx === undefined) p.lastShotIdx = shotIdx;
+        if (shotIdx > p.lastShotIdx) {
+          p.lastShotIdx = shotIdx;
+          const fDir = p.fireDir || -1;
+          const fireHigh = p.dartMode === 'high' ? true : p.dartMode === 'low' ? false : ((shotIdx - 1) % 2 === 1);
+          const muzzleX = fDir > 0 ? p.x + p.w + 4 : p.x - 4;
+          const muzzleY = fireHigh ? (p.y + p.h - 49) : (p.y + p.h - 19);
+          p.darts.push({
+            x: muzzleX,
+            y: muzzleY,
+            startX: muzzleX,
+            vx: fDir * (p.dartSpeed || 305),
+            high: fireHigh,
+            maxDist: p.maxRange || 430,
+          });
+          p.muzzleFlash = 1.0;
+        }
+        if (p.muzzleFlash > 0) p.muzzleFlash = Math.max(0, p.muzzleFlash - dt * 4.5);
+
+        const catTop = c.crouching ? c.y + 22 : c.y + 5;
+        const catBot = c.y + c.h - 3;
+        for (let di = p.darts.length - 1; di >= 0; di--) {
+          const d = p.darts[di];
+          d.x += d.vx * dt;
+          if (
+            Math.abs(d.x - d.startX) >= d.maxDist ||
+            isInCheckpointSafeZone(level, d.x - 12, d.y - 6, 24, 12)
+          ) {
+            p.darts.splice(di, 1);
+            continue;
+          }
+          if (
+            d.x + 11 > c.x + 7 &&
+            d.x - 11 < c.x + c.w - 7 &&
+            d.y + 4 > catTop &&
+            d.y - 4 < catBot
+          ) {
+            Particles.spawnDust(d.x, d.y, 7, d.high ? '#38bdf8' : '#fde047');
+            p.darts.splice(di, 1);
+            onCatHit('سهم الأوبسيديان! -1 ❤️');
+          }
+        }
+      } else if (p.type === 'greece_medusa_aegis') {
+        // 1. GORGONEION MEDUSA AEGIS: Gaze-check petrification cone! Look away (turn back), crouch low, or Meow to counter!
+        if (p.stunTimer > 0) {
+          p.stunTimer = Math.max(0, p.stunTimer - dt);
+          p.gazeState = 'stunned';
+          p.gazeRatio = 0;
+        } else {
+          const period = p.period || 4.5;
+          const cyc = (timeSec + (p.phase || 0)) % period;
+          const cycIdx = Math.floor((timeSec + (p.phase || 0)) / period);
+          if (cyc < 2.15) {
+            p.gazeState = 'dormant';
+            p.gazeRatio = 0;
+          } else if (cyc < 3.05) {
+            p.gazeState = 'warn';
+            p.gazeRatio = (cyc - 2.15) / 0.90;
+          } else {
+            p.gazeState = 'active';
+            p.gazeRatio = 1;
+            const gDir = p.gazeDir || -1;
+            const gRange = p.gazeRange || 220;
+            const eyeX = gDir < 0 ? p.x + 4 : p.x + p.w - 4;
+            const minX = gDir < 0 ? eyeX - gRange : eyeX;
+            const maxX = gDir < 0 ? eyeX : eyeX + gRange;
+            const catCx = c.x + c.w * 0.5;
+            const catTop = c.crouching ? c.y + 22 : c.y + 5;
+            const beamBot = p.y + p.h - 28; // Standing catTop (groundY-39) is inside; crouching catTop (groundY-22) ducks safely below!
+            const beamTop = p.y - 6;
+            if (catCx > minX + 8 && catCx < maxX - 6 && catTop < beamBot && c.y + c.h > beamTop) {
+              if (c.facing === -gDir) {
+                // Mashmasha is looking straight into Medusa's eyes!
+                Particles.spawnDust(catCx, c.y + 18, 9, '#a7f3d0');
+                onCatHit('نظرة ميدوسا المتحجرة! أشِح بنظرك أو انحنِ -1 ❤️');
+              } else if (p.evadedCycle !== cycIdx) {
+                // Clever counterplay: Mashmasha turned her back to Medusa's gaze!
+                p.evadedCycle = cycIdx;
+                const isEn = window.Game.I18n && window.Game.I18n.isEn();
+                Particles.spawnPopup(catCx, c.y - 12, isEn ? '🙈 Looked Away!' : '🙈 أشاحت بنظرها!', '#6ee7b7');
+              }
+            }
+          }
+        }
+      } else if (p.type === 'greece_discobolus') {
+        // 2. OLYMPIC BRONZE DISCOBOLUS: Hurls a Boomerang Discus LOW outward (jump!) that curves UP and sweeps HIGH back (crouch/duck!)
+        const period = p.period || 3.9;
+        const cyc = (timeSec + (p.phase || 0)) % period;
+        const throwIdx = Math.floor((timeSec + (p.phase || 0)) / period);
+        if (p.lastThrowIdx !== throwIdx) {
+          p.lastThrowIdx = throwIdx;
+          p.deflected = false;
+        }
+        const tDir = p.throwDir || -1;
+        const dist = p.throwDist || 255;
+        const floorY = p.y + p.h;
+        const handX = p.x + p.w * 0.5 + tDir * 16;
+
+        if (cyc < 0.85 || p.deflected || cyc >= 3.55) {
+          p.pose = 'idle';
+          p.windupRatio = 0;
+          p.discActive = false;
+        } else if (cyc < 1.55) {
+          p.pose = 'windup';
+          p.windupRatio = (cyc - 0.85) / 0.70;
+          p.discActive = false;
+        } else {
+          const u = (cyc - 1.55) / 2.00; // 0..1 boomerang flight
+          p.pose = u < 0.78 ? 'throw' : 'catch';
+          p.discActive = true;
+          p.discU = u;
+          const reach = Math.sin(u * Math.PI) * dist;
+          const highBlend = u < 0.34 ? 0 : u > 0.64 ? 1 : (u - 0.34) / 0.30;
+          const smoothHigh = highBlend * highBlend * (3 - 2 * highBlend);
+          // Outward pass: floorY - 18 (jump over!); Return pass: floorY - 38 (crouch/sneak under!)
+          p.discX = handX + tDir * reach;
+          p.discY = (floorY - 18) - smoothHigh * 20;
+          p.discHigh = smoothHigh > 0.55;
+          p.discRot = timeSec * 18 * tDir;
+
+          if (!isInCheckpointSafeZone(level, p.discX - 16, p.discY - 8, 32, 16)) {
+            const catTop = c.crouching ? c.y + 22 : c.y + 5;
+            const catBot = c.y + c.h - 3;
+            if (
+              p.discX + 14 > c.x + 7 &&
+              p.discX - 14 < c.x + c.w - 7 &&
+              p.discY + 5.5 > catTop &&
+              p.discY - 5.5 < catBot
+            ) {
+              Particles.spawnDust(p.discX, p.discY, 8, '#fde047');
+              p.deflected = true;
+              p.discActive = false;
+              onCatHit('القرص الأولمبي المرتدّ! -1 ❤️');
+            }
+          }
+        }
+      } else if (p.type === 'greece_zeus_obelisk') {
+        // 3. ALTAR OF ZEUS OBELISK: Summons a sky-tracking storm cloud that locks onto floor X, telegraphs, then strikes vertically!
+        if (!p.boltState) {
+          p.boltState = 'idle';
+          p.boltTimer = 0;
+          p.strikeX = p.x + p.w * 0.5;
+        }
+        const obCx = p.x + p.w * 0.5;
+        const floorY = p.y + p.h;
+        const zRad = p.zoneRadius || 210;
+        const catCx = c.x + c.w * 0.5;
+        const inZone = Math.abs(catCx - obCx) <= zRad && Math.abs((c.y + c.h) - floorY) < 190;
+
+        if (p.boltState === 'idle') {
+          if (inZone) {
+            p.boltState = 'track';
+            p.boltTimer = 0.48;
+            p.strikeX = Math.max(obCx - zRad + 20, Math.min(obCx + zRad - 20, catCx));
+          }
+        } else if (p.boltState === 'track') {
+          const targetX = Math.max(obCx - zRad + 20, Math.min(obCx + zRad - 20, catCx));
+          p.strikeX += (targetX - p.strikeX) * Math.min(1, dt * 8.5);
+          p.boltTimer -= dt;
+          if (p.boltTimer <= 0) {
+            p.boltState = 'lock';
+            p.boltTimer = 0.66; // Stationary golden warning ring so player can dash/jump clear!
+          }
+        } else if (p.boltState === 'lock') {
+          p.boltTimer -= dt;
+          p.lockRatio = 1 - Math.max(0, p.boltTimer / 0.66);
+          if (p.boltTimer <= 0) {
+            p.boltState = 'strike';
+            p.boltTimer = 0.36;
+            Particles.spawnDust(p.strikeX, floorY - 6, 12, '#fef08a');
+          }
+        } else if (p.boltState === 'strike') {
+          p.boltTimer -= dt;
+          p.strikeAlpha = Math.max(0, p.boltTimer / 0.36);
+          if (
+            p.boltTimer > 0.08 &&
+            !isInCheckpointSafeZone(level, p.strikeX - 22, floorY - 220, 44, 220) &&
+            Math.abs(catCx - p.strikeX) < 22 &&
+            c.y + c.h > floorY - 245 &&
+            c.y < floorY + 8
+          ) {
+            onCatHit('صاعقة زيوس السماوية! -1 ❤️');
+          }
+          if (p.boltTimer <= 0) {
+            p.boltState = 'cooldown';
+            p.boltTimer = p.cooldown || 2.5;
+          }
+        } else if (p.boltState === 'cooldown') {
+          p.boltTimer -= dt;
+          if (p.boltTimer <= 0) p.boltState = 'idle';
+        }
+      } else if (p.type === 'battir_stone_roller') {
+        const prevX = p.x;
+        if (p.dir === undefined) p.dir = -1;
+        const spd = p.speed || 135;
+        p.x += p.dir * spd * dt;
+        if (p.x <= p.minX) { p.x = p.minX; p.dir = 1; }
+        else if (p.x >= p.maxX) { p.x = p.maxX; p.dir = -1; }
+        const dx = p.x - prevX;
+        p.wheelRot = (p.wheelRot || 0) + dx / Math.max(12, p.w * 0.5);
+        const r = p.w * 0.5;
+        const rCx = p.x + r, rCy = p.y + r;
+        const catCx2 = c.x + c.w * 0.5, catCy2 = c.y + c.h * 0.5;
+        if (!isInCheckpointSafeZone(level, p.x, p.y, p.w, p.h) && Math.hypot(catCx2 - rCx, catCy2 - rCy) < r + 14) {
+          onCatHit('حجر معصرة الزيتون في بتّير! -1 ❤️');
         }
       }
     }
@@ -1272,15 +1833,21 @@ window.Game = window.Game || {};
   // =========================================================================
   function showVictoryOverlay(reward) {
     endOverlay.classList.remove('hidden');
-    const isFinal = currentStage === TOTAL_STAGES;
+    const isStory1Final = currentStage === STORY1_END;
+    const isWorldFinal = currentStage === TOTAL_STAGES;
+    const isFinal = isStory1Final || isWorldFinal;
     btnNextStage.classList.toggle('hidden', isFinal);
     if (!isFinal) {
       btnNextStage.textContent = t('end_next_stage', { n: currentStage + 1 });
     }
     endBadge.textContent = isFinal
-      ? t('end_final_badge', { n: TOTAL_STAGES })
+      ? t('end_final_badge', { n: currentStage })
       : t('end_stage_done', { n: currentStage });
-    endTitle.textContent = isFinal ? t('end_title_final') : t('end_title_win');
+    endTitle.textContent = isStory1Final
+      ? t('end_title_final')
+      : isWorldFinal
+      ? t('end_title_world_final')
+      : t('end_title_win');
 
     // Animate 3 golden stars
     if (endStarsRow) {
@@ -1319,8 +1886,8 @@ window.Game = window.Game || {};
       const reward = Store.recordStageClear(currentStage, collectedTreats);
       renderLevelGrid();
 
-      if (currentStage === TOTAL_STAGES) {
-        // Grand Finale Stage 15 plays Win1.mp4 -> Win2.mp4!
+      if (currentStage === STORY1_END) {
+        // Grand Finale of Story 1 (Stage 15) plays Win1.mp4 -> Win2.mp4!
         Audio.pauseMusic();
         endOverlay.classList.add('hidden');
         hud.classList.add('hidden');
@@ -1558,6 +2125,39 @@ window.Game = window.Game || {};
     } else if (theme === 'homeward') {
       Art.drawHomewardSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
       Art.drawHomewardMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'snow') {
+      Art.drawSnowSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawSnowMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'circus') {
+      Art.drawCircusSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawCircusMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'desert') {
+      Art.drawDesertSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawDesertMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'japan') {
+      Art.drawJapanSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawJapanMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'steam_train') {
+      Art.drawSteamTrainSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawSteamTrainMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'venice') {
+      Art.drawVeniceSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawVeniceMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'paris') {
+      Art.drawParisSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawParisMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'marrakech') {
+      Art.drawMarrakechSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawMarrakechMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'maya') {
+      Art.drawMayaSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawMayaMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'greece') {
+      Art.drawGreeceSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawGreeceMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+    } else if (theme === 'battir') {
+      Art.drawBattirSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawBattirMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
     } else if (theme === 'construction') {
       Art.drawConstructionSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
       Art.drawConstructionMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
@@ -1613,7 +2213,12 @@ window.Game = window.Game || {};
       if (p.bounceAnim && p.bounceAnim > 0) p.bounceAnim = Math.max(0, p.bounceAnim - 0.08);
       const px = p.x - camX;
       const py = p.y - camY + (p.type !== 'flower_bounce' && p.bounceAnim ? Math.sin(p.bounceAnim * Math.PI) * 6 : 0);
-      if (px + p.w < -40 || px > cullW + 40) continue;
+      const pad = (p.type === 'maya_dart_totem' || p.type === 'maya_twin_scale' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk')
+        ? 540
+        : (p.type === 'pendulum_censer' || p.type === 'waterwheel_arm' || p.type === 'pressure_boiler_valve' || p.type === 'switch_rail_bridge' || p.type === 'carnival_bell_swing' || p.type === 'gondola_boat' || p.type === 'moulin_sail_wheel' || p.type === 'paris_balcony_drawbridge' || p.type === 'morocco_lantern_swing' || p.type === 'morocco_magic_carpet' || p.type === 'morocco_cedar_bridge' || p.type === 'maya_vine_swing' || p.type === 'maya_sun_disc' || p.type === 'maya_stone_bridge' || p.type === 'maya_serpent_ring' || p.type === 'maya_rolling_wheel' || p.type === 'maya_serpent_spine' || p.type === 'maya_vault_door' || p.type === 'greece_sun_mirror' || p.type === 'greece_light_bridge' || p.type === 'greece_chariot_track' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_marble_lift' || p.type === 'battir_water_sluice' || p.type === 'battir_canal_raft' || p.type === 'battir_spring_geyser' || p.type === 'battir_olive_bough' || p.type === 'battir_railway_handcar' || p.type === 'battir_stone_roller' || p.type === 'battir_roman_bath_vent' || p.type === 'battir_hosh_arch_swing' || p.type === 'battir_madud_scale')
+        ? 280
+        : 40;
+      if (px + p.w < -pad || px > cullW + pad) continue;
       Art.drawPlatform(ctx, p, px, py, nv, time);
     }
 
@@ -1624,13 +2229,13 @@ window.Game = window.Game || {};
     for (const p of level.puddles) {
       const px = p.x - camX;
       if (px + p.w < -40 || px > cullW + 40) continue;
-      Art.drawPuddle(ctx, px, p.y - camY, p.w, p.h, time, level.theme === 'harbor' || level.theme === 'harbor_storm');
+      Art.drawPuddle(ctx, px, p.y - camY, p.w, p.h, time, level.theme === 'harbor' || level.theme === 'harbor_storm' || level.theme === 'snow');
     }
 
     for (const cp of level.checkpoints) {
       const cx = cp.x - camX;
-      if (cx < -100 || cx > cullW + 100) continue;
-      Art.drawCheckpoint(ctx, cp, cx, cp.y - camY, time);
+      if (cx < -115 || cx > cullW + 115) continue;
+      Art.drawCheckpoint(ctx, cp, cx, cp.y - camY, time, level.theme, currentStage);
     }
 
     // Spinning Gold Coins
@@ -1734,7 +2339,27 @@ window.Game = window.Game || {};
     }
 
     const g = level.goal;
-    Art.drawMarketGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
+    if (level.theme === 'desert' && Art.drawPharaonicMuseumGate) {
+      Art.drawPharaonicMuseumGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
+    } else if (level.theme === 'japan' && Art.drawJapaneseShrineGate) {
+      Art.drawJapaneseShrineGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
+    } else if (level.theme === 'steam_train' && Art.drawGrandTrainStationGate) {
+      Art.drawGrandTrainStationGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
+    } else if (level.theme === 'venice' && Art.drawVenicePiazzaGate) {
+      Art.drawVenicePiazzaGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
+    } else if (level.theme === 'paris' && Art.drawParisArcGate) {
+      Art.drawParisArcGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
+    } else if (level.theme === 'marrakech' && Art.drawMarrakechBabGate) {
+      Art.drawMarrakechBabGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
+    } else if (level.theme === 'maya' && Art.drawMayaTempleGate) {
+      Art.drawMayaTempleGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
+    } else if (level.theme === 'greece' && Art.drawGreeceAcropolisGate) {
+      Art.drawGreeceAcropolisGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
+    } else if (level.theme === 'battir' && Art.drawBattirFinishGate) {
+      Art.drawBattirFinishGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
+    } else {
+      Art.drawMarketGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
+    }
   }
 
   function drawNightVisionOverlay() {
@@ -1786,6 +2411,30 @@ window.Game = window.Game || {};
       updateFlyingEnemies(level.falcons, dt, timeSec, 'انقضاض بومة! -1 ❤️');
       updateFlyingEnemies(level.bats, dt, timeSec, 'خفاش النفق! -1 ❤️');
       updateFlyingEnemies(level.drones, dt, timeSec, 'طائرة مراقبة! -1 ❤️');
+      if (catCtrl.cat.quicksandSunk) {
+        catCtrl.cat.quicksandSunk = false;
+        onCatHit('رمال متحركة! -1 ❤️');
+      }
+      if (catCtrl.cat.crushedByBlock) {
+        catCtrl.cat.crushedByBlock = false;
+        onCatHit('كتلة حجرية ساقطة! -1 ❤️');
+      }
+      if (catCtrl.cat.crushedByPinch) {
+        catCtrl.cat.crushedByPinch = false;
+        onCatHit('بوابة منزلقة! -1 ❤️');
+      }
+      if (catCtrl.cat.hitLowBridge) {
+        catCtrl.cat.hitLowBridge = false;
+        onCatHit('جسر منخفض! انحنِ للتسلل -1 ❤️');
+      }
+      if (catCtrl.cat.scaldedBySteam) {
+        catCtrl.cat.scaldedBySteam = false;
+        onCatHit('بخار القطار الحار! -1 ❤️');
+      }
+      if (catCtrl.cat.prickedByThorns) {
+        catCtrl.cat.prickedByThorns = false;
+        onCatHit('أشواك الغابة! -1 ❤️');
+      }
       const extChasing = EnemiesExt ? EnemiesExt.updateAll(level, catCtrl, dt, timeSec, onCatHit, Audio, Particles) : false;
       Audio.setChaseMode(!!(dogChasing || extChasing));
       updatePlatformHazards(dt, timeSec);
@@ -2097,6 +2746,13 @@ window.Game = window.Game || {};
       syncToggleButtons();
     });
   }
+  if (btnHudMusic) {
+    btnHudMusic.addEventListener('click', () => {
+      Audio.toggleMusicMute();
+      Audio.playUiClick();
+      syncToggleButtons();
+    });
+  }
 
   if (btnAudio) {
     btnAudio.addEventListener('click', () => {
@@ -2127,8 +2783,69 @@ window.Game = window.Game || {};
     }
   });
 
+  // Hidden Season 2 Secret PIN Gate (Unlabeled tiny dot -> 112233)
+  const btnSecretGate = document.getElementById('btnSecretGate');
+  const secretCodeOverlay = document.getElementById('secretCodeOverlay');
+  const secretCodeInput = document.getElementById('secretCodeInput');
+  const btnSecretSubmit = document.getElementById('btnSecretSubmit');
+  const btnSecretCancel = document.getElementById('btnSecretCancel');
+  const SECRET_SEASON2_PIN = '112233';
+
+  function closeSecretGate() {
+    if (secretCodeOverlay) secretCodeOverlay.classList.add('hidden');
+    if (secretCodeInput) {
+      secretCodeInput.value = '';
+      secretCodeInput.classList.remove('shake');
+    }
+  }
+
+  function submitSecretPin() {
+    if (!secretCodeInput) return;
+    const entered = String(secretCodeInput.value || '').trim();
+    if (entered === SECRET_SEASON2_PIN) {
+      const nextState = !(Store.isSeason2Unlocked && Store.isSeason2Unlocked());
+      if (Store.setSeason2Unlocked) Store.setSeason2Unlocked(nextState);
+      if (Audio.playCollect) Audio.playCollect();
+      closeSecretGate();
+      renderLevelGrid();
+      syncCoinDisplays();
+    } else {
+      secretCodeInput.classList.remove('shake');
+      void secretCodeInput.offsetWidth;
+      secretCodeInput.classList.add('shake');
+      secretCodeInput.value = '';
+      haptic(25);
+    }
+  }
+
+  if (btnSecretGate && secretCodeOverlay) {
+    btnSecretGate.addEventListener('click', () => {
+      Audio.ensureCtx();
+      secretCodeOverlay.classList.remove('hidden');
+      if (secretCodeInput) {
+        secretCodeInput.value = '';
+        secretCodeInput.classList.remove('shake');
+        setTimeout(() => secretCodeInput.focus(), 40);
+      }
+    });
+  }
+  if (btnSecretSubmit) btnSecretSubmit.addEventListener('click', submitSecretPin);
+  if (btnSecretCancel) btnSecretCancel.addEventListener('click', closeSecretGate);
+  if (secretCodeOverlay) {
+    secretCodeOverlay.addEventListener('click', (e) => {
+      if (e.target === secretCodeOverlay) closeSecretGate();
+    });
+  }
+  if (secretCodeInput) {
+    secretCodeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); submitSecretPin(); }
+      else if (e.key === 'Escape') { e.preventDefault(); closeSecretGate(); }
+    });
+  }
+
   // Boot
   refreshAllLocalizedUI();
+  syncToggleButtons();
   initLevel(1);
   requestAnimationFrame(loop);
 })();

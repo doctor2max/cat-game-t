@@ -3,7 +3,7 @@ window.Game = window.Game || {};
 window.Game.Audio = (function () {
   let ctx = null;
   let sfxMuted = false;
-  let musicMuted = false;
+  let musicMuted = true;
   let musicTimer = null;
   let chaseMode = false;
   let stepIndex = 0;
@@ -75,6 +75,7 @@ window.Game.Audio = (function () {
     cat: 'sounds/Cat.wav',
     catDamage: 'sounds/cat-damage.wav',
     dog: 'sounds/Dog.wav',
+    lion: 'sounds/Lion.wav',
     savePoint: 'sounds/save-point.wav',
   };
 
@@ -312,6 +313,277 @@ window.Game.Audio = (function () {
     playSample('dog', 0.78, playBarkSynth);
   }
 
+  function playLionRoarSynth() {
+    if (sfxMuted) return;
+    playTone(135, 58, 0.55, 'sawtooth', 0.22);
+    playNoise(0.48, 320, 0.14);
+  }
+
+  function playLionRoar() {
+    playSample('lion', 0.88, playLionRoarSynth);
+  }
+
+  function playScorpionSnap() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    for (let k = 0; k < 3; k++) {
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1450 + k * 280, t + k * 0.045);
+      osc.frequency.exponentialRampToValueAtTime(520, t + k * 0.045 + 0.04);
+      gain.gain.setValueAtTime(0.08, t + k * 0.045);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + k * 0.045 + 0.045);
+      osc.connect(gain); gain.connect(c.destination);
+      osc.start(t + k * 0.045); osc.stop(t + k * 0.045 + 0.05);
+    }
+  }
+
+  function playSnakeHiss() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    const bufSize = Math.floor(c.sampleRate * 0.28);
+    const buf = c.createBuffer(1, bufSize, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufSize * 0.55));
+    const src = c.createBufferSource(); src.buffer = buf;
+    const filt = c.createBiquadFilter();
+    filt.type = 'bandpass'; filt.frequency.setValueAtTime(3400, t); filt.Q.setValueAtTime(2.6, t);
+    const gain = c.createGain();
+    gain.gain.setValueAtTime(0.14, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+    src.connect(filt); filt.connect(gain); gain.connect(c.destination);
+    src.start(t); src.stop(t + 0.29);
+  }
+
+  function playFalconCry() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(1780, t);
+    osc.frequency.exponentialRampToValueAtTime(1120, t + 0.22);
+    const filt = c.createBiquadFilter();
+    filt.type = 'bandpass'; filt.frequency.setValueAtTime(1600, t); filt.Q.setValueAtTime(3.0, t);
+    gain.gain.setValueAtTime(0.085, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+    osc.connect(filt); filt.connect(gain); gain.connect(c.destination);
+    osc.start(t); osc.stop(t + 0.25);
+  }
+
+  function playSandWhoosh() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    const bufSize = Math.floor(c.sampleRate * 0.22);
+    const buf = c.createBuffer(1, bufSize, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * Math.sin((i / bufSize) * Math.PI);
+    const src = c.createBufferSource(); src.buffer = buf;
+    const filt = c.createBiquadFilter();
+    filt.type = 'lowpass'; filt.frequency.setValueAtTime(680, t);
+    const gain = c.createGain();
+    gain.gain.setValueAtTime(0.09, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    src.connect(filt); filt.connect(gain); gain.connect(c.destination);
+    src.start(t); src.stop(t + 0.23);
+  }
+
+  function playBambooClack() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(620, t);
+    osc.frequency.exponentialRampToValueAtTime(340, t + 0.09);
+    gain.gain.setValueAtTime(0.16, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
+    osc.connect(gain); gain.connect(c.destination);
+    osc.start(t); osc.stop(t + 0.12);
+  }
+
+  function playTanukiPop() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(210, t);
+    osc.frequency.exponentialRampToValueAtTime(520, t + 0.08);
+    osc.frequency.exponentialRampToValueAtTime(310, t + 0.15);
+    gain.gain.setValueAtTime(0.14, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+    osc.connect(gain); gain.connect(c.destination);
+    osc.start(t); osc.stop(t + 0.17);
+  }
+
+  function playCrowCaw() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(680, t);
+    osc.frequency.linearRampToValueAtTime(490, t + 0.16);
+    const filt = c.createBiquadFilter();
+    filt.type = 'bandpass'; filt.frequency.setValueAtTime(1100, t); filt.Q.setValueAtTime(3.2, t);
+    gain.gain.setValueAtTime(0.08, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+    osc.connect(filt); filt.connect(gain); gain.connect(c.destination);
+    osc.start(t); osc.stop(t + 0.19);
+  }
+
+  function playVeniceBell() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    for (const [freq, vol] of [[392, 0.085], [784, 0.04], [1174, 0.02]]) {
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(vol, t);
+      gain.gain.exponentialRampToValueAtTime(0.0008, t + 0.65);
+      osc.connect(gain); gain.connect(c.destination);
+      osc.start(t); osc.stop(t + 0.66);
+    }
+  }
+
+  function playBridgeCrank() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    // Crisp iron ratchet clack + warm brass gear chime
+    for (let i = 0; i < 3; i++) {
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(340 + i * 110, t + i * 0.065);
+      osc.frequency.exponentialRampToValueAtTime(210 + i * 70, t + i * 0.065 + 0.055);
+      gain.gain.setValueAtTime(0.085, t + i * 0.065);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.065 + 0.06);
+      osc.connect(gain); gain.connect(c.destination);
+      osc.start(t + i * 0.065); osc.stop(t + i * 0.065 + 0.065);
+    }
+  }
+
+  function playWaterLock() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(260, t);
+    osc.frequency.exponentialRampToValueAtTime(120, t + 0.14);
+    gain.gain.setValueAtTime(0.11, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+    osc.connect(gain); gain.connect(c.destination);
+    osc.start(t); osc.stop(t + 0.17);
+  }
+
+  function playTrainWhistle() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    for (const freq of [440, 554.37, 659.25]) {
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, t);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.96, t + 0.42);
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.linearRampToValueAtTime(0.055, t + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.44);
+      osc.connect(gain); gain.connect(c.destination);
+      osc.start(t); osc.stop(t + 0.45);
+    }
+  }
+
+  function playSteamHiss() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    const buf = c.createBuffer(1, Math.floor(c.sampleRate * 0.24), c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+    const src = c.createBufferSource(); src.buffer = buf;
+    const filt = c.createBiquadFilter(); filt.type = 'highpass'; filt.frequency.setValueAtTime(1600, t);
+    const gain = c.createGain();
+    gain.gain.setValueAtTime(0.11, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+    src.connect(filt); filt.connect(gain); gain.connect(c.destination);
+    src.start(t);
+  }
+
+  function playRailSwitch() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(320, t);
+    osc.frequency.exponentialRampToValueAtTime(140, t + 0.09);
+    gain.gain.setValueAtTime(0.12, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
+    osc.connect(gain); gain.connect(c.destination);
+    osc.start(t); osc.stop(t + 0.12);
+  }
+
+  function playRailBell() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1180, t);
+    gain.gain.setValueAtTime(0.09, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.34);
+    osc.connect(gain); gain.connect(c.destination);
+    osc.start(t); osc.stop(t + 0.35);
+  }
+
+  function playStoneThud() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(115, t);
+    osc.frequency.exponentialRampToValueAtTime(34, t + 0.22);
+    gain.gain.setValueAtTime(0.28, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+    osc.connect(gain); gain.connect(c.destination);
+    osc.start(t); osc.stop(t + 0.25);
+    playNoise(0.14, 240, 0.16);
+  }
+
   function playPurrSynth() {
     if (sfxMuted) return;
     const c = ensureCtx();
@@ -400,33 +672,43 @@ window.Game.Audio = (function () {
     });
   }
 
-  // Background music tracks from sounds/ folder (soft, non-intrusive volume)
+  // Background music tracks from music/ folder (soft, non-intrusive volume)
   const BG_NORMAL_VOL = 0.16;
   const BG_CHASE_VOL = 0.21;
-  const cityMusic = new Audio('sounds/Rushofcity.mp3');
+  const cityMusic = new Audio('music/Rushofcity.mp3');
   cityMusic.loop = true;
   cityMusic.preload = 'none';
   cityMusic.volume = BG_NORMAL_VOL;
 
-  const parkMusic = new Audio('sounds/Public-Park.mp3');
+  const parkMusic = new Audio('music/Public-Park.mp3');
   parkMusic.loop = true;
   parkMusic.preload = 'none';
   parkMusic.volume = BG_NORMAL_VOL;
 
-  const harborMusic = new Audio('sounds/Seaport.mp3');
+  const harborMusic = new Audio('music/Seaport.mp3');
   harborMusic.loop = true;
   harborMusic.preload = 'none';
   harborMusic.volume = BG_NORMAL_VOL;
 
-  const rooftopMusic = new Audio('sounds/Building-rooftops.mp3');
+  const rooftopMusic = new Audio('music/Building-rooftops.mp3');
   rooftopMusic.loop = true;
   rooftopMusic.preload = 'none';
   rooftopMusic.volume = BG_NORMAL_VOL;
 
-  const subwayMusic = new Audio('sounds/subway.mp3');
+  const subwayMusic = new Audio('music/subway.mp3');
   subwayMusic.loop = true;
   subwayMusic.preload = 'none';
   subwayMusic.volume = BG_NORMAL_VOL;
+
+  const desertMusic = new Audio("music/Egypt's Desert.mp3");
+  desertMusic.loop = true;
+  desertMusic.preload = 'none';
+  desertMusic.volume = BG_NORMAL_VOL;
+
+  const japanMusic = new Audio('music/japan-classic.mp3');
+  japanMusic.loop = true;
+  japanMusic.preload = 'none';
+  japanMusic.volume = BG_NORMAL_VOL;
 
   let activeTrackKey = 'city';
   let bgMusic = cityMusic;
@@ -460,11 +742,15 @@ window.Game.Audio = (function () {
 
   function setMusicTrack(theme) {
     const nextKey =
-      theme === 'subway' || theme === 'museum'
+      theme === 'japan'
+        ? 'japan'
+        : theme === 'desert' || theme === 'marrakech' || theme === 'maya' || theme === 'greece'
+        ? 'desert'
+        : theme === 'subway' || theme === 'museum' || theme === 'steam_train'
         ? 'subway'
-        : theme === 'rooftop' || theme === 'construction' || theme === 'rooftop_neon'
+        : theme === 'rooftop' || theme === 'construction' || theme === 'rooftop_neon' || theme === 'paris'
         ? 'rooftop'
-        : theme === 'harbor' || theme === 'harbor_storm' || theme === 'bridge'
+        : theme === 'harbor' || theme === 'harbor_storm' || theme === 'bridge' || theme === 'venice'
         ? 'harbor'
         : theme === 'park' || theme === 'greenhouse'
         ? 'park'
@@ -473,7 +759,11 @@ window.Game.Audio = (function () {
     bgMusic.pause();
     activeTrackKey = nextKey;
     bgMusic =
-      nextKey === 'subway'
+      nextKey === 'japan'
+        ? japanMusic
+        : nextKey === 'desert'
+        ? desertMusic
+        : nextKey === 'subway'
         ? subwayMusic
         : nextKey === 'rooftop'
         ? rooftopMusic
@@ -557,6 +847,22 @@ window.Game.Audio = (function () {
     playWallScratch,
     playSplash,
     playBark,
+    playLionRoar,
+    playScorpionSnap,
+    playSnakeHiss,
+    playFalconCry,
+    playSandWhoosh,
+    playBambooClack,
+    playTanukiPop,
+    playCrowCaw,
+    playStoneThud,
+    playTrainWhistle,
+    playSteamHiss,
+    playRailSwitch,
+    playRailBell,
+    playVeniceBell,
+    playWaterLock,
+    playBridgeCrank,
     playPurr,
     playCheckpoint,
     playTreat,

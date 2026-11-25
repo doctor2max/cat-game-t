@@ -385,6 +385,44 @@ window.Game = window.Game || {};
       'repeat'
     );
 
+    // 14. Semi-Transparent Crystalline Glacial Ice (Stage 16 Snowy Kingdom)
+    tex.glacialIce = ctx.createPattern(
+      makeOffscreen(96, 96, (c, w, h) => {
+        const g = c.createLinearGradient(0, 0, w, h);
+        g.addColorStop(0, 'rgba(186, 230, 253, 0.64)');
+        g.addColorStop(0.35, 'rgba(125, 211, 252, 0.56)');
+        g.addColorStop(0.7, 'rgba(56, 189, 248, 0.50)');
+        g.addColorStop(1, 'rgba(2, 132, 199, 0.60)');
+        c.fillStyle = g;
+        c.fillRect(0, 0, w, h);
+        // Diagonal crystalline specular facets
+        c.fillStyle = 'rgba(240, 249, 255, 0.28)';
+        c.beginPath(); c.moveTo(0, 18); c.lineTo(36, 0); c.lineTo(54, 0); c.lineTo(0, 42); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(42, h); c.lineTo(w, 34); c.lineTo(w, 56); c.lineTo(64, h); c.closePath(); c.fill();
+        // Deep glacial refractive fracture lines
+        c.strokeStyle = 'rgba(240, 249, 255, 0.52)';
+        c.lineWidth = 1.2;
+        c.beginPath();
+        c.moveTo(14, 10); c.lineTo(34, 38); c.lineTo(26, 62);
+        c.moveTo(34, 38); c.lineTo(58, 48);
+        c.moveTo(68, 12); c.lineTo(82, 34); c.lineTo(74, 68);
+        c.stroke();
+        c.strokeStyle = 'rgba(12, 74, 110, 0.24)';
+        c.lineWidth = 1;
+        c.beginPath();
+        c.moveTo(15, 11); c.lineTo(35, 39); c.lineTo(27, 63);
+        c.stroke();
+        // Trapped frosted air bubbles & ice sparkle specks
+        for (let i = 0; i < 28; i++) {
+          const bx = (i * 31) % w;
+          const by = (i * 47) % h;
+          c.fillStyle = i % 3 === 0 ? 'rgba(255,255,255,0.62)' : 'rgba(224,242,254,0.38)';
+          c.beginPath(); c.arc(bx, by, (i % 3) * 0.7 + 0.8, 0, Math.PI * 2); c.fill();
+        }
+      }),
+      'repeat'
+    );
+
     tex.ready = true;
   }
 
@@ -4054,10 +4092,7991 @@ window.Game = window.Game || {};
       return;
     }
 
+    // =========================================================================
+    // STAGE 16: SNOWY KINGDOM — SEMI-TRANSPARENT CRYSTALLINE GLACIAL ICE PLATFORMS
+    // =========================================================================
+    if (p.type === 'ice_deck' || p.type === 'ice_ledge') {
+      ctx.save();
+      ctx.translate(px, py);
+      const isDeck = p.type === 'ice_deck';
+
+      // 1. Semi-Transparent Crystal Glacial Ice Body (background subtly shows through!)
+      ctx.fillStyle = tex.glacialIce;
+      ctx.beginPath();
+      ctx.roundRect(0, 4, p.w, p.h - 4, isDeck ? [4, 4, 0, 0] : [6, 6, 12, 12]);
+      ctx.fill();
+      const depthG = ctx.createLinearGradient(0, 4, 0, p.h);
+      depthG.addColorStop(0, 'rgba(224, 242, 254, 0.28)');
+      depthG.addColorStop(0.45, 'rgba(56, 189, 248, 0.14)');
+      depthG.addColorStop(1, 'rgba(8, 47, 73, 0.44)');
+      ctx.fillStyle = depthG;
+      ctx.fill();
+      // Inner frosted glass rim glow + crisp translucent ice edge
+      ctx.strokeStyle = 'rgba(224, 242, 254, 0.52)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.roundRect(1.5, 5.5, p.w - 3, p.h - 7, isDeck ? [3, 3, 0, 0] : [5, 5, 10, 10]);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(12, 74, 110, 0.72)';
+      ctx.lineWidth = 1.7;
+      ctx.beginPath();
+      ctx.roundRect(0, 4, p.w, p.h - 4, isDeck ? [4, 4, 0, 0] : [6, 6, 12, 12]);
+      ctx.stroke();
+
+      // 2. Sculpted Diagonal Glass-Ice Refraction Streaks & Shimmering Frost Sheen
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.24)';
+      for (let fx = 18; fx < p.w - 34; fx += 74) {
+        ctx.beginPath();
+        ctx.moveTo(fx, 9);
+        ctx.lineTo(fx + 22, 9);
+        ctx.lineTo(fx + 6, Math.min(p.h - 4, 50));
+        ctx.lineTo(fx - 10, Math.min(p.h - 4, 50));
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // 3. Pillowy Layered Snowdrift Cap with Soft Sky-Blue Under-Shadow
+      ctx.fillStyle = 'rgba(186, 230, 253, 0.88)';
+      ctx.beginPath();
+      ctx.roundRect(-2, 0, p.w + 4, 14, [7, 7, 5, 5]);
+      ctx.fill();
+      const snowG = ctx.createLinearGradient(0, -2, 0, 12);
+      snowG.addColorStop(0, '#ffffff');
+      snowG.addColorStop(0.65, '#f0f9ff');
+      snowG.addColorStop(1, 'rgba(186, 230, 253, 0.92)');
+      ctx.fillStyle = snowG;
+      ctx.beginPath();
+      ctx.moveTo(-2, 6);
+      ctx.quadraticCurveTo(-2, -2, 6, -2);
+      ctx.lineTo(p.w - 6, -2);
+      ctx.quadraticCurveTo(p.w + 2, -2, p.w + 2, 6);
+      const step = 28;
+      for (let sx = p.w; sx >= 0; sx -= step) {
+        const drop = 11 + Math.sin(sx * 0.11 + p.x * 0.03) * 3.5;
+        ctx.quadraticCurveTo(Math.max(0, sx - step * 0.5), drop + 4, Math.max(-2, sx - step), 8);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.55)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      // 4. Translucent Glassy Hanging Icicles on Floating Ledges & Deck Edges
+      const drawIcicle = (ix, iy, len, wid) => {
+        const icG = ctx.createLinearGradient(ix, iy, ix, iy + len);
+        icG.addColorStop(0, 'rgba(224, 242, 254, 0.84)');
+        icG.addColorStop(0.55, 'rgba(125, 211, 252, 0.68)');
+        icG.addColorStop(1, 'rgba(2, 132, 199, 0.58)');
+        ctx.fillStyle = icG;
+        ctx.strokeStyle = 'rgba(12, 74, 110, 0.52)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(ix - wid, iy);
+        ctx.lineTo(ix, iy + len);
+        ctx.lineTo(ix + wid, iy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.78)';
+        ctx.beginPath();
+        ctx.moveTo(ix - wid * 0.4, iy + 1);
+        ctx.lineTo(ix - 0.5, iy + len * 0.7);
+        ctx.lineTo(ix, iy + 1);
+        ctx.closePath();
+        ctx.fill();
+      };
+      if (!isDeck) {
+        for (let ix = 16; ix < p.w - 14; ix += 24) {
+          const iLen = 10 + ((Math.floor(ix + p.x) * 17) % 16);
+          drawIcicle(ix, p.h - 2, iLen, 3.8);
+        }
+      } else {
+        drawIcicle(10, 12, 18, 4.2);
+        drawIcicle(p.w - 10, 12, 16, 4);
+      }
+
+      ctx.restore();
+      if (p.climbable) drawClimbWallSign(ctx, p, px, py, time);
+      return;
+    }
+
+    if (p.type === 'ice_crumble') {
+      ctx.save();
+      const shake = p.crumbleTimer > 0 ? Math.sin(time * 52) * 2.6 : 0;
+      ctx.translate(px + shake, py);
+      const crG = ctx.createLinearGradient(0, 0, 0, p.h);
+      crG.addColorStop(0, 'rgba(224, 242, 254, 0.72)');
+      crG.addColorStop(0.5, 'rgba(125, 211, 252, 0.58)');
+      crG.addColorStop(1, 'rgba(3, 105, 161, 0.62)');
+      ctx.fillStyle = crG;
+      ctx.strokeStyle = 'rgba(12, 74, 110, 0.75)';
+      ctx.lineWidth = 1.7;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, p.w, p.h, 6);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.fillRect(3, 1, p.w - 6, 4.5);
+      ctx.strokeStyle = p.crumbleTimer > 0 ? '#fef08a' : 'rgba(240, 249, 255, 0.9)';
+      ctx.lineWidth = p.crumbleTimer > 0 ? 2.1 : 1.5;
+      ctx.beginPath();
+      ctx.moveTo(p.w * 0.28, 2); ctx.lineTo(p.w * 0.36, p.h * 0.52); ctx.lineTo(p.w * 0.24, p.h - 2);
+      ctx.moveTo(p.w * 0.36, p.h * 0.52); ctx.lineTo(p.w * 0.56, p.h * 0.38);
+      ctx.moveTo(p.w * 0.68, 2); ctx.lineTo(p.w * 0.62, p.h * 0.64); ctx.lineTo(p.w * 0.76, p.h - 2);
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'ice_wall') {
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.fillStyle = tex.glacialIce;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, p.w, p.h, 6);
+      ctx.fill();
+      const wShade = ctx.createLinearGradient(0, 0, p.w, 0);
+      wShade.addColorStop(0, 'rgba(240, 249, 255, 0.34)');
+      wShade.addColorStop(0.42, 'rgba(56, 189, 248, 0.12)');
+      wShade.addColorStop(1, 'rgba(8, 47, 73, 0.42)');
+      ctx.fillStyle = wShade;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(224, 242, 254, 0.48)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.roundRect(2, 2, p.w - 4, p.h - 4, 5);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(12, 74, 110, 0.74)';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, p.w, p.h, 6);
+      ctx.stroke();
+      for (let gy = 26; gy < p.h - 18; gy += 32) {
+        ctx.fillStyle = 'rgba(240, 249, 255, 0.72)';
+        ctx.fillRect(3, gy, p.w - 6, 3.5);
+        ctx.fillStyle = 'rgba(12, 74, 110, 0.32)';
+        ctx.fillRect(3, gy + 3.5, p.w - 6, 2);
+      }
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
+      ctx.beginPath();
+      ctx.roundRect(-3, -4, p.w + 6, 12, 6);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(125, 211, 252, 0.75)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.restore();
+      if (p.climbable) drawClimbWallSign(ctx, p, px, py, time);
+      return;
+    }
+
+    if (p.type === 'ice_bounce') {
+      ctx.save();
+      const cx = px + p.w / 2;
+      const pulse = Math.sin(time * 5.2 + p.x * 0.04) * 2.2;
+      const aura = ctx.createRadialGradient(cx, py + p.h * 0.4, 6, cx, py + p.h * 0.4, p.w * 0.65);
+      aura.addColorStop(0, 'rgba(56, 189, 248, 0.40)');
+      aura.addColorStop(1, 'rgba(56, 189, 248, 0)');
+      ctx.fillStyle = aura;
+      ctx.beginPath(); ctx.ellipse(cx, py + p.h * 0.45, p.w * 0.68, p.h * 0.9, 0, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = 'rgba(3, 105, 161, 0.74)';
+      ctx.strokeStyle = 'rgba(8, 47, 73, 0.82)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.roundRect(px + 6, py + p.h - 10, p.w - 12, 10, 4);
+      ctx.fill(); ctx.stroke();
+
+      const domeG = ctx.createRadialGradient(cx - 10, py + 2, 4, cx, py + p.h * 0.5, p.w * 0.55);
+      domeG.addColorStop(0, 'rgba(255, 255, 255, 0.92)');
+      domeG.addColorStop(0.5, 'rgba(224, 242, 254, 0.80)');
+      domeG.addColorStop(0.85, 'rgba(56, 189, 248, 0.66)');
+      domeG.addColorStop(1, 'rgba(2, 132, 199, 0.68)');
+      ctx.fillStyle = domeG;
+      ctx.strokeStyle = 'rgba(12, 74, 110, 0.76)';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(px + 2, py + p.h - 8);
+      ctx.quadraticCurveTo(cx, py - 10 - pulse, px + p.w - 2, py + p.h - 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 2.4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx - 8, py + 9 - pulse * 0.5);
+      ctx.lineTo(cx, py + 2 - pulse * 0.5);
+      ctx.lineTo(cx + 8, py + 9 - pulse * 0.5);
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'ice_floe') {
+      // Bobbing & Sinking Semi-Transparent Arctic Sea-Ice Floe with Underwater Crystal Keel & Waterline Ripples!
+      const dip = p.sinkOffset || 0;
+      ctx.save();
+      ctx.translate(px, py + dip);
+
+      // Subtle submerged translucent turquoise crystal keel underneath the ice floe
+      const keelG = ctx.createLinearGradient(0, p.h - 4, 0, p.h + 22);
+      keelG.addColorStop(0, 'rgba(56, 189, 248, 0.44)');
+      keelG.addColorStop(1, 'rgba(2, 132, 199, 0.08)');
+      ctx.fillStyle = keelG;
+      ctx.beginPath();
+      ctx.moveTo(8, p.h - 4);
+      ctx.lineTo(p.w * 0.24, p.h + 16);
+      ctx.lineTo(p.w * 0.52, p.h + 22);
+      ctx.lineTo(p.w * 0.78, p.h + 14);
+      ctx.lineTo(p.w - 8, p.h - 4);
+      ctx.closePath();
+      ctx.fill();
+
+      // Main semi-transparent sculpted floating sea-ice slab
+      ctx.fillStyle = tex.glacialIce;
+      ctx.beginPath();
+      ctx.roundRect(0, 3, p.w, p.h - 3, [8, 8, 12, 12]);
+      ctx.fill();
+      const floeG = ctx.createLinearGradient(0, 3, 0, p.h);
+      floeG.addColorStop(0, 'rgba(240, 249, 255, 0.34)');
+      floeG.addColorStop(0.55, 'rgba(56, 189, 248, 0.16)');
+      floeG.addColorStop(1, 'rgba(12, 74, 110, 0.48)');
+      ctx.fillStyle = floeG;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(12, 74, 110, 0.72)';
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+
+      // Pillowy snow cap on top of floating floe
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
+      ctx.beginPath();
+      ctx.roundRect(-2, -1, p.w + 4, 11, [6, 6, 4, 4]);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(125, 211, 252, 0.65)';
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
+
+      // Shimmering white foam waterline ripples when sinking or bobbing
+      const ripAlpha = Math.min(0.82, 0.35 + Math.max(0, dip) * 0.015);
+      ctx.strokeStyle = `rgba(224, 242, 254, ${ripAlpha.toFixed(2)})`;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(-6, p.h - 2);
+      ctx.quadraticCurveTo(p.w * 0.5, p.h + 4 + Math.sin(time * 5 + p.x) * 1.5, p.w + 6, p.h - 2);
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'blizzard_zone') {
+      // Periodic Arctic Blizzard Gust Zone: 3.0s calm -> 0.9s howling warning -> 2.8s fierce swirling blizzard (ZERO rectangular box!)
+      const cyc = (time + (p.phase || 0)) % 6.7;
+      const isWarn = cyc >= 3.0 && cyc < 3.9;
+      const isGust = cyc >= 3.9;
+      if (!isWarn && !isGust) return;
+
+      ctx.save();
+      const dir = p.windDir || -1;
+      const intensity = isGust ? 1 : (cyc - 3.0) / 0.9;
+
+      // Soft, organic flowing blizzard wind ribbons & swirling air curls (no fillRect box!)
+      ctx.lineCap = 'round';
+      const streakCount = isGust ? 16 : 7;
+      for (let r = 0; r < streakCount; r++) {
+        const spd = (isGust ? 430 : 210) + (r % 4) * 62;
+        const frac = ((time * spd + r * 97) % p.w) / p.w;
+        const edgeFade = Math.sin(frac * Math.PI);
+        const sx = dir > 0 ? px + frac * p.w : px + (1 - frac) * p.w;
+        // Organic staggered vertical placement (no straight top/bottom cutoff!)
+        const lane = ((r * 0.6180339) % 1);
+        const sy = py + 14 + lane * (p.h - 28) + Math.sin(time * 5.2 + r * 1.9) * 14;
+        const len = (isGust ? 56 : 30) + (r % 3) * 18;
+        const alpha = (isGust ? 0.68 : 0.42 * intensity) * edgeFade;
+
+        ctx.strokeStyle = isGust
+          ? `rgba(240, 249, 255, ${alpha.toFixed(2)})`
+          : `rgba(186, 230, 253, ${alpha.toFixed(2)})`;
+        ctx.lineWidth = isGust ? (r % 2 === 0 ? 2.2 : 1.4) : 1.25;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.bezierCurveTo(
+          sx + dir * len * 0.35, sy - 7,
+          sx + dir * len * 0.7, sy + 5,
+          sx + dir * len, sy - 2
+        );
+        ctx.stroke();
+
+        // Graceful snow-swirl curl at the tip of alternating wind ribbons
+        if (r % 2 === 0 && edgeFade > 0.35) {
+          ctx.beginPath();
+          ctx.arc(
+            sx + dir * len,
+            sy - 6,
+            isGust ? 4.5 : 3.2,
+            dir > 0 ? Math.PI * 0.5 : -Math.PI * 0.5,
+            dir > 0 ? Math.PI * 2.05 : Math.PI * 1.05
+          );
+          ctx.stroke();
+        }
+
+        // Whipped flying snow crystals drifting naturally along the gust
+        if (edgeFade > 0.2) {
+          ctx.fillStyle = `rgba(255, 255, 255, ${(0.82 * edgeFade * intensity).toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(sx + dir * len * 0.65, sy - 4 + Math.cos(time * 8 + r) * 3, isGust ? 2.1 : 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    // =========================================================================
+    // STAGE 17: MIDNIGHT GRAND CIRCUS PLATFORMS (Hardwood Ring, Gilded Ledges, Trampoline, Tightrope, Trapeze)
+    // =========================================================================
+    if (p.type === 'circus_deck') {
+      ctx.save();
+      ctx.translate(px, py);
+      // Rich varnished hardwood circus ring stage
+      const woodG = ctx.createLinearGradient(0, 0, 0, p.h);
+      woodG.addColorStop(0, '#92400e');
+      woodG.addColorStop(0.22, '#78350f');
+      woodG.addColorStop(0.7, '#451a03');
+      woodG.addColorStop(1, '#1c0a02');
+      ctx.fillStyle = woodG;
+      ctx.fillRect(0, 0, p.w, p.h);
+      // Plank seams & warm floor specular sheen
+      ctx.strokeStyle = 'rgba(28, 10, 2, 0.52)';
+      ctx.lineWidth = 1.2;
+      for (let sx = 48; sx < p.w; sx += 48) {
+        ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, p.h); ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.22)';
+      ctx.fillRect(0, 0, p.w, 4);
+      // Draped crimson velvet circus ring apron with golden scallop trim & brass rivets
+      ctx.fillStyle = '#991b1b';
+      ctx.fillRect(0, 10, p.w, 16);
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(0, 10, p.w, 6);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(0, 8, p.w, 3);
+      ctx.fillRect(0, 25, p.w, 2.5);
+      // Scalloped golden bullion bunting draped along apron
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 1.6;
+      for (let bx = 0; bx < p.w; bx += 36) {
+        const segW = Math.min(36, p.w - bx);
+        ctx.beginPath();
+        ctx.moveTo(bx, 11);
+        ctx.quadraticCurveTo(bx + segW * 0.5, 25, bx + segW, 11);
+        ctx.stroke();
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath(); ctx.arc(bx + segW * 0.5, 20, 2, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.strokeStyle = '#1c0a02';
+      ctx.lineWidth = 1.8;
+      ctx.strokeRect(0, 0, p.w, p.h);
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'circus_ledge') {
+      ctx.save();
+      ctx.translate(px, py);
+      // Plush crimson carpet top + carved gilded mahogany fascia
+      const ledG = ctx.createLinearGradient(0, 0, 0, p.h);
+      ledG.addColorStop(0, '#dc2626');
+      ledG.addColorStop(0.28, '#991b1b');
+      ledG.addColorStop(0.32, '#78350f');
+      ledG.addColorStop(1, '#3b1506');
+      ctx.fillStyle = ledG;
+      ctx.strokeStyle = '#1c0a02';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(0, 0, p.w, p.h, 5); ctx.fill(); ctx.stroke();
+      // Embossed gold marquee trim
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(3, 6, p.w - 6, 2.5);
+      ctx.fillRect(3, p.h - 4, p.w - 6, 2);
+      // Warm chasing carnival marquee bulbs along platform edge
+      for (let bx = 14; bx < p.w - 10; bx += 22) {
+        const lit = Math.sin(time * 5.5 + bx * 0.12) > -0.25;
+        if (lit) {
+          ctx.fillStyle = 'rgba(254, 240, 138, 0.34)';
+          ctx.beginPath(); ctx.arc(bx, 15, 7, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = lit ? '#fef9c3' : '#92400e';
+        ctx.beginPath(); ctx.arc(bx, 15, 2.8, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'circus_wall') {
+      ctx.save();
+      ctx.translate(px, py);
+      // Red & cream striped circus tent mast pillar with braided rope wraps
+      ctx.save();
+      ctx.beginPath(); ctx.roundRect(0, 0, p.w, p.h, 6); ctx.clip();
+      ctx.fillStyle = '#fef3c7';
+      ctx.fillRect(0, 0, p.w, p.h);
+      ctx.fillStyle = '#b91c1c';
+      for (let sy = -p.w; sy < p.h + p.w; sy += 28) {
+        ctx.beginPath();
+        ctx.moveTo(0, sy); ctx.lineTo(p.w, sy + 16);
+        ctx.lineTo(p.w, sy + 30); ctx.lineTo(0, sy + 14);
+        ctx.closePath(); ctx.fill();
+      }
+      const cylShade = ctx.createLinearGradient(0, 0, p.w, 0);
+      cylShade.addColorStop(0, 'rgba(15, 8, 4, 0.42)');
+      cylShade.addColorStop(0.32, 'rgba(255, 255, 255, 0.16)');
+      cylShade.addColorStop(0.75, 'rgba(15, 8, 4, 0.14)');
+      cylShade.addColorStop(1, 'rgba(15, 8, 4, 0.52)');
+      ctx.fillStyle = cylShade; ctx.fillRect(0, 0, p.w, p.h);
+      ctx.restore();
+      // Braided gold-hemp climbing grip bands
+      for (let gy = 26; gy < p.h - 18; gy += 36) {
+        ctx.fillStyle = '#d97706'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.2;
+        ctx.fillRect(-1, gy, p.w + 2, 6); ctx.strokeRect(-1, gy, p.w + 2, 6);
+      }
+      // Ornate gilded brass capital top
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(-4, -5, p.w + 8, 12, 4); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#290d05'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(0, 0, p.w, p.h, 6); ctx.stroke();
+      ctx.restore();
+      if (p.climbable) drawClimbWallSign(ctx, p, px, py, time);
+      return;
+    }
+
+    if (p.type === 'circus_trampoline') {
+      ctx.save();
+      const cx = px + p.w * 0.5;
+      const bounce = p.bounceAnim ? Math.sin(p.bounceAnim * Math.PI) * 9 : 0;
+      const topY = py + 6 + bounce;
+      // Ground contact shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
+      ctx.beginPath(); ctx.ellipse(cx, py + p.h, p.w * 0.48, 5, 0, 0, Math.PI * 2); ctx.fill();
+      // Angled riveted iron trampoline frame legs
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(px + 12, py + p.h - 2); ctx.lineTo(px + 18, py + 12);
+      ctx.moveTo(px + p.w - 12, py + p.h - 2); ctx.lineTo(px + p.w - 18, py + 12);
+      ctx.moveTo(px + 16, py + p.h - 12); ctx.lineTo(px + p.w - 16, py + p.h - 12);
+      ctx.stroke();
+      // Coiled steel bounce springs visibly flexing under mat
+      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2.2;
+      for (const sx of [px + 26, cx, px + p.w - 26]) {
+        ctx.beginPath();
+        ctx.moveTo(sx, py + p.h - 12);
+        for (let z = 1; z <= 4; z++) {
+          const zy = (py + p.h - 12) - ((py + p.h - 12) - (topY + 6)) * (z / 4);
+          ctx.lineTo(sx + (z % 2 === 0 ? -4.5 : 4.5), zy);
+        }
+        ctx.stroke();
+      }
+      // Crimson & gold sunburst taut circus trampoline mat + star emblem
+      const matG = ctx.createLinearGradient(px, topY - 4, px, topY + 12);
+      matG.addColorStop(0, '#ef4444'); matG.addColorStop(0.5, '#b91c1c'); matG.addColorStop(1, '#7f1d1d');
+      ctx.fillStyle = matG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.roundRect(px + 2, topY - 4, p.w - 4, 14, 7); ctx.fill(); ctx.stroke();
+      // Bright golden circus star & upward bounce chevron
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath(); ctx.ellipse(cx, topY + 3, 18, 3.8, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 2.2;
+      const chevBob = Math.sin(time * 6) * 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - 8, topY - 9 + chevBob); ctx.lineTo(cx, topY - 16 + chevBob); ctx.lineTo(cx + 8, topY - 9 + chevBob);
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'tightrope') {
+      ctx.save();
+      const sag = 4 + (p.ropeSag || 0);
+      const midX = px + p.w * 0.5;
+      const midY = py + 4 + sag;
+      // Decorative triangular carnival bunting pennants hanging under the tightrope
+      const penCols = ['#ef4444', '#fbbf24', '#38bdf8', '#f472b6', '#4ade80'];
+      const count = Math.max(4, Math.floor(p.w / 28));
+      for (let k = 0; k < count; k++) {
+        const u0 = (k + 0.15) / count;
+        const u1 = (k + 0.85) / count;
+        const um = (u0 + u1) * 0.5;
+        const x0 = px + u0 * p.w;
+        const x1 = px + u1 * p.w;
+        const xm = px + um * p.w;
+        const y0 = py + 4 + 2 * (1 - u0) * u0 * sag;
+        const y1 = py + 4 + 2 * (1 - u1) * u1 * sag;
+        const ym = py + 4 + 2 * (1 - um) * um * sag;
+        const sway = Math.sin(time * 3.8 + k * 0.9) * 2;
+        ctx.fillStyle = penCols[k % penCols.length];
+        ctx.strokeStyle = 'rgba(15, 23, 42, 0.55)'; ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0 + 2); ctx.lineTo(x1, y1 + 2); ctx.lineTo(xm + sway, ym + 14);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      // Braided taut steel-and-hemp acrobatic high-wire
+      ctx.strokeStyle = '#451a03'; ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.moveTo(px, py + 4); ctx.quadraticCurveTo(midX, midY + sag * 0.5, px + p.w, py + 4); ctx.stroke();
+      ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 2.8;
+      ctx.beginPath(); ctx.moveTo(px, py + 4); ctx.quadraticCurveTo(midX, midY + sag * 0.5, px + p.w, py + 4); ctx.stroke();
+      // Ornate brass-finial stanchion posts anchoring both ends of the wire
+      for (const sx of [px, px + p.w]) {
+        ctx.fillStyle = '#92400e'; ctx.strokeStyle = '#290d05'; ctx.lineWidth = 1.4;
+        ctx.fillRect(sx - 4, py - 10, 8, 28); ctx.strokeRect(sx - 4, py - 10, 8, 28);
+        ctx.fillStyle = '#fde047';
+        ctx.beginPath(); ctx.arc(sx, py - 12, 5.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'trapeze_swing') {
+      ctx.save();
+      const anchorX = (p.baseX !== undefined ? p.baseX : p.x) - (p.x - px) + p.w * 0.5;
+      const leftX = px + 10;
+      const rightX = px + p.w - 10;
+      // Twin taut overhead aerial rigging ropes rising to the big-top rafters
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 3.4;
+      ctx.beginPath();
+      ctx.moveTo(anchorX - 18, -80); ctx.lineTo(leftX, py + 6);
+      ctx.moveTo(anchorX + 18, -80); ctx.lineTo(rightX, py + 6);
+      ctx.stroke();
+      ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(anchorX - 18, -80); ctx.lineTo(leftX, py + 6);
+      ctx.moveTo(anchorX + 18, -80); ctx.lineTo(rightX, py + 6);
+      ctx.stroke();
+      // Mahogany & brass trapeze bar with white acrobat grip tape & brass end-caps
+      const barG = ctx.createLinearGradient(px, py, px, py + p.h);
+      barG.addColorStop(0, '#f59e0b'); barG.addColorStop(0.5, '#b45309'); barG.addColorStop(1, '#451a03');
+      ctx.fillStyle = barG; ctx.strokeStyle = '#1c0a02'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(px, py + 2, p.w, p.h - 4, 6); ctx.fill(); ctx.stroke();
+      // Crisp white acrobat center grip wrap
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(px + p.w * 0.25, py + 3, p.w * 0.5, p.h - 6);
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath(); ctx.arc(px + 5, py + p.h * 0.5, 5, 0, Math.PI * 2); ctx.arc(px + p.w - 5, py + p.h * 0.5, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      return;
+    }
+
+    // =========================================================================
+    // STAGE 18: GOLDEN SAHARA OASIS PLATFORMS (Dunes, Sandstone, Quicksand, Thermal Updrafts, Palm Springs)
+    // =========================================================================
+    if (p.type === 'sand_deck') {
+      ctx.save();
+      ctx.translate(px, py);
+      const sandG = ctx.createLinearGradient(0, 0, 0, p.h);
+      sandG.addColorStop(0, '#fcd34d');
+      sandG.addColorStop(0.18, '#d97706');
+      sandG.addColorStop(0.55, '#92400e');
+      sandG.addColorStop(1, '#451a03');
+      ctx.fillStyle = sandG;
+      ctx.fillRect(0, 0, p.w, p.h);
+      ctx.strokeStyle = 'rgba(69, 26, 3, 0.36)';
+      ctx.lineWidth = 1.3;
+      for (let sy = 26; sy < p.h; sy += 22) {
+        ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(p.w, sy); ctx.stroke();
+        const off = (Math.floor(sy / 22) % 2) * 32;
+        for (let sx = off; sx < p.w; sx += 64) {
+          ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx, Math.min(p.h, sy + 22)); ctx.stroke();
+        }
+      }
+      const topG = ctx.createLinearGradient(0, 0, 0, 14);
+      topG.addColorStop(0, '#fef3c7'); topG.addColorStop(0.5, '#fbbf24'); topG.addColorStop(1, '#d97706');
+      ctx.fillStyle = topG;
+      ctx.beginPath();
+      ctx.moveTo(0, 12);
+      for (let x = 0; x <= p.w; x += 36) {
+        ctx.quadraticCurveTo(x + 18, -3 + Math.sin(x * 0.04) * 2.5, Math.min(p.w, x + 36), 4);
+      }
+      ctx.lineTo(p.w, 16); ctx.lineTo(0, 16); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.6; ctx.strokeRect(0, 0, p.w, p.h);
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'sandstone_ledge') {
+      ctx.save();
+      ctx.translate(px, py);
+      const ledG = ctx.createLinearGradient(0, 0, 0, p.h);
+      ledG.addColorStop(0, '#fde68a'); ledG.addColorStop(0.28, '#d97706'); ledG.addColorStop(1, '#78350f');
+      ctx.fillStyle = ledG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(0, 0, p.w, p.h, 5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#92400e';
+      for (let nx = 14; nx < p.w - 16; nx += 24) ctx.fillRect(nx, 8, 12, 4);
+      ctx.fillStyle = 'rgba(255, 251, 235, 0.48)';
+      ctx.fillRect(4, 2, p.w - 8, 3);
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'sandstone_wall') {
+      ctx.save();
+      ctx.translate(px, py);
+      const wG = ctx.createLinearGradient(0, 0, p.w, 0);
+      wG.addColorStop(0, '#f59e0b'); wG.addColorStop(0.35, '#d97706'); wG.addColorStop(0.85, '#92400e'); wG.addColorStop(1, '#451a03');
+      ctx.fillStyle = wG; ctx.strokeStyle = '#290d02'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(0, 0, p.w, p.h, 5); ctx.fill(); ctx.stroke();
+      for (let gy = 28; gy < p.h - 14; gy += 34) {
+        ctx.fillStyle = '#fde68a'; ctx.fillRect(2, gy, p.w - 4, 3.5);
+        ctx.fillStyle = 'rgba(41, 13, 2, 0.4)'; ctx.fillRect(2, gy + 3.5, p.w - 4, 2.5);
+      }
+      ctx.fillStyle = '#fef3c7';
+      ctx.beginPath(); ctx.roundRect(-2, -3, p.w + 4, 8, 4); ctx.fill();
+      ctx.restore();
+      if (p.climbable) drawClimbWallSign(ctx, p, px, py, time);
+      return;
+    }
+
+    if (p.type === 'quicksand') {
+      ctx.save();
+      ctx.translate(px, py);
+      // Recessed flush desert quicksand basin blending seamlessly into adjacent sandstone banks
+      const qsG = ctx.createLinearGradient(0, 0, 0, p.h);
+      qsG.addColorStop(0, '#e5a034');
+      qsG.addColorStop(0.18, '#c27018');
+      qsG.addColorStop(0.55, '#85420b');
+      qsG.addColorStop(1, '#3b1804');
+      ctx.fillStyle = qsG;
+      ctx.fillRect(0, 4, p.w, p.h - 4);
+      // Sloping sandstone bank edges framing the pit left & right
+      ctx.fillStyle = '#78350f';
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(14, 10); ctx.lineTo(6, p.h); ctx.lineTo(0, p.h); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(p.w, 0); ctx.lineTo(p.w - 14, 10); ctx.lineTo(p.w - 6, p.h); ctx.lineTo(p.w, p.h); ctx.closePath(); ctx.fill();
+      // Soft liquid-sand wavy surface crest
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.moveTo(0, 8);
+      for (let sx = 0; sx <= p.w; sx += 24) {
+        ctx.quadraticCurveTo(sx + 12, 3 + Math.sin(time * 3.2 + sx * 0.08) * 2.5, Math.min(p.w, sx + 24), 7);
+      }
+      ctx.lineTo(p.w, 16); ctx.lineTo(0, 16); ctx.closePath(); ctx.fill();
+      // Inward-pulling concentric swirling sand vortex rings
+      for (let v = 0; v < 3; v++) {
+        const vx = p.w * (0.22 + v * 0.28);
+        const r = 28 - ((time * 14 + v * 9) % 24);
+        const a = Math.sin((r / 28) * Math.PI) * 0.65;
+        ctx.strokeStyle = `rgba(254, 243, 199, ${a.toFixed(2)})`;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.ellipse(vx, 12, r, r * 0.25, 0, 0, Math.PI * 2); ctx.stroke();
+      }
+      // Subtle escaping air bubbles in the wet sand
+      ctx.fillStyle = 'rgba(254, 243, 199, 0.78)';
+      for (let b = 0; b < 5; b++) {
+        const bx = 24 + b * ((p.w - 48) / 4);
+        const pop = Math.abs(Math.sin(time * 3.4 + b * 1.5));
+        ctx.beginPath(); ctx.arc(bx, 9 + pop * 3, 1.5 + pop * 1.4, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'crumble_sandstone') {
+      // Master-Crafted Ancient Egyptian Carved Sandstone Temple Lintel (Sunken Pharaonic Reliefs, Progressive 3D Cracks, Cascading Stone Dust & Jagged Polygonal Collapse!)
+      const visH = Math.max(p.h, 28);
+      const cx = px + p.w * 0.5;
+      // 4 deterministic jagged fault-line X ratios so intact cracks match shattered polygon chunks!
+      const fRatios = [0.21, 0.44, 0.64, 0.82];
+
+      if (p.broken) {
+        const fall = p.crumbleFall || 0;
+        // Smooth subtle sand-dust reformation shimmer right before respawn
+        if (fall >= 1) {
+          if (p.respawnTimer > 0 && p.respawnTimer < 0.48) {
+            const u = 1 - p.respawnTimer / 0.48;
+            ctx.save();
+            ctx.globalAlpha = u * 0.45;
+            ctx.fillStyle = '#fde68a';
+            ctx.beginPath(); ctx.roundRect(px + 2, py + 2, p.w - 4, visH - 6, 4); ctx.fill();
+            ctx.restore();
+          }
+          return;
+        }
+        if (fall <= 0) return;
+
+        ctx.save();
+        // 1. Billowing Volumetric Sandstone Dust Cloud expanding & drifting downward at break site
+        const cloudFade = Math.max(0, 1 - fall * 1.15);
+        if (cloudFade > 0.02) {
+          for (let d = 0; d < 7; d++) {
+            const dx0 = px + p.w * (0.1 + d * 0.133) + (d - 3) * fall * 10;
+            const dy0 = py + visH * 0.45 + fall * 24 + Math.sin(d * 2.1) * 5;
+            const rad = (13 + (d % 3) * 5) * (0.65 + fall * 1.15);
+            const dG = ctx.createRadialGradient(dx0, dy0, 2, dx0, dy0, rad);
+            dG.addColorStop(0, `rgba(253, 230, 138, ${(cloudFade * 0.48).toFixed(2)})`);
+            dG.addColorStop(0.55, `rgba(217, 148, 62, ${(cloudFade * 0.30).toFixed(2)})`);
+            dG.addColorStop(1, 'rgba(180, 96, 24, 0)');
+            ctx.fillStyle = dG;
+            ctx.beginPath(); ctx.arc(dx0, dy0, rad, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+
+        // 2. Five Jagged Irregular Polygonal Carved Limestone Chunks tumbling with gravity & rotation
+        const chunkAlpha = Math.max(0, 1 - Math.pow(fall, 1.45));
+        ctx.globalAlpha = chunkAlpha;
+        const edges = [0, ...fRatios, 1];
+        for (let k = 0; k < edges.length - 1; k++) {
+          const xL = edges[k] * p.w;
+          const xR = edges[k + 1] * p.w;
+          const cw = xR - xL;
+          const dir = k - 2;
+          const grav = fall * fall * (165 + (k % 3) * 28);
+          const cx0 = px + xL + cw * 0.5 + dir * fall * 16;
+          const cy0 = py + visH * 0.5 + grav + (k % 2) * fall * 10;
+          const rot = (k % 2 === 0 ? 1 : -1) * fall * (0.75 + (k % 3) * 0.35);
+
+          ctx.save();
+          ctx.translate(cx0, cy0);
+          ctx.rotate(rot);
+
+          // Irregular fractured sandstone polygon (chipped edges, NOT a rectangle!)
+          const hw = cw * 0.5;
+          const hh = visH * 0.48;
+          const cG = ctx.createLinearGradient(0, -hh, 0, hh);
+          cG.addColorStop(0, '#f7d894');
+          cG.addColorStop(0.28, '#d48d36');
+          cG.addColorStop(0.78, '#8f4714');
+          cG.addColorStop(1, '#451a03');
+          ctx.fillStyle = cG;
+          ctx.strokeStyle = '#240b02';
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.moveTo(-hw + 1, -hh + 1);
+          ctx.lineTo(hw - 1, -hh);
+          ctx.lineTo(hw + 2.2, -hh * 0.15);
+          ctx.lineTo(hw - 1.5, hh * 0.72);
+          ctx.lineTo(hw * 0.2, hh);
+          ctx.lineTo(-hw + 2, hh * 0.85);
+          ctx.lineTo(-hw - 2, hh * 0.1);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Sunlit chiseled top rim + remnant of sunken frieze pigment on the falling chunk
+          ctx.strokeStyle = 'rgba(255, 248, 214, 0.48)';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(-hw + 2, -hh + 1.5); ctx.lineTo(hw - 2, -hh + 1.2); ctx.stroke();
+          ctx.fillStyle = k % 2 === 0 ? 'rgba(29, 78, 128, 0.55)' : 'rgba(153, 52, 24, 0.52)';
+          ctx.fillRect(-hw * 0.45, -2.5, hw * 0.9, 4.5);
+          ctx.restore();
+        }
+
+        // 3. Small Angular Limestone Splinters & Pebbles scattering outward
+        for (let s = 0; s < 8; s++) {
+          const sx0 = px + p.w * (0.08 + s * 0.12) + Math.cos(s * 2.3) * fall * 26;
+          const sy0 = py + visH * 0.6 + fall * fall * (210 + (s % 4) * 32) - Math.sin(fall * Math.PI) * (10 + (s % 3) * 6);
+          ctx.save();
+          ctx.translate(sx0, sy0);
+          ctx.rotate(fall * (3.2 + s * 0.7));
+          ctx.fillStyle = s % 2 === 0 ? '#e6b25c' : '#9a521b';
+          ctx.strokeStyle = '#290d02'; ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(-3.2, -1.5); ctx.lineTo(2.4, -2.6); ctx.lineTo(3.4, 2.0); ctx.lineTo(-1.8, 2.8);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.restore();
+        }
+        ctx.restore();
+        return;
+      }
+
+      // === INTACT / CRACKING ANCIENT EGYPTIAN CARVED SANDSTONE LINTEL ===
+      ctx.save();
+      const warning = p.crumbleTimer > 0;
+      const stress = warning ? Math.max(0, Math.min(1, 1 - p.crumbleTimer / 0.9)) : 0;
+      // Progressive tremor: gentle warning shiver -> urgent rattling right before shatter
+      const tremorAmp = warning ? (0.8 + stress * 2.4) : 0;
+      const shakeX = warning ? Math.sin(time * (38 + stress * 28)) * tremorAmp : 0;
+      const shakeY = warning ? Math.cos(time * (32 + stress * 24)) * (tremorAmp * 0.45) : 0;
+      ctx.translate(px + shakeX, py + shakeY);
+
+      // 1. Cascading Fine Stone Dust & Sand Plumes trickling from widening underside cracks when warning!
+      if (warning) {
+        for (let i = 0; i < fRatios.length; i++) {
+          const fx = p.w * fRatios[i];
+          const streamLen = 14 + stress * 34;
+          const dustG = ctx.createLinearGradient(fx, visH - 4, fx, visH + streamLen);
+          dustG.addColorStop(0, `rgba(253, 230, 138, ${(0.38 + stress * 0.34).toFixed(2)})`);
+          dustG.addColorStop(0.6, `rgba(217, 148, 62, ${(0.22 + stress * 0.20).toFixed(2)})`);
+          dustG.addColorStop(1, 'rgba(180, 96, 24, 0)');
+          ctx.fillStyle = dustG;
+          ctx.beginPath();
+          ctx.moveTo(fx - 2.5 - stress * 2, visH - 3);
+          ctx.lineTo(fx + 2.5 + stress * 2, visH - 3);
+          ctx.lineTo(fx + 6 + stress * 4, visH + streamLen);
+          ctx.lineTo(fx - 6 - stress * 4, visH + streamLen);
+          ctx.closePath();
+          ctx.fill();
+
+          // Tiny falling limestone grit specks pouring down from each crack
+          for (let g = 0; g < 3; g++) {
+            const drop = ((time * (75 + g * 28) + i * 19 + g * 13) % (streamLen + 6));
+            const gx = fx + Math.sin(time * 9 + g + i) * (2 + stress * 2.5);
+            const ga = Math.max(0, 1 - drop / (streamLen + 6));
+            ctx.fillStyle = g % 2 === 0 ? `rgba(254, 243, 199, ${(ga * 0.85).toFixed(2)})` : `rgba(180, 96, 24, ${(ga * 0.85).toFixed(2)})`;
+            ctx.beginPath(); ctx.arc(gx, visH - 2 + drop, 1.1 + (g === 0 ? 0.6 : 0), 0, Math.PI * 2); ctx.fill();
+          }
+        }
+      }
+
+      // 2. Sculpted Weathered Architectural Sandstone Lintel Silhouette (Tapered Cavetto Underside + Chipped Corners!)
+      const slabPath = () => {
+        ctx.beginPath();
+        ctx.moveTo(3, 0);
+        ctx.lineTo(p.w * 0.32, 0.6);
+        ctx.lineTo(p.w * 0.68, 0);
+        ctx.lineTo(p.w - 3, 0.5);
+        ctx.lineTo(p.w, 4);
+        ctx.lineTo(p.w - 1.5, 19);
+        ctx.lineTo(p.w - 6, visH - 1);
+        ctx.lineTo(p.w * 0.72, visH);
+        ctx.lineTo(p.w * 0.52, visH - 1.6);
+        ctx.lineTo(p.w * 0.28, visH);
+        ctx.lineTo(6, visH - 1);
+        ctx.lineTo(1.5, 19);
+        ctx.lineTo(0, 4);
+        ctx.closePath();
+      };
+
+      const csG = ctx.createLinearGradient(0, 0, 0, visH);
+      csG.addColorStop(0, '#fae0a2');
+      csG.addColorStop(0.18, '#df9c42');
+      csG.addColorStop(0.62, '#b56a21');
+      csG.addColorStop(0.86, '#7a3b0e');
+      csG.addColorStop(1, '#3b1605');
+      slabPath();
+      ctx.fillStyle = csG;
+      ctx.fill();
+
+      // Clip interior details (sandstone strata, recessed relief channel, Pharaonic carvings & weathering)
+      ctx.save();
+      slabPath();
+      ctx.clip();
+
+      // Subtle natural sandstone horizontal mineral strata & fine stone grain pitting
+      ctx.fillStyle = 'rgba(255, 248, 220, 0.16)';
+      ctx.fillRect(0, 0, p.w, 4.5);
+      ctx.fillStyle = 'rgba(69, 26, 3, 0.16)';
+      for (let sy = 8; sy < visH - 3; sy += 6) ctx.fillRect(0, sy, p.w, 1.2);
+      for (let sp = 0; sp < 14; sp++) {
+        const sx0 = ((sp * 37 + p.x) % Math.max(10, p.w - 8)) + 4;
+        const sy0 = 3 + ((sp * 19) % (visH - 7));
+        ctx.fillStyle = sp % 2 === 0 ? 'rgba(58, 22, 5, 0.24)' : 'rgba(255, 250, 224, 0.22)';
+        ctx.fillRect(sx0, sy0, 2.2, 1.4);
+      }
+
+      // Recessed Carved Pharaonic Relief Channel (upper chiseled molding shadow + lower sunlit ledge!)
+      ctx.fillStyle = 'rgba(92, 40, 10, 0.26)';
+      ctx.fillRect(6, 6.5, p.w - 12, 13.5);
+      ctx.fillStyle = 'rgba(41, 13, 2, 0.45)';
+      ctx.fillRect(6, 6.5, p.w - 12, 1.5);
+      ctx.fillStyle = 'rgba(255, 248, 214, 0.34)';
+      ctx.fillRect(6, 19.2, p.w - 12, 1.3);
+
+      // 3. AUTHENTIC SUNKEN-RELIEF PHARAONIC TEMPLE CARVINGS (Winged Solar Disk + Flanking Lotus & Ankh Motifs!)
+      const midX = p.w * 0.5;
+      const midY = 13.2;
+
+      // Center Winged Solar Disk (Behdety) with carved recessed feathers & subtle faded turquoise/lapis pigment!
+      for (const side of [-1, 1]) {
+        // Sunken wing shadow + faded mineral turquoise-lapis pigment inlay
+        ctx.fillStyle = 'rgba(22, 78, 99, 0.48)';
+        ctx.beginPath();
+        ctx.moveTo(midX + side * 6, midY - 3.5);
+        ctx.quadraticCurveTo(midX + side * 20, midY - 4.2, midX + side * 31, midY - 2.2);
+        ctx.lineTo(midX + side * 26, midY + 3.2);
+        ctx.quadraticCurveTo(midX + side * 16, midY + 3.8, midX + side * 6, midY + 2.5);
+        ctx.closePath();
+        ctx.fill();
+        // Carved wing feather ribs (dark chiseled groove + warm stone highlight)
+        ctx.strokeStyle = 'rgba(41, 13, 2, 0.58)'; ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(midX + side * 6, midY - 3.5); ctx.quadraticCurveTo(midX + side * 19, midY - 4.2, midX + side * 31, midY - 2.2);
+        ctx.moveTo(midX + side * 7, midY - 0.5); ctx.lineTo(midX + side * 28, midY + 0.2);
+        ctx.moveTo(midX + side * 7, midY + 2.2); ctx.lineTo(midX + side * 24, midY + 3.0);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(254, 243, 199, 0.38)'; ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(midX + side * 7, midY + 0.4); ctx.lineTo(midX + side * 27, midY + 1.0);
+        ctx.stroke();
+      }
+      // Carved Solar Disk core with muted ochre-terracotta sun & sunlit carved rim
+      ctx.fillStyle = 'rgba(154, 52, 18, 0.62)';
+      ctx.strokeStyle = 'rgba(41, 13, 2, 0.65)'; ctx.lineWidth = 1.0;
+      ctx.beginPath(); ctx.arc(midX, midY, 4.0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(254, 243, 199, 0.48)'; ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.arc(midX, midY, 3.8, 0.2, Math.PI * 0.9); ctx.stroke();
+
+      // Flanking Carved Sunken-Relief Ankh & Lotus Frieze Icons on Left & Right Wings of the Lintel
+      const drawCarvedAnkh = (ax0, ay0) => {
+        // Sunken shadow pass
+        ctx.strokeStyle = 'rgba(41, 13, 2, 0.58)'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.ellipse(ax0, ay0 - 2.4, 2.0, 2.3, 0, 0, Math.PI * 2);
+        ctx.moveTo(ax0, ay0 - 0.1); ctx.lineTo(ax0, ay0 + 4.4);
+        ctx.moveTo(ax0 - 2.8, ay0 + 1.0); ctx.lineTo(ax0 + 2.8, ay0 + 1.0);
+        ctx.stroke();
+        // Chiseled sunlit bottom-right rim highlight
+        ctx.strokeStyle = 'rgba(254, 243, 199, 0.35)'; ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(ax0 + 0.8, ay0 + 0.5); ctx.lineTo(ax0 + 0.8, ay0 + 4.4);
+        ctx.moveTo(ax0 - 2.2, ay0 + 1.8); ctx.lineTo(ax0 + 2.8, ay0 + 1.8);
+        ctx.stroke();
+      };
+      const drawCarvedLotus = (lx0, ly0) => {
+        ctx.fillStyle = 'rgba(30, 64, 115, 0.42)';
+        ctx.strokeStyle = 'rgba(41, 13, 2, 0.55)'; ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(lx0, ly0 + 4);
+        ctx.lineTo(lx0 - 4, ly0 - 2.2);
+        ctx.lineTo(lx0 - 1.2, ly0 - 0.5);
+        ctx.lineTo(lx0, ly0 - 3.8);
+        ctx.lineTo(lx0 + 1.2, ly0 - 0.5);
+        ctx.lineTo(lx0 + 4, ly0 - 2.2);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+      };
+
+      for (const side of [-1, 1]) {
+        const x1 = midX + side * 42;
+        if (x1 > 12 && x1 < p.w - 12) drawCarvedAnkh(x1, midY);
+        const x2 = midX + side * 56;
+        if (x2 > 12 && x2 < p.w - 12) drawCarvedLotus(x2, midY);
+      }
+
+      // Stepped underside shadow band (gives real 3D stone slab thickness!)
+      ctx.fillStyle = 'rgba(28, 10, 2, 0.45)';
+      ctx.fillRect(0, 22, p.w, visH - 22);
+
+      // 4. PROGRESSIVE 3D BRANCHING STONE FRACTURE CRACKS (Deep Dark Fissure + Sunlit Chiseled Edge!)
+      for (let i = 0; i < fRatios.length; i++) {
+        const fx = p.w * fRatios[i];
+        const j1 = (i % 2 === 0 ? 1 : -1) * 4.5;
+        const j2 = (i % 2 === 0 ? -1 : 1) * 3.8;
+        const crackW = 1.05 + stress * 1.65;
+
+        const traceMainCrack = (ox, oy) => {
+          ctx.beginPath();
+          ctx.moveTo(fx + ox, 0 + oy);
+          ctx.lineTo(fx + j1 * 0.7 + ox, visH * 0.28 + oy);
+          ctx.lineTo(fx + j2 + ox, visH * 0.58 + oy);
+          ctx.lineTo(fx + j1 * 0.5 + ox, visH * 0.82 + oy);
+          ctx.lineTo(fx - j2 * 0.4 + ox, visH + oy);
+        };
+
+        // Sunlit chiseled crack bevel (right edge of fissure)
+        ctx.strokeStyle = warning
+          ? `rgba(255, 248, 214, ${(0.42 + stress * 0.35).toFixed(2)})`
+          : 'rgba(255, 245, 200, 0.28)';
+        ctx.lineWidth = crackW * 0.85;
+        traceMainCrack(1.1, 0.5);
+        ctx.stroke();
+
+        // Deep dark split fissure interior
+        ctx.strokeStyle = warning ? '#140501' : 'rgba(28, 10, 2, 0.76)';
+        ctx.lineWidth = crackW;
+        ctx.lineJoin = 'miter';
+        traceMainCrack(0, 0);
+        ctx.stroke();
+
+        // Secondary forked micro-cracks sprouting outward as stress increases!
+        if (stress > 0.15) {
+          const bLen = (stress - 0.15) * 14;
+          ctx.strokeStyle = 'rgba(24, 8, 2, 0.85)';
+          ctx.lineWidth = 0.85 + stress * 0.65;
+          ctx.beginPath();
+          ctx.moveTo(fx + j1 * 0.7, visH * 0.28);
+          ctx.lineTo(fx + j1 * 0.7 + (i % 2 === 0 ? bLen : -bLen), visH * 0.28 - bLen * 0.42);
+          ctx.moveTo(fx + j2, visH * 0.58);
+          ctx.lineTo(fx + j2 + (i % 2 === 0 ? -bLen * 0.9 : bLen * 0.9), visH * 0.58 + bLen * 0.38);
+          ctx.stroke();
+        }
+      }
+
+      ctx.restore(); // end slab clip
+
+      // 5. Crisp Outer Stone Contour & Top Sunlit Rim Highlight
+      slabPath();
+      ctx.strokeStyle = '#240b02';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(255, 250, 224, 0.55)';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(4, 1.2); ctx.lineTo(p.w - 4, 1.2);
+      ctx.stroke();
+
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'thermal_updraft') {
+      // Ancient Carved Sandstone & Bronze Desert Geothermal Wind-Vent (Tiered Stone Pedestal, Bronze Grate, Glowing Fissures & Rising Air Plumes!)
+      const cyc = (time + (p.phase || 0)) % 4.8;
+      const isWarn = cyc >= 1.6 && cyc < 2.5;
+      const isActive = cyc >= 2.5;
+      ctx.save();
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+
+      // 1. Flanking Weathered Desert Boulders & Grounded Shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.36)';
+      ctx.beginPath(); ctx.ellipse(cx, baseY, 48, 6, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#78350f'; ctx.strokeStyle = '#290d02'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.ellipse(cx - 38, baseY - 5, 11, 7, -0.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(cx + 39, baseY - 4, 10, 6, 0.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      // 2. Sculpted Tiered Carved Sandstone Wind-Shrine Vent Housing
+      const stG = ctx.createLinearGradient(cx - 38, baseY - 24, cx + 38, baseY);
+      stG.addColorStop(0, '#f59e0b'); stG.addColorStop(0.32, '#d97706'); stG.addColorStop(0.75, '#92400e'); stG.addColorStop(1, '#451a03');
+      ctx.fillStyle = stG; ctx.strokeStyle = '#290d02'; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(cx - 42, baseY);
+      ctx.lineTo(cx - 34, baseY - 18);
+      ctx.lineTo(cx + 34, baseY - 18);
+      ctx.lineTo(cx + 42, baseY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Top beveled sandstone rim & carved Egyptian chevron relief trim
+      ctx.fillStyle = '#fde68a';
+      ctx.beginPath(); ctx.roundRect(cx - 36, baseY - 22, 72, 5, 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(41, 13, 2, 0.55)'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for (let gx = cx - 28; gx <= cx + 22; gx += 12) {
+        ctx.moveTo(gx, baseY - 12); ctx.lineTo(gx + 6, baseY - 6); ctx.lineTo(gx + 12, baseY - 12);
+      }
+      ctx.stroke();
+      // Glowing geothermal heat cracks on stone housing when warming/active
+      if (isWarn || isActive) {
+        ctx.strokeStyle = isActive ? '#fef08a' : '#f97316';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(cx - 18, baseY - 17); ctx.lineTo(cx - 14, baseY - 9); ctx.lineTo(cx - 19, baseY - 2);
+        ctx.moveTo(cx + 16, baseY - 17); ctx.lineTo(cx + 20, baseY - 8); ctx.lineTo(cx + 15, baseY - 2);
+        ctx.stroke();
+      }
+
+      // 3. Recessed Forged Bronze Exhaust Nozzle & Grate Bars
+      const coreG = ctx.createRadialGradient(cx, baseY - 21, 2, cx, baseY - 21, 26);
+      if (isActive) {
+        coreG.addColorStop(0, '#fffbeb'); coreG.addColorStop(0.45, '#fde047'); coreG.addColorStop(1, '#ea580c');
+      } else if (isWarn) {
+        coreG.addColorStop(0, '#fde047'); coreG.addColorStop(0.55, '#ea580c'); coreG.addColorStop(1, '#7c2d12');
+      } else {
+        coreG.addColorStop(0, '#451a03'); coreG.addColorStop(1, '#1c0802');
+      }
+      ctx.fillStyle = coreG; ctx.strokeStyle = '#290d02'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.ellipse(cx, baseY - 21, 25, 4.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Bronze cross-grate ribs across vent mouth
+      ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.6;
+      for (const bx of [-14, -5, 5, 14]) {
+        ctx.beginPath(); ctx.moveTo(cx + bx, baseY - 25); ctx.lineTo(cx + bx, baseY - 17); ctx.stroke();
+      }
+
+      // 4. Organic Rising Thermal Air Plumes & Shimmering Golden Heat Ribbons (ZERO box!)
+      if (isWarn || isActive) {
+        const intensity = isActive ? 1 : (cyc - 1.6) / 0.9;
+        const mouthG = ctx.createRadialGradient(cx, baseY - 24, 4, cx, baseY - 46, 48);
+        mouthG.addColorStop(0, `rgba(254, 240, 138, ${(0.42 * intensity).toFixed(2)})`);
+        mouthG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = mouthG;
+        ctx.beginPath(); ctx.ellipse(cx, baseY - 38, 44, 34, 0, 0, Math.PI * 2); ctx.fill();
+
+        ctx.lineCap = 'round';
+        const ribbons = isActive ? 11 : 5;
+        for (let r = 0; r < ribbons; r++) {
+          const frac = ((time * (isActive ? 1.65 : 0.8) + r * 0.19) % 1);
+          const fade = Math.sin(frac * Math.PI);
+          const ry = baseY - 22 - frac * (p.h - 26);
+          const spread = 12 + frac * 18;
+          const rx = cx + Math.sin(frac * 8.5 + r * 1.35 + time * 4.2) * spread;
+          ctx.strokeStyle = r % 2 === 0
+            ? `rgba(255, 251, 235, ${(fade * 0.62 * intensity).toFixed(2)})`
+            : `rgba(253, 224, 71, ${(fade * 0.52 * intensity).toFixed(2)})`;
+          ctx.lineWidth = isActive ? (2.6 - frac * 0.9) : 1.5;
+          ctx.beginPath();
+          ctx.moveTo(rx, ry + 20);
+          ctx.quadraticCurveTo(rx + Math.cos(time * 5 + r) * 9, ry + 6, rx, ry - 12);
+          ctx.stroke();
+          if (fade > 0.25) {
+            ctx.fillStyle = `rgba(254, 240, 138, ${(fade * 0.85 * intensity).toFixed(2)})`;
+            ctx.beginPath(); ctx.arc(rx, ry - 12, isActive ? 2.2 : 1.5, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'oasis_palm_bounce') {
+      // Sculpted Lush Desert Oasis Palm Rosette Cushion (Sandstone Rim Mound, Fibrous Trunk Heart, 7 Pinnate Fronds & Golden Dates!)
+      ctx.save();
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+      const comp = p.bounceAnim ? Math.sin(p.bounceAnim * Math.PI) * 8 : 0;
+      const topY = py + 12 + comp;
+
+      // Grounded contact shadow & weathered desert oasis soil/sandstone rim mound
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.36)';
+      ctx.beginPath(); ctx.ellipse(cx, baseY, p.w * 0.48, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+      const rimG = ctx.createLinearGradient(cx, baseY - 18, cx, baseY);
+      rimG.addColorStop(0, '#d97706'); rimG.addColorStop(0.55, '#92400e'); rimG.addColorStop(1, '#451a03');
+      ctx.fillStyle = rimG; ctx.strokeStyle = '#290d02'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - 32, baseY);
+      ctx.quadraticCurveTo(cx - 26, baseY - 18, cx, baseY - 16);
+      ctx.quadraticCurveTo(cx + 26, baseY - 18, cx + 32, baseY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Smooth desert oasis pebbles nestled along base
+      ctx.fillStyle = '#b45309';
+      ctx.beginPath(); ctx.ellipse(cx - 24, baseY - 2, 6, 3.2, 0, 0, Math.PI * 2); ctx.ellipse(cx + 22, baseY - 2, 7, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+
+      // Fibrous diamond-bark young palm trunk base
+      ctx.fillStyle = '#5c280a'; ctx.strokeStyle = '#290d02'; ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(cx - 14, baseY - 10); ctx.lineTo(cx - 10, topY + 6);
+      ctx.lineTo(cx + 10, topY + 6); ctx.lineTo(cx + 14, baseY - 10);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(217, 119, 6, 0.45)'; ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(cx - 11, baseY - 14); ctx.lineTo(cx + 11, baseY - 14);
+      ctx.moveTo(cx - 10, baseY - 20); ctx.lineTo(cx + 10, baseY - 20);
+      ctx.stroke();
+
+      // Helper: Draw a sculpted feathery pinnate palm frond with notched leaflet blades & curved midrib
+      const drawBounceFrond = (side, ang, len, dark) => {
+        ctx.save();
+        ctx.translate(cx, topY + 4);
+        ctx.rotate(ang);
+        const fG = ctx.createLinearGradient(0, -10, side * len, 12);
+        if (dark) {
+          fG.addColorStop(0, '#15803d'); fG.addColorStop(0.65, '#065f46'); fG.addColorStop(1, '#064e3b');
+        } else {
+          fG.addColorStop(0, '#86efac'); fG.addColorStop(0.4, '#22c55e'); fG.addColorStop(1, '#15803d');
+        }
+        ctx.fillStyle = fG; ctx.strokeStyle = '#052e16'; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(side * len * 0.42, -16, side * len, 6);
+        // Sculpted notched pinnate leaflet tips returning along lower edge
+        ctx.lineTo(side * len * 0.78, 8); ctx.lineTo(side * len * 0.82, 3);
+        ctx.lineTo(side * len * 0.56, 10); ctx.lineTo(side * len * 0.60, 4);
+        ctx.lineTo(side * len * 0.34, 9); ctx.lineTo(side * len * 0.38, 3);
+        ctx.quadraticCurveTo(side * len * 0.16, 8, 0, 5);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Sunlit central rachis vein
+        ctx.strokeStyle = dark ? 'rgba(134, 239, 172, 0.35)' : 'rgba(236, 253, 245, 0.65)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(0, 1); ctx.quadraticCurveTo(side * len * 0.45, -8, side * len * 0.92, 5); ctx.stroke();
+        ctx.restore();
+      };
+
+      // Back shaded fronds -> Front sunlit springy crown fronds (7 layered fronds!)
+      const sway = Math.sin(time * 2.6 + p.x * 0.03) * 0.035;
+      drawBounceFrond(-1, -0.34 + sway, 46, true);
+      drawBounceFrond(1, 0.34 - sway, 46, true);
+      drawBounceFrond(-1, -0.08 + sway, 52, false);
+      drawBounceFrond(1, 0.08 - sway, 52, false);
+      drawBounceFrond(-1, 0.22 + sway, 44, false);
+      drawBounceFrond(1, -0.22 - sway, 44, false);
+
+      // Golden oasis dates & glowing pollen cushion heart in the center
+      ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.1;
+      for (const [dx, dy] of [[-7, 3], [0, 5], [7, 3], [-3.5, -1], [3.5, -1]]) {
+        ctx.beginPath(); ctx.arc(cx + dx, topY + dy, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath(); ctx.arc(cx - 1, topY - 1.5, 1.5, 0, Math.PI * 2); ctx.fill();
+
+      // Subtle animated golden bounce chevron above the crown
+      const chev = Math.sin(time * 5.5) * 2.2;
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(cx - 7, topY - 12 + chev); ctx.lineTo(cx, topY - 19 + chev); ctx.lineTo(cx + 7, topY - 12 + chev); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    // =========================================================================
+    // STAGE 19: TRADITIONAL JAPANESE OLD TOWN PLATFORMS (High-Craft Kyoto Ishidatami, Kawara Roofs, Bamboo Spring, Chochin Swing, Hinoki Bridge, Yatai Ramen Stall)
+    // =========================================================================
+    if (p.type === 'japan_deck') {
+      ctx.save();
+      ctx.translate(px, py);
+      const deckG = ctx.createLinearGradient(0, 0, 0, p.h);
+      deckG.addColorStop(0, '#475569'); deckG.addColorStop(0.24, '#334155'); deckG.addColorStop(0.68, '#1e293b'); deckG.addColorStop(1, '#0c1222');
+      ctx.fillStyle = deckG; ctx.fillRect(0, 0, p.w, p.h);
+      // Individual beveled Kyoto Ishidatami cut granite flagstones with subtle mossy joints & wet lantern sheen
+      const tones = ['#3f4d63', '#364357', '#46546b', '#2e3a4d'];
+      for (let row = 0, sy = 14; sy < p.h; row++, sy += 22) {
+        const off = (row % 2) * 28;
+        for (let col = 0, sx = off - 28; sx < p.w; col++, sx += 56) {
+          const bx0 = Math.max(0, sx + 1.5), bx1 = Math.min(p.w, sx + 54.5);
+          if (bx1 - bx0 < 4) continue;
+          ctx.fillStyle = tones[(row * 3 + col) % tones.length];
+          ctx.fillRect(bx0, sy + 1, bx1 - bx0, Math.min(20, p.h - sy - 1));
+          ctx.fillStyle = 'rgba(226, 232, 240, 0.12)'; ctx.fillRect(bx0, sy + 1, bx1 - bx0, 1.8);
+          ctx.fillStyle = 'rgba(2, 6, 23, 0.38)'; ctx.fillRect(bx0, sy + 19, bx1 - bx0, 1.8);
+        }
+      }
+      // Moss tufts along lower canal embankment edge
+      ctx.fillStyle = 'rgba(21, 128, 61, 0.42)';
+      for (let mx = 18; mx < p.w - 18; mx += 84) {
+        ctx.beginPath(); ctx.ellipse(mx, 14, 14, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+      }
+      // Wet dusk Ishidatami curb coping catching warm crimson-sakura lantern light
+      const curbG = ctx.createLinearGradient(0, 0, 0, 13);
+      curbG.addColorStop(0, '#e2e8f0'); curbG.addColorStop(0.4, '#94a3b8'); curbG.addColorStop(1, '#334155');
+      ctx.fillStyle = curbG; ctx.fillRect(0, 0, p.w, 12);
+      ctx.fillStyle = 'rgba(251, 113, 133, 0.22)'; ctx.fillRect(0, 2, p.w, 3.5);
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.20)';
+      for (let rx = 28; rx < p.w - 40; rx += 160) ctx.fillRect(rx, 3, 44, 2.5);
+      ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.6; ctx.strokeRect(0, 0, p.w, p.h);
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'shoji_tile_roof') {
+      ctx.save();
+      ctx.translate(px, py);
+      // Carved dark cedar Machiya timber eave rafters & soffit beam
+      const woodG = ctx.createLinearGradient(0, 11, 0, p.h);
+      woodG.addColorStop(0, '#5c2d1b'); woodG.addColorStop(0.55, '#3b1a0e'); woodG.addColorStop(1, '#1c0a04');
+      ctx.fillStyle = woodG; ctx.strokeStyle = '#140702'; ctx.lineWidth = 1.5;
+      ctx.fillRect(4, 11, p.w - 8, p.h - 11); ctx.strokeRect(4, 11, p.w - 8, p.h - 11);
+      // Exposed cedar rafter beam ends along underside
+      ctx.fillStyle = '#783f1c';
+      for (let rx = 14; rx < p.w - 14; rx += 22) ctx.fillRect(rx, 15, 6, 6);
+      // Curved charcoal-slate Kawara ceramic roof with upturned corner eaves
+      const tileG = ctx.createLinearGradient(0, 0, 0, 14);
+      tileG.addColorStop(0, '#94a3b8'); tileG.addColorStop(0.32, '#475569'); tileG.addColorStop(0.78, '#1e293b'); tileG.addColorStop(1, '#090d16');
+      ctx.fillStyle = tileG; ctx.strokeStyle = '#020617'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-6, 5); ctx.quadraticCurveTo(6, -1, 16, 0); ctx.lineTo(p.w - 16, 0); ctx.quadraticCurveTo(p.w - 6, -1, p.w + 6, 5);
+      ctx.lineTo(p.w + 1, 14); ctx.lineTo(-1, 14); ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Individual barrel-tile grooves + sculpted Nokimarugawara round end-cap medallions!
+      for (let tx = 10; tx < p.w - 6; tx += 15) {
+        ctx.strokeStyle = 'rgba(15, 23, 42, 0.55)'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.moveTo(tx, 1); ctx.lineTo(tx, 11); ctx.stroke();
+        ctx.fillStyle = '#475569'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.arc(tx, 12.2, 5.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#cbd5e1'; ctx.beginPath(); ctx.arc(tx, 12.2, 2.0, 0, Math.PI * 2); ctx.fill();
+      }
+      // Subtle crimson festival tassels hanging from both upturned roof corners
+      ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.moveTo(-2, 13); ctx.lineTo(-2, 22); ctx.moveTo(p.w + 2, 13); ctx.lineTo(p.w + 2, 22); ctx.stroke();
+      ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(-2, 14, 1.8, 0, Math.PI * 2); ctx.arc(p.w + 2, 14, 1.8, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'japan_wall') {
+      ctx.save();
+      ctx.translate(px, py);
+      // Traditional Kyoto Shikkui lime plaster wall framed by dark charred Yakisugi cedar posts
+      const wG = ctx.createLinearGradient(0, 0, p.w, 0);
+      wG.addColorStop(0, '#f8fafc'); wG.addColorStop(0.55, '#e2e8f0'); wG.addColorStop(1, '#94a3b8');
+      ctx.fillStyle = wG; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.8;
+      ctx.fillRect(0, 0, p.w, p.h); ctx.strokeRect(0, 0, p.w, p.h);
+      ctx.fillStyle = '#2d140c';
+      ctx.fillRect(0, 0, 7, p.h); ctx.fillRect(p.w - 7, 0, 7, p.h);
+      for (let gy = 30; gy < p.h - 16; gy += 36) {
+        ctx.fillStyle = '#4a2518'; ctx.fillRect(0, gy, p.w, 6);
+        ctx.fillStyle = '#fde68a'; ctx.beginPath(); ctx.arc(3.5, gy + 3, 1.3, 0, Math.PI * 2); ctx.arc(p.w - 3.5, gy + 3, 1.3, 0, Math.PI * 2); ctx.fill();
+      }
+      // Curved Kawara ceramic coping cap on top of wall
+      ctx.fillStyle = '#334155'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(-7, 2); ctx.quadraticCurveTo(p.w * 0.5, -8, p.w + 7, 2); ctx.lineTo(p.w + 4, 6); ctx.lineTo(-4, 6); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      if (p.climbable) drawClimbWallSign(ctx, p, px, py, time);
+      return;
+    }
+
+    if (p.type === 'bamboo_spring') {
+      // Sculpted Living Zen Bamboo Culm Catapult in Mossy Carved Stone Tsukubai Basin!
+      ctx.save();
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+      const comp = p.bounceAnim ? Math.sin(p.bounceAnim * Math.PI) * 11 : 0;
+      const topY = py + 8 + comp;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+      ctx.beginPath(); ctx.ellipse(cx, baseY, p.w * 0.48, 5.2, 0, 0, Math.PI * 2); ctx.fill();
+      // Carved weathered Zen stone basin with lush velvet moss cushions
+      const stG = ctx.createLinearGradient(cx - 32, baseY - 16, cx + 32, baseY);
+      stG.addColorStop(0, '#94a3b8'); stG.addColorStop(0.55, '#475569'); stG.addColorStop(1, '#1e293b');
+      ctx.fillStyle = stG; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(cx - 30, baseY - 15, 60, 15, [6, 6, 3, 3]); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#15803d';
+      ctx.beginPath(); ctx.ellipse(cx - 14, baseY - 14, 13, 4.2, -0.08, 0, Math.PI * 2); ctx.ellipse(cx + 15, baseY - 14, 11, 3.6, 0.1, 0, Math.PI * 2); ctx.fill();
+      // Twin layered arched living emerald bamboo culms
+      const bG = ctx.createLinearGradient(px, topY - 4, px, topY + 14);
+      bG.addColorStop(0, '#bbf7d0'); bG.addColorStop(0.35, '#22c55e'); bG.addColorStop(0.8, '#15803d'); bG.addColorStop(1, '#064e3b');
+      ctx.strokeStyle = '#052e16'; ctx.lineWidth = 12; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(px + 6, baseY - 10); ctx.quadraticCurveTo(cx, topY - 5, px + p.w - 6, baseY - 10); ctx.stroke();
+      ctx.strokeStyle = bG; ctx.lineWidth = 8.4;
+      ctx.beginPath(); ctx.moveTo(px + 6, baseY - 10); ctx.quadraticCurveTo(cx, topY - 5, px + p.w - 6, baseY - 10); ctx.stroke();
+      // Crisp pale bamboo node rings & twin feathery bamboo leaf sprays
+      ctx.strokeStyle = '#ecfccb'; ctx.lineWidth = 1.7;
+      for (const nx of [cx - 24, cx, cx + 24]) {
+        ctx.beginPath(); ctx.moveTo(nx, topY - 3); ctx.lineTo(nx, topY + 6); ctx.stroke();
+      }
+      for (const side of [-1, 1]) {
+        ctx.fillStyle = '#22c55e'; ctx.strokeStyle = '#064e3b'; ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.ellipse(cx + side * 36, topY + 2, 12, 3.4, side * -0.42, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#86efac';
+        ctx.beginPath(); ctx.ellipse(cx + side * 30, topY - 3, 9, 2.6, side * -0.18, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      const chev = Math.sin(time * 5.5) * 2.2;
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.moveTo(cx - 7, topY - 12 + chev); ctx.lineTo(cx, topY - 19 + chev); ctx.lineTo(cx + 7, topY - 12 + chev); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'paper_lantern_swing') {
+      // Ornate Kyoto Festival Chochin Paper-Lantern Swing anchored to a carved overhead wooden eave beam!
+      const dip = p.sinkOffset || 0;
+      ctx.save();
+      const anchorX = (p.baseX !== undefined ? p.baseX : p.x) - (p.x - px) + p.w * 0.5;
+      const topBarY = py - 115;
+      // Carved dark-cedar overhead festival crossbar with crimson end-caps (so ropes connect to a real beam!)
+      ctx.fillStyle = '#3b1a0e'; ctx.strokeStyle = '#140702'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.roundRect(anchorX - 52, topBarY - 6, 104, 10, 3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#dc2626'; ctx.fillRect(anchorX - 54, topBarY - 5, 8, 8); ctx.fillRect(anchorX + 46, topBarY - 5, 8, 8);
+      ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(anchorX - 28, topBarY + 4, 3, 0, Math.PI * 2); ctx.arc(anchorX + 28, topBarY + 4, 3, 0, Math.PI * 2); ctx.fill();
+      // Twin braided crimson festival ropes suspending the footbeam
+      ctx.strokeStyle = '#7f1d1d'; ctx.lineWidth = 3.2;
+      ctx.beginPath();
+      ctx.moveTo(anchorX - 28, topBarY + 4); ctx.lineTo(px + 14, py + dip + 4);
+      ctx.moveTo(anchorX + 28, topBarY + 4); ctx.lineTo(px + p.w - 14, py + dip + 4);
+      ctx.stroke();
+      ctx.strokeStyle = '#fca5a5'; ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(anchorX - 28, topBarY + 4); ctx.lineTo(px + 14, py + dip + 4);
+      ctx.moveTo(anchorX + 28, topBarY + 4); ctx.lineTo(px + p.w - 14, py + dip + 4);
+      ctx.stroke();
+      // Lacquered vermilion-and-gold Kyoto cedar footbeam
+      const beamG = ctx.createLinearGradient(px, py + dip, px, py + dip + p.h);
+      beamG.addColorStop(0, '#ef4444'); beamG.addColorStop(0.5, '#b91c1c'); beamG.addColorStop(1, '#450a0a');
+      ctx.fillStyle = beamG; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(px, py + dip, p.w, p.h, 6); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fde047'; ctx.fillRect(px + 6, py + dip + 2.5, p.w - 12, 2.5);
+      // Twin realistic ribbed glowing red Chochin paper lanterns with golden silk tassels!
+      for (const lx of [px + 24, px + p.w - 24]) {
+        const ly = py + dip + p.h + 16;
+        const lGlow = ctx.createRadialGradient(lx, ly, 3, lx, ly, 28);
+        lGlow.addColorStop(0, 'rgba(254, 240, 138, 0.48)'); lGlow.addColorStop(0.55, 'rgba(239, 68, 68, 0.22)'); lGlow.addColorStop(1, 'rgba(239, 68, 68, 0)');
+        ctx.fillStyle = lGlow; ctx.beginPath(); ctx.arc(lx, ly, 28, 0, Math.PI * 2); ctx.fill();
+        const lnG = ctx.createRadialGradient(lx, ly, 2, lx, ly, 13);
+        lnG.addColorStop(0, '#fef08a'); lnG.addColorStop(0.5, '#ef4444'); lnG.addColorStop(1, '#991b1b');
+        ctx.fillStyle = lnG; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.ellipse(lx, ly, 10.5, 13.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Horizontal bamboo lantern ribs
+        ctx.strokeStyle = 'rgba(69, 10, 10, 0.45)'; ctx.lineWidth = 0.9;
+        for (const ry of [-6, 0, 6]) { ctx.beginPath(); ctx.moveTo(lx - 9, ly + ry); ctx.lineTo(lx + 9, ly + ry); ctx.stroke(); }
+        ctx.fillStyle = '#1c0a05'; ctx.fillRect(lx - 6, ly - 14.5, 12, 3); ctx.fillRect(lx - 5, ly + 11.5, 10, 3);
+        // Swaying golden silk tassel
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.moveTo(lx, ly + 14.5); ctx.lineTo(lx + Math.sin(time * 4 + lx) * 2.5, ly + 22); ctx.stroke();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'koi_bridge_planks') {
+      // Authentic Vermilion & Hinoki Wood Kyoto Canal Footbridge with Brass Giboshi Finials & Splintering Planks!
+      if (p.broken) {
+        const fall = p.crumbleFall || 0;
+        if (fall <= 0 || fall >= 1) return;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, 1 - fall);
+        const planks = 5;
+        const pw = p.w / planks;
+        for (let k = 0; k < planks; k++) {
+          const cx0 = px + (k + 0.5) * pw + (k - 2) * fall * 13;
+          const cy0 = py + p.h * 0.5 + fall * fall * 170;
+          ctx.save(); ctx.translate(cx0, cy0); ctx.rotate((k % 2 === 0 ? 1 : -1) * fall * (0.9 + k * 0.22));
+          ctx.fillStyle = k % 2 === 0 ? '#c27018' : '#92400e'; ctx.strokeStyle = '#290d02'; ctx.lineWidth = 1.3;
+          ctx.beginPath(); ctx.roundRect(-pw * 0.46, -6.5, pw * 0.92, 13, 2); ctx.fill(); ctx.stroke();
+          ctx.restore();
+        }
+        ctx.restore();
+        return;
+      }
+      ctx.save();
+      const warn = p.crumbleTimer > 0;
+      const stress = warn ? Math.min(1, 1 - p.crumbleTimer / 0.85) : 0;
+      const shake = warn ? Math.sin(time * (42 + stress * 24)) * (1.2 + stress * 2.2) : 0;
+      ctx.translate(px + shake, py);
+      // Delicate low vermilion temple handrail posts & golden Giboshi caps on both ends
+      for (const rx of [6, p.w - 6]) {
+        ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.2;
+        ctx.fillRect(rx - 3.5, -16, 7, 18); ctx.strokeRect(rx - 3.5, -16, 7, 18);
+        ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(rx, -17.5, 4.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      ctx.fillStyle = '#b91c1c'; ctx.fillRect(6, -11, p.w - 12, 3.5);
+      // Weathered Hinoki cypress bridge planks with wood grain & creak cracks
+      ctx.fillStyle = '#7f1d1d'; ctx.strokeStyle = '#290606'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(0, 0, p.w, p.h, 3); ctx.fill(); ctx.stroke();
+      const planks = 5;
+      const pw = (p.w - 8) / planks;
+      for (let k = 0; k < planks; k++) {
+        const x0 = 4 + k * pw;
+        const sag = warn ? (k === 2 ? stress * 2.5 : stress * 1.2) : 0;
+        const plG = ctx.createLinearGradient(x0, 2, x0, p.h - 2);
+        plG.addColorStop(0, '#e5a93c'); plG.addColorStop(0.55, '#b45309'); plG.addColorStop(1, '#78350f');
+        ctx.fillStyle = plG;
+        ctx.fillRect(x0 + 1, 2 + sag, pw - 2, p.h - 5);
+        ctx.strokeStyle = warn ? '#fef08a' : '#3b1506'; ctx.lineWidth = 1.0;
+        ctx.strokeRect(x0 + 1, 2 + sag, pw - 2, p.h - 5);
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'steam_ramen_vent') {
+      // Authentic Traditional Japanese Street Yatai Ramen Cart with Mini Tiled Roof, Glowing Paper Lantern, Noren & Billowing Steam!
+      const cyc = (time + (p.phase || 0)) % 4.8;
+      const isWarn = cyc >= 1.6 && cyc < 2.4;
+      const isActive = cyc >= 2.4;
+      ctx.save();
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+      // Ground shadow & wooden cart wheels
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.38)'; ctx.beginPath(); ctx.ellipse(cx, baseY, 46, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+      for (const wx of [cx - 28, cx + 28]) {
+        ctx.fillStyle = '#291204'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(wx, baseY - 6, 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(wx, baseY - 6, 2, 0, Math.PI * 2); ctx.fill();
+      }
+      // Cedar Yatai ramen counter cart body + glowing warm stove interior
+      const cartG = ctx.createLinearGradient(cx - 40, baseY - 30, cx + 40, baseY - 4);
+      cartG.addColorStop(0, '#78350f'); cartG.addColorStop(0.5, '#5c280a'); cartG.addColorStop(1, '#290d02');
+      ctx.fillStyle = cartG; ctx.strokeStyle = '#140702'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(cx - 40, baseY - 30, 80, 24, [4, 4, 2, 2]); ctx.fill(); ctx.stroke();
+      // Split crimson Noren curtains with white ramen-bowl emblems
+      for (let n = 0; n < 3; n++) {
+        const nx = cx - 34 + n * 23;
+        ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.0;
+        ctx.fillRect(nx, baseY - 26, 20, 14); ctx.strokeRect(nx, baseY - 26, 20, 14);
+        ctx.fillStyle = '#fef3c7'; ctx.beginPath(); ctx.arc(nx + 10, baseY - 19, 3.2, 0, Math.PI * 2); ctx.fill();
+      }
+      // Hammered copper Donabe broth kettle steaming on top of cart
+      const ketG = ctx.createLinearGradient(cx - 24, baseY - 33, cx + 24, baseY - 27);
+      ketG.addColorStop(0, '#fde047'); ketG.addColorStop(0.5, '#d97706'); ketG.addColorStop(1, '#78350f');
+      ctx.fillStyle = ketG; ctx.strokeStyle = '#3b1506'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.ellipse(cx, baseY - 30, 24, 5.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = isActive ? '#fffbeb' : isWarn ? '#fde68a' : '#92400e';
+      ctx.beginPath(); ctx.ellipse(cx, baseY - 30, 18, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+      // Mini glowing red ramen lantern hanging on left post
+      ctx.fillStyle = '#ef4444'; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.ellipse(cx - 42, baseY - 26, 5.5, 7.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Organic billowing translucent white ramen steam plumes rising upward (ZERO box!)
+      if (isWarn || isActive) {
+        const intensity = isActive ? 1 : (cyc - 1.6) / 0.8;
+        for (let s = 0; s < (isActive ? 14 : 6); s++) {
+          const frac = ((time * (isActive ? 1.45 : 0.7) + s * 0.15) % 1);
+          const fade = Math.sin(frac * Math.PI);
+          const sy = baseY - 32 - frac * (p.h - 36);
+          const sx = cx + Math.sin(frac * 7.2 + s * 1.45 + time * 3.6) * (10 + frac * 18);
+          const rad = 11 + frac * 17;
+          const stG = ctx.createRadialGradient(sx, sy, 2, sx, sy, rad);
+          stG.addColorStop(0, `rgba(255, 255, 255, ${(fade * 0.45 * intensity).toFixed(2)})`);
+          stG.addColorStop(0.6, `rgba(241, 245, 249, ${(fade * 0.24 * intensity).toFixed(2)})`);
+          stG.addColorStop(1, 'rgba(226, 232, 240, 0)');
+          ctx.fillStyle = stG;
+          ctx.beginPath(); ctx.arc(sx, sy, rad, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'crushing_lantern') {
+      // Carved Kyoto Granite Shrine Drop-Block suspended by hemp hoist ropes (Crusher + Rideable Elevator!)
+      const st = p.crushState || 'idle';
+      const isWarn = st === 'warn';
+      const isDrop = st === 'drop';
+      const shake = isWarn ? Math.sin(time * 62) * 3.4 : 0;
+      const bx = px + shake;
+      const topBeamY = py - (p.y - (p.restY !== undefined ? p.restY : p.y)) - 86;
+      ctx.save();
+      // Fixed overhead dark-cedar pulley beam
+      ctx.fillStyle = '#2d140c'; ctx.strokeStyle = '#0f0502'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(px - 10, topBeamY - 8, p.w + 20, 12, 3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#b91c1c';
+      ctx.fillRect(px - 12, topBeamY - 7, 8, 10); ctx.fillRect(px + p.w + 4, topBeamY - 7, 8, 10);
+      // Twin braided hemp hoist ropes unspooling from top beam to granite block
+      ctx.strokeStyle = '#a16207'; ctx.lineWidth = 3.2;
+      ctx.beginPath();
+      ctx.moveTo(px + 16, topBeamY + 4); ctx.lineTo(bx + 16, py + 4);
+      ctx.moveTo(px + p.w - 16, topBeamY + 4); ctx.lineTo(bx + p.w - 16, py + 4);
+      ctx.stroke();
+      ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(px + 16, topBeamY + 4); ctx.lineTo(bx + 16, py + 4);
+      ctx.moveTo(px + p.w - 16, topBeamY + 4); ctx.lineTo(bx + p.w - 16, py + 4);
+      ctx.stroke();
+      // Carved Kyoto granite block body
+      const grG = ctx.createLinearGradient(bx, py, bx + p.w, py + p.h);
+      grG.addColorStop(0, '#94a3b8'); grG.addColorStop(0.5, '#475569'); grG.addColorStop(1, '#1e293b');
+      ctx.fillStyle = grG; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.roundRect(bx, py, p.w, p.h, 6); ctx.fill(); ctx.stroke();
+      // Rideable mossy stone top cap (signals player can stand/ride on top!)
+      ctx.fillStyle = '#15803d';
+      ctx.beginPath(); ctx.roundRect(bx + 3, py - 2, p.w - 6, 8, [4, 4, 2, 2]); ctx.fill();
+      ctx.fillStyle = '#86efac'; ctx.fillRect(bx + 10, py, p.w - 20, 2);
+      // Forged iron corner plates & brass rivets
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(bx + 2, py + p.h - 12, p.w - 4, 10);
+      ctx.fillStyle = '#fbbf24';
+      for (const rx of [bx + 12, bx + p.w / 2, bx + p.w - 12]) {
+        ctx.beginPath(); ctx.arc(rx, py + p.h - 7, 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+      // Glowing crimson temple seal in center (flares brightly on warn & drop!)
+      const sealGlow = (isWarn || isDrop) ? 0.95 : 0.38;
+      ctx.fillStyle = `rgba(239, 68, 68, ${sealGlow})`;
+      ctx.strokeStyle = (isWarn || isDrop) ? '#fef08a' : '#7f1d1d';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(bx + p.w * 0.5 - 16, py + p.h * 0.5 - 17, 32, 30, 4); ctx.fill(); ctx.stroke();
+      // Stylized Torii emblem inside seal
+      ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(bx + p.w * 0.5 - 10, py + p.h * 0.5 - 8); ctx.lineTo(bx + p.w * 0.5 + 10, py + p.h * 0.5 - 8);
+      ctx.moveTo(bx + p.w * 0.5 - 7, py + p.h * 0.5 - 3); ctx.lineTo(bx + p.w * 0.5 + 7, py + p.h * 0.5 - 3);
+      ctx.moveTo(bx + p.w * 0.5 - 5, py + p.h * 0.5 - 8); ctx.lineTo(bx + p.w * 0.5 - 5, py + p.h * 0.5 + 8);
+      ctx.moveTo(bx + p.w * 0.5 + 5, py + p.h * 0.5 - 8); ctx.lineTo(bx + p.w * 0.5 + 5, py + p.h * 0.5 + 8);
+      ctx.stroke();
+      // Pulsing downward danger chevron during warn/drop
+      if (isWarn || isDrop) {
+        const dy = Math.sin(time * 22) * 3;
+        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2.6;
+        ctx.beginPath();
+        ctx.moveTo(bx + p.w * 0.5 - 10, py + p.h + 8 + dy);
+        ctx.lineTo(bx + p.w * 0.5, py + p.h + 17 + dy);
+        ctx.lineTo(bx + p.w * 0.5 + 10, py + p.h + 8 + dy);
+        ctx.stroke();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'pendulum_censer') {
+      // Heavy Swinging Kyoto Temple Bronze Fire Censer on Forged Iron Chain
+      const pivotSX = (p.pivotX !== undefined ? p.pivotX : p.x + p.w / 2) - (p.x - px);
+      const pivotSY = (p.pivotY !== undefined ? p.pivotY : p.y) - (p.y - py);
+      const len = p.chainLen || 168;
+      const maxAng = p.maxAngle || 0.90;
+      const ang = p.curAngle !== undefined ? p.curAngle : Math.sin(time * (p.swingSpeed || 2.0) + (p.phase || 0)) * maxAng;
+      const bobSX = pivotSX + Math.sin(ang) * len;
+      const bobSY = pivotSY + Math.cos(ang) * len;
+      const bobR = p.bobR || 22;
+      ctx.save();
+      // Subtle dotted swing-arc preview so player can read timing effortlessly
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.24)'; ctx.lineWidth = 1.6; ctx.setLineDash([5, 6]);
+      ctx.beginPath();
+      ctx.arc(pivotSX, pivotSY, len, Math.PI * 0.5 - maxAng, Math.PI * 0.5 + maxAng);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      // Overhead vermilion & dark-cedar Torii anchor beam
+      ctx.fillStyle = '#7f1d1d'; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(pivotSX - 34, pivotSY - 10, 68, 12, 3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.arc(pivotSX, pivotSY + 2, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Forged iron chain links connecting pivot to censer
+      const links = Math.max(6, Math.floor(len / 14));
+      for (let i = 1; i < links; i++) {
+        const t = i / links;
+        const lx = pivotSX + (bobSX - pivotSX) * t;
+        const ly = pivotSY + (bobSY - pivotSY) * t;
+        ctx.strokeStyle = i % 2 === 0 ? '#475569' : '#94a3b8';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath(); ctx.ellipse(lx, ly, 3.2, 5.2, -ang, 0, Math.PI * 2); ctx.stroke();
+      }
+      // Fiery radial aura around the temple fire censer
+      const aura = ctx.createRadialGradient(bobSX, bobSY, 4, bobSX, bobSY, bobR * 1.9);
+      aura.addColorStop(0, 'rgba(254, 240, 138, 0.72)');
+      aura.addColorStop(0.48, 'rgba(249, 115, 22, 0.36)');
+      aura.addColorStop(1, 'rgba(239, 68, 68, 0)');
+      ctx.fillStyle = aura;
+      ctx.beginPath(); ctx.arc(bobSX, bobSY, bobR * 1.9, 0, Math.PI * 2); ctx.fill();
+      // Ornate bronze-iron censer orb with glowing ember core
+      const orbG = ctx.createRadialGradient(bobSX - 5, bobSY - 5, 3, bobSX, bobSY, bobR);
+      orbG.addColorStop(0, '#fef08a'); orbG.addColorStop(0.42, '#ea580c'); orbG.addColorStop(0.78, '#7c2d12'); orbG.addColorStop(1, '#1c1917');
+      ctx.fillStyle = orbG; ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.arc(bobSX, bobSY, bobR, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Decorative bronze band & flickering flame crown
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.moveTo(bobSX - bobR + 2, bobSY); ctx.lineTo(bobSX + bobR - 2, bobSY); ctx.stroke();
+      for (let f = -1; f <= 1; f++) {
+        const fh = 7 + Math.sin(time * 16 + f * 2.1) * 3.5;
+        ctx.fillStyle = f === 0 ? '#fef08a' : '#f97316';
+        ctx.beginPath();
+        ctx.moveTo(bobSX + f * 8 - 4, bobSY - bobR + 3);
+        ctx.quadraticCurveTo(bobSX + f * 8, bobSY - bobR - fh, bobSX + f * 8 + 4, bobSY - bobR + 3);
+        ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'jump_flip_panel') {
+      // Red (Group 0) & Indigo-Blue (Group 1) Kyoto Lacquer Shoji Panels that flip solid/ghost on every jump!
+      const isBlue = (p.flipGroup || 0) === 1;
+      const anim = p.flipAnim !== undefined ? p.flipAnim : (p.flipActive === false ? 0 : 1);
+      ctx.save();
+      const cx = px + p.w * 0.5;
+      const cy = py + p.h * 0.5;
+      // Always show crisp dotted ghost frame when folding/inactive so player plans next jump cleanly
+      if (anim < 0.85) {
+        ctx.strokeStyle = isBlue ? 'rgba(56, 189, 248, 0.72)' : 'rgba(248, 113, 113, 0.72)';
+        ctx.fillStyle = isBlue ? 'rgba(30, 58, 138, 0.14)' : 'rgba(153, 27, 27, 0.14)';
+        ctx.lineWidth = 1.8; ctx.setLineDash([6, 5]);
+        ctx.beginPath(); ctx.roundRect(px + 1, py + 1, p.w - 2, p.h - 2, 5); ctx.fill(); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      if (anim > 0.08) {
+        ctx.translate(cx, cy);
+        ctx.scale(1, 0.22 + 0.78 * anim);
+        ctx.globalAlpha = Math.min(1, 0.18 + 0.82 * anim);
+        const bg = ctx.createLinearGradient(0, -p.h / 2, 0, p.h / 2);
+        if (isBlue) {
+          bg.addColorStop(0, '#38bdf8'); bg.addColorStop(0.45, '#2563eb'); bg.addColorStop(1, '#1e3a8a');
+        } else {
+          bg.addColorStop(0, '#fb7185'); bg.addColorStop(0.45, '#dc2626'); bg.addColorStop(1, '#7f1d1d');
+        }
+        ctx.fillStyle = bg; ctx.strokeStyle = isBlue ? '#bae6fd' : '#fecaca'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.roundRect(-p.w / 2, -p.h / 2, p.w, p.h, 5); ctx.fill(); ctx.stroke();
+        // Delicate Kyoto Shoji lattice bars
+        ctx.strokeStyle = isBlue ? 'rgba(224, 242, 254, 0.55)' : 'rgba(254, 243, 199, 0.55)';
+        ctx.lineWidth = 1.1;
+        for (let sx = -p.w / 2 + 22; sx < p.w / 2 - 12; sx += 24) {
+          ctx.beginPath(); ctx.moveTo(sx, -p.h / 2 + 3); ctx.lineTo(sx, p.h / 2 - 3); ctx.stroke();
+        }
+        // Center emblem: Moon crescent for Blue, Sun disc for Red
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath(); ctx.arc(0, 0, 5.2, 0, Math.PI * 2); ctx.fill();
+        if (isBlue) {
+          ctx.fillStyle = '#1d4ed8';
+          ctx.beginPath(); ctx.arc(2.5, -1, 4.2, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'waterwheel_arm') {
+      // Rotating 4-Arm Kyoto Cedar Waterwheel Lift (Hub + Spoked Rim drawn once on isHubArm!)
+      const hubSX = p.hubX - (p.x - px);
+      const hubSY = p.hubY - (p.y - py);
+      const rad = p.radius || 96;
+      const ang = p.curAngle !== undefined ? p.curAngle : (time * (p.rotSpeed || 0.92) + (p.armAngle || 0));
+      ctx.save();
+      if (p.isHubArm) {
+        // Grand spoked Kyoto timber waterwheel centered at (hubSX, hubSY)
+        ctx.strokeStyle = '#3b1a0e'; ctx.lineWidth = 12;
+        ctx.beginPath(); ctx.arc(hubSX, hubSY, rad, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = '#92400e'; ctx.lineWidth = 7;
+        ctx.beginPath(); ctx.arc(hubSX, hubSY, rad, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = '#78350f'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(hubSX, hubSY, rad * 0.52, 0, Math.PI * 2); ctx.stroke();
+        // 8 rotating timber spokes & water paddles
+        for (let k = 0; k < 8; k++) {
+          const sa = ang + k * (Math.PI / 4);
+          ctx.strokeStyle = k % 2 === 0 ? '#5c280a' : '#78350f';
+          ctx.lineWidth = k % 2 === 0 ? 5.5 : 3.2;
+          ctx.beginPath();
+          ctx.moveTo(hubSX, hubSY);
+          ctx.lineTo(hubSX + Math.cos(sa) * (rad + 7), hubSY + Math.sin(sa) * (rad + 7));
+          ctx.stroke();
+        }
+        // Central forged-iron hub with brass studs
+        ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.arc(hubSX, hubSY, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath(); ctx.arc(hubSX, hubSY, 4.5, 0, Math.PI * 2); ctx.fill();
+      }
+      // Horizontal hanging Hinoki timber gondola platform (always stays level!)
+      const platG = ctx.createLinearGradient(px, py, px, py + p.h);
+      platG.addColorStop(0, '#eab308'); platG.addColorStop(0.5, '#b45309'); platG.addColorStop(1, '#451a03');
+      ctx.fillStyle = platG; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(px, py, p.w, p.h, 5); ctx.fill(); ctx.stroke();
+      // Iron pivot pin & crimson trim bar
+      ctx.fillStyle = '#dc2626'; ctx.fillRect(px + 6, py + 3, p.w - 12, 3);
+      ctx.fillStyle = '#e2e8f0'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(px + p.w * 0.5, py + p.h * 0.5, 4.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'wagasa_ricochet') {
+      // Tilted 45° Japanese Oiled-Paper Wagasa Umbrella — Diagonal Pinball Launcher!
+      const dir = p.launchDir || 1;
+      const cx = px + p.w * 0.5;
+      const cy = py + p.h * 0.5;
+      const pulse = p.spinAnim ? Math.sin(p.spinAnim * Math.PI) * 0.22 : 0;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(dir * 0.54);
+      ctx.scale(1 + pulse, 1 - pulse * 0.45);
+      // Bamboo handle extending downward behind umbrella
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 4.5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(0, -4); ctx.lineTo(0, 32); ctx.stroke();
+      ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(-2, 14); ctx.lineTo(2, 14); ctx.moveTo(-2, 24); ctx.lineTo(2, 24); ctx.stroke();
+      // Crimson & Sakura-pink arched Wagasa canopy
+      const wR = p.w * 0.52;
+      const umbG = ctx.createRadialGradient(0, -10, 4, 0, 2, wR);
+      umbG.addColorStop(0, '#fef08a'); umbG.addColorStop(0.28, '#f43f5e'); umbG.addColorStop(0.75, '#be123c'); umbG.addColorStop(1, '#4c0519');
+      ctx.fillStyle = umbG; ctx.strokeStyle = '#290606'; ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(-wR, 6);
+      ctx.quadraticCurveTo(0, -24, wR, 6);
+      ctx.quadraticCurveTo(0, -2, -wR, 6);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      // Delicate radial bamboo ribs across canopy
+      ctx.strokeStyle = 'rgba(254, 240, 138, 0.52)'; ctx.lineWidth = 1.0;
+      for (const rx of [-wR * 0.62, -wR * 0.28, 0, wR * 0.28, wR * 0.62]) {
+        ctx.beginPath(); ctx.moveTo(0, -11); ctx.lineTo(rx, 4); ctx.stroke();
+      }
+      // Golden top finial & animated diagonal launch chevron
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.arc(0, -12, 3.8, 0, Math.PI * 2); ctx.fill();
+      const bounceOff = Math.sin(time * 6.5) * 3.5;
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(-8, -22 - bounceOff); ctx.lineTo(0, -30 - bounceOff); ctx.lineTo(8, -22 - bounceOff);
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'pinch_wall') {
+      // Sliding Kyoto Yakisugi & Shoji Pinch-Wall on Brass Guide Tracks
+      const baseSX = (p.baseX !== undefined ? p.baseX : p.x) - (p.x - px);
+      const dir = p.slideDir || 1;
+      const dist = p.slideDist || 54;
+      const trackMinX = Math.min(baseSX, baseSX + dir * dist);
+      const trackMaxX = Math.max(baseSX + p.w, baseSX + dir * dist + p.w);
+      ctx.save();
+      // Top & bottom brass/iron guide tracks showing full travel range
+      ctx.fillStyle = '#334155'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.2;
+      ctx.fillRect(trackMinX, py - 5, trackMaxX - trackMinX, 6);
+      ctx.fillRect(trackMinX, py + p.h - 1, trackMaxX - trackMinX, 6);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(trackMinX + 4, py - 3, trackMaxX - trackMinX - 8, 2);
+      // Heavy charred Yakisugi cedar & reinforced Shoji wall body
+      const pwG = ctx.createLinearGradient(px, py, px + p.w, py);
+      pwG.addColorStop(0, '#3b1a0e'); pwG.addColorStop(0.5, '#5c280a'); pwG.addColorStop(1, '#290d02');
+      ctx.fillStyle = pwG; ctx.strokeStyle = '#0f0502'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(px, py, p.w, p.h, 3); ctx.fill(); ctx.stroke();
+      // Warm cream Shoji lattice inset panels
+      ctx.fillStyle = '#fef3c7';
+      ctx.fillRect(px + 8, py + 12, p.w - 16, p.h - 24);
+      ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.3;
+      for (let ly = py + 28; ly < py + p.h - 16; ly += 24) {
+        ctx.beginPath(); ctx.moveTo(px + 8, ly); ctx.lineTo(px + p.w - 8, ly); ctx.stroke();
+      }
+      // Leading edge strip (crimson warning stripe if canCrush, gold climb trim if climbable)
+      const leadX = dir > 0 ? px + p.w - 6 : px;
+      const closePulse = p.canCrush ? (0.55 + 0.45 * (p.closeT || 0)) : 0.7;
+      ctx.fillStyle = p.canCrush ? `rgba(239, 68, 68, ${closePulse.toFixed(2)})` : '#fbbf24';
+      ctx.fillRect(leadX, py + 2, 6, p.h - 4);
+      ctx.restore();
+      if (p.climbable) drawClimbWallSign(ctx, p, px, py, time);
+      return;
+    }
+
+    if (p.type === 'steam_car_deck') {
+      // MONUMENTAL 280px-TALL TRUE-SCALE VICTORIAN STEAM LOCOMOTIVES & PULLMAN CARRIAGES!
+      // Giant 60px Spoked Cast-Iron Bogie Wheels, Massive 64px-Wide Realistic Vestibule Doors,
+      // Tall Velvet-Curtained Windows (64x82px), & Authentic Riveted Black-and-Brass Steam Locomotive Engine!
+      ctx.save();
+      ctx.translate(px, py);
+      const railY = p.h - 16;
+      const wheelR = Math.min(31, Math.max(16, p.h * 0.115));
+      const wheelY = railY - wheelR + 1;
+      const wheelAng = time * 10.0;
+
+      // 1. Continuous gravel ballast bed, fast-scrolling wooden sleepers & gleaming steel rail (unbroken across coupling spans!)
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(-160, railY + 2, p.w + 320, p.h - railY + 4);
+      const tieStep = 38;
+      const tieOff = ((-time * 290) % tieStep + tieStep) % tieStep;
+      ctx.fillStyle = '#451a03';
+      for (let tx = tieOff - 160 - tieStep; tx < p.w + 160 + tieStep; tx += tieStep) {
+        ctx.fillRect(tx, railY + 3, 18, 9);
+      }
+      const railG = ctx.createLinearGradient(0, railY - 3, 0, railY + 5);
+      railG.addColorStop(0, '#f8fafc'); railG.addColorStop(0.45, '#94a3b8'); railG.addColorStop(1, '#1e293b');
+      ctx.fillStyle = railG;
+      ctx.fillRect(-160, railY - 2.5, p.w + 320, 6);
+
+      // 2. Subdivide each train span into grand wide Victorian Pullman Carriages (~520px wide, 280px tall!)
+      const numCars = Math.max(1, Math.round(p.w / 520));
+      const gap = 26;
+      const carW = (p.w - (numCars - 1) * gap) / numCars;
+      const bodyTop = 16;
+      const chassisY = wheelY - wheelR * 0.48;
+      const bodyH = chassisY - bodyTop;
+      const cableSway = Math.sin(time * 8.5) * 2.2;
+
+      for (let cIdx = 0; cIdx < numCars; cIdx++) {
+        const cx0 = cIdx * (carW + gap);
+        const isCoalTender = (p.x >= 10200 && numCars >= 2 && cIdx === numCars - 2);
+        const isLeadEngine = (p.x >= 10200 && cIdx === numCars - 1);
+
+        // Realistic Accordion Vestibule, Heavy Steel Coupler, Safety Chains, Brake Air Hoses & Jumper Cables!
+        if (cIdx > 0) {
+          const gx = cx0 - gap;
+          ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.6;
+          ctx.fillRect(gx - 2, bodyTop + 14, gap + 4, bodyH - 18);
+          ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.6;
+          for (let b = 4; b < gap; b += 5.5) {
+            ctx.beginPath(); ctx.moveTo(gx + b, bodyTop + 16); ctx.lineTo(gx + b, chassisY - 6); ctx.stroke();
+          }
+          ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 3.2; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(gx - 3, bodyTop + 26); ctx.quadraticCurveTo(gx + gap * 0.5, bodyTop + 44 + cableSway, gx + gap + 3, bodyTop + 26); ctx.stroke();
+          ctx.strokeStyle = '#d97706'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.moveTo(gx - 3, bodyTop + 34); ctx.quadraticCurveTo(gx + gap * 0.5, bodyTop + 54 - cableSway, gx + gap + 3, bodyTop + 34); ctx.stroke();
+          ctx.fillStyle = '#334155'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.5;
+          ctx.fillRect(gx - 5, chassisY - 12, gap + 10, 10); ctx.strokeRect(gx - 5, chassisY - 12, gap + 10, 10);
+          ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(gx + gap * 0.5, chassisY - 7, 3.0, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 4.2;
+          ctx.beginPath(); ctx.moveTo(gx - 2, chassisY + 2); ctx.quadraticCurveTo(gx + gap * 0.5, chassisY + 28 + cableSway, gx + gap + 2, chassisY + 2); ctx.stroke();
+          ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2.0; ctx.setLineDash([3, 3]);
+          ctx.beginPath(); ctx.moveTo(gx - 1, chassisY + 4); ctx.quadraticCurveTo(gx + gap * 0.5, chassisY + 20 - cableSway, gx + gap + 1, chassisY + 4); ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        // Heavy Riveted Steel Underframe Chassis
+        ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#020617'; ctx.lineWidth = 2.0;
+        ctx.fillRect(cx0 + 4, chassisY - 7, carW - 8, 18);
+
+        if (!isLeadEngine) {
+          // Under-Car Brake Air Tanks & Standard Passenger/Tender Spinning Bogies
+          ctx.fillStyle = '#1e293b';
+          ctx.beginPath(); ctx.roundRect(cx0 + carW * 0.36, chassisY + 10, carW * 0.28, 28, 8); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#94a3b8'; ctx.fillRect(cx0 + carW * 0.38, chassisY + 16, carW * 0.24, 3.5);
+          const bogieCenters = [cx0 + 96, cx0 + carW - 96];
+          for (const bc of bogieCenters) {
+            ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.8;
+            ctx.beginPath(); ctx.roundRect(bc - 60, wheelY - 16, 120, 18, 5); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#475569'; ctx.fillRect(bc - 16, wheelY - 22, 32, 12);
+            for (const wx of [bc - 38, bc + 38]) {
+              ctx.save();
+              ctx.translate(wx, wheelY);
+              ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 3.8;
+              ctx.beginPath(); ctx.arc(0, 0, wheelR, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+              ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 3.0;
+              ctx.beginPath(); ctx.arc(0, 0, wheelR - 6, 0, Math.PI * 2); ctx.stroke();
+              for (let sp = 0; sp < 8; sp++) {
+                const a = wheelAng + sp * (Math.PI / 4);
+                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * (wheelR - 5), Math.sin(a) * (wheelR - 5)); ctx.stroke();
+              }
+              ctx.fillStyle = '#991b1b';
+              ctx.beginPath(); ctx.arc(0, 0, wheelR - 6, wheelAng, wheelAng + 1.15); ctx.lineTo(0, 0); ctx.closePath(); ctx.fill();
+              ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.8;
+              ctx.beginPath(); ctx.arc(0, 0, 6.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+              ctx.restore();
+            }
+            const rodX = Math.cos(wheelAng) * 12;
+            const rodY = Math.sin(wheelAng) * 12;
+            ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 5.0; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(bc - 38 + rodX, wheelY + rodY); ctx.lineTo(bc + 38 + rodX, wheelY + rodY); ctx.stroke();
+          }
+        }
+
+        if (isCoalTender) {
+          // MATTE-BLACK RIVETED COAL TENDER CAR feeding the Lead Steam Locomotive!
+          const tG = ctx.createLinearGradient(cx0, bodyTop, cx0, chassisY);
+          tG.addColorStop(0, '#334155'); tG.addColorStop(0.22, '#1e293b'); tG.addColorStop(0.7, '#0f172a'); tG.addColorStop(1, '#020617');
+          ctx.fillStyle = tG; ctx.strokeStyle = '#020617'; ctx.lineWidth = 2.2;
+          ctx.beginPath(); ctx.roundRect(cx0, bodyTop + 10, carW, bodyH - 10, [6, 6, 2, 2]); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.4;
+          ctx.strokeRect(cx0 + 14, bodyTop + 24, carW - 28, bodyH - 42);
+          ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 16px Georgia, serif'; ctx.textAlign = 'center';
+          ctx.fillText('Dr.MAX07  •  COAL TENDER', cx0 + carW * 0.5, bodyTop + bodyH * 0.56);
+          ctx.fillStyle = '#64748b';
+          for (let rx = cx0 + 20; rx < cx0 + carW - 14; rx += 26) {
+            ctx.beginPath(); ctx.arc(rx, bodyTop + 18, 1.8, 0, Math.PI * 2); ctx.arc(rx, chassisY - 12, 1.8, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.roundRect(cx0 - 4, 0, carW + 8, 14, [4, 4, 1, 1]); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#020617';
+          ctx.beginPath(); ctx.moveTo(cx0 + 30, 0); ctx.quadraticCurveTo(cx0 + carW * 0.5, -18, cx0 + carW - 30, 0); ctx.closePath(); ctx.fill();
+          continue;
+        }
+
+        if (isLeadEngine) {
+          // MASTERPIECE LEAD 4-6-2 GLOSS-BLACK & BRASS STEAM LOCOMOTIVE ENGINE!
+          const cabW = 138;
+          const cabX = cx0;
+          const boilX = cx0 + cabW - 6;
+          const boilW = carW - cabW + 6;
+          const drvR = 35;
+          const drvY = railY - drvR + 1;
+
+          // 1. Cylindrical Brushed-Obsidian & Gloss-Black Iron Steam Boiler
+          const boilTop = bodyTop + 18;
+          const boilH = bodyH - 36;
+          const bG = ctx.createLinearGradient(boilX, boilTop, boilX, boilTop + boilH);
+          bG.addColorStop(0, '#64748b');
+          bG.addColorStop(0.14, '#334155');
+          bG.addColorStop(0.32, '#0f172a');
+          bG.addColorStop(0.76, '#020617');
+          bG.addColorStop(1, '#1e293b');
+          ctx.fillStyle = bG; ctx.strokeStyle = '#020617'; ctx.lineWidth = 2.4;
+          ctx.beginPath(); ctx.roundRect(boilX, boilTop, boilW, boilH, [6, 16, 10, 4]); ctx.fill(); ctx.stroke();
+
+          // Riveted Smokebox front nose & conical door with brass lock
+          const sbX = boilX + boilW - 74;
+          const sbG = ctx.createLinearGradient(sbX, boilTop, sbX, boilTop + boilH);
+          sbG.addColorStop(0, '#475569'); sbG.addColorStop(0.3, '#1e293b'); sbG.addColorStop(1, '#020617');
+          ctx.fillStyle = sbG;
+          ctx.beginPath(); ctx.roundRect(sbX, boilTop + 1, 74, boilH - 2, [2, 16, 10, 2]); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.0;
+          ctx.beginPath(); ctx.ellipse(boilX + boilW - 2, boilTop + boilH * 0.5, 11, boilH * 0.36, 0, -Math.PI * 0.5, Math.PI * 0.5); ctx.fill(); ctx.stroke();
+
+          // Gleaming Polished Brass Boiler Bands & External Copper Steam Pipe
+          for (const bx of [boilX + 54, boilX + 126, boilX + 198, sbX]) {
+            const bandG = ctx.createLinearGradient(bx, boilTop, bx + 8, boilTop);
+            bandG.addColorStop(0, '#92400e'); bandG.addColorStop(0.5, '#fef08a'); bandG.addColorStop(1, '#78350f');
+            ctx.fillStyle = bandG;
+            ctx.fillRect(bx, boilTop + 1, 7, boilH - 2);
+          }
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.6;
+          ctx.beginPath(); ctx.moveTo(boilX + 6, boilTop + 26); ctx.lineTo(sbX + 56, boilTop + 26); ctx.stroke();
+          ctx.strokeStyle = '#d97706'; ctx.lineWidth = 4.2;
+          ctx.beginPath(); ctx.moveTo(boilX + 10, boilTop + boilH - 18); ctx.lineTo(sbX + 46, boilTop + boilH - 18); ctx.stroke();
+
+          // Polished Brass Steam Dome & Golden Locomotive Bell
+          const domeX = boilX + 94;
+          const dG = ctx.createRadialGradient(domeX - 6, boilTop - 8, 3, domeX, boilTop + 4, 28);
+          dG.addColorStop(0, '#fffbeb'); dG.addColorStop(0.35, '#fbbf24'); dG.addColorStop(0.8, '#92400e'); dG.addColorStop(1, '#451a03');
+          ctx.fillStyle = dG; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.arc(domeX, boilTop + 2, 24, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+          const bellX = boilX + 168;
+          ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.moveTo(bellX - 9, boilTop + 2); ctx.quadraticCurveTo(bellX, boilTop - 18, bellX + 9, boilTop + 2); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+          // 2. Classic Gloss-Black & Crimson-Trimmed Engineer's Cab with Firebox Glow
+          const cabG = ctx.createLinearGradient(cabX, bodyTop, cabX, chassisY);
+          cabG.addColorStop(0, '#334155'); cabG.addColorStop(0.25, '#0f172a'); cabG.addColorStop(1, '#020617');
+          ctx.fillStyle = cabG; ctx.strokeStyle = '#020617'; ctx.lineWidth = 2.2;
+          ctx.beginPath(); ctx.roundRect(cabX, bodyTop, cabW, bodyH, [8, 8, 2, 2]); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#dc2626'; ctx.fillRect(cabX + 4, bodyTop + 98, cabW - 8, 6);
+          ctx.fillStyle = '#fbbf24'; ctx.fillRect(cabX + 4, bodyTop + 104, cabW - 8, 2.5);
+          const fwG = ctx.createLinearGradient(cabX + 18, bodyTop + 18, cabX + 18, bodyTop + 88);
+          fwG.addColorStop(0, '#fffbeb'); fwG.addColorStop(0.45, '#fbbf24'); fwG.addColorStop(1, '#ea580c');
+          ctx.fillStyle = fwG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.6;
+          ctx.beginPath(); ctx.roundRect(cabX + 18, bodyTop + 18, cabW - 36, 68, [14, 14, 3, 3]); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 14px Georgia, serif'; ctx.textAlign = 'center';
+          ctx.fillText('07', cabX + cabW * 0.5, bodyTop + 128);
+
+          // 3. Cast-Iron Running Board, Front Steel Cowcatcher & Volumetric Golden Headlamp Beam
+          ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.5;
+          ctx.fillRect(cx0, chassisY - 6, carW + 18, 12); ctx.strokeRect(cx0, chassisY - 6, carW + 18, 12);
+          const cowX = cx0 + carW;
+          ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#020617'; ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(cowX - 4, chassisY + 6); ctx.lineTo(cowX + 48, railY - 2); ctx.lineTo(cowX - 4, railY - 2);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2.0;
+          for (let g = 8; g <= 36; g += 9) {
+            ctx.beginPath(); ctx.moveTo(cowX + g * 0.35, chassisY + 8); ctx.lineTo(cowX + g + 8, railY - 3); ctx.stroke();
+          }
+          const hlX = boilX + boilW + 4;
+          const hlY = boilTop + 18;
+          const beamG = ctx.createLinearGradient(hlX, hlY, hlX + 190, hlY);
+          beamG.addColorStop(0, 'rgba(255, 251, 235, 0.72)'); beamG.addColorStop(0.45, 'rgba(254, 240, 138, 0.25)'); beamG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+          ctx.fillStyle = beamG;
+          ctx.beginPath(); ctx.moveTo(hlX + 6, hlY - 8); ctx.lineTo(hlX + 190, hlY - 52); ctx.lineTo(hlX + 190, hlY + 48); ctx.lineTo(hlX + 6, hlY + 8); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+          ctx.beginPath(); ctx.roundRect(hlX - 10, hlY - 11, 16, 22, 4); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fffbeb'; ctx.beginPath(); ctx.arc(hlX + 5, hlY, 7.5, 0, Math.PI * 2); ctx.fill();
+
+          // 4. 3 GIANT COUPLED 70px DRIVING WHEELS + FRONT STEAM CYLINDER & TRUE ANIMATED PISTON RODS!
+          const drivers = [cx0 + 135, cx0 + 215, cx0 + 295];
+          for (const wx of drivers) {
+            ctx.save();
+            ctx.translate(wx, drvY);
+            ctx.fillStyle = '#090d16'; ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 4.2;
+            ctx.beginPath(); ctx.arc(0, 0, drvR, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 3.2;
+            ctx.beginPath(); ctx.arc(0, 0, drvR - 6, 0, Math.PI * 2); ctx.stroke();
+            for (let sp = 0; sp < 12; sp++) {
+              const a = wheelAng + sp * (Math.PI / 6);
+              ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * (drvR - 5), Math.sin(a) * (drvR - 5)); ctx.stroke();
+            }
+            ctx.fillStyle = '#991b1b';
+            ctx.beginPath(); ctx.arc(0, 0, drvR - 6, wheelAng + Math.PI, wheelAng + Math.PI + 1.25); ctx.lineTo(0, 0); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.8;
+            ctx.beginPath(); ctx.arc(0, 0, 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.restore();
+          }
+          const pilX = cx0 + 382;
+          const pilR = 18;
+          const pilY = railY - pilR + 1;
+          ctx.save();
+          ctx.translate(pilX, pilY);
+          ctx.fillStyle = '#090d16'; ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 3.0;
+          ctx.beginPath(); ctx.arc(0, 0, pilR, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 2.2;
+          for (let sp = 0; sp < 6; sp++) {
+            const a = wheelAng * 1.9 + sp * (Math.PI / 3);
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * (pilR - 3), Math.sin(a) * (pilR - 3)); ctx.stroke();
+          }
+          ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+
+          const cylX = cx0 + 356;
+          const cylY = drvY - 12;
+          const crankX = Math.cos(wheelAng) * 16;
+          const crankY = Math.sin(wheelAng) * 16;
+          ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 6.2; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(drivers[0] + crankX, drvY + crankY); ctx.lineTo(drivers[2] + crankX, drvY + crankY); ctx.stroke();
+          ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 2.2;
+          ctx.beginPath(); ctx.moveTo(drivers[0] + crankX, drvY + crankY); ctx.lineTo(drivers[2] + crankX, drvY + crankY); ctx.stroke();
+          const crossheadX = cylX - 18 + crankX * 0.85;
+          ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 5.2;
+          ctx.beginPath(); ctx.moveTo(drivers[1] + crankX, drvY + crankY); ctx.lineTo(crossheadX, drvY); ctx.lineTo(cylX + 6, drvY); ctx.stroke();
+          ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+          ctx.beginPath(); ctx.roundRect(cylX, cylY, 44, 28, 5); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fbbf24'; ctx.fillRect(cylX + 3, cylY + 4, 4, 20); ctx.fillRect(cylX + 37, cylY + 4, 4, 20);
+          const cylExhaust = Math.max(0, Math.sin(wheelAng));
+          if (cylExhaust > 0.35) {
+            const cRad = 10 + cylExhaust * 16;
+            const cG = ctx.createRadialGradient(cylX + 8, cylY + 26, 2, cylX + 8, cylY + 26, cRad);
+            cG.addColorStop(0, `rgba(255, 251, 235, ${(cylExhaust * 0.55).toFixed(2)})`);
+            cG.addColorStop(1, 'rgba(255, 251, 235, 0)');
+            ctx.fillStyle = cG; ctx.beginPath(); ctx.arc(cylX + 8, cylY + 26, cRad, 0, Math.PI * 2); ctx.fill();
+          }
+
+          // 5. Flat Walkable Steel Catwalk Roof flush at y=0
+          const roofG = ctx.createLinearGradient(cx0, 0, cx0, 16);
+          roofG.addColorStop(0, '#475569'); roofG.addColorStop(0.5, '#1e293b'); roofG.addColorStop(1, '#020617');
+          ctx.fillStyle = roofG; ctx.strokeStyle = '#020617'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.roundRect(cx0 - 4, 0, carW + 8, 16, [6, 6, 1, 1]); ctx.fill(); ctx.stroke();
+
+          // 6. TALL FLARED VICTORIAN BLACK-AND-BRASS SMOKESTACK & VOLUMETRIC BILLOWING STEAM PLUME!
+          const stkX = sbX + 34;
+          const stkG = ctx.createLinearGradient(stkX - 18, -42, stkX + 18, -42);
+          stkG.addColorStop(0, '#020617'); stkG.addColorStop(0.4, '#475569'); stkG.addColorStop(1, '#020617');
+          ctx.fillStyle = stkG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(stkX - 12, 2); ctx.lineTo(stkX - 18, -38); ctx.lineTo(stkX + 18, -38); ctx.lineTo(stkX + 12, 2);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.roundRect(stkX - 22, -44, 44, 8, 3); ctx.fill(); ctx.stroke();
+          for (let sp = 0; sp < 14; sp++) {
+            const frac = ((time * 0.95 + sp / 14) % 1);
+            const sx = stkX - frac * 240 - Math.sin(frac * 5 + time * 3) * 6;
+            const sy = -50 - Math.pow(frac, 0.78) * 95 + Math.sin(frac * 7 + sp) * 4;
+            const rad = 11 + Math.pow(frac, 0.85) * 34;
+            const alpha = Math.sin(Math.min(1, frac * 4.5) * Math.PI * 0.5) * Math.pow(1 - frac, 1.1) * 0.62;
+            const pG = ctx.createRadialGradient(sx, sy - rad * 0.2, rad * 0.15, sx, sy, rad);
+            pG.addColorStop(0, `rgba(255, 251, 235, ${alpha.toFixed(3)})`);
+            pG.addColorStop(0.55, `rgba(226, 232, 240, ${(alpha * 0.65).toFixed(3)})`);
+            pG.addColorStop(1, 'rgba(148, 163, 184, 0)');
+            ctx.fillStyle = pG; ctx.beginPath(); ctx.arc(sx, sy, rad, 0, Math.PI * 2); ctx.fill();
+          }
+          continue;
+        }
+
+        // MAJESTIC 280px-TALL VICTORIAN ROYAL CRIMSON & MAHOGANY PULLMAN CARRIAGE BODY!
+        const bodyG = ctx.createLinearGradient(cx0, bodyTop, cx0, chassisY);
+        bodyG.addColorStop(0, '#991b1b'); bodyG.addColorStop(0.45, '#7f1d1d'); bodyG.addColorStop(0.85, '#450a0a'); bodyG.addColorStop(1, '#290606');
+        ctx.fillStyle = bodyG; ctx.strokeStyle = '#140404'; ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.roundRect(cx0, bodyTop, carW, bodyH, [8, 8, 2, 2]); ctx.fill(); ctx.stroke();
+
+        const waistY = bodyTop + bodyH * 0.66;
+        ctx.fillStyle = '#3b0707';
+        ctx.fillRect(cx0 + 3, waistY, carW - 6, chassisY - waistY - 3);
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(cx0 + 6, bodyTop + 8, carW - 12, 3.2);
+        ctx.fillRect(cx0 + 6, waistY - 2, carW - 12, 3.0);
+        ctx.fillRect(cx0 + 6, chassisY - 10, carW - 12, 2.8);
+
+        // Domed Dark-Slate Pullman Roof Deck with Brass Rivets (walkable surface flush at y=0!)
+        const roofG = ctx.createLinearGradient(cx0, 0, cx0, 18);
+        roofG.addColorStop(0, '#64748b'); roofG.addColorStop(0.5, '#334155'); roofG.addColorStop(1, '#0f172a');
+        ctx.fillStyle = roofG; ctx.strokeStyle = '#020617'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.roundRect(cx0 - 5, 0, carW + 10, 18, [6, 6, 1, 1]); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fde68a';
+        for (let rx = cx0 + 16; rx < cx0 + carW - 10; rx += 30) {
+          ctx.beginPath(); ctx.arc(rx, 8.5, 1.8, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // GIANT LIFE-SIZED VICTORIAN VESTIBULE DOORS (64px Wide × Full Carriage Height!)
+        // With Arched Brass-Framed Glass, Carved Double Mahogany Panels, Brass Lever, Handrails & 2-Tier Boarding Steps!
+        const doorW = 64;
+        const doorH = bodyH - 12;
+        for (const [dx, railSide] of [[cx0 + 12, -1], [cx0 + carW - 12 - doorW, 1]]) {
+          const dy = bodyTop + 10;
+          ctx.fillStyle = '#240505'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.2;
+          ctx.beginPath(); ctx.roundRect(dx, dy, doorW, doorH, [8, 8, 2, 2]); ctx.fill(); ctx.stroke();
+          // Tall arched warm-lit observation glass window inside door
+          const dgG = ctx.createLinearGradient(dx + 9, dy + 10, dx + 9, dy + 78);
+          dgG.addColorStop(0, '#fffbeb'); dgG.addColorStop(0.5, '#fde047'); dgG.addColorStop(1, '#d97706');
+          ctx.fillStyle = dgG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.0;
+          ctx.beginPath(); ctx.roundRect(dx + 9, dy + 10, doorW - 18, 66, [12, 12, 3, 3]); ctx.fill(); ctx.stroke();
+          // Carved twin lower mahogany panels & gleaming brass lever handle
+          const panY = dy + 84;
+          const panH = Math.max(22, doorH - 94);
+          ctx.fillStyle = '#3b0707'; ctx.strokeStyle = '#b45309'; ctx.lineWidth = 1.5;
+          ctx.fillRect(dx + 9, panY, (doorW - 24) * 0.5, panH); ctx.strokeRect(dx + 9, panY, (doorW - 24) * 0.5, panH);
+          ctx.fillRect(dx + 15 + (doorW - 24) * 0.5, panY, (doorW - 24) * 0.5, panH); ctx.strokeRect(dx + 15 + (doorW - 24) * 0.5, panY, (doorW - 24) * 0.5, panH);
+          // Brass door lever handle & keyhole escutcheon
+          ctx.fillStyle = '#fbbf24';
+          const hndX = railSide < 0 ? dx + doorW - 15 : dx + 7;
+          ctx.fillRect(hndX, dy + 79, 9, 4.5);
+          // Twin heavy polished brass boarding grab-handles flanking the door
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.8;
+          ctx.beginPath();
+          ctx.moveTo(dx - 4, dy + 20); ctx.lineTo(dx - 4, dy + doorH - 6);
+          ctx.moveTo(dx + doorW + 4, dy + 20); ctx.lineTo(dx + doorW + 4, dy + doorH - 6);
+          ctx.stroke();
+          // 2-tier riveted steel boarding staircase beneath each door!
+          ctx.fillStyle = '#475569'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.4;
+          ctx.fillRect(dx + 4, chassisY + 2, doorW - 8, 7); ctx.strokeRect(dx + 4, chassisY + 2, doorW - 8, 7);
+          ctx.fillRect(dx + 8, chassisY + 11, doorW - 16, 7); ctx.strokeRect(dx + 8, chassisY + 11, doorW - 16, 7);
+        }
+
+        // Tall Arched Velvet-Curtained Victorian Passenger Windows (64x82px!) cleanly framed between the grand doors
+        const innerStart = cx0 + 88;
+        const innerEnd = cx0 + carW - 88;
+        const winCount = Math.max(2, Math.floor((innerEnd - innerStart) / 88));
+        const winPitch = (innerEnd - innerStart) / winCount;
+        const winW = Math.min(64, winPitch - 20);
+        const winH = Math.max(46, Math.min(84, bodyH * 0.50));
+        for (let wIdx = 0; wIdx < winCount; wIdx++) {
+          const wx = innerStart + wIdx * winPitch + (winPitch - winW) * 0.5;
+          const wy = bodyTop + 20;
+          const wG = ctx.createLinearGradient(wx, wy, wx, wy + winH);
+          wG.addColorStop(0, '#fffbeb'); wG.addColorStop(0.45, '#fde047'); wG.addColorStop(0.85, '#f59e0b'); wG.addColorStop(1, '#92400e');
+          ctx.fillStyle = wG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.4;
+          ctx.beginPath(); ctx.roundRect(wx, wy, winW, winH, [14, 14, 3, 3]); ctx.fill(); ctx.stroke();
+          // Warm Pullman table lamp silhouette inside each window
+          ctx.fillStyle = 'rgba(180, 83, 9, 0.55)';
+          ctx.beginPath(); ctx.moveTo(wx + winW * 0.5 - 8, wy + winH - 14); ctx.lineTo(wx + winW * 0.5 + 8, wy + winH - 14); ctx.lineTo(wx + winW * 0.5 + 4, wy + winH - 25); ctx.lineTo(wx + winW * 0.5 - 4, wy + winH - 25); ctx.closePath(); ctx.fill();
+          ctx.fillRect(wx + winW * 0.5 - 2, wy + winH - 14, 4, 12);
+          // Rich crimson velvet curtain drapes framing both sides
+          ctx.fillStyle = '#7f1d1d';
+          ctx.beginPath(); ctx.moveTo(wx + 2, wy + 3); ctx.lineTo(wx + 18, wy + 3); ctx.quadraticCurveTo(wx + 8, wy + winH * 0.5, wx + 2, wy + winH * 0.74); ctx.closePath(); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(wx + winW - 2, wy + 3); ctx.lineTo(wx + winW - 18, wy + 3); ctx.quadraticCurveTo(wx + winW - 8, wy + winH * 0.5, wx + winW - 2, wy + winH * 0.74); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = 'rgba(69, 10, 10, 0.55)'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.moveTo(wx + winW * 0.5, wy); ctx.lineTo(wx + winW * 0.5, wy + winH); ctx.moveTo(wx, wy + 18); ctx.lineTo(wx + winW, wy + 18); ctx.stroke();
+        }
+
+        // Royal Golden Brass Crest Plaque ("Dr.MAX07 • EXPRESS")
+        ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.roundRect(cx0 + carW * 0.5 - 52, waistY + 10, 104, 20, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#451a03'; ctx.font = 'bold 10px system-ui, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('Dr.MAX07 EXPRESS', cx0 + carW * 0.5, waistY + 23.5);
+      }
+
+      // Realistic Outer Span Couplers, Spring Buffers, Hanging Brake Hoses & Spanning Inter-Carriage Cables!
+      // Left outer coupler & brake hose
+      ctx.fillStyle = '#334155'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.8;
+      ctx.fillRect(-18, chassisY - 14, 19, 14); ctx.strokeRect(-18, chassisY - 14, 19, 14);
+      ctx.fillStyle = '#64748b'; ctx.fillRect(-24, chassisY - 17, 7, 20); ctx.strokeRect(-24, chassisY - 17, 7, 20);
+      ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 4.0; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-6, chassisY + 2); ctx.quadraticCurveTo(-18, chassisY + 26 + cableSway, -24, chassisY + 14); ctx.stroke();
+      // Right outer coupler, spring buffer, heavy steel tow-bar & sagging power/brake cables reaching across gap!
+      ctx.fillStyle = '#334155'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.8;
+      ctx.fillRect(p.w - 1, chassisY - 14, 19, 14); ctx.strokeRect(p.w - 1, chassisY - 14, 19, 14);
+      ctx.fillStyle = '#64748b'; ctx.fillRect(p.w + 17, chassisY - 17, 7, 20); ctx.strokeRect(p.w + 17, chassisY - 17, 7, 20);
+      if (p.x < 10200) {
+        // Low visual steel drawbar & sagging brake/electrical cables linking across the inter-zone gap (purely visual below deck!)
+        const spanGap = 240;
+        ctx.strokeStyle = '#334155'; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(p.w + 20, chassisY - 7); ctx.lineTo(p.w + spanGap, chassisY - 7); ctx.stroke();
+        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 3.6;
+        ctx.beginPath(); ctx.moveTo(p.w + 4, chassisY + 2); ctx.quadraticCurveTo(p.w + spanGap * 0.5, chassisY + 38 + cableSway, p.w + spanGap, chassisY + 2); ctx.stroke();
+        ctx.strokeStyle = '#d97706'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.moveTo(p.w + 2, bodyTop + 36); ctx.quadraticCurveTo(p.w + spanGap * 0.5, bodyTop + 76 - cableSway, p.w + spanGap, bodyTop + 36); ctx.stroke();
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2.0; ctx.setLineDash([5, 4]);
+        ctx.beginPath(); ctx.moveTo(p.w + 12, chassisY + 4); ctx.quadraticCurveTo(p.w + spanGap * 0.5, chassisY + 26 + cableSway, p.w + spanGap, chassisY + 4); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'brass_rail_roof') {
+      // Elevated Pullman Clerestory Observation Roof with Brass Luggage Rail & Warm Skylights
+      ctx.save();
+      ctx.translate(px, py);
+      // Curved brass luggage railing above deck
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.moveTo(8, -8); ctx.lineTo(p.w - 8, -8); ctx.stroke();
+      for (let bx = 10; bx <= p.w - 10; bx += 32) {
+        ctx.beginPath(); ctx.moveTo(bx, -8); ctx.lineTo(bx, 0); ctx.stroke();
+      }
+      const rG = ctx.createLinearGradient(0, 0, 0, p.h);
+      rG.addColorStop(0, '#64748b'); rG.addColorStop(0.45, '#334155'); rG.addColorStop(1, '#0f172a');
+      ctx.fillStyle = rG; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(0, 0, p.w, p.h, 5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fbbf24'; ctx.fillRect(6, 3, p.w - 12, 2.5);
+      for (let gx = 16; gx < p.w - 26; gx += 34) {
+        ctx.fillStyle = '#fef08a'; ctx.fillRect(gx, 9, 18, 9);
+        ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.1; ctx.strokeRect(gx, 9, 18, 9);
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'tunnel_clearance') {
+      // Suspended Riveted Steel Railway Clearance Gantry on Twin Steel Cables with Clear Danger Sign (⚠) on Top!
+      ctx.save();
+      ctx.translate(px, py);
+      // 1. Twin heavy braided steel suspension cables & iron turnbuckle shackles extending upward
+      for (const cx0 of [16, p.w - 16]) {
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 5.5;
+        ctx.beginPath(); ctx.moveTo(cx0, -340); ctx.lineTo(cx0, 0); ctx.stroke();
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(cx0 - 1, -340); ctx.lineTo(cx0 - 1, 0); ctx.stroke();
+        // Brass cable shackle ring bolted to top of gantry
+        ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.arc(cx0, 0, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      // 2. Bold Yellow-and-Black Triangle Danger Warning Sign (⚠) mounted right on top of the gantry!
+      const signCx = p.w * 0.5;
+      ctx.fillStyle = '#334155'; ctx.fillRect(signCx - 2.5, -14, 5, 16); // steel sign post
+      ctx.fillStyle = '#facc15'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.6; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(signCx, -44);
+      ctx.lineTo(signCx - 20, -10);
+      ctx.lineTo(signCx + 20, -10);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      // Bold black exclamation mark inside danger triangle
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath(); ctx.roundRect(signCx - 2.4, -33, 4.8, 13, 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(signCx, -15.5, 2.7, 0, Math.PI * 2); ctx.fill();
+
+      // 3. Heavy Riveted Steel Clearance Truss Girder Box
+      const gG = ctx.createLinearGradient(0, 0, 0, p.h);
+      gG.addColorStop(0, '#475569'); gG.addColorStop(0.5, '#1e293b'); gG.addColorStop(1, '#0f172a');
+      ctx.fillStyle = gG; ctx.strokeStyle = '#020617'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.roundRect(0, 0, p.w, p.h, 4); ctx.fill(); ctx.stroke();
+      // Diagonal steel truss cross-bracing & corner rivets
+      ctx.strokeStyle = '#64748b'; ctx.lineWidth = 2.4;
+      for (let tx = 8; tx < p.w - 24; tx += 32) {
+        ctx.beginPath(); ctx.moveTo(tx, 8); ctx.lineTo(tx + 28, p.h - 18); ctx.moveTo(tx + 28, 8); ctx.lineTo(tx, p.h - 18); ctx.stroke();
+      }
+      // High-visibility yellow/black hazard clearance stripe along bottom beam
+      ctx.fillStyle = '#facc15'; ctx.fillRect(2, p.h - 14, p.w - 4, 12);
+      ctx.fillStyle = '#0f172a';
+      for (let sx = 6; sx < p.w - 10; sx += 20) { ctx.fillRect(sx, p.h - 14, 10, 12); }
+      // Flashing crimson warning beacons & animated crouch chevron underneath (⬇)
+      const blink = Math.sin(time * 7.5) > 0;
+      for (const lx of [14, p.w - 14]) {
+        if (blink) {
+          const lg = ctx.createRadialGradient(lx, p.h - 24, 2, lx, p.h - 24, 16);
+          lg.addColorStop(0, 'rgba(248, 113, 113, 0.78)'); lg.addColorStop(1, 'rgba(248, 113, 113, 0)');
+          ctx.fillStyle = lg; ctx.beginPath(); ctx.arc(lx, p.h - 24, 16, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = blink ? '#ef4444' : '#7f1d1d'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(lx, p.h - 24, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      const chev = Math.sin(time * 6) * 2.5;
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 2.8; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(p.w * 0.5 - 10, p.h + 7 + chev); ctx.lineTo(p.w * 0.5, p.h + 16 + chev); ctx.lineTo(p.w * 0.5 + 10, p.h + 7 + chev);
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'steam_piston_lift') {
+      // Sculpted Victorian Brass & Cast-Iron Hydraulic Steam Piston Lift with Telescopic Chrome Shaft,
+      // Twin Copper Feed Pipes, Analog Pressure Gauge, Diamond-Plate Deck & Organic Billowing Steam Jets!
+      const restSY = (p.restY !== undefined ? p.restY : p.y) - (p.y - py);
+      const isWarn = p.pistonState === 'warn';
+      const isUp = p.pistonState === 'up';
+      const shake = isWarn ? Math.sin(time * 55) * 2.2 : 0;
+      const cx = px + p.w * 0.5;
+      ctx.save();
+      // 1. Telescopic chrome-steel hydraulic piston rod with machined oil-seal collars
+      const shaftTop = py + 18;
+      const shaftBot = restSY + p.h - 4;
+      if (shaftBot > shaftTop) {
+        const shG = ctx.createLinearGradient(cx - 16, 0, cx + 16, 0);
+        shG.addColorStop(0, '#334155'); shG.addColorStop(0.32, '#f8fafc'); shG.addColorStop(0.65, '#94a3b8'); shG.addColorStop(1, '#1e293b');
+        ctx.fillStyle = shG; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.6;
+        ctx.fillRect(cx - 14, shaftTop, 28, shaftBot - shaftTop);
+        ctx.strokeRect(cx - 14, shaftTop, 28, shaftBot - shaftTop);
+        // Brass hydraulic packing collar rings along piston rod
+        ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.2;
+        ctx.fillRect(cx - 18, shaftTop + 4, 36, 7); ctx.strokeRect(cx - 18, shaftTop + 4, 36, 7);
+        ctx.fillRect(cx - 18, restSY + 16, 36, 7); ctx.strokeRect(cx - 18, restSY + 16, 36, 7);
+      }
+      // 2. Twin curved copper steam feed pipes flanking the boiler cylinder
+      ctx.strokeStyle = '#d97706'; ctx.lineWidth = 4.5; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(px + 6, restSY + p.h - 4); ctx.quadraticCurveTo(px + 2, restSY + 30, px + 14, restSY + 28);
+      ctx.moveTo(px + p.w - 6, restSY + p.h - 4); ctx.quadraticCurveTo(px + p.w - 2, restSY + 30, px + p.w - 14, restSY + 28);
+      ctx.stroke();
+      // 3. Heavy bolted riveted brass boiler cylinder base
+      const cylG = ctx.createLinearGradient(px + 10, restSY + 18, px + p.w - 10, restSY + p.h);
+      cylG.addColorStop(0, '#fde68a'); cylG.addColorStop(0.35, '#d97706'); cylG.addColorStop(0.75, '#92400e'); cylG.addColorStop(1, '#451a03');
+      ctx.fillStyle = cylG; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(px + 12, restSY + 20, p.w - 24, p.h - 20, [6, 6, 2, 2]); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#1e293b'; ctx.fillRect(px + 4, restSY + p.h - 8, p.w - 8, 8);
+      // Detailed Bourdon pressure gauge dial with tick marks & crimson needle
+      ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.arc(cx, restSY + 42, 10.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      const dialAng = isWarn ? -0.3 + Math.sin(time * 34) * 0.45 : -2.2 + (p.stroke || 0) * 2.5;
+      ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.moveTo(cx, restSY + 42); ctx.lineTo(cx + Math.cos(dialAng) * 8, restSY + 42 + Math.sin(dialAng) * 8); ctx.stroke();
+      ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.arc(cx, restSY + 42, 2.2, 0, Math.PI * 2); ctx.fill();
+      // 4. Heavy Bolted Brass-and-Iron Rideable Lift Deck with Diamond Tread & Corner Rivets
+      const topG = ctx.createLinearGradient(px, py, px, py + 22);
+      topG.addColorStop(0, '#fef08a'); topG.addColorStop(0.3, '#f59e0b'); topG.addColorStop(0.72, '#92400e'); topG.addColorStop(1, '#451a03');
+      ctx.fillStyle = topG; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.9;
+      ctx.beginPath(); ctx.roundRect(px + shake, py, p.w, 22, 6); ctx.fill(); ctx.stroke();
+      // Dark steel anti-slip tread strip & golden corner bolts
+      ctx.fillStyle = '#1e293b'; ctx.fillRect(px + 8 + shake, py + 2, p.w - 16, 4.5);
+      ctx.fillStyle = '#fef08a';
+      for (const rx of [px + 10, px + p.w * 0.5, px + p.w - 10]) {
+        ctx.beginPath(); ctx.arc(rx + shake, py + 13, 2.3, 0, Math.PI * 2); ctx.fill();
+      }
+      // 5. Organic billowing white steam relief bursts on warn & rapid upward stroke!
+      if (isWarn || isUp) {
+        for (const side of [-1, 1]) {
+          for (let k = 0; k < 3; k++) {
+            const frac = ((time * 2.6 + k * 0.33) % 1);
+            const sx = cx + side * (24 + frac * 26);
+            const sy = restSY + 24 - frac * 14;
+            const rad = 7 + frac * 12;
+            const sG = ctx.createRadialGradient(sx, sy, 1.5, sx, sy, rad);
+            sG.addColorStop(0, `rgba(255, 255, 255, ${((1 - frac) * 0.78).toFixed(2)})`);
+            sG.addColorStop(1, 'rgba(226, 232, 240, 0)');
+            ctx.fillStyle = sG;
+            ctx.beginPath(); ctx.arc(sx, sy, rad, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'coal_hopper_conveyor') {
+      const spd = p.conveyorSpeed || 150;
+      const dir = spd >= 0 ? 1 : -1;
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(0, 0, p.w, p.h, 8); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = 'rgba(249, 115, 22, 0.35)'; ctx.fillRect(10, 4, p.w - 20, p.h - 8);
+      const step = 28;
+      const off = ((time * spd * 0.45) % step + step) % step;
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.0;
+      for (let cx = off; cx < p.w - 12; cx += step) {
+        ctx.beginPath();
+        ctx.moveTo(cx - dir * 5, 6); ctx.lineTo(cx + dir * 4, p.h * 0.5); ctx.lineTo(cx - dir * 5, p.h - 6);
+        ctx.stroke();
+      }
+      for (const rx of [10, p.w - 10]) {
+        ctx.fillStyle = '#d97706'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(rx, p.h * 0.5, 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'coupling_drawbridge') {
+      const dip = p.sinkOffset || 0;
+      const tiltRad = Math.max(-0.22, Math.min(0.22, (p.tiltOffset || 0) * 0.008));
+      ctx.save();
+      ctx.translate(px + p.w * 0.5, py + p.h * 0.5 + dip);
+      ctx.rotate(tiltRad);
+      const plG = ctx.createLinearGradient(0, -p.h / 2, 0, p.h / 2);
+      plG.addColorStop(0, '#94a3b8'); plG.addColorStop(0.5, '#475569'); plG.addColorStop(1, '#1e293b');
+      ctx.fillStyle = plG; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(-p.w / 2, -p.h / 2, p.w, p.h, 4); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.2;
+      for (let tx = -p.w / 2 + 16; tx < p.w / 2 - 12; tx += 22) {
+        ctx.beginPath(); ctx.moveTo(tx, -p.h / 2 + 3); ctx.lineTo(tx, p.h / 2 - 3); ctx.stroke();
+      }
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(0, 0, 6.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'pressure_boiler_valve') {
+      // Ornate Riveted Copper-and-Bronze Steam Boiler Manifold with Handwheel Valve, Bourdon Pressure Gauge & Flared Nozzle!
+      const dir = p.blastDir || -1;
+      const bLen = p.blastLen || 150;
+      const st = p.valveState || 'calm';
+      const cx = px + p.w * 0.5;
+      ctx.save();
+      // Heavy cast-iron bolted floor flange
+      ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(px, py + p.h - 10, p.w, 10, 3); ctx.fill(); ctx.stroke();
+      // Riveted hammered-copper cylindrical boiler vessel with domed cap
+      const bG = ctx.createLinearGradient(px + 4, py, px + p.w - 4, py);
+      bG.addColorStop(0, '#fde68a'); bG.addColorStop(0.28, '#d97706'); bG.addColorStop(0.72, '#92400e'); bG.addColorStop(1, '#451a03');
+      ctx.fillStyle = bG; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(px + 5, py + 10, p.w - 10, p.h - 18, [12, 12, 2, 2]); ctx.fill(); ctx.stroke();
+      // Twin polished brass reinforcing bands with rivets
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(px + 5, py + 22, p.w - 10, 4);
+      ctx.fillRect(px + 5, py + p.h - 24, p.w - 10, 4);
+      // Crimson cast-iron spoked valve handwheel mounted on top stem!
+      ctx.fillStyle = '#475569'; ctx.fillRect(cx - 3, py + 2, 6, 10);
+      ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(cx - 14, py - 2, 28, 6, 3); ctx.fill(); ctx.stroke();
+      // Detailed Bourdon analog pressure gauge with quivering red needle
+      ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(cx, py + 44, 9.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      const gaugeAng = st === 'blast' ? 0.5 : st === 'warn' ? -0.4 + Math.sin(time * 36) * 0.35 : -2.2;
+      ctx.strokeStyle = st === 'blast' ? '#ef4444' : '#0f172a'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.moveTo(cx, py + 44); ctx.lineTo(cx + Math.cos(gaugeAng) * 7, py + 44 + Math.sin(gaugeAng) * 7); ctx.stroke();
+      // Flared iron exhaust trumpet nozzle pointing in blastDir
+      const nozX = dir > 0 ? px + p.w - 5 : px + 5;
+      ctx.fillStyle = '#334155'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(nozX, py + 24);
+      ctx.lineTo(nozX + dir * 14, py + 19);
+      ctx.lineTo(nozX + dir * 14, py + 45);
+      ctx.lineTo(nozX, py + 40);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Status indicator jewel lamp
+      ctx.fillStyle = st === 'blast' ? '#ef4444' : st === 'warn' ? '#facc15' : '#4ade80';
+      ctx.beginPath(); ctx.arc(cx, py + 17, 4.2, 0, Math.PI * 2); ctx.fill();
+      // Ultra-realistic layered volumetric billowing horizontal steam jet
+      if (st === 'warn' || st === 'blast') {
+        const count = st === 'blast' ? 16 : 5;
+        const reach = st === 'blast' ? bLen : 42;
+        const originX = nozX + dir * 14;
+        const originY = py + 32;
+        for (let i = 0; i < count; i++) {
+          const frac = ((time * (st === 'blast' ? 2.5 : 1.1) + i / count) % 1);
+          const fade = Math.sin(frac * Math.PI);
+          const sx = originX + dir * frac * reach;
+          const sy = originY + Math.sin(frac * 10 + i * 1.9 + time * 9) * (3 + frac * 11);
+          const rad = 8 + frac * (st === 'blast' ? 18 : 9);
+          const sG = ctx.createRadialGradient(sx, sy - rad * 0.2, 2, sx, sy, rad);
+          sG.addColorStop(0, `rgba(255, 255, 255, ${(fade * 0.85).toFixed(2)})`);
+          sG.addColorStop(0.5, `rgba(226, 232, 240, ${(fade * 0.48).toFixed(2)})`);
+          sG.addColorStop(1, 'rgba(203, 213, 225, 0)');
+          ctx.fillStyle = sG;
+          ctx.beginPath(); ctx.arc(sx, sy, rad, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'track_switch_lever') {
+      // Detailed Victorian Ground-Throw Railway Switch Lever + Notched Brass Quadrant + Miniature Semaphore Signal Post!
+      const fAnim = p.flipAnim !== undefined ? p.flipAnim : (p.flipped ? 1 : 0);
+      const ang = -0.56 + fAnim * 1.12;
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+      ctx.save();
+      // 1. Miniature Victorian Railway Semaphore Signal Post standing beside the lever
+      const postX = cx + 18;
+      ctx.fillStyle = '#334155'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.3;
+      ctx.fillRect(postX - 2.5, py - 24, 5, p.h + 24); ctx.strokeRect(postX - 2.5, py - 24, 5, p.h + 24);
+      // Pivoting mechanical semaphore signal blade (horizontal red = locked, angled up green = open!)
+      ctx.save();
+      ctx.translate(postX, py - 14);
+      ctx.rotate(-fAnim * 0.72);
+      ctx.fillStyle = p.flipped ? '#22c55e' : '#dc2626'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.roundRect(0, -4, 24, 8, 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(14, -3.5, 4, 7);
+      ctx.restore();
+      // Hooded brass signal lantern glowing warmly on post
+      const lampY = py - 14;
+      const sGlow = ctx.createRadialGradient(postX, lampY, 2, postX, lampY, 22);
+      sGlow.addColorStop(0, p.flipped ? 'rgba(74, 222, 128, 0.78)' : 'rgba(248, 113, 113, 0.78)');
+      sGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = sGlow; ctx.beginPath(); ctx.arc(postX, lampY, 22, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = p.flipped ? '#4ade80' : '#ef4444'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.arc(postX, lampY, 5.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      // 2. Heavy Bolted Cast-Iron Base Plate & Notched Brass Locking Quadrant
+      ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(cx - 22, baseY - 7, 44, 7, 2); ctx.fill(); ctx.stroke();
+      const qG = ctx.createLinearGradient(cx - 18, baseY - 24, cx + 18, baseY - 4);
+      qG.addColorStop(0, '#fbbf24'); qG.addColorStop(0.55, '#b45309'); qG.addColorStop(1, '#451a03');
+      ctx.fillStyle = qG; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(cx, baseY - 5, 18, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Crisp locking notch ticks along brass quadrant rim
+      ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 1.2;
+      for (let n = 1; n <= 5; n++) {
+        const na = Math.PI + (n / 6) * Math.PI;
+        ctx.beginPath(); ctx.moveTo(cx + Math.cos(na) * 14, baseY - 5 + Math.sin(na) * 14); ctx.lineTo(cx + Math.cos(na) * 18, baseY - 5 + Math.sin(na) * 18); ctx.stroke();
+      }
+
+      // 3. Pivoting Forged-Steel Lever Arm with Release Grip & Counterweight Ball
+      ctx.save();
+      ctx.translate(cx, baseY - 7);
+      ctx.rotate(ang);
+      // Heavy cast-iron counterweight ball at bottom-side of lever
+      ctx.fillStyle = '#334155'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.arc(0, -14, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Polished steel shaft & curved latch handle
+      ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 4.6; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -40); ctx.stroke();
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.moveTo(4, -26); ctx.lineTo(4, -39); ctx.stroke();
+      // Glossy Bakelite/Brass grip ball
+      const ballG = ctx.createRadialGradient(-2, -44, 1.5, 0, -42, 8.5);
+      ballG.addColorStop(0, '#ffffff');
+      ballG.addColorStop(0.35, p.flipped ? '#4ade80' : '#f87171');
+      ballG.addColorStop(1, p.flipped ? '#15803d' : '#991b1b');
+      ctx.fillStyle = ballG; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(0, -42, 8.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'switch_rail_bridge') {
+      const ext = p.extendAnim !== undefined ? p.extendAnim : (p.extended ? 1 : 0);
+      ctx.save();
+      if (ext < 0.95) {
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)'; ctx.lineWidth = 1.6; ctx.setLineDash([7, 6]);
+        ctx.strokeRect(px + 1, py + 1, p.w - 2, p.h - 2);
+        ctx.setLineDash([]);
+      }
+      const curW = p.w * ext;
+      if (curW > 4) {
+        const brG = ctx.createLinearGradient(px, py, px, py + p.h);
+        brG.addColorStop(0, '#fbbf24'); brG.addColorStop(0.35, '#b45309'); brG.addColorStop(1, '#451a03');
+        ctx.fillStyle = brG; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.roundRect(px, py, curW, p.h, 3); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 1.4;
+        for (let tx = 8; tx < curW - 18; tx += 26) {
+          ctx.beginPath(); ctx.moveTo(px + tx, py + 3); ctx.lineTo(px + tx + 18, py + p.h - 3); ctx.stroke();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'venice_quay') {
+      // Museum-Grade Venetian Istrian Marble & Red-Brick Fondamenta Quay:
+      // - Real Staggered Venetian Red-Brick Masonry Wall + Mossy Stone Seam Patina
+      // - Sculpted Beveled Istrian Marble Paving Slabs with Overhanging Bullnose Coping & Cast Shadow
+      // - Radial Cut-Stone Voussoir Water-Vault Arches with Carved Keystones & Wrought-Iron Grates
+      // - Forged Brass Mooring Rings with Coiled Hemp Ropes + Natural Grass Tufts, Moss & Flowering Wall Plants!
+      ctx.save();
+      ctx.translate(px, py);
+      const seed = Math.abs(Math.floor(p.x / 37));
+
+      // 1. Staggered Venetian Red-Brick Canal Embankment Wall + Damp Mossy Tide Patina
+      drawBrickMasonry(ctx, 0, 20, p.w, p.h - 20, ['#a63b29', '#8f2e1f', '#b84c35', '#7a2519', '#c25a3d'], '#d6c3ae', seed);
+      const shadeG = ctx.createLinearGradient(0, 20, 0, p.h - 18);
+      shadeG.addColorStop(0.0, 'rgba(28, 12, 6, 0.42)');
+      shadeG.addColorStop(0.16, 'rgba(28, 12, 6, 0.0)');
+      shadeG.addColorStop(0.76, 'rgba(20, 52, 22, 0.08)');
+      shadeG.addColorStop(0.92, 'rgba(22, 78, 36, 0.58)');
+      shadeG.addColorStop(1.0, 'rgba(12, 48, 24, 0.78)');
+      ctx.fillStyle = shadeG;
+      ctx.fillRect(0, 20, p.w, p.h - 20);
+
+      // 2. Sculpted Beveled Istrian Marble Paving Slabs & Overhanging Bullnose Coping
+      const slabW = 54;
+      for (let sx = 0; sx < p.w; sx += slabW) {
+        const w2 = Math.min(slabW, p.w - sx);
+        const shade = ((Math.floor(sx / slabW) + seed) % 3);
+        const sG = ctx.createLinearGradient(sx, 0, sx, 22);
+        sG.addColorStop(0, shade === 0 ? '#fffdf5' : (shade === 1 ? '#f7f1e6' : '#f2eae0'));
+        sG.addColorStop(0.65, shade === 0 ? '#e7dfd3' : '#ddd4c7');
+        sG.addColorStop(1, '#a89f94');
+        ctx.fillStyle = sG;
+        ctx.fillRect(sx, 0, w2, 22);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.72)'; ctx.fillRect(sx + 1, 0, Math.max(0, w2 - 2), 2.5);
+        ctx.strokeStyle = 'rgba(68, 53, 39, 0.48)'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, 22); ctx.stroke();
+      }
+      ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(0, 22); ctx.lineTo(p.w, 22); ctx.stroke();
+      ctx.fillStyle = '#c4bab0'; ctx.fillRect(0, 18, p.w, 4);
+
+      // 3. Architectural Carved Istrian Limestone Water-Vault Arches with Radial Voussoirs, Keystones & Iron Grates!
+      for (let ax = 78; ax < p.w - 60; ax += 160) {
+        const archY = p.h - 22;
+        const archR = 27;
+        const vG = ctx.createLinearGradient(ax, archY - archR, ax, p.h);
+        vG.addColorStop(0, '#04121f'); vG.addColorStop(0.65, '#072236'); vG.addColorStop(1, '#0c4a6e');
+        ctx.fillStyle = vG;
+        ctx.beginPath(); ctx.arc(ax, archY, archR, Math.PI, 0); ctx.lineTo(ax + archR, p.h); ctx.lineTo(ax - archR, p.h); ctx.closePath(); ctx.fill();
+        // Recessed wrought-iron Venetian water-gate bars inside the arch vault
+        ctx.strokeStyle = 'rgba(30, 41, 59, 0.85)'; ctx.lineWidth = 1.6;
+        for (const gx of [-14, -5, 5, 14]) {
+          const topOff = Math.sqrt(Math.max(0, archR * archR - gx * gx));
+          ctx.beginPath(); ctx.moveTo(ax + gx, archY - topOff + 2); ctx.lineTo(ax + gx, p.h - 14); ctx.stroke();
+        }
+        ctx.beginPath(); ctx.moveTo(ax - archR + 3, archY - 6); ctx.lineTo(ax + archR - 3, archY - 6); ctx.stroke();
+
+        // Radial Carved Istrian Limestone Voussoir Arch Blocks!
+        const voussoirs = 9;
+        for (let vi = 0; vi < voussoirs; vi++) {
+          const a1 = Math.PI + (vi / voussoirs) * Math.PI;
+          const a2 = Math.PI + ((vi + 1) / voussoirs) * Math.PI;
+          const isKey = vi === Math.floor(voussoirs / 2);
+          const rIn = archR - 1;
+          const rOut = isKey ? archR + 10.5 : archR + 7.5;
+          ctx.fillStyle = isKey ? '#fffbeb' : (vi % 2 === 0 ? '#efe7dc' : '#ddd4c7');
+          ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.arc(ax, archY, rOut, a1, a2);
+          ctx.arc(ax, archY, rIn, a2, a1, true);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+        }
+        ctx.fillStyle = '#ddd4c7'; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.0;
+        ctx.fillRect(ax - archR - 6, archY, 7, 16); ctx.strokeRect(ax - archR - 6, archY, 7, 16);
+        ctx.fillRect(ax + archR - 1, archY, 7, 16); ctx.strokeRect(ax + archR - 1, archY, 7, 16);
+
+        // Forged Brass Mooring Ring on Carved Stone Boss + Draped Hemp Rope Loop between arches!
+        const mx = ax + 80;
+        if (mx < p.w - 22) {
+          ctx.fillStyle = '#e7dfd3'; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.roundRect(mx - 8, 28, 16, 15, 3); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#451a03'; ctx.beginPath(); ctx.arc(mx, 35, 3.2, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#d97706'; ctx.lineWidth = 2.8;
+          ctx.beginPath(); ctx.arc(mx, 42, 7.2, 0, Math.PI * 2); ctx.stroke();
+          ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.arc(mx - 1, 41, 6.2, -2.4, -0.6); ctx.stroke();
+          ctx.strokeStyle = '#b45309'; ctx.lineWidth = 2.2;
+          ctx.beginPath(); ctx.moveTo(mx + 4, 47); ctx.quadraticCurveTo(mx + 12, 62, mx + 2, 72); ctx.quadraticCurveTo(mx - 8, 66, mx - 2, 48); ctx.stroke();
+        }
+      }
+
+      // 4. Natural Lush Grass Tufts, Velvety Moss Patches & Flowering Mediterranean Wall Plants on the Quay!
+      for (let gx = 28; gx < p.w - 24; gx += 76) {
+        const hHash = Math.abs((Math.floor(gx / 76) * 31 + seed * 17) % 10);
+        const sway = Math.sin(time * 2.1 + gx * 0.04) * 2.2;
+        // Soft mossy cushion hugging the marble coping / brick seam (y = 22)
+        if (hHash % 2 === 0) {
+          ctx.fillStyle = 'rgba(21, 128, 61, 0.78)';
+          ctx.beginPath(); ctx.ellipse(gx, 22, 11 + (hHash % 3) * 4, 3.6, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = 'rgba(74, 222, 128, 0.45)';
+          ctx.beginPath(); ctx.ellipse(gx - 2, 21, 6, 2.0, 0, 0, Math.PI * 2); ctx.fill();
+        }
+        // Delicate green grass blades & tiny Mediterranean wildflowers sprouting along the stone slab edge
+        const bladeCnt = 3 + (hHash % 3);
+        for (let b = 0; b < bladeCnt; b++) {
+          const bx2 = gx + (b - bladeCnt * 0.5) * 4.2;
+          const bh2 = 7 + ((hHash + b * 3) % 7);
+          const lean = (b - bladeCnt * 0.5) * 2.4 + sway;
+          ctx.strokeStyle = (b % 2 === 0) ? '#15803d' : '#22c55e';
+          ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(bx2, 2.5);
+          ctx.quadraticCurveTo(bx2 + lean * 0.4, -bh2 * 0.5, bx2 + lean, -bh2);
+          ctx.stroke();
+        }
+        // Occasional delicate wild white/pink/golden blossom nestled in the grass tuft
+        if (hHash % 3 === 0) {
+          const flCol = hHash === 0 ? '#fce7f3' : (hHash === 3 ? '#fef08a' : '#fda4af');
+          ctx.fillStyle = flCol;
+          ctx.beginPath(); ctx.arc(gx + sway * 0.6, -6, 2.3, 0, Math.PI * 2); ctx.arc(gx + 5 + sway * 0.5, -4, 1.9, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#f59e0b';
+          ctx.beginPath(); ctx.arc(gx + sway * 0.6, -6, 0.9, 0, Math.PI * 2); ctx.fill();
+        }
+        // Leafy Mediterranean wall-fern / caper sprig growing organically out of a weathered brick joint!
+        if (hHash === 1 || hHash === 5 || hHash === 8) {
+          const wy = 44 + (hHash % 3) * 8;
+          ctx.strokeStyle = '#166534'; ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(gx, wy); ctx.quadraticCurveTo(gx + 8, wy - 6, gx + 14 + sway * 0.6, wy + 2);
+          ctx.moveTo(gx, wy); ctx.quadraticCurveTo(gx - 7, wy - 5, gx - 12 + sway * 0.6, wy + 3);
+          ctx.stroke();
+          ctx.fillStyle = '#22c55e';
+          for (const [lx, ly] of [[gx + 6, wy - 3], [gx + 11, wy], [gx - 6, wy - 2], [gx - 10, wy + 1]]) {
+            ctx.beginPath(); ctx.ellipse(lx + sway * 0.3, ly, 3.2, 1.8, 0.3, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.fillStyle = '#fff1f2';
+          ctx.beginPath(); ctx.arc(gx + 2, wy - 4, 1.8, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      // 5. Subtle Waterline Lap Strictly Clipped to Quay Width [0..p.w] (Zero Overflow Popping into Canal Gaps!)
+      const wG = ctx.createLinearGradient(0, p.h - 24, 0, p.h);
+      wG.addColorStop(0, 'rgba(14, 116, 144, 0.72)'); wG.addColorStop(0.55, 'rgba(12, 74, 110, 0.88)'); wG.addColorStop(1, 'rgba(8, 47, 73, 0.95)');
+      ctx.fillStyle = wG; ctx.fillRect(0, p.h - 22, p.w, 22);
+      const wOff = Math.sin(time * 2.4) * 6;
+      ctx.strokeStyle = 'rgba(186, 230, 253, 0.52)'; ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      for (let wx = 4; wx < p.w - 36; wx += 44) {
+        ctx.moveTo(wx + wOff * 0.4, p.h - 19); ctx.quadraticCurveTo(wx + 20 + wOff * 0.4, p.h - 22, wx + 40 + wOff * 0.4, p.h - 19);
+      }
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'venice_balcony') {
+      // Sculpted Istrian Marble Palazzo Balcony with Corbel Brackets, Hourglass Balusters & Trailing Geraniums!
+      ctx.save();
+      ctx.translate(px, py);
+      // Carved stone corbel brackets supporting the balcony underside
+      ctx.fillStyle = '#a8a29e'; ctx.strokeStyle = '#44403c'; ctx.lineWidth = 1.4;
+      for (const cx0 of [16, p.w - 28]) {
+        ctx.beginPath(); ctx.moveTo(cx0, p.h); ctx.lineTo(cx0 + 12, p.h); ctx.quadraticCurveTo(cx0 + 10, p.h + 14, cx0, p.h + 12); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      // Molded marble deck slab & carved rail
+      const bG = ctx.createLinearGradient(0, 0, 0, p.h);
+      bG.addColorStop(0, '#fffbeb'); bG.addColorStop(0.45, '#e7e5e4'); bG.addColorStop(1, '#78716c');
+      ctx.fillStyle = bG; ctx.strokeStyle = '#44403c'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(0, 0, p.w, p.h, 4); ctx.fill(); ctx.stroke();
+      // Turned hourglass Venetian stone balusters
+      ctx.fillStyle = '#f5f5f4'; ctx.strokeStyle = '#78716c'; ctx.lineWidth = 1.0;
+      for (let bx = 14; bx < p.w - 14; bx += 20) {
+        ctx.beginPath(); ctx.roundRect(bx, 5, 7, p.h - 10, 3); ctx.fill(); ctx.stroke();
+      }
+      // Lush terracotta window-boxes overflowing with emerald ivy & blooming crimson Venetian geraniums!
+      for (const fx of [14, p.w - 14]) {
+        ctx.fillStyle = '#15803d'; ctx.beginPath(); ctx.ellipse(fx, -1, 9, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(fx - 4, 2, 4, 0, Math.PI * 2); ctx.arc(fx + 5, 2, 3.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath(); ctx.arc(fx - 3, -4, 3.0, 0, Math.PI * 2); ctx.arc(fx + 3, -3, 2.8, 0, Math.PI * 2); ctx.arc(fx, -6, 2.5, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'gondola_boat') {
+      // Master-Craft Piano-Black Venetian Gondola adorned with Intricate Baroque Golden Scrollwork,
+      // Gilded Seahorse Cavallini, 6-Pronged Silver Ferro, Tufted Crimson Sofa & Lapping Canal Water!
+      const dip = p.sinkOffset || 0;
+      ctx.save();
+      ctx.translate(px, py + dip);
+      // 1. Sleek curved piano-black lacquered mahogany hull with glossy metallic highlight
+      const hG = ctx.createLinearGradient(0, -12, 0, p.h + 8);
+      hG.addColorStop(0, '#475569'); hG.addColorStop(0.28, '#0f172a'); hG.addColorStop(0.75, '#020617'); hG.addColorStop(1, '#1e293b');
+      ctx.fillStyle = hG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(-20, -10);
+      ctx.quadraticCurveTo(-8, p.h + 9, p.w * 0.5, p.h + 7);
+      ctx.quadraticCurveTo(p.w + 8, p.h + 9, p.w + 22, -14);
+      ctx.quadraticCurveTo(p.w - 6, 6, p.w * 0.5, 5);
+      ctx.quadraticCurveTo(6, 6, -20, -10);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // 2. INTRICATE BAROQUE GOLDEN SCROLLWORK & FILIGREE ENGRAVINGS along the black hull!
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+      // Flowing golden S-scroll baroque vine along the full hull flank
+      ctx.beginPath();
+      ctx.moveTo(4, 11);
+      ctx.bezierCurveTo(p.w * 0.18, 22, p.w * 0.28, 7, p.w * 0.42, 16);
+      ctx.bezierCurveTo(p.w * 0.56, 23, p.w * 0.68, 7, p.w * 0.82, 16);
+      ctx.quadraticCurveTo(p.w * 0.92, 20, p.w - 4, 10);
+      ctx.stroke();
+      // Delicate gilded filigree curls & golden fleur-de-lis diamond studs
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 1.2;
+      for (const frac of [0.16, 0.34, 0.66, 0.84]) {
+        const fx = p.w * frac;
+        ctx.beginPath(); ctx.arc(fx, 14, 4.2, 0.2, Math.PI * 1.4); ctx.stroke();
+        ctx.fillStyle = '#fde047';
+        ctx.beginPath(); ctx.moveTo(fx, 9); ctx.lineTo(fx + 2.6, 12); ctx.lineTo(fx, 15); ctx.lineTo(fx - 2.6, 12); ctx.closePath(); ctx.fill();
+      }
+      // Twin gilded Venetian Seahorse (Cavallino) ornaments flanking the crimson sofa!
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.0;
+      for (const side of [-1, 1]) {
+        const cx0 = p.w * 0.5 + side * (p.w * 0.29);
+        ctx.beginPath();
+        ctx.moveTo(cx0, 4); ctx.quadraticCurveTo(cx0 + side * 6, -8, cx0, -11);
+        ctx.quadraticCurveTo(cx0 - side * 5, -7, cx0, 4);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+
+      // 3. Iconic 6-Pronged Polished Silver Ferro di Prua Prow Blade on right bow
+      ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(p.w + 17, -10);
+      ctx.quadraticCurveTo(p.w + 30, -28, p.w + 14, -32);
+      ctx.quadraticCurveTo(p.w + 20, -18, p.w + 12, -6);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1.6;
+      for (let pr = 0; pr < 5; pr++) {
+        ctx.beginPath(); ctx.moveTo(p.w + 16, -12 - pr * 3.2); ctx.lineTo(p.w + 24, -12 - pr * 3.2); ctx.stroke();
+      }
+
+      // 4. Plush tufted crimson velvet Trasto passenger sofa with gold tassels & wooden oar
+      const sG = ctx.createLinearGradient(p.w * 0.24, -9, p.w * 0.24, 9);
+      sG.addColorStop(0, '#f43f5e'); sG.addColorStop(0.5, '#be123c'); sG.addColorStop(1, '#4c0519');
+      ctx.fillStyle = sG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(p.w * 0.24, -7, p.w * 0.52, 13, 5); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#b45309'; ctx.lineWidth = 3.0; ctx.lineCap = 'round';
+      const oarSway = Math.sin(time * 2.6) * 4;
+      ctx.beginPath(); ctx.moveTo(10, -4); ctx.lineTo(-14 + oarSway, p.h + 10); ctx.stroke();
+
+      // 5. Delicate hull-hugging foam wake & waterline shimmer (NO rectangular water block!)
+      const wWave = Math.sin(time * 4.2 + (p.phase || 0)) * 1.8;
+      ctx.strokeStyle = 'rgba(224, 242, 254, 0.72)'; ctx.lineWidth = 2.0; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(4, p.h + 4 + wWave * 0.4);
+      ctx.quadraticCurveTo(p.w * 0.28, p.h + 7 - wWave, p.w * 0.5, p.h + 5 + wWave);
+      ctx.quadraticCurveTo(p.w * 0.75, p.h + 3 - wWave, p.w - 4, p.h + 5 + wWave * 0.4);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(186, 230, 253, 0.36)'; ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(16, p.h + 9 - wWave * 0.3);
+      ctx.quadraticCurveTo(p.w * 0.5, p.h + 11 + wWave * 0.6, p.w - 16, p.h + 9 - wWave * 0.3);
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'canal_tide_gate') {
+      // Heavy 8-Spoke Hammered-Brass Venetian Water-Lock Wheel on Carved Stone Housing with Murano Lamp!
+      const spin = (p.spinAnim || 0) * Math.PI * 2.6;
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+      ctx.save();
+      // Carved Istrian stone sluice pedestal with iron sluice chain
+      const stG = ctx.createLinearGradient(cx - 18, baseY - 36, cx + 18, baseY);
+      stG.addColorStop(0, '#fffbeb'); stG.addColorStop(0.55, '#d6d3d1'); stG.addColorStop(1, '#78716c');
+      ctx.fillStyle = stG; ctx.strokeStyle = '#44403c'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(cx - 16, baseY - 34, 32, 34, [6, 6, 2, 2]); ctx.fill(); ctx.stroke();
+      // Glowing Murano-glass lock status lantern
+      const lGlow = ctx.createRadialGradient(cx, baseY - 17, 2, cx, baseY - 17, 16);
+      lGlow.addColorStop(0, p.opened ? 'rgba(74, 222, 128, 0.85)' : 'rgba(56, 189, 248, 0.85)');
+      lGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = lGlow; ctx.beginPath(); ctx.arc(cx, baseY - 17, 16, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = p.opened ? '#4ade80' : '#38bdf8'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(cx, baseY - 17, 5.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // 8-Spoke Hammered-Brass Ship-Style Sluice Wheel with Turned Mahogany Handles!
+      ctx.save();
+      ctx.translate(cx, py + 18);
+      ctx.rotate(spin);
+      ctx.strokeStyle = p.opened ? '#4ade80' : '#fbbf24'; ctx.lineWidth = 4.2;
+      ctx.beginPath(); ctx.arc(0, 0, 17, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#92400e'; ctx.lineWidth = 2.6;
+      for (let s = 0; s < 8; s++) {
+        const a = s * (Math.PI / 4);
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 22, Math.sin(a) * 22); ctx.stroke();
+        ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(Math.cos(a) * 22, Math.sin(a) * 22, 2.4, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'canal_tide_raft') {
+      // Lashed Cypress Timber Lock Raft riding atop a Churning Translucent Turquoise Rising Water Column!
+      const restSY = (p.restY !== undefined ? p.restY : p.y) - (p.y - py);
+      ctx.save();
+      const colH = Math.max(0, (restSY + p.h + 22) - (py + p.h));
+      if (colH > 4) {
+        const wG = ctx.createLinearGradient(px, py + p.h, px + p.w, py + p.h);
+        wG.addColorStop(0, 'rgba(14, 165, 233, 0.25)');
+        wG.addColorStop(0.5, 'rgba(56, 189, 248, 0.62)');
+        wG.addColorStop(1, 'rgba(14, 165, 233, 0.25)');
+        ctx.fillStyle = wG;
+        ctx.fillRect(px + 8, py + p.h - 2, p.w - 16, colH);
+        // Sparkling white foam bubbles rising inside water lock column
+        ctx.fillStyle = 'rgba(224, 242, 254, 0.68)';
+        for (let b = 0; b < 6; b++) {
+          const frac = ((time * 1.4 + b / 6) % 1);
+          const by = py + p.h + colH - frac * colH;
+          const bx = px + 20 + ((b * 37) % Math.max(20, p.w - 40));
+          ctx.beginPath(); ctx.arc(bx, by, 3.2, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      // Lashed cypress timber planks with iron bolt-plates & brass mooring bollards
+      const rG = ctx.createLinearGradient(px, py, px, py + p.h);
+      rG.addColorStop(0, '#eab308'); rG.addColorStop(0.5, '#b45309'); rG.addColorStop(1, '#451a03');
+      ctx.fillStyle = rG; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(px, py, p.w, p.h, 6); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.4;
+      for (let lx = px + 26; lx < px + p.w - 20; lx += 28) {
+        ctx.beginPath(); ctx.moveTo(lx, py + 2); ctx.lineTo(lx, py + p.h - 2); ctx.stroke();
+      }
+      // Churning white foam crest lapping under the raft
+      ctx.strokeStyle = 'rgba(240, 249, 255, 0.85)'; ctx.lineWidth = 2.6;
+      ctx.beginPath(); ctx.moveTo(px + 4, py + p.h + 2); ctx.quadraticCurveTo(px + p.w * 0.5, py + p.h + 6, px + p.w - 4, py + p.h + 2); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'cafe_awning_fold') {
+      // Authentic Striped Venetian Canal Café Awning with Articulated Wrought-Iron Scissor Arms & Scalloped Valance!
+      const anim = p.foldAnim !== undefined ? p.foldAnim : (p.foldSolid === false ? 0 : 1);
+      const isWarn = p.foldState === 'warn';
+      const shake = isWarn ? Math.sin(time * 48) * 2.2 : 0;
+      ctx.save();
+      if (anim < 0.85) {
+        ctx.strokeStyle = 'rgba(251, 113, 133, 0.65)'; ctx.lineWidth = 1.6; ctx.setLineDash([6, 5]);
+        ctx.strokeRect(px + 1, py + 1, p.w - 2, p.h - 2);
+        ctx.setLineDash([]);
+      }
+      const curW = Math.max(16, p.w * anim);
+      // Articulated wrought-iron scissor folding arms visible underneath the awning!
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(px + 4, py + p.h + 10); ctx.lineTo(px + curW * 0.5, py + p.h - 2); ctx.lineTo(px + curW - 4, py + p.h + 6);
+      ctx.stroke();
+      // Ribbed crimson-and-cream striped Venetian canvas canopy with scalloped valance
+      const stripes = 7;
+      const sw = curW / stripes;
+      for (let i = 0; i < stripes; i++) {
+        ctx.fillStyle = i % 2 === 0 ? '#be123c' : '#fffbeb';
+        ctx.fillRect(px + i * sw, py + shake, sw + 0.5, p.h - 5);
+        ctx.beginPath(); ctx.arc(px + (i + 0.5) * sw, py + p.h - 5 + shake, sw * 0.5, 0, Math.PI); ctx.fill();
+      }
+      ctx.strokeStyle = '#4c0519'; ctx.lineWidth = 1.6;
+      ctx.strokeRect(px, py + shake, curW, p.h - 5);
+      // Polished brass roller cassette housing on wall edge
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.roundRect(px - 4, py - 3, 9, p.h + 3, 3); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'carnival_bell_swing') {
+      // Museum-Grade Sculpted Venetian Bronze Cathedral Bell + Tightly Interlocking Forged-Bronze Chain Physically Anchored to Bell Crown!
+      const pivotSX = (p.pivotX !== undefined ? p.pivotX : p.x + p.w / 2) - (p.x - px);
+      const pivotSY = (p.pivotY !== undefined ? p.pivotY : p.y) - (p.y - py);
+      const len = p.chainLen || 182;
+      const maxAng = p.maxAngle || 0.84;
+      const ang = p.curAngle !== undefined ? p.curAngle : Math.sin(time * (p.swingSpeed || 1.9) + (p.phase || 0)) * maxAng;
+      const bobSX = pivotSX + Math.sin(ang) * len;
+      const bobSY = pivotSY + Math.cos(ang) * len;
+      const bobR = p.bobR || 23;
+      // Exact physical attachment points: top belfry shackle -> bell crown cannon ring
+      const startX = pivotSX + Math.sin(ang) * 5;
+      const startY = pivotSY + Math.cos(ang) * 5;
+      const crownLen = Math.max(24, len - bobR * 1.02);
+      const crownX = pivotSX + Math.sin(ang) * crownLen;
+      const crownY = pivotSY + Math.cos(ang) * crownLen;
+
+      ctx.save();
+      // Subtle swing-arc telegraph guide
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.22)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 6]);
+      ctx.beginPath(); ctx.arc(pivotSX, pivotSY, len, Math.PI * 0.5 - maxAng, Math.PI * 0.5 + maxAng); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 1. Continuous, Tightly Interlocking Forged-Bronze Chain (Zero Gaps from Pivot Ring to Bell Crown!)
+      const chainDist = Math.hypot(crownX - startX, crownY - startY);
+      ctx.strokeStyle = '#291003'; ctx.lineWidth = 5.4; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(crownX, crownY); ctx.stroke();
+      const linkCount = Math.max(8, Math.ceil(chainDist / 8.5));
+      for (let i = 0; i <= linkCount; i++) {
+        const t = i / linkCount;
+        const lx = startX + (crownX - startX) * t;
+        const ly = startY + (crownY - startY) * t;
+        const flat = (i % 2 === 0);
+        ctx.strokeStyle = '#291003'; ctx.lineWidth = 3.2;
+        ctx.beginPath(); ctx.ellipse(lx, ly, flat ? 3.8 : 1.7, 5.4, -ang, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = flat ? '#f59e0b' : '#b45309'; ctx.lineWidth = 1.7;
+        ctx.beginPath(); ctx.ellipse(lx, ly, flat ? 3.6 : 1.5, 5.2, -ang, 0, Math.PI * 2); ctx.stroke();
+      }
+
+      // 2. Carved Istrian Marble & Wrought-Bronze Overhead Belfry Beam & Anchor Shackle
+      const beamG = ctx.createLinearGradient(pivotSX, pivotSY - 14, pivotSX, pivotSY + 4);
+      beamG.addColorStop(0, '#f5ebe0'); beamG.addColorStop(0.6, '#d6cfc2'); beamG.addColorStop(1, '#78716c');
+      ctx.fillStyle = beamG; ctx.strokeStyle = '#3f352c'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(pivotSX - 42, pivotSY - 14, 84, 15, 4); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#78350f'; ctx.strokeStyle = '#291003'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.roundRect(pivotSX - 10, pivotSY - 4, 20, 8, 3); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.arc(pivotSX, pivotSY + 5, 4.8, 0, Math.PI * 2); ctx.stroke();
+
+      // Subtle golden acoustic sound-wave arcs near peak swing
+      if (Math.abs(ang) > maxAng * 0.70) {
+        ctx.strokeStyle = 'rgba(254, 240, 138, 0.48)'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.arc(bobSX, bobSY, bobR * 1.35, -0.5, 0.5); ctx.stroke();
+        ctx.beginPath(); ctx.arc(bobSX, bobSY, bobR * 1.35, Math.PI - 0.5, Math.PI + 0.5); ctx.stroke();
+      }
+
+      // 3. Museum-Grade Sculpted Venetian Bronze Cathedral Bell (Physically Joined to Chain via Crown Ring!)
+      ctx.save();
+      ctx.translate(bobSX, bobSY);
+      ctx.rotate(-ang);
+
+      // Forged-bronze crown shackle ring & arched bell cannons (canons) gripping the chain end
+      ctx.strokeStyle = '#291003'; ctx.lineWidth = 4.2;
+      ctx.beginPath(); ctx.arc(0, -bobR * 1.02, 5.2, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.arc(0, -bobR * 1.02, 5.2, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#92400e'; ctx.strokeStyle = '#291003'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.roundRect(-bobR * 0.34, -bobR * 0.94, bobR * 0.68, bobR * 0.22, 4); ctx.fill(); ctx.stroke();
+
+      // 3D Dark Hollow Bell Mouth Cavity + Counter-Swinging Forged-Iron Clapper (moves opposite to bell swing!)
+      ctx.fillStyle = '#1c0a05'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.ellipse(0, bobR * 0.78, bobR * 1.08, bobR * 0.26, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      const clapAng = Math.max(-0.56, Math.min(0.56, -ang * 0.66));
+      const clapPivotY = bobR * 0.18;
+      const clapLen = bobR * 0.82;
+      const clapX = Math.sin(clapAng) * clapLen;
+      const clapY = clapPivotY + Math.cos(clapAng) * clapLen;
+      ctx.strokeStyle = '#451a03'; ctx.lineWidth = 3.2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(0, clapPivotY); ctx.lineTo(clapX, clapY); ctx.stroke();
+      const clG = ctx.createRadialGradient(clapX - 2, clapY - 1.5, 1, clapX, clapY, 6.8);
+      clG.addColorStop(0, '#fef08a'); clG.addColorStop(0.45, '#d97706'); clG.addColorStop(1, '#451a03');
+      ctx.fillStyle = clG; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.arc(clapX, clapY, 6.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      // Authentic S-Curve Flared Cathedral Bell Body with Burnished Venetian Bronze & Verdigris Sheen
+      const bG = ctx.createLinearGradient(-bobR * 1.08, -bobR * 0.2, bobR * 1.08, bobR * 0.4);
+      bG.addColorStop(0.0, '#5c280e');
+      bG.addColorStop(0.24, '#f59e0b');
+      bG.addColorStop(0.38, '#fef3c7');
+      bG.addColorStop(0.56, '#b45309');
+      bG.addColorStop(0.82, '#6b2c10');
+      bG.addColorStop(1.0, '#2e4028');
+      ctx.fillStyle = bG; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.7;
+      ctx.beginPath();
+      ctx.moveTo(-bobR * 0.46, -bobR * 0.78);
+      ctx.quadraticCurveTo(0, -bobR * 0.96, bobR * 0.46, -bobR * 0.78);
+      ctx.bezierCurveTo(bobR * 0.68, -bobR * 0.28, bobR * 0.74, bobR * 0.34, bobR * 1.12, bobR * 0.76);
+      ctx.quadraticCurveTo(0, bobR * 0.96, -bobR * 1.12, bobR * 0.76);
+      ctx.bezierCurveTo(-bobR * 0.74, bobR * 0.34, -bobR * 0.68, -bobR * 0.28, -bobR * 0.46, -bobR * 0.78);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // Embossed Twin Gilded Decorative Relief Bands & Parallel Horizontal Accent Lines (=)
+      ctx.strokeStyle = 'rgba(254, 240, 138, 0.72)'; ctx.lineWidth = 1.7;
+      ctx.beginPath(); ctx.moveTo(-bobR * 0.56, -bobR * 0.44); ctx.quadraticCurveTo(0, -bobR * 0.34, bobR * 0.56, -bobR * 0.44); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-bobR * 0.90, bobR * 0.48); ctx.quadraticCurveTo(0, bobR * 0.62, bobR * 0.90, bobR * 0.48); ctx.stroke();
+      ctx.strokeStyle = 'rgba(254, 243, 199, 0.72)'; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(-bobR * 0.34, -bobR * 0.04); ctx.quadraticCurveTo(0, bobR * 0.03, bobR * 0.34, -bobR * 0.04);
+      ctx.moveTo(-bobR * 0.38, bobR * 0.14); ctx.quadraticCurveTo(0, bobR * 0.21, bobR * 0.38, bobR * 0.14);
+      ctx.stroke();
+
+      // Glossy vertical metallic specular gleam along the sunlit bronze bell curve
+      ctx.strokeStyle = 'rgba(255, 251, 235, 0.52)'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-bobR * 0.26, -bobR * 0.62);
+      ctx.bezierCurveTo(-bobR * 0.36, -bobR * 0.12, -bobR * 0.44, bobR * 0.28, -bobR * 0.62, bobR * 0.60);
+      ctx.stroke();
+
+      ctx.restore();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'venice_water_spout') {
+      // Tiered Istrian Marble Lion-Head Fountain with Sparkling Layered Turquoise-and-White Geyser Column!
+      const isActive = !!p.spoutActive;
+      const isWarn = !!p.spoutWarn;
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+      ctx.save();
+      // Tiered Istrian marble fountain basin with mossy stone sheen & carved Lion-head medallion!
+      const fG = ctx.createLinearGradient(cx - 42, baseY - 30, cx + 42, baseY);
+      fG.addColorStop(0, '#fffbeb'); fG.addColorStop(0.55, '#d6d3d1'); fG.addColorStop(1, '#78716c');
+      ctx.fillStyle = fG; ctx.strokeStyle = '#44403c'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(cx - 40, baseY - 28, 80, 28, [10, 10, 2, 2]); ctx.fill(); ctx.stroke();
+      // Carved golden Venetian lion-head emblem on front of basin
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(cx, baseY - 12, 8.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#0284c7'; ctx.beginPath(); ctx.ellipse(cx, baseY - 26, 32, 6, 0, 0, Math.PI * 2); ctx.fill();
+      if (isWarn || isActive) {
+        const count = isActive ? 18 : 6;
+        const maxH = isActive ? (p.h - 26) : 52;
+        for (let i = 0; i < count; i++) {
+          const frac = ((time * (isActive ? 1.9 : 0.9) + i / count) % 1);
+          const fade = Math.sin(frac * Math.PI);
+          const sy = baseY - 26 - frac * maxH;
+          const sx = cx + Math.sin(frac * 9 + i * 1.7 + time * 5.5) * (5 + frac * 13);
+          const rad = 10 + frac * (isActive ? 17 : 8);
+          const spG = ctx.createRadialGradient(sx, sy, 2, sx, sy, rad);
+          spG.addColorStop(0, `rgba(240, 249, 255, ${(fade * 0.85).toFixed(2)})`);
+          spG.addColorStop(0.5, `rgba(56, 189, 248, ${(fade * 0.52).toFixed(2)})`);
+          spG.addColorStop(1, 'rgba(14, 165, 233, 0)');
+          ctx.fillStyle = spG; ctx.beginPath(); ctx.arc(sx, sy, rad, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    // =========================================================================
+    // STAGE 22: PARIS ROOFTOPS & EIFFEL TOWER PLATFORMS (Museum-Grade Craft)
+    // =========================================================================
+    if (p.type === 'paris_zinc_roof') {
+      // Authentic Haussmannian Standing-Seam Blue-Grey Zinc Mansard Roof + Cream Limestone Cornice!
+      ctx.save();
+      ctx.translate(px, py);
+      const isGround = p.h >= 60;
+      const zG = ctx.createLinearGradient(0, 0, 0, isGround ? 36 : p.h);
+      zG.addColorStop(0, '#64748b'); zG.addColorStop(0.28, '#475569'); zG.addColorStop(0.72, '#334155'); zG.addColorStop(1, '#1e293b');
+      ctx.fillStyle = zG; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(0, 0, p.w, isGround ? 34 : p.h, [4, 4, 2, 2]); ctx.fill(); ctx.stroke();
+      for (let rx = 20; rx < p.w - 10; rx += 22) {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.52)'; ctx.fillRect(rx, 2, 2.2, (isGround ? 30 : p.h - 4));
+        ctx.fillStyle = 'rgba(226, 232, 240, 0.24)'; ctx.fillRect(rx + 2.2, 2, 1.3, (isGround ? 30 : p.h - 4));
+      }
+      ctx.fillStyle = '#cbd5e1'; ctx.fillRect(2, 1, p.w - 4, 3);
+      ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(8, -5); ctx.lineTo(p.w - 8, -5); ctx.stroke();
+      for (let gx = 16; gx < p.w - 12; gx += 32) {
+        ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, -6); ctx.stroke();
+      }
+      if (isGround) {
+        const stG = ctx.createLinearGradient(0, 34, 0, p.h);
+        stG.addColorStop(0, '#f5ebe0'); stG.addColorStop(0.16, '#e7d8c5'); stG.addColorStop(0.65, '#cbb69c'); stG.addColorStop(1, '#8c745a');
+        ctx.fillStyle = stG; ctx.strokeStyle = '#443527'; ctx.lineWidth = 1.5;
+        ctx.fillRect(0, 34, p.w, p.h - 34); ctx.strokeRect(0, 34, p.w, p.h - 34);
+        ctx.fillStyle = '#fffbeb'; ctx.fillRect(0, 34, p.w, 5);
+        ctx.fillStyle = 'rgba(68, 53, 39, 0.35)';
+        for (let dx = 6; dx < p.w - 8; dx += 14) ctx.fillRect(dx, 40, 7, 5);
+        ctx.strokeStyle = 'rgba(68, 53, 39, 0.24)'; ctx.lineWidth = 1.0;
+        for (let my = 56; my < p.h; my += 22) {
+          ctx.beginPath(); ctx.moveTo(0, my); ctx.lineTo(p.w, my); ctx.stroke();
+        }
+        for (let wx = 54; wx < p.w - 72; wx += 130) {
+          const wG = ctx.createLinearGradient(wx, 52, wx, 92);
+          wG.addColorStop(0, '#fef08a'); wG.addColorStop(0.6, '#f59e0b'); wG.addColorStop(1, '#92400e');
+          ctx.fillStyle = wG; ctx.strokeStyle = '#443527'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.roundRect(wx, 52, 34, 38, [14, 14, 2, 2]); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#291d14'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.moveTo(wx + 17, 52); ctx.lineTo(wx + 17, 90); ctx.moveTo(wx, 71); ctx.lineTo(wx + 34, 71); ctx.stroke();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'moulin_sail_wheel') {
+      // Museum-Grade Parisian Montmartre Windmill (Moulin Rouge / Moulin de la Galette):
+      // Cylindrical brick-and-limestone tower, balcony catwalk, standing-seam bell cap, tapered crimson lattice sails & gimbal balcony steps!
+      const r = p.radius || 130;
+      const ang0 = p.wheelAngle !== undefined ? p.wheelAngle : (time * (p.rotSpeed || 0.72) + (p.phase || 0));
+      ctx.save();
+
+      // 1. Sculpted Cylindrical Parisian Brick & Limestone Windmill Tower (behind rotor)
+      const twTopY = py - 32;
+      const twBotY = py + r + 135;
+      const twG = ctx.createLinearGradient(px - 52, py, px + 52, py);
+      twG.addColorStop(0, '#3b0710'); twG.addColorStop(0.24, '#881337'); twG.addColorStop(0.46, '#be123c'); twG.addColorStop(0.76, '#7f1d1d'); twG.addColorStop(1, '#260409');
+      ctx.fillStyle = twG; ctx.strokeStyle = '#1c0307'; ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(px - 38, twTopY); ctx.lineTo(px + 38, twTopY);
+      ctx.lineTo(px + 58, twBotY); ctx.lineTo(px - 58, twBotY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // Subtle cylindrical horizontal masonry courses & carved cream limestone belt bands
+      ctx.save();
+      ctx.clip();
+      ctx.strokeStyle = 'rgba(28, 3, 7, 0.28)'; ctx.lineWidth = 1.0;
+      for (let by = twTopY + 18; by < twBotY; by += 14) {
+        ctx.beginPath(); ctx.moveTo(px - 60, by); ctx.lineTo(px + 60, by); ctx.stroke();
+      }
+      // Carved cream Lutetian limestone collar bands
+      ctx.fillStyle = '#e7d8c5'; ctx.strokeStyle = '#443527'; ctx.lineWidth = 1.2;
+      ctx.fillRect(px - 44, twTopY + 2, 88, 7); ctx.strokeRect(px - 44, twTopY + 2, 88, 7);
+      ctx.fillRect(px - 50, py + 52, 100, 7); ctx.strokeRect(px - 50, py + 52, 100, 7);
+      ctx.restore();
+
+      // Ornate warm-lit arched windmill gallery window + wrought-iron Juliette balcony below hub
+      const wy = py + 70;
+      const winG = ctx.createLinearGradient(px, wy, px, wy + 34);
+      winG.addColorStop(0, '#fffbeb'); winG.addColorStop(0.55, '#fde047'); winG.addColorStop(1, '#d97706');
+      ctx.fillStyle = winG; ctx.strokeStyle = '#e7d8c5'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.roundRect(px - 13, wy, 26, 34, [13, 13, 2, 2]); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(px, wy); ctx.lineTo(px, wy + 34); ctx.moveTo(px - 13, wy + 17); ctx.lineTo(px + 13, wy + 17); ctx.stroke();
+      ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.4;
+      ctx.strokeRect(px - 17, wy + 22, 34, 13);
+
+      // Wooden exterior gallery catwalk circling the tower neck beneath the zinc cap
+      ctx.fillStyle = '#451a03'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.2;
+      ctx.fillRect(px - 48, twTopY + 12, 96, 6); ctx.strokeRect(px - 48, twTopY + 12, 96, 6);
+      ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(px - 46, twTopY + 2); ctx.lineTo(px + 46, twTopY + 2); ctx.stroke();
+      for (let rx = px - 42; rx <= px + 42; rx += 10.5) {
+        ctx.beginPath(); ctx.moveTo(rx, twTopY + 2); ctx.lineTo(rx, twTopY + 12); ctx.stroke();
+      }
+
+      // 2. Bell-Curved Standing-Seam Blue-Grey Zinc Cap Roof + Gilded Finial & Weathervane!
+      const capG = ctx.createLinearGradient(px - 46, twTopY - 58, px + 46, twTopY);
+      capG.addColorStop(0, '#64748b'); capG.addColorStop(0.35, '#475569'); capG.addColorStop(0.72, '#334155'); capG.addColorStop(1, '#0f172a');
+      ctx.fillStyle = capG; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(px - 47, twTopY + 2);
+      ctx.bezierCurveTo(px - 38, twTopY - 26, px - 14, twTopY - 48, px, twTopY - 60);
+      ctx.bezierCurveTo(px + 14, twTopY - 48, px + 38, twTopY - 26, px + 47, twTopY + 2);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Standing-seam zinc meridian ribs on conical cap
+      ctx.strokeStyle = 'rgba(226, 232, 240, 0.28)'; ctx.lineWidth = 1.1;
+      for (const ox of [-26, -12, 0, 12, 26]) {
+        ctx.beginPath(); ctx.moveTo(px, twTopY - 59); ctx.quadraticCurveTo(px + ox * 0.65, twTopY - 24, px + ox, twTopY + 1); ctx.stroke();
+      }
+      // Gilded brass finial orb & Parisian wrought-iron weathervane arrow
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.moveTo(px, twTopY - 60); ctx.lineTo(px, twTopY - 82); ctx.stroke();
+      ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.arc(px, twTopY - 65, 4.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(px - 14, twTopY - 76); ctx.lineTo(px + 14, twTopY - 76); ctx.stroke();
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.moveTo(px + 14, twTopY - 76); ctx.lineTo(px + 9, twTopY - 79); ctx.lineTo(px + 9, twTopY - 73); ctx.closePath(); ctx.fill();
+
+      // 3. Four Sculpted Tapered Parisian Windmill Sails (Crimson Timber Lattice, Laced Canvas & Cabaret Bulbs!)
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(ang0);
+      for (let bi = 0; bi < 4; bi++) {
+        ctx.save();
+        ctx.rotate(bi * Math.PI * 0.5);
+        // Sculpted tapered oak-and-crimson main stock spar beam (offset slightly to leading edge!)
+        const sparG = ctx.createLinearGradient(0, -6, 0, 6);
+        sparG.addColorStop(0, '#dc2626'); sparG.addColorStop(0.5, '#7f1d1d'); sparG.addColorStop(1, '#3b0707');
+        ctx.fillStyle = sparG; ctx.strokeStyle = '#1c0307'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(0, -5.5); ctx.lineTo(r + 16, -3.0); ctx.lineTo(r + 16, 3.0); ctx.lineTo(0, 5.5);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Tapered trapezoidal crimson-framed sailcloth wing (narrower near hub, gracefully flared toward outer tip!)
+        const sStart = 28, sEnd = r + 12;
+        const wInnerTop = -15, wOuterTop = -23;
+        const wInnerBot = 21, wOuterBot = 31;
+        // Billowing warm cream-gold woven canvas sailcloth with soft fabric gradient
+        const sailG = ctx.createLinearGradient(sStart, wOuterTop, sEnd, wOuterBot);
+        sailG.addColorStop(0, 'rgba(255, 248, 220, 0.42)');
+        sailG.addColorStop(0.55, 'rgba(253, 224, 71, 0.28)');
+        sailG.addColorStop(1, 'rgba(225, 29, 72, 0.24)');
+        ctx.fillStyle = sailG;
+        ctx.beginPath();
+        ctx.moveTo(sStart, wInnerTop); ctx.lineTo(sEnd, wOuterTop);
+        ctx.lineTo(sEnd, wOuterBot); ctx.lineTo(sStart, wInnerBot);
+        ctx.closePath(); ctx.fill();
+
+        // Fine crimson timber lattice frame & tapered cross-ribs
+        ctx.strokeStyle = '#b91c1c'; ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.moveTo(sStart, wInnerTop); ctx.lineTo(sEnd, wOuterTop);
+        ctx.lineTo(sEnd, wOuterBot); ctx.lineTo(sStart, wInnerBot); ctx.closePath(); ctx.stroke();
+        ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 1.35;
+        const ribs = 6;
+        for (let k = 1; k < ribs; k++) {
+          const u = k / ribs;
+          const rx = sStart + u * (sEnd - sStart);
+          const yt = wInnerTop + u * (wOuterTop - wInnerTop);
+          const yb = wInnerBot + u * (wOuterBot - wInnerBot);
+          ctx.beginPath(); ctx.moveTo(rx, yt); ctx.lineTo(rx, yb); ctx.stroke();
+        }
+        // Longitudinal stringers along the tapered lattice
+        ctx.beginPath();
+        ctx.moveTo(sStart, wInnerTop * 0.45); ctx.lineTo(sEnd, wOuterTop * 0.45);
+        ctx.moveTo(sStart, wInnerBot * 0.45); ctx.lineTo(sEnd, wOuterBot * 0.45);
+        ctx.stroke();
+
+        // Warm Moulin Rouge incandescent cabaret bulbs in brass sockets along sail perimeter
+        for (let k = 0; k <= ribs; k++) {
+          const u = k / ribs;
+          const bx0 = sStart + u * (sEnd - sStart);
+          const yt = wInnerTop + u * (wOuterTop - wInnerTop);
+          const yb = wInnerBot + u * (wOuterBot - wInnerBot);
+          const lit = Math.sin(time * 5.8 + bi * 1.4 + k * 0.9) > -0.25;
+          if (lit) {
+            ctx.fillStyle = 'rgba(254, 240, 138, 0.34)';
+            ctx.beginPath(); ctx.arc(bx0, yt, 5.2, 0, Math.PI * 2); ctx.arc(bx0, yb, 5.2, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.fillStyle = lit ? '#fffbeb' : '#92400e';
+          ctx.beginPath(); ctx.arc(bx0, yt, 2.0, 0, Math.PI * 2); ctx.arc(bx0, yb, 2.0, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // Ornate Multi-Tiered Cast-Iron & Gilded Brass Rosette Rotor Hub
+      const hubG = ctx.createRadialGradient(-5, -5, 2, 0, 0, 22);
+      hubG.addColorStop(0, '#fef9c3'); hubG.addColorStop(0.42, '#fbbf24'); hubG.addColorStop(0.78, '#b45309'); hubG.addColorStop(1, '#451a03');
+      ctx.fillStyle = hubG; ctx.strokeStyle = '#1c0307'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.arc(0, 0, 21, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#9f1239'; ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fef08a';
+      for (let rv = 0; rv < 8; rv++) {
+        const ra = (rv * Math.PI) / 4;
+        ctx.beginPath(); ctx.arc(Math.cos(ra) * 16.5, Math.sin(ra) * 16.5, 1.4, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+
+      // 4. Four Level Gimbal-Mounted Ornate Parisian Balcony Stepping Platforms (Always Level & Physically Engineered!)
+      for (let bi = 0; bi < 4; bi++) {
+        const a = ang0 + bi * (Math.PI * 0.5);
+        const bx = px + Math.cos(a) * (r * 0.76);
+        const by = py + Math.sin(a) * (r * 0.76);
+        const bw = 78;
+        // Curved wrought-iron gimbal suspension yoke & brass pivot pin
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.moveTo(bx - 16, by - 5); ctx.quadraticCurveTo(bx, by - 14, bx + 16, by - 5); ctx.stroke();
+        ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.arc(bx, by - 9, 4.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Carved mahogany & wrought-iron balcony step deck with decorative scrolled under-brackets
+        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(bx - bw * 0.36, by + 7); ctx.quadraticCurveTo(bx - bw * 0.2, by + 14, bx, by + 7); ctx.quadraticCurveTo(bx + bw * 0.2, by + 14, bx + bw * 0.36, by + 7); ctx.stroke();
+        const plG = ctx.createLinearGradient(bx - bw * 0.5, by - 8, bx - bw * 0.5, by + 8);
+        plG.addColorStop(0, '#d97706'); plG.addColorStop(0.35, '#92400e'); plG.addColorStop(1, '#451a03');
+        ctx.fillStyle = plG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.roundRect(bx - bw * 0.5, by - 8, bw, 15, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(254, 240, 138, 0.38)'; ctx.fillRect(bx - bw * 0.5 + 4, by - 6, bw - 8, 2.2);
+        // Tiny warm glowing brass corner lanterns on each platform
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath(); ctx.arc(bx - bw * 0.5 + 5, by - 1, 2.2, 0, Math.PI * 2); ctx.arc(bx + bw * 0.5 - 5, by - 1, 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'paris_awning_spring') {
+      // Tensioned Burgundy-and-Cream Striped Parisian Patisserie Awning with Scrolled Wrought-Iron Brackets!
+      const flex = p.bounceAnim ? Math.sin(p.bounceAnim * Math.PI) * 9 : 0;
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+      for (const bx of [12, p.w - 12]) {
+        ctx.beginPath(); ctx.moveTo(bx, 12); ctx.lineTo(bx, 32); ctx.moveTo(bx, 28); ctx.quadraticCurveTo(bx + (bx < p.w * 0.5 ? 14 : -14), 22, bx + (bx < p.w * 0.5 ? 20 : -20), 12); ctx.stroke();
+      }
+      const stripes = 6;
+      const sw = p.w / stripes;
+      for (let s = 0; s < stripes; s++) {
+        const sx = s * sw;
+        const midDip = Math.sin(((s + 0.5) / stripes) * Math.PI) * flex;
+        ctx.fillStyle = s % 2 === 0 ? '#9f1239' : '#fffbeb';
+        ctx.strokeStyle = '#4c0519'; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(sx, 2 + midDip * 0.6);
+        ctx.lineTo(sx + sw, 2 + midDip * 0.6);
+        ctx.lineTo(sx + sw, 18 + midDip);
+        ctx.arc(sx + sw * 0.5, 18 + midDip, sw * 0.5, 0, Math.PI);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.moveTo(2, 3); ctx.quadraticCurveTo(p.w * 0.5, 3 + flex * 0.7, p.w - 2, 3); ctx.stroke();
+      const chev = Math.sin(time * 5.2 + p.x) * 2;
+      ctx.strokeStyle = 'rgba(254, 240, 138, 0.78)'; ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(p.w * 0.5 - 7, -6 + chev); ctx.lineTo(p.w * 0.5, -12 + chev); ctx.lineTo(p.w * 0.5 + 7, -6 + chev);
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'paris_chimney_updraft') {
+      // Authentic Parisian Brick & Stone Chimney Stack with Terracotta Mitrons & Organic Rising Warm-Air Plumes (NO box!)
+      const isActive = !!p.updraftActive;
+      const isWarn = !!p.updraftWarn;
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+      ctx.save();
+      const chG = ctx.createLinearGradient(cx - 34, baseY - 38, cx + 34, baseY);
+      chG.addColorStop(0, '#c2410c'); chG.addColorStop(0.45, '#9a3412'); chG.addColorStop(1, '#431407');
+      ctx.fillStyle = chG; ctx.strokeStyle = '#290d04'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(cx - 34, baseY - 32, 68, 34, [3, 3, 0, 0]); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#e7d8c5'; ctx.strokeStyle = '#443527'; ctx.lineWidth = 1.4;
+      ctx.fillRect(cx - 38, baseY - 36, 76, 6); ctx.strokeRect(cx - 38, baseY - 36, 76, 6);
+      for (const ox of [-20, 0, 20]) {
+        const potG = ctx.createLinearGradient(cx + ox - 7, baseY - 54, cx + ox + 7, baseY - 36);
+        potG.addColorStop(0, '#ea580c'); potG.addColorStop(0.5, '#c2410c'); potG.addColorStop(1, '#7c2d12');
+        ctx.fillStyle = potG; ctx.strokeStyle = '#290d04'; ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(cx + ox - 7, baseY - 36); ctx.lineTo(cx + ox - 5, baseY - 54);
+        ctx.lineTo(cx + ox + 5, baseY - 54); ctx.lineTo(cx + ox + 7, baseY - 36);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        if (isWarn || isActive) {
+          ctx.fillStyle = isActive ? '#fef08a' : '#fb923c';
+          ctx.beginPath(); ctx.ellipse(cx + ox, baseY - 54, 4.5, 1.8, 0, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      if (isWarn || isActive) {
+        const riseH = p.h - 56;
+        ctx.lineCap = 'round';
+        const ribbonCount = isActive ? 5 : 2;
+        for (let r = 0; r < ribbonCount; r++) {
+          const frac = ((time * (isActive ? 1.55 : 0.7) + r * 0.21) % 1);
+          const fade = Math.sin(frac * Math.PI);
+          const rx = cx + (r - (ribbonCount - 1) * 0.5) * 14 + Math.sin(time * 4 + r * 1.7) * 6;
+          const ry0 = baseY - 54 - frac * (riseH * 0.78);
+          const len = isActive ? 48 : 22;
+          ctx.strokeStyle = isActive
+            ? `rgba(254, 243, 199, ${(0.62 * fade).toFixed(2)})`
+            : `rgba(253, 186, 116, ${(0.40 * fade).toFixed(2)})`;
+          ctx.lineWidth = isActive ? 2.6 : 1.6;
+          ctx.beginPath();
+          ctx.moveTo(rx, ry0);
+          ctx.bezierCurveTo(rx - 8, ry0 - len * 0.35, rx + 8, ry0 - len * 0.7, rx, ry0 - len);
+          ctx.stroke();
+          if (isActive && fade > 0.25) {
+            ctx.fillStyle = `rgba(254, 240, 138, ${(0.78 * fade).toFixed(2)})`;
+            ctx.beginPath(); ctx.arc(rx + Math.cos(time * 7 + r) * 5, ry0 - len * 0.6, 2.0, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'paris_bridge_crank') {
+      // Ornate Haussmannian Cast-Iron Street-Post Ratchet Crank with Glowing Parisian Glass Lamp & Brass Wheel!
+      const spin = (p.spinAnim || 0) * Math.PI * 2.5;
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+      ctx.save();
+      const postG = ctx.createLinearGradient(cx - 14, baseY - 40, cx + 14, baseY);
+      postG.addColorStop(0, '#115e59'); postG.addColorStop(0.5, '#134e4a'); postG.addColorStop(1, '#042f2e');
+      ctx.fillStyle = postG; ctx.strokeStyle = '#022c22'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(cx - 13, baseY - 38, 26, 38, [5, 5, 2, 2]); ctx.fill(); ctx.stroke();
+      const gCol = p.opened ? 'rgba(74, 222, 128, 0.85)' : 'rgba(56, 189, 248, 0.85)';
+      const lGlow = ctx.createRadialGradient(cx, baseY - 19, 2, cx, baseY - 19, 16);
+      lGlow.addColorStop(0, gCol); lGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = lGlow; ctx.beginPath(); ctx.arc(cx, baseY - 19, 16, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = p.opened ? '#4ade80' : '#38bdf8'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(cx, baseY - 19, 5.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.save();
+      ctx.translate(cx, py + 16);
+      ctx.rotate(spin);
+      ctx.strokeStyle = p.opened ? '#4ade80' : '#fbbf24'; ctx.lineWidth = 3.8;
+      ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#92400e'; ctx.lineWidth = 2.4;
+      for (let s = 0; s < 6; s++) {
+        const a = s * (Math.PI / 3);
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 19, Math.sin(a) * 19); ctx.stroke();
+        ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(Math.cos(a) * 19, Math.sin(a) * 19, 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.arc(0, 0, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'paris_balcony_drawbridge') {
+      // Counterweighted Ornate Wrought-Iron Parisian Balcony Footbridge with Suspension Chain & Scrollwork Rail!
+      const anim = p.bridgeAnim !== undefined ? p.bridgeAnim : (p.lowered ? 1 : 0);
+      const liftAngle = -(1 - anim) * 1.18;
+      ctx.save();
+      ctx.fillStyle = '#e7d8c5'; ctx.strokeStyle = '#443527'; ctx.lineWidth = 1.5;
+      ctx.fillRect(px - 8, py - 56, 14, 72); ctx.strokeRect(px - 8, py - 56, 14, 72);
+      ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(px - 1, py - 58, 4.5, 0, Math.PI * 2); ctx.fill();
+
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(liftAngle);
+      const brG = ctx.createLinearGradient(0, 0, 0, p.h);
+      brG.addColorStop(0, '#334155'); brG.addColorStop(0.5, '#1e293b'); brG.addColorStop(1, '#090d16');
+      ctx.fillStyle = brG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(0, 0, p.w, p.h, 3); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.moveTo(4, -18); ctx.lineTo(p.w - 4, -18); ctx.stroke();
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.1;
+      for (let rx = 18; rx < p.w - 14; rx += 26) {
+        ctx.beginPath(); ctx.moveTo(rx, 0); ctx.lineTo(rx, -18); ctx.stroke();
+        ctx.beginPath(); ctx.arc(rx + 13, -9, 5.2, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.restore();
+
+      const ax = px + Math.cos(liftAngle) * (p.w * 0.62);
+      const ay = py + Math.sin(liftAngle) * (p.w * 0.62);
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2.2; ctx.setLineDash([5, 3]);
+      ctx.beginPath(); ctx.moveTo(px - 1, py - 52); ctx.lineTo(ax, ay); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'paris_laundry_line') {
+      // Catenary Parisian Rooftop Clothesline with Fluttering Breton Shirts, Aprons & Red Berets!
+      const sag = 5 + (p.ropeSag || 0);
+      const midX = px + p.w * 0.5;
+      const midY = py + 4 + sag;
+      ctx.save();
+      const items = Math.max(3, Math.floor(p.w / 58));
+      for (let k = 0; k < items; k++) {
+        const u = (k + 0.5) / items;
+        const gx = px + u * p.w;
+        const gy = py + 5 + 4 * u * (1 - u) * sag;
+        const flutter = Math.sin(time * 4.2 + k * 1.4) * 3.5;
+        ctx.save();
+        ctx.translate(gx, gy);
+        ctx.rotate(flutter * 0.035);
+        if (k % 3 === 0) {
+          ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.roundRect(-11, 2, 22, 22, 3); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#1e3a8a';
+          for (let sy = 6; sy <= 20; sy += 5) ctx.fillRect(-10, sy, 20, 2.2);
+        } else if (k % 3 === 1) {
+          ctx.fillStyle = '#be123c'; ctx.strokeStyle = '#4c0519'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.ellipse(0, 11, 12, 7.5, 0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        } else {
+          ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.roundRect(-9, 2, 18, 24, 3); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#9f1239'; ctx.fillRect(-5, 13, 10, 6);
+        }
+        ctx.fillStyle = '#d97706'; ctx.fillRect(-2, -2, 4, 6);
+        ctx.restore();
+      }
+      ctx.strokeStyle = '#451a03'; ctx.lineWidth = 4.6;
+      ctx.beginPath(); ctx.moveTo(px, py + 4); ctx.quadraticCurveTo(midX, midY + sag * 0.5, px + p.w, py + 4); ctx.stroke();
+      ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.moveTo(px, py + 4); ctx.quadraticCurveTo(midX, midY + sag * 0.5, px + p.w, py + 4); ctx.stroke();
+      for (const sx of [px, px + p.w]) {
+        ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.3;
+        ctx.fillRect(sx - 3.5, py - 10, 7, 26); ctx.strokeRect(sx - 3.5, py - 10, 7, 26);
+        ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(sx, py - 11, 4.0, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    // ===== STAGE 23: MARRAKECH SOUK & KASBAH ROOFTOPS PLATFORMS =====
+    if (p.type === 'kasbah_terrace') {
+      // Authentic Marrakech Red-Ochre Pise Kasbah Masonry, Polychrome 8-Point Star Zellij Frieze,
+      // Almohad Blind Horseshoe Niches & Carved Atlas Cedarwood Corbels!
+      const isGround = p.h >= 70;
+      ctx.save();
+      const bodyG = ctx.createLinearGradient(px, py, px, py + p.h);
+      bodyG.addColorStop(0.00, '#cf6a46');
+      bodyG.addColorStop(0.20, '#b85333');
+      bodyG.addColorStop(0.65, '#913b22');
+      bodyG.addColorStop(1.00, '#592012');
+      ctx.fillStyle = bodyG;
+      ctx.beginPath();
+      if (isGround) ctx.rect(px, py, p.w, p.h);
+      else ctx.roundRect(px, py, p.w, p.h, [4, 4, 7, 7]);
+      ctx.fill();
+      ctx.strokeStyle = '#3f170c';
+      ctx.lineWidth = 1.7;
+      ctx.stroke();
+
+      // Rammed-earth pise horizontal courses, putlog holes & weathered Tadelakt plaster patches
+      ctx.strokeStyle = 'rgba(58, 20, 10, 0.26)';
+      ctx.lineWidth = 1.0;
+      for (let ry = py + 28; ry < py + p.h - 6; ry += 18) {
+        ctx.beginPath(); ctx.moveTo(px + 2, ry); ctx.lineTo(px + p.w - 2, ry); ctx.stroke();
+      }
+      for (let sx = px + 18; sx < px + p.w - 22; sx += 52) {
+        ctx.fillStyle = 'rgba(254, 243, 199, 0.12)';
+        ctx.fillRect(sx, py + 31, 18, 4.5);
+        ctx.fillStyle = 'rgba(42, 13, 6, 0.35)';
+        ctx.fillRect(sx + 26, py + 32, 4, 4); // traditional pise formwork putlog hole!
+      }
+
+      // Cream sandstone corner quoins on left & right edges
+      ctx.fillStyle = 'rgba(254, 243, 199, 0.24)';
+      for (let qy = py + 24; qy < py + p.h - 10; qy += 18) {
+        ctx.fillRect(px + 1.5, qy, 6, 9);
+        ctx.fillRect(px + p.w - 7.5, qy + 6, 6, 9);
+      }
+
+      // Recessed Almohad Blind Horseshoe Niches along tall ground Kasbah walls
+      if (isGround && p.w >= 180 && p.h >= 85) {
+        for (let nx = px + 54; nx <= px + p.w - 54; nx += 128) {
+          const ny = py + 48;
+          ctx.fillStyle = 'rgba(56, 18, 9, 0.38)';
+          ctx.strokeStyle = 'rgba(254, 215, 170, 0.32)';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.arc(nx, ny, 14, Math.PI * 0.88, Math.PI * 0.12, false);
+          ctx.lineTo(nx + 13, Math.min(py + p.h - 4, ny + 44));
+          ctx.lineTo(nx - 13, Math.min(py + p.h - 4, ny + 44));
+          ctx.closePath();
+          ctx.fill(); ctx.stroke();
+        }
+      }
+
+      // Top Sun-Baked Terracotta Bejmat Tile Coping Ledge with Individual Tile Joints
+      const capG = ctx.createLinearGradient(px, py, px, py + 9);
+      capG.addColorStop(0, '#fae1b8');
+      capG.addColorStop(0.55, '#e29e5f');
+      capG.addColorStop(1, '#b46232');
+      ctx.fillStyle = capG;
+      ctx.fillRect(px + 1, py + 0.5, p.w - 2, 8.5);
+      ctx.strokeStyle = 'rgba(92, 36, 16, 0.45)';
+      ctx.lineWidth = 0.9;
+      for (let tx = px + 14; tx < px + p.w - 6; tx += 14) {
+        ctx.beginPath(); ctx.moveTo(tx, py + 0.5); ctx.lineTo(tx, py + 9); ctx.stroke();
+      }
+      ctx.strokeStyle = '#5c2410';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(px, py + 9); ctx.lineTo(px + p.w, py + 9); ctx.stroke();
+
+      // Hand-Laid Polychrome 8-Pointed Khatam Star & Cobalt Cross Zellij Mosaic Frieze!
+      const zY = py + 9.5;
+      const zH = 12.5;
+      ctx.fillStyle = '#09353c';
+      ctx.fillRect(px + 1, zY, p.w - 2, zH);
+      const zCols = ['#14b8a6', '#f59e0b', '#2563eb', '#10b981'];
+      for (let zx = px + 10, k = 0; zx <= px + p.w - 10; zx += 18, k++) {
+        const cy = zY + zH * 0.5;
+        // Ivory 8-pointed Khatam star
+        ctx.fillStyle = '#fef3c7';
+        ctx.fillRect(zx - 3.6, cy - 3.6, 7.2, 7.2);
+        ctx.save();
+        ctx.translate(zx, cy);
+        ctx.rotate(Math.PI * 0.25);
+        ctx.fillRect(-3.6, -3.6, 7.2, 7.2);
+        ctx.restore();
+        // Jewel center
+        ctx.fillStyle = zCols[k % zCols.length];
+        ctx.beginPath(); ctx.arc(zx, cy, 2.1, 0, Math.PI * 2); ctx.fill();
+        // Interlocking turquoise/gold diamond between stars
+        if (zx + 9 < px + p.w - 6) {
+          ctx.fillStyle = (k % 2 === 0) ? '#38bdf8' : '#fbbf24';
+          ctx.beginPath();
+          ctx.moveTo(zx + 9, cy - 2.6); ctx.lineTo(zx + 11.6, cy);
+          ctx.lineTo(zx + 9, cy + 2.6); ctx.lineTo(zx + 6.4, cy);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.05;
+      ctx.beginPath();
+      ctx.moveTo(px + 1, zY); ctx.lineTo(px + p.w - 1, zY);
+      ctx.moveTo(px + 1, zY + zH); ctx.lineTo(px + p.w - 1, zY + zH);
+      ctx.stroke();
+
+      // Carved Atlas Cedarwood Corbel Brackets & Brass Studs under Elevated Terraces
+      if (!isGround && p.w >= 90) {
+        for (let bx = px + 16; bx <= px + p.w - 26; bx += 38) {
+          ctx.fillStyle = '#5c2810';
+          ctx.strokeStyle = '#291003';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.moveTo(bx, py + p.h);
+          ctx.lineTo(bx + 12, py + p.h);
+          ctx.quadraticCurveTo(bx + 10, py + p.h + 7, bx + 6, py + p.h + 8);
+          ctx.quadraticCurveTo(bx + 2, py + p.h + 7, bx, py + p.h);
+          ctx.closePath();
+          ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath(); ctx.arc(bx + 6, py + p.h - 3, 1.4, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'souk_carpet_bounce') {
+      // Tensioned Hand-Woven Amazigh Berber Kilim Canopy over Turned Cedar Posts with Brass Finials & Silk Tassels!
+      const flex = (p.bounceAnim || 0) * 12;
+      ctx.save();
+      // Turned Atlas cedarwood side support posts + carved rings + brass Jamour finials
+      for (const sx of [px + 5, px + p.w - 5]) {
+        const pG = ctx.createLinearGradient(sx - 4, py, sx + 4, py);
+        pG.addColorStop(0, '#92400e'); pG.addColorStop(0.5, '#b45309'); pG.addColorStop(1, '#451a03');
+        ctx.fillStyle = pG; ctx.strokeStyle = '#291003'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.roundRect(sx - 4, py - 5, 8, 40, 2.5); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(sx - 4.5, py + 6, 9, 2.2);
+        ctx.fillRect(sx - 4.5, py + 22, 9, 2.2);
+        // Brass orb + mini finial spike
+        ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.arc(sx, py - 9, 5.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(sx, py - 15.5, 2.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+
+      // Richly woven Crimson, Saffron & Indigo Berber Kilim Body with elastic bounce sag
+      const rG = ctx.createLinearGradient(px, py, px, py + 20 + flex);
+      rG.addColorStop(0, '#e11d48');
+      rG.addColorStop(0.45, '#be123c');
+      rG.addColorStop(1, '#7f1d1d');
+      ctx.fillStyle = rG;
+      ctx.strokeStyle = '#450a0a';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(px + 5, py + 2);
+      ctx.quadraticCurveTo(px + p.w * 0.5, py + 6 + flex * 1.15, px + p.w - 5, py + 2);
+      ctx.lineTo(px + p.w - 7, py + 18 + flex * 0.55);
+      ctx.quadraticCurveTo(px + p.w * 0.5, py + 23 + flex * 1.25, px + 7, py + 18 + flex * 0.55);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      // Golden-saffron & ivory woven top/bottom kilim selvedge borders
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(px + 7, py + 4.5);
+      ctx.quadraticCurveTo(px + p.w * 0.5, py + 8.5 + flex * 1.12, px + p.w - 7, py + 4.5);
+      ctx.moveTo(px + 8, py + 15.5 + flex * 0.5);
+      ctx.quadraticCurveTo(px + p.w * 0.5, py + 20.5 + flex * 1.2, px + p.w - 8, py + 15.5 + flex * 0.5);
+      ctx.stroke();
+
+      // Authentic Amazigh Berber Stepped Lozenges & Turquoise/Indigo Medallions
+      const count = Math.max(3, Math.floor((p.w - 26) / 24));
+      for (let i = 0; i < count; i++) {
+        const u = (i + 0.5) / count;
+        const dx = px + 13 + u * (p.w - 26);
+        const dy = py + 11 + 4 * u * (1 - u) * flex * 1.15;
+        ctx.fillStyle = '#fef3c7';
+        ctx.beginPath();
+        ctx.moveTo(dx, dy - 5); ctx.lineTo(dx + 7.5, dy);
+        ctx.lineTo(dx, dy + 5); ctx.lineTo(dx - 7.5, dy);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = (i % 2 === 0) ? '#1e3a8a' : '#0d9488';
+        ctx.beginPath();
+        ctx.moveTo(dx, dy - 2.8); ctx.lineTo(dx + 4, dy);
+        ctx.lineTo(dx, dy + 2.8); ctx.lineTo(dx - 4, dy);
+        ctx.closePath(); ctx.fill();
+      }
+
+      // Swinging Two-Tone Silk & Wool Knotted Fringe Tassels
+      for (let tx = px + 10, k = 0; tx <= px + p.w - 10; tx += 10, k++) {
+        const u = (tx - px) / p.w;
+        const ty = py + 18 + 4 * u * (1 - u) * flex * 1.2;
+        const sw = Math.sin(time * 4.8 + tx * 0.12) * 2.4;
+        ctx.strokeStyle = (k % 2 === 0) ? '#fef08a' : '#fda4af';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(tx + sw, ty + 8.5); ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath(); ctx.arc(tx, ty + 0.5, 1.3, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'morocco_lantern_swing') {
+      // Museum-Grade Swinging Pierced-Brass & Stained-Glass Moroccan Fanous Chandelier + Zellij Cedar Deck!
+      const ropeLen = p.ropeLen || 260;
+      const ang = (p.swingAngle !== undefined) ? p.swingAngle : Math.sin(time * (p.swingSpeed || 1.55) + (p.phase || 0)) * (p.swingAmp || 0.46);
+      const bobX = px + Math.sin(ang) * ropeLen;
+      const bobY = py + Math.cos(ang) * ropeLen;
+      const deckX = (p.platX !== undefined) ? (px + (p.platX - p.x)) : (bobX - p.w * 0.5);
+      const deckY = (p.platY !== undefined) ? (py + (p.platY - p.y)) : bobY;
+      ctx.save();
+
+      // Overhead Carved Cedar & Zellij Rosette Ceiling Mount
+      ctx.fillStyle = '#5c2810'; ctx.strokeStyle = '#291003'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(px - 24, py - 11, 48, 13, 4); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#14b8a6';
+      ctx.fillRect(px - 18, py - 8, 36, 5);
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(px, py + 3, 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      // Forged Hammered-Brass Suspension Chain from Ceiling Ring to Lantern Finial
+      const lanternTopX = px + Math.sin(ang) * (ropeLen - 58);
+      const lanternTopY = py + Math.cos(ang) * (ropeLen - 58);
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 4.6;
+      ctx.beginPath(); ctx.moveTo(px, py + 5); ctx.lineTo(lanternTopX, lanternTopY); ctx.stroke();
+      ctx.strokeStyle = '#fde047'; ctx.lineWidth = 2.0; ctx.setLineDash([6, 4]);
+      ctx.beginPath(); ctx.moveTo(px, py + 5); ctx.lineTo(lanternTopX, lanternTopY); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Grand Pierced-Brass & Multi-Jewel Stained-Glass Fanous Chandelier
+      const lanCx = deckX + p.w * 0.5;
+      const lanCy = deckY - 30;
+      const glow = ctx.createRadialGradient(lanCx, lanCy, 4, lanCx, lanCy, 56);
+      glow.addColorStop(0.00, 'rgba(255, 251, 235, 0.72)');
+      glow.addColorStop(0.45, 'rgba(251, 191, 36, 0.28)');
+      glow.addColorStop(1.00, 'rgba(245, 158, 11, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(lanCx, lanCy, 56, 0, Math.PI * 2); ctx.fill();
+
+      // Pierced onion cupola dome + top brass ring
+      ctx.fillStyle = '#d97706'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(lanCx, lanCy - 28, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(lanCx, lanCy - 25);
+      ctx.bezierCurveTo(lanCx + 15, lanCy - 18, lanCx + 19, lanCy - 11, lanCx + 18, lanCy - 6);
+      ctx.lineTo(lanCx - 18, lanCy - 6);
+      ctx.bezierCurveTo(lanCx - 19, lanCy - 11, lanCx - 15, lanCy - 18, lanCx, lanCy - 25);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Tiny glowing filigree cutouts in brass dome
+      ctx.fillStyle = '#fef9c3';
+      for (const ox of [-8, 0, 8]) {
+        ctx.beginPath(); ctx.arc(lanCx + ox, lanCy - 12, 1.5, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // 3-Pane Stained-Glass Hexagonal Body (Turquoise Left, Molten-Gold Center, Ruby Right!)
+      const panes = [
+        { x0: -17, x1: -6, b0: -13, b1: -5, col: '#2dd4bf' },
+        { x0: -6,  x1: 6,  b0: -5,  b1: 5,  col: '#fef08a' },
+        { x0: 6,   x1: 17, b0: 5,   b1: 13, col: '#fb7185' }
+      ];
+      for (const pn of panes) {
+        ctx.fillStyle = pn.col; ctx.strokeStyle = '#5c2810'; ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(lanCx + pn.x0, lanCy - 6);
+        ctx.lineTo(lanCx + pn.x1, lanCy - 6);
+        ctx.lineTo(lanCx + pn.b1, lanCy + 14);
+        ctx.lineTo(lanCx + pn.b0, lanCy + 14);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+      }
+      // Carved Moorish arch tracery across center glass pane + lower brass cone
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.arc(lanCx, lanCy + 2, 5, Math.PI, 0);
+      ctx.moveTo(lanCx - 15, lanCy + 4); ctx.lineTo(lanCx + 15, lanCy + 4);
+      ctx.stroke();
+      ctx.fillStyle = '#b45309'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(lanCx - 13, lanCy + 14); ctx.lineTo(lanCx + 13, lanCy + 14);
+      ctx.lineTo(lanCx, lanCy + 22); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // Scrollwork Brass Struts Anchoring the Level Stepping Deck
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(lanCx - 13, lanCy + 14); ctx.quadraticCurveTo(deckX + 18, deckY - 8, deckX + 12, deckY + 2);
+      ctx.moveTo(lanCx + 13, lanCy + 14); ctx.quadraticCurveTo(deckX + p.w - 18, deckY - 8, deckX + p.w - 12, deckY + 2);
+      ctx.stroke();
+
+      // Cushioned Royal-Crimson Velvet, Carved Cedarwood & Zellij-Inlaid Stepping Platform
+      ctx.fillStyle = '#be123c';
+      ctx.beginPath(); ctx.roundRect(deckX + 4, deckY - 2.5, p.w - 8, 5, 2.5); ctx.fill();
+      const dG = ctx.createLinearGradient(deckX, deckY + 1, deckX, deckY + p.h);
+      dG.addColorStop(0, '#b45309'); dG.addColorStop(0.5, '#78350f'); dG.addColorStop(1, '#3b1506');
+      ctx.fillStyle = dG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.7;
+      ctx.beginPath(); ctx.roundRect(deckX, deckY + 1, p.w, p.h - 1, 5); ctx.fill(); ctx.stroke();
+      // Polychrome Zellij diamond inlay strip along deck edge
+      ctx.fillStyle = '#0f766e';
+      ctx.fillRect(deckX + 8, deckY + 5.5, p.w - 16, 5.5);
+      for (let ix = deckX + 15, k = 0; ix <= deckX + p.w - 15; ix += 14, k++) {
+        ctx.fillStyle = (k % 2 === 0) ? '#fef3c7' : '#38bdf8';
+        ctx.beginPath();
+        ctx.moveTo(ix, deckY + 5.8); ctx.lineTo(ix + 3.2, deckY + 8.2);
+        ctx.lineTo(ix, deckY + 10.6); ctx.lineTo(ix - 3.2, deckY + 8.2);
+        ctx.closePath(); ctx.fill();
+      }
+      // Dangling mini brass teardrops under deck corners
+      ctx.fillStyle = '#fbbf24';
+      for (const bx0 of [deckX + 10, deckX + p.w * 0.5, deckX + p.w - 10]) {
+        ctx.beginPath(); ctx.arc(bx0, deckY + p.h + 3, 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'morocco_magic_carpet') {
+      // Royal Marrakech Silk & Gold Brocade Flying Carpet with Khatam Star Medallion, Stardust Trail & Fluttering Tassels!
+      const wave1 = Math.sin(time * 5.6 + (p.phase || 0)) * 2.8;
+      const wave2 = Math.cos(time * 5.6 + (p.phase || 0) + 1.2) * 2.4;
+      ctx.save();
+
+      // Mystical Golden Desert-Magic Glow & Sparkling Motes Underneath
+      const aura = ctx.createRadialGradient(px + p.w * 0.5, py + 14, 6, px + p.w * 0.5, py + 14, p.w * 0.62);
+      aura.addColorStop(0, 'rgba(253, 224, 71, 0.44)');
+      aura.addColorStop(0.6, 'rgba(245, 158, 11, 0.16)');
+      aura.addColorStop(1, 'rgba(245, 158, 11, 0)');
+      ctx.fillStyle = aura;
+      ctx.beginPath(); ctx.ellipse(px + p.w * 0.5, py + 15, p.w * 0.62, 17, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(254, 249, 195, 0.80)';
+      for (let sp = 0; sp < 5; sp++) {
+        const sx0 = px + 14 + ((sp * 27 + time * 38) % Math.max(20, p.w - 28));
+        const sy0 = py + p.h + 3 + Math.sin(time * 7 + sp * 2) * 4;
+        ctx.beginPath(); ctx.arc(sx0, sy0, 1.6, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Undulating S-Curve Royal Crimson & Majorelle-Indigo Brocade Carpet Body
+      const cG = ctx.createLinearGradient(px, py, px + p.w, py + p.h);
+      cG.addColorStop(0.00, '#881337');
+      cG.addColorStop(0.28, '#be123c');
+      cG.addColorStop(0.50, '#e11d48');
+      cG.addColorStop(0.72, '#1e3a8a');
+      cG.addColorStop(1.00, '#881337');
+      ctx.fillStyle = cG;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(px + 2, py + 4 + wave1 * 0.5);
+      ctx.bezierCurveTo(px + p.w * 0.33, py - 2 - wave1, px + p.w * 0.66, py + 7 + wave2, px + p.w - 2, py + 3 - wave2 * 0.5);
+      ctx.lineTo(px + p.w - 4, py + p.h - 2 - wave2 * 0.5);
+      ctx.bezierCurveTo(px + p.w * 0.66, py + p.h + 4 + wave2, px + p.w * 0.33, py + p.h - 4 - wave1, px + 4, py + p.h - 1 + wave1 * 0.5);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      // Inner gold-threaded brocade border & emerald corner spandrels
+      ctx.strokeStyle = 'rgba(254, 243, 199, 0.72)';
+      ctx.lineWidth = 1.0;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(px + 8, py + 6.5);
+      ctx.lineTo(px + p.w - 8, py + 6.5);
+      ctx.moveTo(px + 8, py + p.h - 4.5);
+      ctx.lineTo(px + p.w - 8, py + p.h - 4.5);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Central Golden 8-Pointed Khatam Star Medallion & Flanking Turquoise Lozenges
+      const mCx = px + p.w * 0.5;
+      const mCy = py + p.h * 0.5;
+      ctx.fillStyle = '#fde68a';
+      ctx.fillRect(mCx - 5.5, mCy - 5.5, 11, 11);
+      ctx.save();
+      ctx.translate(mCx, mCy);
+      ctx.rotate(Math.PI * 0.25);
+      ctx.fillRect(-5.5, -5.5, 11, 11);
+      ctx.restore();
+      ctx.fillStyle = '#0d9488';
+      ctx.beginPath(); ctx.arc(mCx, mCy, 3.2, 0, Math.PI * 2); ctx.fill();
+      for (const off of [-26, 26]) {
+        if (Math.abs(off) < p.w * 0.4) {
+          ctx.fillStyle = '#38bdf8';
+          ctx.beginPath();
+          ctx.moveTo(mCx + off, mCy - 3.5); ctx.lineTo(mCx + off + 5, mCy);
+          ctx.lineTo(mCx + off, mCy + 3.5); ctx.lineTo(mCx + off - 5, mCy);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+
+      // Multi-Strand Fluttering Golden Silk Corner Tassels!
+      for (const side of [-1, 1]) {
+        const tx = side < 0 ? px + 3 : px + p.w - 3;
+        const sw = Math.sin(time * 8.2 + side * 1.4) * 4.2;
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath(); ctx.arc(tx, py + 9, 2.8, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 1.6;
+        for (const spread of [-2.5, 0, 2.5]) {
+          ctx.beginPath();
+          ctx.moveTo(tx, py + 9);
+          ctx.quadraticCurveTo(tx + side * 8, py + 12 + sw * 0.7 + spread, tx + side * 15, py + 16 + sw + spread * 1.3);
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'morocco_cedar_lever') {
+      // Zellij-Inlaid Marble & Cedar Pedestal + 8-Pointed Pierced-Brass Moorish Star Wheel!
+      const opened = !!p.opened;
+      const spin = (p.spinAnim || 0) * Math.PI * 1.3;
+      const cx = px + p.w * 0.5;
+      const cy = py + 23;
+      ctx.save();
+
+      // Stepped White-Marble & Turquoise-Zellij Pedestal Base
+      ctx.fillStyle = '#fef3c7'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(cx - 18, py + p.h - 11, 36, 11, 3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#0f766e';
+      ctx.fillRect(cx - 14, py + p.h - 8.5, 28, 6);
+      ctx.fillStyle = '#fbbf24';
+      for (const dx of [-8, 0, 8]) {
+        ctx.beginPath(); ctx.arc(cx + dx, py + p.h - 5.5, 1.5, 0, Math.PI * 2); ctx.fill();
+      }
+      // Carved Atlas Cedarwood Horseshoe Pillar
+      const pilG = ctx.createLinearGradient(cx - 9, py + 12, cx + 9, py + p.h - 11);
+      pilG.addColorStop(0, '#b45309'); pilG.addColorStop(0.5, '#78350f'); pilG.addColorStop(1, '#451a03');
+      ctx.fillStyle = pilG; ctx.strokeStyle = '#291003'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(cx - 8.5, py + 12, 17, p.h - 22, [8, 8, 2, 2]); ctx.fill(); ctx.stroke();
+
+      // Rotating 8-Pointed Pierced-Brass Kasbah Star Wheel & Turned Handles
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(opened ? (0.85 + spin) : (-0.85 - spin));
+      ctx.strokeStyle = '#451a03'; ctx.lineWidth = 5.8;
+      ctx.beginPath(); ctx.arc(0, 0, 15.5, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 3.0;
+      ctx.beginPath(); ctx.arc(0, 0, 15.5, 0, Math.PI * 2); ctx.stroke();
+      for (let s = 0; s < 8; s++) {
+        const a = s * Math.PI * 0.25;
+        ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 18.5, Math.sin(a) * 18.5); ctx.stroke();
+        ctx.fillStyle = '#d97706'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.arc(Math.cos(a) * 19, Math.sin(a) * 19, 2.3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+
+      // Center Cabochon Gemstone Status Indicator (Glowing Emerald = Lowered, Glowing Amber = Raised)
+      const gemCol = opened ? '#10b981' : '#f59e0b';
+      const glow = ctx.createRadialGradient(cx, cy, 2, cx, cy, 20);
+      glow.addColorStop(0, opened ? 'rgba(16, 185, 129, 0.62)' : 'rgba(245, 158, 11, 0.52)');
+      glow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(cx, cy, 20, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = gemCol; ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(cx, cy, 6.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(cx - 1.8, cy - 1.8, 1.6, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'morocco_cedar_bridge') {
+      // Monumental Kasbah Bastion Hinge Pier + Carved Atlas Cedarwood & Zellij Marquetry Drawbridge!
+      const anim = Math.max(0, Math.min(1, p.bridgeAnim !== undefined ? p.bridgeAnim : (p.lowered ? 1 : 0)));
+      const liftAngle = -(1 - anim) * 1.18;
+      ctx.save();
+
+      // Left Kasbah Pise Sandstone Bastion Pier with Zellij Band, Merlons & Brass Pulley Wheel
+      const pierG = ctx.createLinearGradient(px - 16, py - 64, px + 2, py + 24);
+      pierG.addColorStop(0, '#d06a45'); pierG.addColorStop(0.55, '#a64429'); pierG.addColorStop(1, '#6c2717');
+      ctx.fillStyle = pierG; ctx.strokeStyle = '#3f170c'; ctx.lineWidth = 1.8;
+      ctx.fillRect(px - 15, py - 62, 18, 86); ctx.strokeRect(px - 15, py - 62, 18, 86);
+      // Stepped merlons crowning the pier
+      ctx.fillStyle = '#d97745';
+      for (const mx of [px - 15, px - 5]) {
+        ctx.beginPath();
+        ctx.moveTo(mx, py - 62); ctx.lineTo(mx + 4, py - 69); ctx.lineTo(mx + 8, py - 62);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      // Turquoise Zellij collar + brass pulley wheel
+      ctx.fillStyle = '#14b8a6';
+      ctx.fillRect(px - 14, py - 48, 16, 6);
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(px - 6, py - 56, 6.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#451a03';
+      ctx.beginPath(); ctx.arc(px - 6, py - 56, 2.2, 0, Math.PI * 2); ctx.fill();
+
+      // Hinged Carved Atlas Cedarwood, Wrought-Iron & Zellij Drawbridge Deck
+      ctx.save();
+      ctx.translate(px, py + 6);
+      ctx.rotate(liftAngle);
+      const bG = ctx.createLinearGradient(0, -6, 0, p.h - 3);
+      bG.addColorStop(0, '#c2631a'); bG.addColorStop(0.45, '#854212'); bG.addColorStop(1, '#451a03');
+      ctx.fillStyle = bG; ctx.strokeStyle = '#291003'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(0, -6, p.w, p.h, 4); ctx.fill(); ctx.stroke();
+
+      // Turquoise & Gold Zellij Marquetry Band + Brass Dome Bosses
+      ctx.fillStyle = '#0f766e';
+      ctx.fillRect(8, -1, p.w - 16, 6);
+      for (let bx = 16, k = 0; bx < p.w - 10; bx += 22, k++) {
+        ctx.fillStyle = (k % 2 === 0) ? '#fbbf24' : '#fef3c7';
+        ctx.beginPath(); ctx.arc(bx, 2, 2.3, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Turned Cedarwood Mashrabiya Low Balustrade Rail along Bridge
+      ctx.strokeStyle = '#92400e'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.moveTo(14, -14); ctx.lineTo(p.w - 14, -14); ctx.stroke();
+      for (let rx = 18; rx <= p.w - 16; rx += 26) {
+        ctx.strokeStyle = '#78350f'; ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.moveTo(rx, -6); ctx.lineTo(rx, -14); ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath(); ctx.arc(rx, -15, 2.0, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+
+      // Taut Forged-Brass Hoisting Chain from Pulley Crown to Bridge Shackle
+      const ax = px + Math.cos(liftAngle) * (p.w * 0.62);
+      const ay = py + 6 + Math.sin(liftAngle) * (p.w * 0.62);
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 3.6;
+      ctx.beginPath(); ctx.moveTo(px - 6, py - 56); ctx.lineTo(ax, ay - 4); ctx.stroke();
+      ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.8; ctx.setLineDash([5, 3]);
+      ctx.beginPath(); ctx.moveTo(px - 6, py - 56); ctx.lineTo(ax, ay - 4); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'morocco_fountain_geyser') {
+      // Sculpted Octagonal Polychrome Zellij & Tiered White-Marble Riad Fountain + Sparkling Turquoise Water Plume!
+      const baseY = py + p.h;
+      const cx = px + p.w * 0.5;
+      const active = !!p.geyserActive;
+      const warn = !!p.geyserWarn;
+      ctx.save();
+
+      // 1. Rising Buoyant Turquoise, Aquamarine & Pearl-Foam Water Column when Active!
+      if (active) {
+        const pulse = Math.sin(time * 16) * 4;
+        // Soft refreshing mist halo around erupting water column
+        const mistG = ctx.createRadialGradient(cx, py + p.h * 0.4, 8, cx, py + p.h * 0.4, 48);
+        mistG.addColorStop(0, 'rgba(153, 246, 228, 0.30)');
+        mistG.addColorStop(1, 'rgba(153, 246, 228, 0)');
+        ctx.fillStyle = mistG;
+        ctx.fillRect(cx - 48, py - 16, 96, p.h);
+
+        const jetG = ctx.createLinearGradient(cx, baseY - 28, cx, py);
+        jetG.addColorStop(0.00, 'rgba(13, 148, 136, 0.92)');
+        jetG.addColorStop(0.45, 'rgba(45, 212, 191, 0.84)');
+        jetG.addColorStop(0.82, 'rgba(165, 243, 252, 0.88)');
+        jetG.addColorStop(1.00, 'rgba(255, 255, 255, 0.95)');
+        ctx.fillStyle = jetG;
+        ctx.beginPath();
+        ctx.moveTo(cx - 17, baseY - 28);
+        ctx.quadraticCurveTo(cx - 27 - pulse * 0.4, py + p.h * 0.45, cx - 23, py + 12);
+        ctx.quadraticCurveTo(cx, py - 10 + pulse * 0.5, cx + 23, py + 12);
+        ctx.quadraticCurveTo(cx + 27 + pulse * 0.4, py + p.h * 0.45, cx + 17, baseY - 28);
+        ctx.closePath();
+        ctx.fill();
+
+        // Sparkling white upward current ribbons & frothy crown crest
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.82)';
+        ctx.lineWidth = 2.1;
+        ctx.lineCap = 'round';
+        for (let s = -1; s <= 1; s++) {
+          const offset = ((time * 250 + (s + 2) * 55) % Math.max(24, p.h - 48));
+          const sy = baseY - 34 - offset;
+          ctx.beginPath();
+          ctx.moveTo(cx + s * 8.5, sy + 20);
+          ctx.quadraticCurveTo(cx + s * 11, sy + 10, cx + s * 9.5, sy);
+          ctx.stroke();
+        }
+        // Billowing foam crown & glistening airborne droplets
+        ctx.fillStyle = 'rgba(240, 253, 250, 0.94)';
+        for (const [ox, oy, rad] of [[-14, 10, 8], [0, 5, 10], [14, 10, 8]]) {
+          ctx.beginPath(); ctx.arc(cx + ox, py + oy + pulse * 0.3, rad, 0, Math.PI * 2); ctx.fill();
+        }
+        for (let d = 0; d < 7; d++) {
+          const dx = cx + Math.sin(time * 9.5 + d * 1.6) * 28;
+          const dy = py + 10 + Math.cos(time * 7.2 + d * 2.1) * 16;
+          ctx.beginPath(); ctx.arc(dx, dy, 2.8, 0, Math.PI * 2); ctx.fill();
+        }
+      } else if (warn) {
+        // Bubbling pre-eruption turquoise warning froth
+        ctx.fillStyle = 'rgba(94, 234, 212, 0.86)';
+        for (let b = 0; b < 6; b++) {
+          const bx = cx + Math.sin(time * 15 + b * 1.8) * 15;
+          const by = baseY - 32 - ((time * 68 + b * 10) % 24);
+          ctx.beginPath(); ctx.arc(bx, by, 3.6, 0, Math.PI * 2); ctx.fill();
+        }
+      } else {
+        // Gentle idle Riad fountain trickle arc when calm!
+        ctx.strokeStyle = 'rgba(103, 232, 249, 0.72)';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(cx, baseY - 38); ctx.quadraticCurveTo(cx - 9, baseY - 46, cx - 13, baseY - 30);
+        ctx.moveTo(cx, baseY - 38); ctx.quadraticCurveTo(cx + 9, baseY - 46, cx + 13, baseY - 30);
+        ctx.stroke();
+      }
+
+      // 2. Carved White-Marble Lotus Centerpiece Bowl & Brass Pine-Cone Nozzle
+      ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.3;
+      ctx.fillRect(cx - 5.5, baseY - 34, 11, 12); ctx.strokeRect(cx - 5.5, baseY - 34, 11, 12);
+      ctx.beginPath();
+      ctx.moveTo(cx - 17, baseY - 35);
+      ctx.quadraticCurveTo(cx, baseY - 27, cx + 17, baseY - 35);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(cx - 4, baseY - 35); ctx.lineTo(cx, baseY - 43); ctx.lineTo(cx + 4, baseY - 35);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // 3. Octagonal Polychrome Zellij & Stepped Marble Riad Fountain Basin (Flush on Ground)
+      const fG = ctx.createLinearGradient(px + 4, baseY - 24, px + 4, baseY);
+      fG.addColorStop(0, '#0d9488'); fG.addColorStop(0.5, '#0f766e'); fG.addColorStop(1, '#134e4a');
+      ctx.fillStyle = fG; ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(px + 5, baseY - 22); ctx.lineTo(px + p.w - 5, baseY - 22);
+      ctx.lineTo(px + p.w - 1, baseY); ctx.lineTo(px + 1, baseY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // 8-Pointed Khatam Star & Cobalt Zellij Mosaic Tiles across Fountain Basin
+      for (let zx = px + 14, k = 0; zx <= px + p.w - 14; zx += 15, k++) {
+        const zy = baseY - 11;
+        ctx.fillStyle = '#fef3c7';
+        ctx.fillRect(zx - 3.2, zy - 3.2, 6.4, 6.4);
+        ctx.save(); ctx.translate(zx, zy); ctx.rotate(Math.PI * 0.25); ctx.fillRect(-3.2, -3.2, 6.4, 6.4); ctx.restore();
+        ctx.fillStyle = (k % 2 === 0) ? '#2563eb' : '#f59e0b';
+        ctx.beginPath(); ctx.arc(zx, zy, 1.9, 0, Math.PI * 2); ctx.fill();
+      }
+      // Shimmering turquoise water surface & sculpted white-marble coping rim
+      ctx.fillStyle = '#2dd4bf';
+      ctx.fillRect(px + 6, baseY - 25, p.w - 12, 3);
+      ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.roundRect(px + 2, baseY - 27, p.w - 4, 5.5, 2.5); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    // ===== STAGE 24: MAYAN JUNGLE TEMPLES & CHICHÉN ITZÁ PLATFORMS =====
+    if (p.type === 'maya_stone_terrace') {
+      // Museum-Grade Carved Yucatán Cut-Limestone Ashlar Masonry + Maya-Blue/Jade/Gold Glyph Frieze + Corbels, Hanging Lianas & Orchids!
+      const isGround = p.h >= 70;
+      const seed = Math.abs(Math.floor(p.x / 43));
+      ctx.save();
+
+      // Floating ledges get sculpted 3D Mayan stepped corbel under-brackets & hanging rainforest vines!
+      if (!isGround) {
+        ctx.fillStyle = '#575243';
+        ctx.strokeStyle = '#2c281e';
+        ctx.lineWidth = 1.2;
+        for (let bx2 = px + 22; bx2 < px + p.w - 26; bx2 += 64) {
+          ctx.beginPath();
+          ctx.moveTo(bx2, py + p.h);
+          ctx.lineTo(bx2 + 22, py + p.h);
+          ctx.lineTo(bx2 + 17, py + p.h + 7);
+          ctx.lineTo(bx2 + 5, py + p.h + 7);
+          ctx.closePath();
+          ctx.fill(); ctx.stroke();
+        }
+        // Dangling tropical liana vines beneath elevated stone ledges
+        for (let vx2 = px + 34; vx2 < px + p.w - 28; vx2 += 76) {
+          const vLen = 16 + ((Math.floor(vx2 / 76) * 17 + seed) % 16);
+          const vSw = Math.sin(time * 2.0 + vx2 * 0.03) * 2.5;
+          ctx.strokeStyle = '#15803d';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(vx2, py + p.h);
+          ctx.quadraticCurveTo(vx2 + vSw * 0.5, py + p.h + vLen * 0.5, vx2 + vSw, py + p.h + vLen);
+          ctx.stroke();
+          ctx.fillStyle = '#22c55e';
+          ctx.beginPath();
+          ctx.ellipse(vx2 + vSw * 0.6 + 3, py + p.h + vLen * 0.6, 3.6, 1.8, 0.5, 0, Math.PI * 2);
+          ctx.ellipse(vx2 + vSw - 2.5, py + p.h + vLen - 2, 3.4, 1.7, -0.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      drawBrickMasonry(ctx, px, py + 8, p.w, p.h - 8, ['#a69d88', '#8d8571', '#b7ae97', '#797260', '#beb59e'], '#464134', seed);
+      // Warm jungle sunset top-light & deep damp stone shadow
+      const stG = ctx.createLinearGradient(px, py, px, py + p.h);
+      stG.addColorStop(0, 'rgba(254, 243, 199, 0.24)');
+      stG.addColorStop(0.50, 'rgba(0, 0, 0, 0)');
+      stG.addColorStop(1, 'rgba(12, 26, 18, 0.56)');
+      ctx.fillStyle = stG;
+      ctx.fillRect(px, py + 8, p.w, p.h - 8);
+      ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.6;
+      ctx.strokeRect(px, py, p.w, p.h);
+
+      // Carved limestone top paving slabs with beveled sunlit edge & subtle chisel highlights
+      const capG = ctx.createLinearGradient(px, py, px, py + 10);
+      capG.addColorStop(0, '#f3ede0'); capG.addColorStop(0.60, '#cfc6b0'); capG.addColorStop(1, '#78715f');
+      ctx.fillStyle = capG; ctx.fillRect(px, py, p.w, 9);
+      ctx.fillStyle = 'rgba(255, 253, 244, 0.55)';
+      ctx.fillRect(px + 2, py + 1, p.w - 4, 2);
+      ctx.strokeStyle = '#4a4538'; ctx.lineWidth = 1.1;
+      for (let sx = px + 42; sx < px + p.w - 10; sx += 42) {
+        ctx.beginPath(); ctx.moveTo(sx, py); ctx.lineTo(sx, py + 9); ctx.stroke();
+      }
+
+      // Carved Ancient Limestone Mayan Step-Fret (Xicalcoliuhqui) Relief Molding Band
+      const fY = py + 10;
+      ctx.fillStyle = '#4e4839'; ctx.fillRect(px + 1, fY, p.w - 2, 11);
+      ctx.fillStyle = 'rgba(248, 240, 218, 0.30)'; ctx.fillRect(px + 1, fY + 10, p.w - 2, 1.2);
+      for (let gx = px + 6; gx < px + p.w - 14; gx += 22) {
+        ctx.fillStyle = '#8b836f';
+        ctx.fillRect(gx, fY + 2, 15, 7);
+        ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.1;
+        ctx.strokeRect(gx, fY + 2, 15, 7);
+        // Chiseled spiral step-fret relief inside each stone frieze block
+        ctx.strokeStyle = 'rgba(248, 240, 218, 0.42)'; ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(gx + 2, fY + 7.5); ctx.lineTo(gx + 2, fY + 3.5); ctx.lineTo(gx + 12.5, fY + 3.5);
+        ctx.lineTo(gx + 12.5, fY + 7); ctx.lineTo(gx + 6, fY + 7); ctx.lineTo(gx + 6, fY + 5.2);
+        ctx.stroke();
+      }
+
+      // ANCIENT SCULPTED 3D MAYAN LIMESTONE BAS-RELIEFS (Museum-Grade Chiaroscuro Stone Carvings: Chaac, Kinich Calendar, Kukulcán, Balam Jaguar, Ajaw Ruler & Hieroglyphs!)
+      if (isGround && p.h >= 78) {
+        const reliefY = py + 25;
+        const reliefH = Math.min(60, p.h - 32);
+        const tileStep = 112;
+        const startWorld = Math.ceil((p.x + 14) / tileStep) * tileStep;
+        for (let wx = startWorld; wx < p.x + p.w - 82; wx += tileStep) {
+          const rx = px + (wx - p.x);
+          const rw = 90;
+          const rKind = Math.abs(Math.floor(wx / tileStep)) % 6;
+          const rSeed = Math.abs(Math.floor(wx / 37));
+
+          // 1. Deeply Chiseled Recessed Limestone Niche (Rough Pitted Cavity + Overhanging Top/Left Cast Shadow + Sunlit Lower/Right Bevel Lip)
+          const cavG = ctx.createLinearGradient(rx, reliefY, rx + rw * 0.4, reliefY + reliefH);
+          cavG.addColorStop(0.0, '#363226');
+          cavG.addColorStop(0.45, '#4b4536');
+          cavG.addColorStop(1.0, '#5e5745');
+          ctx.fillStyle = cavG;
+          ctx.fillRect(rx, reliefY, rw, reliefH);
+
+          // Subtle chisel-pitted limestone grain & faint ancient Maya-blue / red-cinnabar stucco traces in sheltered recesses
+          ctx.fillStyle = (rKind % 2 === 0) ? 'rgba(46, 125, 132, 0.14)' : 'rgba(154, 56, 40, 0.13)';
+          ctx.fillRect(rx + 4, reliefY + 4, rw - 8, reliefH - 8);
+          for (let pk = 0; pk < 10; pk++) {
+            const pxk = rx + 6 + ((pk * 19 + rSeed * 7) % (rw - 12));
+            const pyk = reliefY + 5 + ((pk * 13 + rSeed * 11) % (reliefH - 10));
+            ctx.fillStyle = pk % 2 === 0 ? 'rgba(22, 19, 14, 0.30)' : 'rgba(214, 204, 180, 0.14)';
+            ctx.fillRect(pxk, pyk, 2.2, 1.6);
+          }
+
+          // Deep overhang shadow cast by upper & left stone frame onto recessed tablet
+          ctx.fillStyle = 'rgba(14, 12, 8, 0.58)';
+          ctx.fillRect(rx, reliefY, rw, 4.2);
+          ctx.fillRect(rx, reliefY, 4.0, reliefH);
+          // Chiseled sunlit bottom & right stone bevel catching golden-hour light
+          ctx.fillStyle = 'rgba(248, 240, 218, 0.48)';
+          ctx.fillRect(rx + 2, reliefY + reliefH - 2.4, rw - 2, 2.4);
+          ctx.fillRect(rx + rw - 2.4, reliefY + 2, 2.4, reliefH - 2);
+          ctx.strokeStyle = '#262219';
+          ctx.lineWidth = 1.25;
+          ctx.strokeRect(rx + 0.5, reliefY + 0.5, rw - 1, reliefH - 1);
+
+          const midX = rx + rw * 0.5;
+          const midY = reliefY + reliefH * 0.5 + 0.5;
+
+          // Shared 3D Bas-Relief Stone Gradient (Warm Sunlit Upper-Left Limestone -> Weathered Ochre Mid -> Cool Shadowed Lower-Right)
+          const stoneHi = ctx.createLinearGradient(rx + 8, reliefY + 4, rx + rw - 8, reliefY + reliefH - 4);
+          stoneHi.addColorStop(0.0, '#e5dcc5');
+          stoneHi.addColorStop(0.45, '#b8ae95');
+          stoneHi.addColorStop(1.0, '#7d7560');
+
+          const stoneMid = ctx.createLinearGradient(rx + 8, reliefY + 4, rx + rw - 8, reliefY + reliefH - 4);
+          stoneMid.addColorStop(0.0, '#cfc6ae');
+          stoneMid.addColorStop(0.50, '#9c937c');
+          stoneMid.addColorStop(1.0, '#69624f');
+
+          // Helper: Sculpted 3D Raised Stone Volume (Undercut Cast Shadow + Sunlit Top-Left Bevel + Shaded Limestone Body + Chiseled Contour)
+          const carveRelief = (buildPath, depth, useHighTone, pigmentCol) => {
+            ctx.save();
+            ctx.translate(depth * 0.95, depth * 1.15);
+            ctx.beginPath(); buildPath();
+            ctx.fillStyle = 'rgba(15, 13, 9, 0.72)';
+            ctx.fill();
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(-0.85, -0.95);
+            ctx.beginPath(); buildPath();
+            ctx.fillStyle = 'rgba(253, 247, 228, 0.72)';
+            ctx.fill();
+            ctx.restore();
+
+            ctx.beginPath(); buildPath();
+            ctx.fillStyle = useHighTone ? stoneHi : stoneMid;
+            ctx.fill();
+            if (pigmentCol) {
+              ctx.fillStyle = pigmentCol;
+              ctx.fill();
+            }
+            ctx.strokeStyle = 'rgba(34, 29, 20, 0.72)';
+            ctx.lineWidth = 0.85;
+            ctx.stroke();
+          };
+
+          // Helper: Chiseled V-Groove Incision into Raised Stone (Dark Cut + Sunlit Lower-Right Lip)
+          const chiselGroove = (buildPath, wPx = 1.2) => {
+            ctx.save();
+            ctx.translate(0.65, 0.75);
+            ctx.beginPath(); buildPath();
+            ctx.strokeStyle = 'rgba(250, 243, 222, 0.46)';
+            ctx.lineWidth = wPx * 0.75;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.beginPath(); buildPath();
+            ctx.strokeStyle = 'rgba(24, 20, 14, 0.82)';
+            ctx.lineWidth = wPx;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+          };
+
+          if (rKind === 0) {
+            // 1. PUUC HIGH-RELIEF STONE MASK OF CHAAC (Mayan Rain God — Layered Brow, Flanged Earspools, Projecting Hooked Snout & Ik' Fangs)
+            // Flanking carved earspool assemblages with tubular beads
+            for (const s of [-1, 1]) {
+              carveRelief(() => {
+                ctx.roundRect(midX + s * 31 - 6.5, midY - 8.5, 13, 17, 3.5);
+              }, 2.0, false, 'rgba(45, 138, 148, 0.12)');
+              carveRelief(() => {
+                ctx.arc(midX + s * 31, midY, 4.2, 0, Math.PI * 2);
+              }, 1.4, true);
+              ctx.fillStyle = '#221e15';
+              ctx.beginPath(); ctx.arc(midX + s * 31, midY, 1.7, 0, Math.PI * 2); ctx.fill();
+            }
+            // Main sculpted Puuc mask block with stepped temple headband
+            carveRelief(() => {
+              ctx.moveTo(midX - 23, midY - 14);
+              ctx.lineTo(midX - 18, midY - 21);
+              ctx.lineTo(midX + 18, midY - 21);
+              ctx.lineTo(midX + 23, midY - 14);
+              ctx.lineTo(midX + 22, midY + 15);
+              ctx.lineTo(midX + 14, midY + 20);
+              ctx.lineTo(midX - 14, midY + 20);
+              ctx.lineTo(midX - 22, midY + 15);
+              ctx.closePath();
+            }, 2.6, false);
+            // Raised headband cartouche & flanking rain scrolls
+            carveRelief(() => {
+              ctx.roundRect(midX - 16, midY - 19.5, 32, 5.5, 1.8);
+            }, 1.6, true, 'rgba(45, 138, 148, 0.14)');
+            // Deeply recessed orbital sockets + sculpted overhanging volute brows
+            for (const s of [-1, 1]) {
+              ctx.fillStyle = '#1f1b13';
+              ctx.beginPath(); ctx.roundRect(midX + s * 11.5 - 6, midY - 10.5, 12, 8.5, 2); ctx.fill();
+              carveRelief(() => {
+                ctx.moveTo(midX + s * 5, midY - 12);
+                ctx.quadraticCurveTo(midX + s * 12, midY - 15, midX + s * 18.5, midY - 10.5);
+                ctx.lineTo(midX + s * 17, midY - 8);
+                ctx.quadraticCurveTo(midX + s * 11.5, midY - 11.2, midX + s * 5.5, midY - 9.2);
+                ctx.closePath();
+              }, 1.5, true);
+              carveRelief(() => {
+                ctx.arc(midX + s * 11.5, midY - 6.2, 3.0, 0, Math.PI * 2);
+              }, 1.0, true);
+              ctx.fillStyle = '#242017';
+              ctx.fillRect(midX + s * 11.5 - 1.5, midY - 7.0, 3.0, 1.6);
+            }
+            // Cavernous fanged mouth recess + carved T-shaped Ik' tooth & corner curls
+            ctx.fillStyle = '#1b1811';
+            ctx.beginPath(); ctx.roundRect(midX - 15, midY + 7.5, 30, 8.5, 2); ctx.fill();
+            carveRelief(() => {
+              ctx.rect(midX - 3.5, midY + 8, 7, 4.5);
+              ctx.rect(midX - 12.5, midY + 8, 3.5, 5.5);
+              ctx.rect(midX + 9.0, midY + 8, 3.5, 5.5);
+            }, 1.2, true);
+            // High-relief projecting hooked Chaac rain-snout (casts strong shadow downward!)
+            carveRelief(() => {
+              ctx.moveTo(midX - 4.5, midY - 10);
+              ctx.lineTo(midX + 4.5, midY - 10);
+              ctx.lineTo(midX + 6.2, midY + 3.5);
+              ctx.bezierCurveTo(midX + 6.5, midY + 12.5, midX - 2, midY + 13.5, midX - 6.5, midY + 7.5);
+              ctx.quadraticCurveTo(midX - 2.5, midY + 7.2, midX - 3.2, midY + 2.5);
+              ctx.closePath();
+            }, 3.2, true);
+
+          } else if (rKind === 1) {
+            // 2. KINICH AHAU SOLAR CALENDAR STONE (Multi-Ringed 3D Carved Sun Wheel, Beveled Rays, Central Solar Deity & Bar-Dot Numerals)
+            const rad = Math.min(21, reliefH * 0.39);
+            // Outer ring of 8 sculpted triangular solar rays
+            carveRelief(() => {
+              for (let a = 0; a < 8; a++) {
+                const ang = a * (Math.PI * 0.25);
+                ctx.moveTo(midX + Math.cos(ang - 0.20) * (rad - 5), midY + Math.sin(ang - 0.20) * (rad - 5));
+                ctx.lineTo(midX + Math.cos(ang) * (rad + 3.8), midY + Math.sin(ang) * (rad + 3.8));
+                ctx.lineTo(midX + Math.cos(ang + 0.20) * (rad - 5), midY + Math.sin(ang + 0.20) * (rad - 5));
+                ctx.closePath();
+              }
+            }, 2.0, false, 'rgba(165, 58, 42, 0.12)');
+            // Raised outer stone calendar drum
+            carveRelief(() => {
+              ctx.arc(midX, midY, rad - 2.8, 0, Math.PI * 2);
+            }, 2.4, true);
+            // Chiseled concentric calendar glyph divisions
+            chiselGroove(() => {
+              ctx.arc(midX, midY, rad - 6.8, 0, Math.PI * 2);
+              for (let g = 0; g < 12; g++) {
+                const ga = g * (Math.PI / 6);
+                ctx.moveTo(midX + Math.cos(ga) * (rad - 6.8), midY + Math.sin(ga) * (rad - 6.8));
+                ctx.lineTo(midX + Math.cos(ga) * (rad - 3.0), midY + Math.sin(ga) * (rad - 3.0));
+              }
+            }, 1.0);
+            // Central raised Kinich Ahau Sun-God boss
+            carveRelief(() => {
+              ctx.arc(midX, midY, 8.2, 0, Math.PI * 2);
+            }, 1.8, true);
+            chiselGroove(() => {
+              ctx.arc(midX - 2.8, midY - 1.8, 1.6, 0, Math.PI * 2);
+              ctx.arc(midX + 2.8, midY - 1.8, 1.6, 0, Math.PI * 2);
+              ctx.moveTo(midX - 3.5, midY + 2.5); ctx.lineTo(midX + 3.5, midY + 2.5);
+              ctx.moveTo(midX, midY + 2.5); ctx.lineTo(midX, midY + 5.8);
+            }, 1.05);
+            // Flanking 3D raised Mayan Bar-and-Dot Long Count numerals
+            for (const s of [-1, 1]) {
+              const nx = midX + s * 33;
+              carveRelief(() => {
+                ctx.roundRect(nx - 6.5, midY + 2.5, 13, 3.8, 1.4);
+                ctx.roundRect(nx - 6.5, midY + 8.2, 13, 3.8, 1.4);
+                for (let d = -1; d <= 1; d++) {
+                  ctx.moveTo(nx + d * 4.2 + 1.9, midY - 3.5);
+                  ctx.arc(nx + d * 4.2, midY - 3.5, 1.9, 0, Math.PI * 2);
+                }
+              }, 1.8, true);
+            }
+
+          } else if (rKind === 2) {
+            // 3. KUKULCÁN FEATHERED VISION SERPENT (Layered Quetzal Plume Fans, Sculpted Scaled Coils, Fanged Jaws & Bifurcated Scroll)
+            // Back sweeping carved quetzal plume fans radiating off the upper coil
+            carveRelief(() => {
+              for (let pf = 0; pf < 5; pf++) {
+                const px0 = rx + 18 + pf * 8.5;
+                const py0 = midY - 6 + Math.sin(pf * 0.9) * 4;
+                ctx.moveTo(px0, py0 + 3);
+                ctx.quadraticCurveTo(px0 - 7, py0 - 11, px0 - 11, py0 - 14);
+                ctx.quadraticCurveTo(px0 - 2, py0 - 13, px0 + 3.5, py0 + 1);
+                ctx.closePath();
+              }
+            }, 1.8, false, 'rgba(45, 138, 148, 0.16)');
+            // Thick muscular S-coiled serpent body in high stone relief
+            carveRelief(() => {
+              ctx.moveTo(rx + 8, midY + 12);
+              ctx.bezierCurveTo(rx + 18, midY - 17, rx + 39, midY + 20, rx + 55, midY - 4);
+              ctx.lineTo(rx + 58, midY + 4);
+              ctx.bezierCurveTo(rx + 40, midY + 29, rx + 20, midY - 6, rx + 11, midY + 18);
+              ctx.closePath();
+            }, 2.6, true);
+            // Chiseled ventral serpent belly scales along body
+            chiselGroove(() => {
+              for (let sc = 0; sc < 6; sc++) {
+                const su = (sc + 0.5) / 6;
+                const sx0 = rx + 12 + su * 41;
+                const sy0 = midY + 7 + Math.sin(su * Math.PI * 2 - 1.2) * 8;
+                ctx.moveTo(sx0 - 2, sy0 - 3); ctx.lineTo(sx0 + 2, sy0 + 3);
+              }
+            }, 1.0);
+            // Sculpted fanged Kukulcán head, supraorbital plume crest & bifurcated speech/fire scroll
+            carveRelief(() => {
+              ctx.moveTo(rx + 51, midY - 14);
+              ctx.quadraticCurveTo(rx + 62, midY - 19, rx + 74, midY - 12);
+              ctx.lineTo(rx + 75, midY - 4);
+              ctx.lineTo(rx + 61, midY - 3);
+              ctx.lineTo(rx + 73, midY + 5);
+              ctx.lineTo(rx + 68, midY + 10);
+              ctx.lineTo(rx + 51, midY + 6);
+              ctx.closePath();
+            }, 2.8, true);
+            ctx.fillStyle = '#1e1a12';
+            ctx.beginPath(); ctx.arc(rx + 61, midY - 9, 2.1, 0, Math.PI * 2); ctx.fill();
+            carveRelief(() => {
+              ctx.moveTo(rx + 73, midY - 2);
+              ctx.quadraticCurveTo(rx + 83, midY - 7, rx + 81, midY - 13);
+              ctx.quadraticCurveTo(rx + 85, midY - 6, rx + 78, midY + 1);
+              ctx.quadraticCurveTo(rx + 84, midY + 6, rx + 79, midY + 11);
+              ctx.quadraticCurveTo(rx + 77, midY + 4, rx + 72, midY + 1);
+              ctx.closePath();
+            }, 1.5, false, 'rgba(165, 58, 42, 0.16)');
+
+          } else if (rKind === 3) {
+            // 4. SACRED CROUCHING BALAM JAGUAR BAS-RELIEF (Muscular Forequarters, Clawed Forepaw, Roaring Jaws & Trefoil Rosettes)
+            carveRelief(() => {
+              // Crouching muscular back, shoulder hump, rounded ear, roaring snout & extended clawed foreleg
+              ctx.moveTo(midX - 33, midY + 15);
+              ctx.quadraticCurveTo(midX - 31, midY - 8, midX - 15, midY - 13);
+              ctx.arc(midX - 8, midY - 15, 4.8, Math.PI * 0.9, 0.1);
+              ctx.lineTo(midX + 10, midY - 15);
+              ctx.quadraticCurveTo(midX + 24, midY - 13, midX + 27, midY - 5);
+              ctx.lineTo(midX + 14, midY - 2);
+              ctx.lineTo(midX + 25, midY + 5);
+              ctx.lineTo(midX + 18, midY + 10);
+              ctx.lineTo(midX + 7, midY + 7);
+              // Muscular foreleg & paw reaching right
+              ctx.lineTo(midX + 22, midY + 13);
+              ctx.quadraticCurveTo(midX + 28, midY + 16, midX + 23, midY + 19);
+              ctx.lineTo(midX - 33, midY + 18);
+              ctx.closePath();
+            }, 2.7, true);
+            // Carved ceremonial jade collar band
+            carveRelief(() => {
+              ctx.moveTo(midX - 4, midY - 13); ctx.lineTo(midX + 3, midY + 9);
+              ctx.lineTo(midX - 2, midY + 10); ctx.lineTo(midX - 9, midY - 12);
+              ctx.closePath();
+            }, 1.4, false, 'rgba(45, 138, 148, 0.18)');
+            // Recessed roaring mouth interior + ivory stone canine fang
+            ctx.fillStyle = '#1b1710';
+            ctx.beginPath();
+            ctx.moveTo(midX + 13, midY - 3); ctx.lineTo(midX + 24, midY - 4);
+            ctx.lineTo(midX + 22, midY + 4); ctx.lineTo(midX + 13, midY + 2);
+            ctx.closePath(); ctx.fill();
+            ctx.fillStyle = '#ede5cf';
+            ctx.beginPath(); ctx.moveTo(midX + 19, midY - 3.5); ctx.lineTo(midX + 20.5, midY + 1.5); ctx.lineTo(midX + 22, midY - 3.5); ctx.fill();
+            // Chiseled fierce feline eye, shoulder musculature & Maya trefoil jaguar rosettes
+            chiselGroove(() => {
+              ctx.roundRect(midX + 4, midY - 11, 6.5, 3.6, 1.2);
+              ctx.moveTo(midX - 14, midY - 3); ctx.quadraticCurveTo(midX - 8, midY + 6, midX - 14, midY + 14);
+              for (const [jx, jy] of [[-23, 1], [-18, 10], [-27, 11], [-4, 13]]) {
+                ctx.moveTo(midX + jx + 2.3, midY + jy);
+                ctx.arc(midX + jx, midY + jy, 2.3, 0, Math.PI * 2);
+              }
+            }, 1.05);
+
+          } else if (rKind === 4) {
+            // 5. CLASSIC MAYA AJAW RULER PROFILE (Palenque Stucco Style — Sweeping Layered Plume Headdress, Sloped Brow & Jade Regalia)
+            // Cascading carved quetzal feather panache sweeping left & overhead
+            carveRelief(() => {
+              for (let f = 0; f < 4; f++) {
+                const fy = midY - 17 + f * 5.2;
+                ctx.moveTo(midX + 2, fy);
+                ctx.bezierCurveTo(midX - 15, fy - 7, midX - 28, fy - 1, midX - 36, fy + 8);
+                ctx.quadraticCurveTo(midX - 24, fy + 5, midX - 2, fy + 4.2);
+                ctx.closePath();
+              }
+            }, 1.9, false, 'rgba(45, 138, 148, 0.16)');
+            // Sculpted noble Ajaw head, aquiline Maya nose, shoulders & beaded pectoral
+            carveRelief(() => {
+              ctx.moveTo(midX - 14, midY + 19);
+              ctx.lineTo(midX - 10, midY + 8);
+              ctx.lineTo(midX - 9, midY - 13);
+              ctx.lineTo(midX + 9, midY - 14); // Sloped classical forehead
+              ctx.lineTo(midX + 19, midY - 3); // Prominent Maya nose bridge
+              ctx.lineTo(midX + 14, midY + 0.5);
+              ctx.lineTo(midX + 16, midY + 5); // Sculpted lips
+              ctx.lineTo(midX + 11, midY + 10.5); // Chin
+              ctx.lineTo(midX + 18, midY + 19); // Forward shoulder
+              ctx.closePath();
+            }, 2.6, true);
+            // Zoomorphic headdress diadem brow + circular jade earflare + beaded collar
+            carveRelief(() => {
+              ctx.roundRect(midX - 11, midY - 19, 23, 6.5, 2);
+            }, 2.0, true, 'rgba(165, 58, 42, 0.14)');
+            carveRelief(() => {
+              ctx.arc(midX - 4, midY + 1.5, 5.0, 0, Math.PI * 2);
+            }, 1.8, true, 'rgba(45, 138, 148, 0.18)');
+            chiselGroove(() => {
+              ctx.arc(midX - 4, midY + 1.5, 1.8, 0, Math.PI * 2);
+              ctx.moveTo(midX + 5, midY - 7.5); ctx.quadraticCurveTo(midX + 9, midY - 9, ctx ? midX + 11.5 : 0, midY - 6.8);
+              ctx.moveTo(midX - 9, midY + 13); ctx.quadraticCurveTo(midX + 2, midY + 17, midX + 13, midY + 13);
+            }, 1.05);
+
+          } else {
+            // 6. PAIRED CLASSIC MAYA HIEROGLYPHIC CODEX BLOCKS (4 Convex Pillow-Cut Stone Cartouches with Main Signs & Affixes!)
+            for (let r = 0; r < 2; r++) {
+              for (let c = 0; c < 2; c++) {
+                const gx0 = midX + (c === 0 ? -19.5 : 19.5);
+                const gy0 = midY + (r === 0 ? -11.5 : 11.5);
+                // Prefix / superfix stone nodules + main pillow-shaped glyph cartouche
+                carveRelief(() => {
+                  ctx.roundRect(gx0 - 16, gy0 - 9, 5.5, 8.5, 2.5);
+                  ctx.roundRect(gx0 - 16, gy0 + 0.5, 5.5, 8.5, 2.5);
+                  ctx.roundRect(gx0 - 9.5, gy0 - 9.5, 25, 19, 5.0);
+                }, 2.3, (r + c) % 2 === 0);
+
+                // Intricately chiseled glyph logograms inside each raised stone block
+                chiselGroove(() => {
+                  if (r === 0 && c === 0) {
+                    // K'in (Four-petal solar glyph)
+                    ctx.arc(gx0 + 3, gy0, 5.2, 0, Math.PI * 2);
+                    ctx.moveTo(gx0 - 1, gy0 - 4); ctx.lineTo(gx0 + 7, gy0 + 4);
+                    ctx.moveTo(gx0 + 7, gy0 - 4); ctx.lineTo(gx0 - 1, gy0 + 4);
+                  } else if (r === 0 && c === 1) {
+                    // Ajaw (Lord face day-sign)
+                    ctx.roundRect(gx0 - 4, gy0 - 5.5, 14, 11, 3);
+                    ctx.arc(gx0 + 0.5, gy0 - 1.5, 1.3, 0, Math.PI * 2);
+                    ctx.arc(gx0 + 5.5, gy0 - 1.5, 1.3, 0, Math.PI * 2);
+                    ctx.moveTo(gx0, gy0 + 2.8); ctx.lineTo(gx0 + 6, gy0 + 2.8);
+                  } else if (r === 1 && c === 0) {
+                    // Chan / Kan (Woven sky cross-bands)
+                    ctx.roundRect(gx0 - 4.5, gy0 - 5.5, 15, 11, 2.5);
+                    ctx.moveTo(gx0 - 3, gy0 - 4.5); ctx.lineTo(gx0 + 9, gy0 + 4.5);
+                    ctx.moveTo(gx0 + 9, gy0 - 4.5); ctx.lineTo(gx0 - 3, gy0 + 4.5);
+                  } else {
+                    // Cauac / Tun (Sacred stone rain-cluster glyph)
+                    ctx.arc(gx0 + 3, gy0 - 1, 5.5, 0, Math.PI * 2);
+                    ctx.arc(gx0 + 1, gy0 - 2.5, 1.5, 0, Math.PI * 2);
+                    ctx.moveTo(gx0 - 2, gy0 + 5.5); ctx.lineTo(gx0 + 8, gy0 + 5.5);
+                  }
+                }, 1.0);
+              }
+            }
+          }
+
+          // Natural Chipped Limestone Edge Spalls & Diagonal Weathering Fracture Line
+          if (rKind % 2 === 0) {
+            chiselGroove(() => {
+              ctx.moveTo(rx + rw - 17, reliefY + 1.5);
+              ctx.lineTo(rx + rw - 22, reliefY + 16);
+              ctx.lineTo(rx + rw - 18, reliefY + 31);
+              ctx.lineTo(rx + rw - 24, reliefY + reliefH - 2);
+            }, 0.95);
+          }
+
+          // Velvety 3D Cushion Moss, Pale Lichen Crusts & Tiny Sprouting Stone Ferns in Damp Niche Corners!
+          ctx.fillStyle = 'rgba(180, 198, 166, 0.24)';
+          ctx.beginPath(); ctx.ellipse(rx + rw - 14, reliefY + 8, 6.5, 3.0, 0.3, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = 'rgba(20, 83, 45, 0.78)';
+          ctx.beginPath();
+          ctx.ellipse(rx + 8, reliefY + 4, 10, 3.6, 0.18, 0, Math.PI * 2);
+          ctx.ellipse(rx + rw - 10, reliefY + reliefH - 3.5, 11, 3.8, -0.18, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = 'rgba(74, 222, 128, 0.46)';
+          ctx.beginPath();
+          ctx.ellipse(rx + 6.5, reliefY + 3.2, 5.5, 1.8, 0.18, 0, Math.PI * 2);
+          ctx.ellipse(rx + rw - 11.5, reliefY + reliefH - 4.4, 6.0, 1.9, -0.18, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Trailing Jungle Ivy Vines & Ferns creeping down the ancient ground wall face!
+        for (let vx = px + 44; vx < px + p.w - 30; vx += 126) {
+          const vH = 26 + ((Math.floor(vx / 126) * 23 + seed * 7) % 34);
+          const sw = Math.sin(time * 1.9 + vx * 0.03) * 2.2;
+          ctx.strokeStyle = '#14532d'; ctx.lineWidth = 1.9;
+          ctx.beginPath();
+          ctx.moveTo(vx, py + 9);
+          ctx.quadraticCurveTo(vx + sw * 0.5, py + 9 + vH * 0.5, vx + sw, py + 9 + vH);
+          ctx.stroke();
+          for (let lf = 1; lf <= 3; lf++) {
+            const u = lf / 3.2;
+            ctx.fillStyle = lf % 2 === 0 ? '#15803d' : '#22c55e';
+            ctx.beginPath();
+            ctx.ellipse(vx + sw * u + (lf % 2 ? 4 : -4), py + 9 + vH * u, 4.5, 2.0, lf % 2 ? 0.5 : -0.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      // Lush Jungle Moss Cushions, Wild Grass Tufts, Fern Fronds & Tropical Orchids on Top Stone Joints!
+      for (let mx = px + 22; mx < px + p.w - 18; mx += 64) {
+        const hH = Math.abs((Math.floor(mx / 64) * 29 + seed * 13) % 9);
+        const sway = Math.sin(time * 2.1 + mx * 0.04) * 2.0;
+        ctx.fillStyle = 'rgba(21, 128, 61, 0.88)';
+        ctx.beginPath(); ctx.ellipse(mx, py + 8.5, 14, 4.0, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(74, 222, 128, 0.48)';
+        ctx.beginPath(); ctx.ellipse(mx - 2, py + 7.5, 8, 2.0, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+        for (let b = -2; b <= 2; b++) {
+          const bh = (b === 0 ? 11 : (Math.abs(b) === 1 ? 8.5 : 6));
+          ctx.beginPath(); ctx.moveTo(mx + b * 3.2, py + 1.5); ctx.quadraticCurveTo(mx + b * 4.5 + sway * 0.4, py - bh * 0.55, mx + b * 6 + sway, py - bh); ctx.stroke();
+        }
+        if (hH % 3 === 0) {
+          ctx.fillStyle = hH === 0 ? '#f43f5e' : (hH === 3 ? '#facc15' : '#e879f9');
+          ctx.beginPath(); ctx.arc(mx + sway * 0.6, py - 8.5, 2.5, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#fef9c3';
+          ctx.beginPath(); ctx.arc(mx + sway * 0.6, py - 8.5, 1.0, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'maya_bounce_drum') {
+      // Carved Mayan Tunkul / Pax Temple Drum with Spotted Jaguar-Hide Membrane, Rawhide Lacing, Jaguar-Paw Feet & Jade Sonic Pulse!
+      const flex = (p.bounceAnim || 0) * 10;
+      ctx.save();
+      if (flex > 0.4) {
+        const ringA = Math.min(0.65, (p.bounceAnim || 0) * 0.65);
+        ctx.strokeStyle = `rgba(52, 211, 153, ${ringA.toFixed(2)})`;
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.ellipse(px + p.w * 0.5, py + 4 - (1 - (p.bounceAnim || 0)) * 18, p.w * 0.46, 7, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      // Carved limestone jaguar-paw support pedestals
+      for (const sx of [px + 12, px + p.w - 26]) {
+        ctx.fillStyle = '#9e9581'; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.roundRect(sx, py + 15, 14, 17, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#d6ccb4';
+        for (let cl = 0; cl < 3; cl++) ctx.fillRect(sx + 2 + cl * 4, py + 29, 2.5, 3);
+      }
+      // Sculpted rosewood/mahogany temple drum body with carved glyph band
+      const dG = ctx.createLinearGradient(px, py + 4, px, py + 24);
+      dG.addColorStop(0, '#c25e0e'); dG.addColorStop(0.5, '#7c2d12'); dG.addColorStop(1, '#431407');
+      ctx.fillStyle = dG; ctx.strokeStyle = '#291003'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(px + 4, py + 5 + flex * 0.4, p.w - 8, 18, 6); ctx.fill(); ctx.stroke();
+
+      // Crisscrossed rawhide tension cords across drum shell
+      ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 1.2;
+      for (let lx = px + 14; lx < px + p.w - 20; lx += 18) {
+        ctx.beginPath();
+        ctx.moveTo(lx, py + 8 + flex * 0.4); ctx.lineTo(lx + 9, py + 21 + flex * 0.4);
+        ctx.moveTo(lx + 9, py + 8 + flex * 0.4); ctx.lineTo(lx + 18, py + 21 + flex * 0.4);
+        ctx.stroke();
+      }
+
+      // Tensioned golden-amber jaguar-hide drumhead top with authentic jaguar rosettes!
+      const hG = ctx.createLinearGradient(px + 4, py, px + p.w - 4, py + 12);
+      hG.addColorStop(0, '#fde047'); hG.addColorStop(0.5, '#fbbf24'); hG.addColorStop(1, '#d97706');
+      ctx.fillStyle = hG; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(px + 4, py + 5);
+      ctx.quadraticCurveTo(px + p.w * 0.5, py + 0.5 + flex, px + p.w - 4, py + 5);
+      ctx.lineTo(px + p.w - 6, py + 11.5 + flex * 0.4);
+      ctx.quadraticCurveTo(px + p.w * 0.5, py + 14.5 + flex, px + 6, py + 11.5 + flex * 0.4);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // Jaguar rosette spots on drumhead
+      ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.1;
+      for (const rxOff of [0.24, 0.42, 0.58, 0.76]) {
+        ctx.beginPath(); ctx.ellipse(px + p.w * rxOff, py + 7.2 + flex * 0.6, 3.2, 1.4, 0, 0, Math.PI * 2); ctx.stroke();
+      }
+
+      // Polished emerald jade & gold studs along rim
+      for (let ix = px + 16; ix <= px + p.w - 16; ix += 20) {
+        ctx.fillStyle = '#10b981'; ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.arc(ix, py + 15 + flex * 0.4, 3.0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'maya_vine_swing') {
+      // Overhead Mossy Sacred Ceiba Bough & Blooming Jungle Liana Vine holding a Carved Jade-Inlaid Temple Deck!
+      const ropeLen = p.ropeLen || 262;
+      const ang = (p.swingAngle !== undefined) ? p.swingAngle : Math.sin(time * (p.swingSpeed || 1.5) + (p.phase || 0)) * (p.swingAmp || 0.45);
+      const bobX = px + Math.sin(ang) * ropeLen;
+      const bobY = py + Math.cos(ang) * ropeLen;
+      const deckX = (p.platX !== undefined) ? (px + (p.platX - p.x)) : (bobX - p.w * 0.5);
+      const deckY = (p.platY !== undefined) ? (py + (p.platY - p.y)) : bobY;
+      ctx.save();
+      // Overhead gnarly mossy Ceiba bough + tropical blossom + carved jade pivot ring
+      const brG = ctx.createLinearGradient(px - 32, py - 12, px + 32, py + 4);
+      brG.addColorStop(0, '#6b3e23'); brG.addColorStop(1, '#3b1f0e');
+      ctx.fillStyle = brG; ctx.strokeStyle = '#241106'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(px - 32, py - 11, 64, 13, 6); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#15803d';
+      ctx.beginPath(); ctx.ellipse(px - 14, py - 10, 11, 3, 0, 0, Math.PI * 2); ctx.ellipse(px + 15, py - 10, 9, 2.6, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#10b981'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(px, py + 3, 6.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      // Braided tropical jungle vine with alternating green leaves & scarlet orchid buds
+      const harnessX = deckX + p.w * 0.5;
+      const harnessY = deckY - 14;
+      ctx.strokeStyle = '#14532d'; ctx.lineWidth = 5.2;
+      ctx.beginPath(); ctx.moveTo(px, py + 6); ctx.lineTo(harnessX, harnessY); ctx.stroke();
+      ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 2.0; ctx.setLineDash([7, 5]);
+      ctx.beginPath(); ctx.moveTo(px, py + 6); ctx.lineTo(harnessX, harnessY); ctx.stroke();
+      ctx.setLineDash([]);
+      for (let lf = 1; lf <= 6; lf++) {
+        const u = lf / 7;
+        const lx = px + (harnessX - px) * u;
+        const ly = py + 6 + (harnessY - (py + 6)) * u;
+        const s = (lf % 2 === 0) ? 1 : -1;
+        ctx.fillStyle = (lf % 2 === 0) ? '#16a34a' : '#22c55e';
+        ctx.beginPath(); ctx.ellipse(lx + s * 6.5, ly, 6, 2.7, s * 0.5, 0, Math.PI * 2); ctx.fill();
+        if (lf === 3) {
+          ctx.fillStyle = '#f43f5e';
+          ctx.beginPath(); ctx.arc(lx - s * 4, ly + 2, 2.4, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      // Twin braided vine support ropes anchoring the level carved temple deck
+      ctx.strokeStyle = '#15803d'; ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(harnessX, harnessY); ctx.lineTo(deckX + 12, deckY + 2);
+      ctx.moveTo(harnessX, harnessY); ctx.lineTo(deckX + p.w - 12, deckY + 2);
+      ctx.stroke();
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.arc(harnessX, harnessY, 3.5, 0, Math.PI * 2); ctx.fill();
+
+      // Level carved limestone & Mayan jade-inlaid platform with golden corner bosses
+      const dG = ctx.createLinearGradient(deckX, deckY, deckX, deckY + p.h);
+      dG.addColorStop(0, '#ded6c1'); dG.addColorStop(0.45, '#9e9581'); dG.addColorStop(1, '#575243');
+      ctx.fillStyle = dG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(deckX, deckY, p.w, p.h, 5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#059669'; ctx.fillRect(deckX + 10, deckY + 5, p.w - 20, 5.5);
+      ctx.fillStyle = '#fde047';
+      for (let gx = deckX + 16; gx <= deckX + p.w - 16; gx += 18) {
+        ctx.fillRect(gx - 2, deckY + 6.5, 4, 2.5);
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'maya_sun_disc') {
+      // Floating Glowing Mayan Jade, Maya-Blue & Burnished Gold Sun-Calendar Disc with Trailing Stardust Motes!
+      const bob = Math.sin(time * 4.8 + (p.phase || 0)) * 2.2;
+      const midX = px + p.w * 0.5;
+      const midY = py + p.h * 0.5 + bob * 0.4;
+      ctx.save();
+      const aura = ctx.createRadialGradient(midX, midY + 4, 8, midX, midY + 4, p.w * 0.64);
+      aura.addColorStop(0, 'rgba(52, 211, 153, 0.48)');
+      aura.addColorStop(0.50, 'rgba(251, 191, 36, 0.20)');
+      aura.addColorStop(1, 'rgba(251, 191, 36, 0)');
+      ctx.fillStyle = aura;
+      ctx.beginPath(); ctx.ellipse(midX, midY + 5, p.w * 0.64, 18, 0, 0, Math.PI * 2); ctx.fill();
+
+      // Golden solar pointer rays underneath disc rim
+      ctx.fillStyle = '#f59e0b';
+      for (let r = -2; r <= 2; r++) {
+        const rx = midX + r * 20;
+        ctx.beginPath();
+        ctx.moveTo(rx - 4, midY + p.h * 0.45);
+        ctx.lineTo(rx, midY + p.h * 0.45 + 6);
+        ctx.lineTo(rx + 4, midY + p.h * 0.45);
+        ctx.closePath(); ctx.fill();
+      }
+
+      const gG = ctx.createLinearGradient(px, py, px + p.w, py + p.h);
+      gG.addColorStop(0, '#92400e'); gG.addColorStop(0.28, '#fbbf24'); gG.addColorStop(0.55, '#fef9c3'); gG.addColorStop(0.78, '#f59e0b'); gG.addColorStop(1, '#92400e');
+      ctx.fillStyle = gG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(px, py + bob * 0.4, p.w, p.h, 8); ctx.fill(); ctx.stroke();
+
+      // Alternating emerald jade & Maya-blue sun-calendar glyph inlays
+      for (let gx = px + 12; gx < px + p.w - 14; gx += 16) {
+        ctx.fillStyle = ((Math.floor(gx / 16) & 1) === 0) ? '#059669' : '#0284c7';
+        ctx.fillRect(gx, py + 4.5 + bob * 0.4, 10, p.h - 9);
+      }
+      // Central glowing sun-god cabochon
+      ctx.fillStyle = '#10b981'; ctx.strokeStyle = '#fef9c3'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(midX, midY, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      // Floating emerald-gold energy motes beneath the hovering disc
+      for (let m = 0; m < 3; m++) {
+        const mx2 = midX + Math.sin(time * 3.6 + m * 2.1 + (p.phase || 0)) * (p.w * 0.34);
+        const my2 = midY + 13 + Math.cos(time * 4.4 + m * 1.7) * 3;
+        ctx.fillStyle = m === 1 ? '#fef08a' : '#6ee7b7';
+        ctx.beginPath(); ctx.arc(mx2, my2, 2.0, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'maya_jade_switch') {
+      // Sculpted Limestone & Emerald Jade Sun-Wheel Altar Pedestal (Bidirectional Toggle!)
+      const opened = !!p.opened;
+      const spin = (p.spinAnim || 0) * Math.PI * 1.25;
+      const cx = px + p.w * 0.5;
+      const cy = py + 22;
+      ctx.save();
+      // Stepped carved Mayan altar pedestal
+      ctx.fillStyle = '#9e9581'; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(cx - 20, py + p.h - 10, 40, 10, 3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#b5ad96';
+      ctx.beginPath(); ctx.roundRect(cx - 15, py + p.h - 17, 30, 8, 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#78715f';
+      ctx.beginPath(); ctx.roundRect(cx - 10, py + 12, 20, p.h - 27, 4); ctx.fill(); ctx.stroke();
+
+      // Radial jade/amber aura behind sun-wheel
+      const glow = ctx.createRadialGradient(cx, cy, 3, cx, cy, 24);
+      glow.addColorStop(0, opened ? 'rgba(52, 211, 153, 0.72)' : 'rgba(251, 191, 36, 0.52)');
+      glow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(cx, cy, 24, 0, Math.PI * 2); ctx.fill();
+
+      // Rotating 8-ray carved Mayan jade & burnished gold sun-calendar wheel
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(opened ? (0.85 + spin) : (-0.85 - spin));
+      ctx.fillStyle = '#fbbf24';
+      for (let s = 0; s < 8; s++) {
+        const a = s * Math.PI * 0.25;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a - 0.16) * 14, Math.sin(a - 0.16) * 14);
+        ctx.lineTo(Math.cos(a) * 20, Math.sin(a) * 20);
+        ctx.lineTo(Math.cos(a + 0.16) * 14, Math.sin(a + 0.16) * 14);
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.strokeStyle = '#332f24'; ctx.lineWidth = 6.2;
+      ctx.beginPath(); ctx.arc(0, 0, 14.5, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = opened ? '#10b981' : '#0284c7'; ctx.lineWidth = 3.4;
+      ctx.beginPath(); ctx.arc(0, 0, 14.5, 0, Math.PI * 2); ctx.stroke();
+      for (let s = 0; s < 4; s++) {
+        const a = s * Math.PI * 0.5;
+        ctx.strokeStyle = '#fde047'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 13, Math.sin(a) * 13); ctx.stroke();
+      }
+      ctx.restore();
+
+      // Glowing emerald/amber jade heart cabochon
+      ctx.fillStyle = opened ? '#34d399' : '#f59e0b'; ctx.strokeStyle = '#fef9c3'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(cx, cy, 6.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'maya_stone_bridge') {
+      // Carved Mayan Kukulcán Serpent-Pylon Counterweight Limestone & Jade Drawbridge!
+      const anim = Math.max(0, Math.min(1, p.bridgeAnim !== undefined ? p.bridgeAnim : (p.lowered ? 1 : 0)));
+      const liftAngle = -(1 - anim) * 1.18;
+      ctx.save();
+      // Stepped limestone counterweight tower + sculpted Kukulcán serpent capital
+      const twG = ctx.createLinearGradient(px - 18, py - 66, px + 4, py + 22);
+      twG.addColorStop(0, '#cfc6b0'); twG.addColorStop(0.55, '#8a826e'); twG.addColorStop(1, '#575243');
+      ctx.fillStyle = twG; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.8;
+      ctx.fillRect(px - 16, py - 64, 20, 88); ctx.strokeRect(px - 16, py - 64, 20, 88);
+      ctx.fillStyle = '#b5ad96';
+      ctx.fillRect(px - 20, py - 72, 28, 10); ctx.strokeRect(px - 20, py - 72, 28, 10);
+      ctx.fillStyle = '#10b981'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(px - 6, py - 54, 6.0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      ctx.save();
+      ctx.translate(px, py + 6);
+      ctx.rotate(liftAngle);
+      const bG = ctx.createLinearGradient(0, -6, 0, p.h - 4);
+      bG.addColorStop(0, '#e5decb'); bG.addColorStop(0.45, '#9e9581'); bG.addColorStop(1, '#575243');
+      ctx.fillStyle = bG; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(0, -6, p.w, p.h, 4); ctx.fill(); ctx.stroke();
+      // Ashlar stone slab joints & Mayan jade-and-gold inlay strip
+      ctx.strokeStyle = 'rgba(51, 47, 36, 0.5)'; ctx.lineWidth = 1.1;
+      for (let sx = 38; sx < p.w - 16; sx += 38) {
+        ctx.beginPath(); ctx.moveTo(sx, -6); ctx.lineTo(sx, p.h - 6); ctx.stroke();
+      }
+      ctx.fillStyle = '#065f46'; ctx.fillRect(10, 1, p.w - 20, 6);
+      for (let bx = 18; bx < p.w - 14; bx += 24) {
+        ctx.fillStyle = ((Math.floor(bx / 24) & 1) === 0) ? '#34d399' : '#fbbf24';
+        ctx.fillRect(bx - 4, 2.5, 8, 3);
+      }
+      ctx.restore();
+
+      const ax = px + Math.cos(liftAngle) * (p.w * 0.58);
+      const ay = py + 6 + Math.sin(liftAngle) * (p.w * 0.58);
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 3.6;
+      ctx.beginPath(); ctx.moveTo(px - 6, py - 54); ctx.lineTo(ax, ay); ctx.stroke();
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8; ctx.setLineDash([5, 4]);
+      ctx.beginPath(); ctx.moveTo(px - 6, py - 54); ctx.lineTo(ax, ay); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'maya_cenote_geyser') {
+      // Carved Mayan Feathered-Serpent Cenote Fountain Basin + Shimmering Bioluminescent Emerald-Turquoise Water Plume!
+      const baseY = py + p.h;
+      const cx = px + p.w * 0.5;
+      const active = !!p.geyserActive;
+      const warn = !!p.geyserWarn;
+      ctx.save();
+      if (active) {
+        const pulse = Math.sin(time * 16) * 4;
+        // Soft turquoise mist aura around erupting cenote plume
+        const mGlow = ctx.createRadialGradient(cx, py + p.h * 0.45, 10, cx, py + p.h * 0.45, 58);
+        mGlow.addColorStop(0, 'rgba(45, 212, 191, 0.34)');
+        mGlow.addColorStop(1, 'rgba(45, 212, 191, 0)');
+        ctx.fillStyle = mGlow;
+        ctx.fillRect(cx - 58, py - 14, 116, p.h);
+
+        const jetG = ctx.createLinearGradient(cx, baseY - 26, cx, py);
+        jetG.addColorStop(0, 'rgba(13, 148, 136, 0.94)');
+        jetG.addColorStop(0.45, 'rgba(45, 212, 191, 0.86)');
+        jetG.addColorStop(0.82, 'rgba(153, 246, 228, 0.90)');
+        jetG.addColorStop(1, 'rgba(240, 253, 250, 0.95)');
+        ctx.fillStyle = jetG;
+        ctx.beginPath();
+        ctx.moveTo(cx - 19, baseY - 24);
+        ctx.quadraticCurveTo(cx - 28 - pulse * 0.4, py + p.h * 0.45, cx - 24, py + 12);
+        ctx.quadraticCurveTo(cx, py - 10 + pulse * 0.5, cx + 24, py + 12);
+        ctx.quadraticCurveTo(cx + 28 + pulse * 0.4, py + p.h * 0.45, cx + 19, baseY - 24);
+        ctx.closePath(); ctx.fill();
+
+        // Luminous inner white-water core & rising streaks
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.80)'; ctx.lineWidth = 2.2;
+        for (let s = -1; s <= 1; s++) {
+          const offset = ((time * 245 + (s + 2) * 55) % (p.h - 48));
+          const sy = baseY - 32 - offset;
+          ctx.beginPath(); ctx.moveTo(cx + s * 9, sy + 20); ctx.lineTo(cx + s * 11, sy); ctx.stroke();
+        }
+        // Foaming crown crest & sparkling water droplets
+        ctx.fillStyle = 'rgba(240, 253, 250, 0.94)';
+        for (let c = -2; c <= 2; c++) {
+          ctx.beginPath(); ctx.arc(cx + c * 9, py + 8 + Math.abs(c) * 2 + pulse * 0.3, 6.5 - Math.abs(c) * 0.8, 0, Math.PI * 2); ctx.fill();
+        }
+        for (let d = 0; d < 6; d++) {
+          const dx = cx + Math.sin(time * 9 + d * 1.7) * 26;
+          const dy = py + 10 + Math.cos(time * 7 + d * 2.1) * 14;
+          ctx.beginPath(); ctx.arc(dx, dy, 3.0, 0, Math.PI * 2); ctx.fill();
+        }
+      } else if (warn) {
+        // Boiling turquoise warning froth before eruption!
+        ctx.fillStyle = 'rgba(94, 234, 212, 0.88)';
+        for (let b = 0; b < 6; b++) {
+          const bx = cx + Math.sin(time * 15 + b * 1.8) * 16;
+          const by = baseY - 28 - ((time * 68 + b * 11) % 26);
+          ctx.beginPath(); ctx.arc(bx, by, 3.8, 0, Math.PI * 2); ctx.fill();
+        }
+      } else {
+        // Gentle idle shimmering cenote water dome above spout
+        ctx.fillStyle = 'rgba(45, 212, 191, 0.55)';
+        ctx.beginPath();
+        ctx.ellipse(cx, baseY - 34, 10 + Math.sin(time * 5) * 1.5, 4, 0, Math.PI, 0);
+        ctx.fill();
+      }
+      // Carved stone Kukulcán serpent spout & Maya-blue/jade inlaid stepped fountain basin
+      ctx.fillStyle = '#0f766e'; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(cx - 12, baseY - 22); ctx.lineTo(cx - 8, baseY - 35); ctx.lineTo(cx + 8, baseY - 35); ctx.lineTo(cx + 12, baseY - 22); ctx.closePath(); ctx.fill(); ctx.stroke();
+      const fG = ctx.createLinearGradient(px + 4, baseY - 24, px + 4, baseY);
+      fG.addColorStop(0, '#cfc6b0'); fG.addColorStop(0.50, '#8a826e'); fG.addColorStop(1, '#4a4538');
+      ctx.fillStyle = fG; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(px + 6, baseY - 22); ctx.lineTo(px + p.w - 6, baseY - 22);
+      ctx.lineTo(px + p.w - 2, baseY); ctx.lineTo(px + 2, baseY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      for (let zx = px + 14; zx <= px + p.w - 14; zx += 15) {
+        ctx.fillStyle = ((Math.floor(zx / 15) & 1) === 0) ? '#10b981' : '#0284c7';
+        ctx.fillRect(zx - 4.5, baseY - 16, 9, 8);
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(zx - 1.5, baseY - 13.5, 3, 3);
+      }
+      ctx.fillStyle = '#ebe3ce'; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.roundRect(px + 2, baseY - 26, p.w - 4, 6, 3); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'maya_serpent_ring') {
+      // Chichén Itzá Great Ballcourt (Pok-Ta-Pok) Carved Feathered-Serpent Launch Hoop + Trajectory Aim Chevron!
+      const cx = px + p.w * 0.5;
+      const cy = py + p.h * 0.5 + Math.sin(time * 3.4 + p.x * 0.01) * 3.0;
+      const charge = p.chargeAnim || 0;
+      const aimAng = (p.targetX !== undefined && p.targetY !== undefined)
+        ? Math.atan2((p.targetY - (p.y + p.h * 0.5)) - (p.arcHeight || 68) * 0.65, p.targetX - (p.x + p.w * 0.5))
+        : Math.atan2(-(p.launchVy || 560), p.launchVx || 560);
+      ctx.save();
+
+      // Radiant emerald-gold vortex aura inside hoop
+      const rGlow = ctx.createRadialGradient(cx, cy, 4, cx, cy, 42 + charge * 12);
+      rGlow.addColorStop(0, charge > 0.2 ? 'rgba(254, 249, 195, 0.92)' : 'rgba(52, 211, 153, 0.55)');
+      rGlow.addColorStop(0.55, 'rgba(16, 185, 129, 0.28)');
+      rGlow.addColorStop(1, 'rgba(16, 185, 129, 0)');
+      ctx.fillStyle = rGlow;
+      ctx.beginPath(); ctx.arc(cx, cy, 42 + charge * 12, 0, Math.PI * 2); ctx.fill();
+
+      // Rotating inner Mayan glyph energy ring
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(time * 2.6);
+      ctx.strokeStyle = 'rgba(253, 224, 71, 0.85)';
+      ctx.lineWidth = 2.0;
+      ctx.setLineDash([6, 5]);
+      ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // Sculpted Chichén Itzá Carved Limestone & Jade Intertwined Serpent Ring
+      ctx.strokeStyle = '#332f24'; ctx.lineWidth = 11.5;
+      ctx.beginPath(); ctx.arc(cx, cy, 26, 0, Math.PI * 2); ctx.stroke();
+      const stG = ctx.createLinearGradient(cx - 28, cy - 28, cx + 28, cy + 28);
+      stG.addColorStop(0, '#efe7d2'); stG.addColorStop(0.5, '#b5ad96'); stG.addColorStop(1, '#6e6856');
+      ctx.strokeStyle = stG; ctx.lineWidth = 8.2;
+      ctx.beginPath(); ctx.arc(cx, cy, 26, 0, Math.PI * 2); ctx.stroke();
+
+      // Carved emerald jade scale inlays around stone ring
+      for (let k = 0; k < 8; k++) {
+        const a = k * Math.PI * 0.25;
+        ctx.fillStyle = (k % 2 === 0) ? '#10b981' : '#fbbf24';
+        ctx.beginPath(); ctx.arc(cx + Math.cos(a) * 26, cy + Math.sin(a) * 26, 2.8, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Sculpted Kukulcán Serpent Head Crest on top of hoop + Quetzal Plumes at bottom
+      ctx.fillStyle = '#d6ccb4'; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.roundRect(cx - 10, cy - 39, 20, 11, 4); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath(); ctx.arc(cx + 4, cy - 34, 2.2, 0, Math.PI * 2); ctx.fill();
+      for (const s of [-1, 0, 1]) {
+        ctx.strokeStyle = s === 0 ? '#10b981' : '#0d9488'; ctx.lineWidth = 3.2; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(cx + s * 5, cy + 31); ctx.lineTo(cx + s * 8, cy + 42); ctx.stroke();
+      }
+
+      // Pulsing Golden Trajectory Aim Chevron & Dotted Sight Dots!
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(aimAng);
+      const pulseShift = (time * 28) % 14;
+      ctx.fillStyle = '#fde047'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(38 + pulseShift * 0.3, 0);
+      ctx.lineTo(27 + pulseShift * 0.3, -7);
+      ctx.lineTo(30 + pulseShift * 0.3, 0);
+      ctx.lineTo(27 + pulseShift * 0.3, 7);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = 'rgba(253, 224, 71, 0.65)';
+      ctx.beginPath(); ctx.arc(49, 0, 2.5, 0, Math.PI * 2); ctx.arc(60, 0, 1.9, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'maya_twin_scale') {
+      // Linked Counterweight Mayan Gold Balance Scales (Overhead Pivoting Stone/Gold Beam + Chains + Ornate Scale Pan!)
+      const panCx = px + p.w * 0.5;
+      const beamY = (p.beamY !== undefined ? p.beamY : 255) + (py - p.y);
+      ctx.save();
+
+      // Left pan draws the shared overhead pivoting Mayan balance beam & central Jade Sun Fulcrum!
+      if (p.panSide === -1 && p.partnerX !== undefined) {
+        const rightCx = px + (p.partnerX - p.x);
+        const rightPy = py + ((p.partnerY !== undefined ? p.partnerY : p.y) - p.y);
+        const midBx = (panCx + rightCx) * 0.5;
+        const leftHangY = beamY + (p.scaleOffset || 0) * 0.24;
+        const rightHangY = beamY - (p.scaleOffset || 0) * 0.24;
+
+        // Tall carved Mayan stone ceiling pylon supporting fulcrum
+        ctx.fillStyle = '#78715f'; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.6;
+        ctx.fillRect(midBx - 9, beamY - 95, 18, 98);
+        ctx.strokeRect(midBx - 9, beamY - 95, 18, 98);
+
+        // Pivoting carved gold-and-limestone balance beam
+        ctx.strokeStyle = '#332f24'; ctx.lineWidth = 9.5; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(panCx, leftHangY); ctx.lineTo(rightCx, rightHangY); ctx.stroke();
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 5.5;
+        ctx.beginPath(); ctx.moveTo(panCx, leftHangY); ctx.lineTo(rightCx, rightHangY); ctx.stroke();
+
+        // Central Mayan Jade Sun Fulcrum Medallion
+        ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(midBx, beamY, 13, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath(); ctx.arc(midBx, beamY, 6.5, 0, Math.PI * 2); ctx.fill();
+
+        // Taut bronze counterweight chains from beam ends to BOTH scale pans!
+        for (const [hCx, hTopY, hPanY, hW] of [[panCx, leftHangY, py, p.w], [rightCx, rightHangY, rightPy, p.w]]) {
+          ctx.strokeStyle = '#b45309'; ctx.lineWidth = 2.4; ctx.setLineDash([5, 3]);
+          ctx.beginPath();
+          ctx.moveTo(hCx, hTopY); ctx.lineTo(hCx, hPanY - 18);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.0;
+          ctx.beginPath();
+          ctx.moveTo(hCx, hPanY - 18); ctx.lineTo(hCx - hW * 0.42, hPanY + 2);
+          ctx.moveTo(hCx, hPanY - 18); ctx.lineTo(hCx + hW * 0.42, hPanY + 2);
+          ctx.stroke();
+          ctx.fillStyle = '#10b981'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.arc(hCx, hPanY - 18, 4.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        }
+      }
+
+      // Ornate Burnished-Gold & Emerald-Jade Mayan Scale Pan
+      const pG = ctx.createLinearGradient(px, py, px + p.w, py + p.h + 6);
+      pG.addColorStop(0, '#92400e'); pG.addColorStop(0.3, '#fbbf24'); pG.addColorStop(0.55, '#fef08a'); pG.addColorStop(0.8, '#d97706'); pG.addColorStop(1, '#78350f');
+      ctx.fillStyle = pG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(px - 2, py);
+      ctx.lineTo(px + p.w + 2, py);
+      ctx.lineTo(px + p.w - 10, py + p.h);
+      ctx.lineTo(px + 10, py + p.h);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      ctx.fillStyle = '#059669';
+      ctx.fillRect(px + 14, py + 5, p.w - 28, 5);
+      ctx.fillStyle = '#fef9c3';
+      for (let gx = px + 22; gx <= px + p.w - 22; gx += 18) {
+        ctx.fillRect(gx - 2, py + 6.5, 4, 2);
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'maya_thorn_pit') {
+      // Sunken Jungle Briar Thorn Trough (Tangled emerald-crimson spiky vines & glowing amber hazard buds!)
+      ctx.save();
+      const bgG = ctx.createLinearGradient(px, py, px, py + p.h);
+      bgG.addColorStop(0, 'rgba(6, 46, 34, 0.85)');
+      bgG.addColorStop(1, '#041f18');
+      ctx.fillStyle = bgG;
+      ctx.fillRect(px, py + 4, p.w, p.h - 4);
+
+      // Tangled thorny jungle vines & sharp crimson-tipped thorns
+      ctx.strokeStyle = '#14532d'; ctx.lineWidth = 3.6;
+      ctx.beginPath();
+      for (let vx = px; vx < px + p.w; vx += 28) {
+        ctx.moveTo(vx, py + p.h - 2);
+        ctx.quadraticCurveTo(vx + 14, py + 3, Math.min(px + p.w, vx + 28), py + p.h - 2);
+      }
+      ctx.stroke();
+
+      for (let sx = px + 8; sx < px + p.w - 6; sx += 14) {
+        const hOff = ((Math.floor(sx / 14) % 2) === 0) ? 0 : 3;
+        ctx.fillStyle = '#991b1b'; ctx.strokeStyle = '#fca5a5'; ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(sx - 4, py + p.h - 2);
+        ctx.lineTo(sx, py + hOff);
+        ctx.lineTo(sx + 4, py + p.h - 2);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'maya_rolling_wheel') {
+      // Giant Rolling Carved Mayan Stone Sun-Calendar Wheel Monolith!
+      const rad = p.w * 0.5;
+      const cx = px + rad;
+      const cy = py + rad;
+      const rot = p.wheelRot || 0;
+      ctx.save();
+      ctx.translate(cx, cy);
+
+      // Contact shadow beneath monolith
+      ctx.fillStyle = 'rgba(10, 22, 16, 0.45)';
+      ctx.beginPath(); ctx.ellipse(0, rad - 2, rad * 0.72, 6, 0, 0, Math.PI * 2); ctx.fill();
+
+      ctx.rotate(rot);
+      // Chiseled outer stone calendar cogs
+      ctx.fillStyle = '#6e6856'; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 1.4;
+      for (let t = 0; t < 12; t++) {
+        const a = t * (Math.PI / 6);
+        ctx.save();
+        ctx.rotate(a);
+        ctx.fillRect(-6, -rad - 2, 12, 7);
+        ctx.strokeRect(-6, -rad - 2, 12, 7);
+        ctx.restore();
+      }
+
+      // Main 3D Carved Yucatán Limestone Monolith Disc
+      const wG = ctx.createRadialGradient(-rad * 0.25, -rad * 0.25, 6, 0, 0, rad - 2);
+      wG.addColorStop(0, '#f3ead3');
+      wG.addColorStop(0.55, '#bfb69e');
+      wG.addColorStop(1, '#78715f');
+      ctx.fillStyle = wG; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.arc(0, 0, rad - 2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      // Polychrome Mayan Calendar Ring (8 radial glyph wedges in Emerald Jade, Maya Blue & Gold!)
+      ctx.strokeStyle = '#065f46'; ctx.lineWidth = 8.0;
+      ctx.beginPath(); ctx.arc(0, 0, rad * 0.64, 0, Math.PI * 2); ctx.stroke();
+      for (let k = 0; k < 8; k++) {
+        const a = k * Math.PI * 0.25;
+        ctx.strokeStyle = (k % 2 === 0) ? '#fbbf24' : '#38bdf8';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * (rad * 0.30), Math.sin(a) * (rad * 0.30));
+        ctx.lineTo(Math.cos(a) * (rad - 5), Math.sin(a) * (rad - 5));
+        ctx.stroke();
+        ctx.fillStyle = (k % 2 === 0) ? '#10b981' : '#0284c7';
+        ctx.beginPath();
+        ctx.arc(Math.cos(a + 0.39) * (rad * 0.64), Math.sin(a + 0.39) * (rad * 0.64), 4.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Central Golden Mayan Sun-God Hub Medallion
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.arc(0, 0, rad * 0.30, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#059669';
+      ctx.beginPath(); ctx.arc(0, 0, rad * 0.14, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'maya_dart_totem') {
+      // Monumental Stacked 3D Mayan Gargoyle Blowgun Totem:
+      // Upper Sculpted Quetzal-Serpent Gargoyle (Sky-Blue HIGH [Duck] Dart) + Lower Snarling Balam Jaguar Gargoyle (Gold LOW [Jump] Dart)!
+      const fDir = p.fireDir || -1;
+      const baseY = py + p.h;
+      const midX = px + p.w * 0.5;
+      const highY = baseY - 49;
+      const lowY = baseY - 19;
+      ctx.save();
+
+      // 1. Render active flying multi-feathered flint-knapped obsidian blowgun darts!
+      if (p.darts && p.darts.length) {
+        for (const d of p.darts) {
+          const dx = px + (d.x - p.x);
+          const dy = py + (d.y - p.y);
+          const dir = d.vx >= 0 ? 1 : -1;
+          ctx.save();
+          ctx.translate(dx, dy);
+          ctx.scale(dir, 1);
+
+          // Layered aerodynamic comet wake & spinning wind ring
+          const tG = ctx.createLinearGradient(14, 0, -36, 0);
+          tG.addColorStop(0, d.high ? 'rgba(56, 189, 248, 0.90)' : 'rgba(251, 191, 36, 0.90)');
+          tG.addColorStop(0.5, d.high ? 'rgba(16, 185, 129, 0.42)' : 'rgba(245, 158, 11, 0.42)');
+          tG.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = tG;
+          ctx.beginPath();
+          ctx.moveTo(10, -2.5); ctx.lineTo(-36, -6); ctx.lineTo(-36, 6); ctx.lineTo(10, 2.5);
+          ctx.closePath(); ctx.fill();
+
+          ctx.strokeStyle = d.high ? 'rgba(186, 230, 253, 0.65)' : 'rgba(254, 240, 138, 0.65)';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.ellipse(-4, 0, 2.5, 6.2, 0, 0, Math.PI * 2); ctx.stroke();
+
+          // Triple Quetzal/Macaw fletching feathers at tail
+          ctx.fillStyle = d.high ? '#0284c7' : '#d97706';
+          ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(-19, -5.5); ctx.lineTo(-10, -1.2); ctx.lineTo(-10, 1.2); ctx.lineTo(-19, 5.5); ctx.lineTo(-15, 0);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = d.high ? '#7dd3fc' : '#fde047';
+          ctx.beginPath();
+          ctx.moveTo(-17, -3.5); ctx.lineTo(-11, 0); ctx.lineTo(-17, 3.5); ctx.closePath(); ctx.fill();
+
+          // Banded hardwood blowgun shaft + crimson sinew binding
+          ctx.fillStyle = '#d97706';
+          ctx.fillRect(-12, -1.6, 18, 3.2);
+          ctx.fillStyle = '#fef3c7';
+          ctx.fillRect(-6, -1.6, 4, 3.2);
+          ctx.fillStyle = '#dc2626';
+          ctx.fillRect(3.5, -2.2, 3, 4.4);
+
+          // Flint-knapped glassy black obsidian spearhead with specular facets!
+          ctx.fillStyle = '#090d16'; ctx.strokeStyle = d.high ? '#7dd3fc' : '#fde047'; ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.moveTo(17.5, 0); ctx.lineTo(6, -5.2); ctx.lineTo(7.8, 0); ctx.lineTo(6, 5.2);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = 'rgba(226, 232, 240, 0.55)';
+          ctx.beginPath(); ctx.moveTo(16, 0); ctx.lineTo(7.5, -3.4); ctx.lineTo(8.5, 0); ctx.closePath(); ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // 2. Sculpted 3D Mayan Gargoyle Pillar (facing fDir!)
+      ctx.translate(midX, baseY);
+      ctx.scale(fDir, 1); // Now +X always points toward firing direction!
+
+      // Contact shadow & stepped carved limestone altar plinth
+      ctx.fillStyle = 'rgba(12, 22, 16, 0.42)';
+      ctx.beginPath(); ctx.ellipse(0, 0, 28, 5, 0, 0, Math.PI * 2); ctx.fill();
+
+      const stG = ctx.createLinearGradient(-24, -p.h, 24, 0);
+      stG.addColorStop(0, '#6e6856'); // Shaded back spine
+      stG.addColorStop(0.45, '#aba28c');
+      stG.addColorStop(0.82, '#ded5bf'); // Sunlit front snout side
+      stG.addColorStop(1, '#f3ebd6');
+
+      // Base stepped pedestal with carved Mayan glyph slots & moss
+      ctx.fillStyle = '#78715f'; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(-25, -8, 50, 8, 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = stG;
+      ctx.fillRect(-21, -p.h + 12, 38, p.h - 20);
+      ctx.strokeRect(-21, -p.h + 12, 38, p.h - 20);
+
+      // Chiseled stone block joints & weathered cracks along back spine
+      ctx.strokeStyle = 'rgba(44, 40, 30, 0.55)'; ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(-21, -35); ctx.lineTo(17, -35);
+      ctx.moveTo(-21, -64); ctx.lineTo(17, -64);
+      ctx.moveTo(-12, -8); ctx.lineTo(-12, -35);
+      ctx.moveTo(-8, -35); ctx.lineTo(-8, -64);
+      ctx.moveTo(-16, -54); ctx.lineTo(-11, -48); ctx.lineTo(-14, -42);
+      ctx.stroke();
+
+      // Recessed glowing rune vein along side of totem
+      ctx.fillStyle = '#064e3b';
+      ctx.fillRect(-16, -61, 6, 48);
+      ctx.fillStyle = ((p.warnRatio || 0) > 0) ? (p.warnHigh ? '#38bdf8' : '#fbbf24') : '#10b981';
+      for (let ry = -57; ry <= -19; ry += 9) ctx.fillRect(-14.5, ry, 3, 5);
+
+      // ---- LOWER GARGOYLE: Sculpted Snarling Balam Jaguar Head (LOW Gold Dart @ y = -19) ----
+      ctx.fillStyle = stG; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 1.5;
+      // Projecting upper & lower jaguar stone jaws
+      ctx.beginPath();
+      ctx.moveTo(-4, -33); ctx.lineTo(22, -30); ctx.lineTo(25, -22); ctx.lineTo(8, -21);
+      ctx.lineTo(8, -16); ctx.lineTo(23, -15); ctx.lineTo(20, -9); ctx.lineTo(-4, -9);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Dark recessed blowgun throat & sharp white stone jaguar fangs!
+      ctx.fillStyle = '#181410';
+      ctx.fillRect(7, -22.5, 16, 7);
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.moveTo(18, -22.5); ctx.lineTo(20, -18.5); ctx.lineTo(22, -22.5);
+      ctx.moveTo(17, -15.5); ctx.lineTo(19, -19); ctx.lineTo(21, -15.5);
+      ctx.fill();
+      // Carved golden earspool & fierce glowing amber jaguar eye
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(-3, -23, 5.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#059669'; ctx.beginPath(); ctx.arc(-3, -23, 2.2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath(); ctx.moveTo(6, -29); ctx.lineTo(14, -27.5); ctx.lineTo(12, -24); ctx.lineTo(6, -25); ctx.closePath(); ctx.fill();
+
+      // ---- UPPER GARGOYLE: Sculpted Plumed Kukulcán / Quetzal Head (HIGH Sky-Blue Dart @ y = -49) ----
+      ctx.fillStyle = stG; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-6, -63); ctx.lineTo(21, -59); ctx.lineTo(26, -52); ctx.lineTo(7, -51);
+      ctx.lineTo(7, -46); ctx.lineTo(23, -45); ctx.lineTo(19, -39); ctx.lineTo(-6, -38);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(7, -52.5, 16, 7);
+      // Maya-blue & turquoise stone beak inlays + glowing sky-blue serpent eye
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(2, -59, 13, 3.5);
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath(); ctx.arc(9, -54.5, 2.6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(9.6, -55, 0.9, 0, Math.PI * 2); ctx.fill();
+
+      // Crown Stepped Cornice, Swept Stone Plume Crest & Jungle Moss Cushion!
+      ctx.fillStyle = '#dfd7c2'; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-25, -64); ctx.lineTo(21, -64); ctx.lineTo(18, -73); ctx.lineTo(-22, -73);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Carved stone feather crest fanning atop totem
+      for (let fc = -2; fc <= 2; fc++) {
+        ctx.fillStyle = (fc % 2 === 0) ? '#10b981' : '#0d9488';
+        ctx.beginPath();
+        ctx.roundRect(-5 + fc * 6.5 - 3, -85 + Math.abs(fc) * 2, 6, 13 - Math.abs(fc) * 1.5, 3);
+        ctx.fill(); ctx.stroke();
+      }
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(-16, -71, 30, 3);
+      ctx.fillStyle = '#15803d';
+      ctx.beginPath(); ctx.ellipse(-15, -64, 8, 2.6, 0, 0, Math.PI * 2); ctx.fill();
+
+      // 3. Telegraph Charging Glow & Muzzle Flash right inside the active Gargoyle Jaws!
+      if ((p.warnRatio || 0) > 0) {
+        const wy = p.warnHigh ? -49 : -19;
+        const r = 7 + p.warnRatio * 13;
+        const wGlow = ctx.createRadialGradient(22, wy, 1, 22, wy, r);
+        wGlow.addColorStop(0, '#ffffff');
+        wGlow.addColorStop(0.45, p.warnHigh ? 'rgba(56, 189, 248, 0.92)' : 'rgba(253, 224, 71, 0.92)');
+        wGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = wGlow;
+        ctx.beginPath(); ctx.arc(22, wy, r, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'maya_serpent_spine') {
+      // Undulating Living Kukulcán Feathered-Serpent Bridge + Traveling Golden Equinox Solar Crest!
+      const idx = p.segmentIdx || 0;
+      const total = p.totalSegments || 7;
+      const isTail = idx === 0;
+      const isHead = idx === total - 1;
+      const glow = p.solarGlow || 0;
+      ctx.save();
+
+      // Radiant Golden Equinox Solar Crest Aura when illuminated!
+      if (glow > 0.12) {
+        const sGlow = ctx.createRadialGradient(px + p.w * 0.5, py + 8, 6, px + p.w * 0.5, py + 8, p.w * 0.72);
+        sGlow.addColorStop(0, `rgba(254, 249, 195, ${(glow * 0.75).toFixed(2)})`);
+        sGlow.addColorStop(0.55, `rgba(251, 191, 36, ${(glow * 0.42).toFixed(2)})`);
+        sGlow.addColorStop(1, 'rgba(251, 191, 36, 0)');
+        ctx.fillStyle = sGlow;
+        ctx.beginPath(); ctx.ellipse(px + p.w * 0.5, py + 8, p.w * 0.72, 26, 0, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Swaying emerald Quetzal ventral plumes hanging beneath each serpent vertebra
+      const sway = Math.sin(time * 5.0 + idx) * 3;
+      for (let f = px + 16; f <= px + p.w - 16; f += 18) {
+        ctx.strokeStyle = glow > 0.45 ? '#fbbf24' : '#10b981';
+        ctx.lineWidth = 3.2; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(f, py + p.h - 2); ctx.lineTo(f - 3 + sway, py + p.h + 11); ctx.stroke();
+      }
+
+      // Sculpted Jade & Limestone Serpent Vertebra Body
+      const bodyG = ctx.createLinearGradient(px, py, px, py + p.h);
+      if (glow > 0.45) {
+        bodyG.addColorStop(0, '#fef9c3'); bodyG.addColorStop(0.5, '#fbbf24'); bodyG.addColorStop(1, '#b45309');
+      } else {
+        bodyG.addColorStop(0, '#6ee7b7'); bodyG.addColorStop(0.45, '#059669'); bodyG.addColorStop(1, '#064e3b');
+      }
+      ctx.fillStyle = bodyG; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(px, py, p.w, p.h, 8); ctx.fill(); ctx.stroke();
+
+      // Sunlit limestone stepping cap & golden scale chevrons
+      ctx.fillStyle = glow > 0.45 ? '#fffbeb' : '#e5decb';
+      ctx.beginPath(); ctx.roundRect(px + 4, py + 1.5, p.w - 8, 7, 3); ctx.fill();
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.4;
+      for (let sx = px + 18; sx < px + p.w - 16; sx += 20) {
+        ctx.beginPath(); ctx.moveTo(sx - 5, py + 14); ctx.lineTo(sx, py + 19); ctx.lineTo(sx + 5, py + 14); ctx.stroke();
+      }
+
+      // Tail Rattle Plumes on Segment 0 & Majestic Sculpted Kukulcán Serpent Head on Last Segment!
+      if (isTail) {
+        for (const [ang, col] of [[-0.25, '#10b981'], [0, '#fbbf24'], [0.25, '#0d9488']]) {
+          ctx.strokeStyle = col; ctx.lineWidth = 4.0; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(px + 2, py + 12); ctx.lineTo(px - 22, py + 12 + ang * 34); ctx.stroke();
+        }
+      } else if (isHead) {
+        const hx = px + p.w;
+        ctx.fillStyle = '#d6ccb4'; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(hx - 4, py - 8);
+        ctx.lineTo(hx + 24, py + 2);
+        ctx.lineTo(hx + 20, py + 14);
+        ctx.lineTo(hx + 24, py + 24);
+        ctx.lineTo(hx - 4, py + p.h + 2);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath(); ctx.arc(hx + 9, py + 4, 3.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(hx + 15, py + 11, 3, 4);
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'maya_glyph_seal' || p.type === 'maya_vault_door') {
+      // Helper: Hand-Crafted Vector Mayan Bas-Relief Sacred Emblem (0 = Kinich Sun, 1 = Balam Jaguar, 2 = Plumed Quetzal — ZERO emojis!)
+      const drawSacredMayanGlyph = (cx0, cy0, sc, sealIdx, isLit) => {
+        ctx.save();
+        ctx.translate(cx0, cy0);
+        ctx.scale(sc, sc);
+        const mainCol = isLit ? '#fde047' : '#a89f87';
+        const accCol = isLit ? '#10b981' : '#575243';
+        const lineCol = isLit ? '#451a03' : '#29251c';
+        if (sealIdx === 0) {
+          // 8-Ray Chiseled Kinich Ahau Sun Emblem
+          ctx.fillStyle = mainCol; ctx.strokeStyle = lineCol; ctx.lineWidth = 1.1;
+          for (let r = 0; r < 8; r++) {
+            ctx.save(); ctx.rotate(r * Math.PI * 0.25);
+            ctx.beginPath(); ctx.moveTo(-2.6, -6); ctx.lineTo(0, -11.5); ctx.lineTo(2.6, -6); ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            ctx.restore();
+          }
+          ctx.beginPath(); ctx.arc(0, 0, 6.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = accCol;
+          ctx.beginPath(); ctx.arc(0, 0, 2.8, 0, Math.PI * 2); ctx.fill();
+        } else if (sealIdx === 1) {
+          // Sculpted Mayan Balam Jaguar Head Relief
+          ctx.fillStyle = mainCol; ctx.strokeStyle = lineCol; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.arc(-4.5, -6.5, 2.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(-8, 5); ctx.quadraticCurveTo(-9, -6, 0, -7);
+          ctx.quadraticCurveTo(8, -6, 9, 1); ctx.lineTo(4, 3);
+          ctx.lineTo(7, 6.5); ctx.lineTo(-5, 6.5);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = accCol;
+          ctx.beginPath(); ctx.arc(2.5, -2.2, 1.8, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(5, 1.5, 1.8, 2.5);
+        } else {
+          // Sculpted Plumed Quetzal Crest & Twin Streamers Relief
+          ctx.strokeStyle = isLit ? '#34d399' : '#78715f'; ctx.lineWidth = 2.0; ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(-2, 2); ctx.quadraticCurveTo(-8, 6, -10, 9);
+          ctx.moveTo(0, 3); ctx.quadraticCurveTo(-5, 8, -7, 10.5);
+          ctx.stroke();
+          ctx.fillStyle = accCol; ctx.strokeStyle = lineCol; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.ellipse(0, 0, 6.5, 4.5, -0.35, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = mainCol;
+          ctx.beginPath(); ctx.arc(4.5, -3.8, 3.4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(7.5, -4.5); ctx.lineTo(11, -3); ctx.lineTo(7.5, -2); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = mainCol; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.moveTo(2.5, -7); ctx.lineTo(1, -10.5); ctx.moveTo(5, -7); ctx.lineTo(5, -10.8); ctx.stroke();
+        }
+        ctx.restore();
+      };
+
+      if (p.type === 'maya_glyph_seal') {
+        const lit = !!p.activated;
+        const bob = Math.sin(time * 4.2 + (p.sealIdx || 0) * 1.6) * 4;
+        const cx = px + p.w * 0.5;
+        const cy = py + p.h * 0.5 + bob;
+        ctx.save();
+
+        const aura = ctx.createRadialGradient(cx, cy, 4, cx, cy, lit ? 44 : 34);
+        aura.addColorStop(0, lit ? 'rgba(52, 211, 153, 0.90)' : 'rgba(253, 224, 71, 0.62)');
+        aura.addColorStop(0.55, lit ? 'rgba(16, 185, 129, 0.30)' : 'rgba(245, 158, 11, 0.22)');
+        aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = aura;
+        ctx.beginPath(); ctx.arc(cx, cy, lit ? 44 : 34, 0, Math.PI * 2); ctx.fill();
+
+        // Rotating 3D Carved Mayan Jade & Burnished Gold Octagonal Stela Disc
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(time * (lit ? 2.2 : 0.75));
+        const octG = ctx.createLinearGradient(-22, -22, 22, 22);
+        if (lit) {
+          octG.addColorStop(0, '#6ee7b7'); octG.addColorStop(0.5, '#059669'); octG.addColorStop(1, '#064e3b');
+        } else {
+          octG.addColorStop(0, '#fef08a'); octG.addColorStop(0.5, '#d97706'); octG.addColorStop(1, '#78350f');
+        }
+        ctx.fillStyle = octG;
+        ctx.strokeStyle = '#451a03'; ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        for (let k = 0; k < 8; k++) {
+          const a = k * Math.PI * 0.25;
+          const rx = Math.cos(a) * 22, ry = Math.sin(a) * 22;
+          if (k === 0) ctx.moveTo(rx, ry); else ctx.lineTo(rx, ry);
+        }
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Carved Mayan inner step-fret border dots
+        ctx.fillStyle = lit ? '#fef08a' : '#10b981';
+        for (let k = 0; k < 8; k++) {
+          const a = k * Math.PI * 0.25 + Math.PI * 0.125;
+          ctx.beginPath(); ctx.arc(Math.cos(a) * 16.5, Math.sin(a) * 16.5, 1.8, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+
+        // Recessed Dark Obsidian Inner Medallion Plate + Vector Sacred Relief!
+        ctx.fillStyle = lit ? '#064e3b' : '#1c1917';
+        ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(cx, cy, 13.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        drawSacredMayanGlyph(cx, cy, 1.0, p.sealIdx || 0, true);
+        ctx.restore();
+        return;
+      }
+
+      // Monumental Carved Mayan Cyclopean Stone Vault Gate with 3 Vector Bas-Relief Sockets & Glowing Jade Veins!
+      const open = Math.max(0, Math.min(1, p.openAnim || 0));
+      const slideUp = open * (p.h - 20);
+      const doorH = p.h - slideUp;
+      const mask = p.litMask || 0;
+      const litTotal = ((mask & 1) ? 1 : 0) + ((mask & 2) ? 1 : 0) + ((mask & 4) ? 1 : 0);
+      ctx.save();
+
+      // 3D Recessed Vault Guide Slots on Left & Right
+      ctx.fillStyle = '#26231b';
+      ctx.fillRect(px - 5, py, p.w + 10, p.h);
+
+      if (doorH > 8) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(px - 6, py, p.w + 12, p.h);
+        ctx.clip();
+
+        const dy = py - slideUp;
+        // Heavy 3D Chiseled Interlocking Mayan Monolith Blocks
+        const slabG = ctx.createLinearGradient(px, dy, px + p.w, dy);
+        slabG.addColorStop(0, '#cfc6b0'); slabG.addColorStop(0.5, '#968d77'); slabG.addColorStop(1, '#575243');
+        ctx.fillStyle = slabG; ctx.strokeStyle = '#29251c'; ctx.lineWidth = 2.2;
+        ctx.fillRect(px, dy, p.w, p.h);
+        ctx.strokeRect(px, dy, p.w, p.h);
+
+        // Chiseled interlocking cyclopean stone block seams & bevels
+        ctx.strokeStyle = 'rgba(41, 37, 28, 0.72)'; ctx.lineWidth = 1.5;
+        for (let by = dy + 24; by < dy + p.h - 10; by += 28) {
+          ctx.beginPath();
+          ctx.moveTo(px, by); ctx.lineTo(px + p.w * 0.35, by);
+          ctx.lineTo(px + p.w * 0.35, by + 6); ctx.lineTo(px + p.w * 0.68, by + 6);
+          ctx.lineTo(px + p.w * 0.68, by); ctx.lineTo(px + p.w, by);
+          ctx.stroke();
+        }
+
+        // Glowing Emerald-Gold Energy Conduit Channels linking the 3 Sacred Sockets!
+        ctx.strokeStyle = litTotal > 0 ? '#10b981' : '#3f3a2e';
+        ctx.lineWidth = 3.6;
+        ctx.beginPath(); ctx.moveTo(px + p.w * 0.5, dy + 16); ctx.lineTo(px + p.w * 0.5, dy + p.h - 14); ctx.stroke();
+        if (litTotal === 3) {
+          ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.moveTo(px + p.w * 0.5, dy + 16); ctx.lineTo(px + p.w * 0.5, dy + p.h - 14); ctx.stroke();
+        }
+
+        // Carved Gold & Jade Stepped-Fret Side Trim along Vault Slab
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(px + 2, dy + 2, 3.5, p.h - 4);
+        ctx.fillRect(px + p.w - 5.5, dy + 2, 3.5, p.h - 4);
+
+        // 3 Recessed Octagonal Stone Sockets with Hand-Crafted Vector Bas-Reliefs!
+        for (let s = 0; s < 3; s++) {
+          const isLit = (mask & (1 << s)) !== 0;
+          const sy = dy + 42 + s * 52;
+          const scx = px + p.w * 0.5;
+          if (isLit) {
+            const gG = ctx.createRadialGradient(scx, sy, 3, scx, sy, 26);
+            gG.addColorStop(0, 'rgba(52, 211, 153, 0.92)');
+            gG.addColorStop(0.55, 'rgba(251, 191, 36, 0.35)');
+            gG.addColorStop(1, 'rgba(52, 211, 153, 0)');
+            ctx.fillStyle = gG;
+            ctx.beginPath(); ctx.arc(scx, sy, 26, 0, Math.PI * 2); ctx.fill();
+          }
+          // Beveled octagonal stone socket rim
+          ctx.fillStyle = isLit ? '#065f46' : '#26221a';
+          ctx.strokeStyle = isLit ? '#fde047' : '#78715f';
+          ctx.lineWidth = 2.0;
+          ctx.beginPath(); ctx.arc(scx, sy, 16, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          drawSacredMayanGlyph(scx, sy, 1.05, s, isLit);
+        }
+        ctx.restore();
+      }
+
+      // Sculpted Overhanging Mayan Serpent-Molding Lintel Frame Crown
+      const linG = ctx.createLinearGradient(px - 12, py - 24, px + p.w + 12, py + 4);
+      linG.addColorStop(0, '#dfd7c2'); linG.addColorStop(0.5, '#9e9581'); linG.addColorStop(1, '#575243');
+      ctx.fillStyle = linG; ctx.strokeStyle = '#29251c'; ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(px - 13, py - 22); ctx.lineTo(px + p.w + 13, py - 22);
+      ctx.lineTo(px + p.w + 9, py + 4); ctx.lineTo(px - 9, py + 4);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#059669';
+      ctx.fillRect(px - 7, py - 15, p.w + 14, 7);
+      ctx.fillStyle = '#fbbf24';
+      for (let gx = px - 2; gx <= px + p.w + 2; gx += 12) ctx.fillRect(gx, py - 13, 5, 3);
+      ctx.restore();
+      return;
+    }
+
+    // === STAGE 25: SANTORINI & ACROPOLIS, GREECE PLATFORMS (Museum-Grade Realism) ===
+    if (p.type === 'greece_terrace') {
+      ctx.save();
+      const isGround = p.h >= 60;
+      ctx.beginPath();
+      ctx.roundRect(px, py, p.w, p.h, isGround ? [5, 5, 0, 0] : 5);
+      ctx.save();
+      ctx.clip();
+      // 1. Pre-baked Calacatta veined marble texture blended with warm sunlit Pentelic limestone
+      ctx.translate(px, py);
+      ctx.fillStyle = tex.veinedMarble;
+      ctx.fillRect(0, 0, p.w, p.h);
+      const mG = ctx.createLinearGradient(0, 0, 0, p.h);
+      mG.addColorStop(0, 'rgba(255, 253, 245, 0.72)');
+      mG.addColorStop(0.22, 'rgba(248, 244, 236, 0.56)');
+      mG.addColorStop(0.65, 'rgba(214, 206, 194, 0.45)');
+      mG.addColorStop(1, 'rgba(120, 113, 108, 0.62)');
+      ctx.fillStyle = mG;
+      ctx.fillRect(0, 0, p.w, p.h);
+
+      // Cast drop shadow beneath overhanging top coping slab
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.24)';
+      ctx.fillRect(0, 7, p.w, 4);
+
+      // 2. Iconic Aegean Cobalt-Blue & Sculpted 3D Gold Greek Key (Meander) Frieze Band
+      const frG = ctx.createLinearGradient(0, 8, 0, 19.5);
+      frG.addColorStop(0, '#0284c7');
+      frG.addColorStop(0.5, '#0369a1');
+      frG.addColorStop(1, '#082f49');
+      ctx.fillStyle = frG;
+      ctx.fillRect(0, 8, p.w, 11.5);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(0, 8, p.w, 1.4);
+      ctx.fillRect(0, 18.4, p.w, 1.4);
+      for (let mx = 8; mx < p.w - 14; mx += 16) {
+        ctx.strokeStyle = 'rgba(15, 23, 42, 0.45)';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(mx + 0.8, 17.2); ctx.lineTo(mx + 0.8, 11.2); ctx.lineTo(mx + 10.8, 11.2);
+        ctx.lineTo(mx + 10.8, 15.8); ctx.lineTo(mx + 5.8, 15.8); ctx.lineTo(mx + 5.8, 13.2);
+        ctx.stroke();
+        ctx.strokeStyle = '#fef9c3';
+        ctx.lineWidth = 1.25;
+        ctx.beginPath();
+        ctx.moveTo(mx, 16.5); ctx.lineTo(mx, 10.5); ctx.lineTo(mx + 10, 10.5);
+        ctx.lineTo(mx + 10, 15.2); ctx.lineTo(mx + 5, 15.2); ctx.lineTo(mx + 5, 12.6);
+        ctx.stroke();
+      }
+
+      // Subtle natural Pentelic marble diagonal gold-grey veining
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.22)';
+      ctx.lineWidth = 1.0;
+      for (let vx = 28; vx < p.w - 20; vx += 84) {
+        ctx.beginPath();
+        ctx.moveTo(vx, 21);
+        ctx.quadraticCurveTo(vx + 14, 38, vx + 6, Math.min(p.h - 4, 62));
+        ctx.stroke();
+      }
+
+      if (isGround) {
+        // 3. Staggered Ashlar Pentelic Marble Masonry Courses with Chiseled Sunlit Top & Shadowed Bottom Bevels
+        for (let row = 0; row < 4; row++) {
+          const ry = 22 + row * 24;
+          if (ry > p.h) break;
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.44)';
+          ctx.fillRect(0, ry + 1, p.w, 1.5);
+          ctx.strokeStyle = 'rgba(87, 83, 78, 0.36)';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(0, ry); ctx.lineTo(p.w, ry); ctx.stroke();
+          const off = (row % 2) * 34;
+          for (let jx = 34 + off; jx < p.w - 10; jx += 68) {
+            ctx.beginPath(); ctx.moveTo(jx, ry); ctx.lineTo(jx, Math.min(p.h, ry + 24)); ctx.stroke();
+          }
+        }
+        // Deeply Sculpted Vaulted Cycladic Stone Retaining Arches with Aegean Keystones!
+        for (let ax = 56; ax < p.w - 56; ax += 148) {
+          const archG = ctx.createLinearGradient(ax - 24, 30, ax + 24, p.h);
+          archG.addColorStop(0, 'rgba(30, 41, 59, 0.34)');
+          archG.addColorStop(0.55, 'rgba(71, 85, 105, 0.18)');
+          archG.addColorStop(1, 'rgba(15, 23, 42, 0.28)');
+          ctx.fillStyle = archG;
+          ctx.strokeStyle = 'rgba(100, 116, 139, 0.52)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(ax, 54, 24, Math.PI, 0);
+          ctx.lineTo(ax + 24, p.h); ctx.lineTo(ax - 24, p.h);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          // Sunlit inner right arch reveal + carved marble keystone
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.52)';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.arc(ax, 54, 22.5, -Math.PI * 0.45, 0);
+          ctx.lineTo(ax + 22.5, p.h);
+          ctx.stroke();
+          ctx.fillStyle = '#0284c7';
+          ctx.fillRect(ax - 3.5, 27.5, 7, 5);
+        }
+      } else {
+        // Floating balcony carved marble dentil cornice molding underneath
+        ctx.fillStyle = 'rgba(71, 85, 105, 0.38)';
+        for (let dx = 8; dx < p.w - 8; dx += 14) {
+          ctx.fillRect(dx, p.h - 5, 7, 4);
+        }
+      }
+      ctx.restore();
+
+      // Sculpted Pentelic marble scroll corbels & trailing bougainvillea tendrils beneath floating Greek ledges!
+      if (!isGround) {
+        for (let bx2 = px + 20; bx2 < px + p.w - 24; bx2 += 68) {
+          ctx.fillStyle = '#e2e8f0'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.moveTo(bx2, py + p.h); ctx.lineTo(bx2 + 18, py + p.h);
+          ctx.quadraticCurveTo(bx2 + 15, py + p.h + 7, bx2 + 9, py + p.h + 8);
+          ctx.quadraticCurveTo(bx2 + 3, py + p.h + 7, bx2, py + p.h);
+          ctx.fill(); ctx.stroke();
+        }
+      }
+
+      // 4. Crisp Sculpted Sunlit White Marble Top Coping Slab + Outer Contour
+      ctx.strokeStyle = '#57534e';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(px, py, p.w, p.h, isGround ? [5, 5, 0, 0] : 5);
+      ctx.stroke();
+
+      const capG = ctx.createLinearGradient(px, py, px, py + 8);
+      capG.addColorStop(0, '#ffffff');
+      capG.addColorStop(0.65, '#f8fafc');
+      capG.addColorStop(1, '#cbd5e1');
+      ctx.fillStyle = capG;
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.roundRect(px - 2.5, py, p.w + 5, 8, 2.5);
+      ctx.fill();
+      ctx.stroke();
+
+      // 5. Mediterranean Terracotta Planters with Olive Sprigs & Lush Magenta Bougainvillea along wide terraces
+      if (isGround) {
+        for (let fx = px + 88; fx < px + p.w - 88; fx += 260) {
+          // Carved terracotta pot base seated flush on marble coping
+          ctx.fillStyle = '#c2410c'; ctx.strokeStyle = '#7c2d12'; ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(fx - 7, py); ctx.lineTo(fx - 9, py - 9);
+          ctx.lineTo(fx + 9, py - 9); ctx.lineTo(fx + 7, py);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#ea580c'; ctx.fillRect(fx - 10, py - 11, 20, 3);
+          // Silvery-green olive foliage & vibrant magenta bougainvillea blossoms
+          ctx.fillStyle = '#15803d';
+          ctx.beginPath();
+          ctx.arc(fx - 5, py - 13, 5.5, 0, Math.PI * 2);
+          ctx.arc(fx + 4, py - 14, 6, 0, Math.PI * 2);
+          ctx.arc(fx, py - 18, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#db2777';
+          ctx.beginPath();
+          ctx.arc(fx - 4, py - 15, 2.8, 0, Math.PI * 2);
+          ctx.arc(fx + 5, py - 16, 2.6, 0, Math.PI * 2);
+          ctx.arc(fx + 1, py - 20, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#fbcfe8';
+          ctx.beginPath(); ctx.arc(fx, py - 21, 1.1, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'greece_sun_mirror') {
+      // Archimedes Fluted Ionic Marble Pedestal & Hammered-Bronze Solar Mirror
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+      const active = (p.activeTimer || 0) > 0;
+      const glow = p.beamGlow || 0;
+      ctx.save();
+      // Stepped marble plinth & fluted Ionic pedestal
+      const pedG = ctx.createLinearGradient(cx - 12, baseY - 28, cx + 12, baseY - 28);
+      pedG.addColorStop(0, '#ffffff'); pedG.addColorStop(0.55, '#e7e5e4'); pedG.addColorStop(1, '#a8a29e');
+      ctx.fillStyle = pedG; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.3;
+      ctx.fillRect(cx - 12, baseY - 28, 24, 24); ctx.strokeRect(cx - 12, baseY - 28, 24, 24);
+      ctx.strokeStyle = 'rgba(87, 83, 78, 0.4)'; ctx.lineWidth = 1;
+      for (const fl of [-6, 0, 6]) {
+        ctx.beginPath(); ctx.moveTo(cx + fl, baseY - 25); ctx.lineTo(cx + fl, baseY - 6); ctx.stroke();
+      }
+      // Ionic volute capital scrolls & stepped plinth
+      ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.roundRect(cx - 16, baseY - 6, 32, 6, 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(cx - 15, baseY - 31, 30, 5, 2); ctx.fill(); ctx.stroke();
+      for (const side of [-1, 1]) {
+        ctx.beginPath(); ctx.arc(cx + side * 13, baseY - 28.5, 3.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      // Bronze Y-gimbal cradle supporting the parabolic solar dish
+      ctx.strokeStyle = '#92400e'; ctx.lineWidth = 2.8;
+      ctx.beginPath();
+      ctx.moveTo(cx, baseY - 31); ctx.lineTo(cx, py + 28);
+      ctx.moveTo(cx - 15, py + 24); ctx.quadraticCurveTo(cx, py + 34, cx + 15, py + 24);
+      ctx.stroke();
+
+      // Golden sunbeam aura when active
+      if (glow > 0.05) {
+        const rg = ctx.createRadialGradient(cx, py + 16, 4, cx, py + 16, 52);
+        rg.addColorStop(0, `rgba(255, 251, 235, ${(0.88 * glow).toFixed(2)})`);
+        rg.addColorStop(0.45, `rgba(254, 240, 138, ${(0.45 * glow).toFixed(2)})`);
+        rg.addColorStop(1, 'rgba(251, 191, 36, 0)');
+        ctx.fillStyle = rg;
+        ctx.beginPath(); ctx.arc(cx, py + 16, 52, 0, Math.PI * 2); ctx.fill();
+      }
+      // Sculpted Hammered-Bronze Archimedes Parabolic Dish with Riveted Rim
+      const dishG = ctx.createLinearGradient(cx - 18, py + 2, cx + 18, py + 32);
+      dishG.addColorStop(0, '#fef08a'); dishG.addColorStop(0.45, '#d97706'); dishG.addColorStop(1, '#78350f');
+      ctx.fillStyle = dishG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.ellipse(cx, py + 16, 17, 17, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Concave polished mirror lens with animated sunlight glint
+      const lensG = ctx.createRadialGradient(cx - 3, py + 11, 2, cx + 2, py + 16, 14);
+      if (active) {
+        lensG.addColorStop(0, '#ffffff'); lensG.addColorStop(0.6, '#fef08a'); lensG.addColorStop(1, '#f59e0b');
+      } else {
+        lensG.addColorStop(0, '#f0f9ff'); lensG.addColorStop(0.6, '#bae6fd'); lensG.addColorStop(1, '#0284c7');
+      }
+      ctx.fillStyle = lensG;
+      ctx.beginPath(); ctx.ellipse(cx + 2, py + 16, 12, 13.5, 0, 0, Math.PI * 2); ctx.fill();
+      // Animated diagonal specular sheen across mirror
+      const glint = 0.45 + 0.4 * Math.sin(time * 4.2 + px * 0.02);
+      ctx.fillStyle = `rgba(255, 255, 255, ${glint.toFixed(2)})`;
+      ctx.beginPath(); ctx.ellipse(cx - 2, py + 10, 4.5, 2.2, -0.5, 0, Math.PI * 2); ctx.fill();
+
+      if (active) {
+        // Volumetric projecting sunray beam with drifting golden solar motes
+        const beamG = ctx.createLinearGradient(cx + 12, py + 16, cx + 130, py + 16);
+        beamG.addColorStop(0, 'rgba(255, 251, 235, 0.85)');
+        beamG.addColorStop(0.5, 'rgba(254, 240, 138, 0.42)');
+        beamG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = beamG;
+        ctx.beginPath(); ctx.moveTo(cx + 10, py + 9); ctx.lineTo(cx + 130, py - 2); ctx.lineTo(cx + 130, py + 34); ctx.lineTo(cx + 10, py + 23); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'greece_light_bridge') {
+      // Solid Golden Solar Light Bridge with Bronze Sun Sconces & Luminous Greek-Key Runes
+      const active = (p.activeTimer || 0) > 0;
+      const alpha = active ? Math.max(0.28, p.lightAlpha || 1) : 0;
+      ctx.save();
+      // Sculpted bronze & crystal anchor sconces at left and right ends
+      for (const ex of [px, px + p.w - 12]) {
+        const scG = ctx.createLinearGradient(ex, py - 4, ex + 12, py + p.h + 4);
+        scG.addColorStop(0, '#fbbf24'); scG.addColorStop(0.5, '#b45309'); scG.addColorStop(1, '#451a03');
+        ctx.fillStyle = scG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.roundRect(ex, py - 3, 12, p.h + 6, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = active ? '#fffbeb' : '#64748b';
+        ctx.beginPath(); ctx.arc(ex + 6, py + p.h * 0.5, 3.8, 0, Math.PI * 2); ctx.fill();
+      }
+      if (!active) {
+        ctx.strokeStyle = 'rgba(254, 240, 138, 0.42)';
+        ctx.lineWidth = 1.6;
+        ctx.setLineDash([7, 6]);
+        ctx.strokeRect(px + 12, py + 2, p.w - 24, p.h - 4);
+        ctx.setLineDash([]);
+      } else {
+        ctx.globalAlpha = alpha;
+        // Soft golden halo around the solid solar beam
+        const haloG = ctx.createLinearGradient(px, py - 10, px, py + p.h + 10);
+        haloG.addColorStop(0, 'rgba(254, 240, 138, 0)');
+        haloG.addColorStop(0.5, 'rgba(254, 240, 138, 0.45)');
+        haloG.addColorStop(1, 'rgba(251, 191, 36, 0)');
+        ctx.fillStyle = haloG;
+        ctx.fillRect(px + 8, py - 10, p.w - 16, p.h + 20);
+        // Core radiant sunbeam slab
+        const bG = ctx.createLinearGradient(px, py, px, py + p.h);
+        bG.addColorStop(0, '#ffffff'); bG.addColorStop(0.32, '#fef08a'); bG.addColorStop(0.75, '#f59e0b'); bG.addColorStop(1, '#d97706');
+        ctx.fillStyle = bG; ctx.strokeStyle = '#fffbeb'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(px + 8, py, p.w - 16, p.h, 5); ctx.fill(); ctx.stroke();
+        // Traveling luminous Greek-key solar pulse segments & tiny rising sparks
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.82)';
+        const off = (time * 92) % 30;
+        for (let sx = px + 14 + off; sx < px + p.w - 22; sx += 30) {
+          ctx.fillRect(sx, py + 4, 12, 3.5);
+        }
+        for (let k = 0; k < 4; k++) {
+          const spX = px + 24 + ((k * 67 + time * 35) % Math.max(20, p.w - 48));
+          const spY = py - 2 - ((time * 28 + k * 9) % 14);
+          ctx.beginPath(); ctx.arc(spX, spY, 1.8, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'greece_chariot_track') {
+      // Trigger-Driven Burnished-Bronze Olympic Chariot with Carved Laurel Relief & 8-Spoke Wheels
+      const sx0 = (p.startX !== undefined ? p.startX : p.x) - (p.x - px);
+      const ex0 = (p.endX !== undefined ? p.endX : p.x + 260) - (p.x - px) + p.w;
+      const trackY = py + p.h + 7;
+      ctx.save();
+      // Sculpted marble & bronze track end-posts + twin grooved bronze guide rails
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(sx0, trackY); ctx.lineTo(ex0, trackY); ctx.stroke();
+      ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.moveTo(sx0, trackY - 1.2); ctx.lineTo(ex0, trackY - 1.2); ctx.stroke();
+      for (const tx of [sx0, ex0]) {
+        ctx.fillStyle = '#e7e5e4'; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.2;
+        ctx.fillRect(tx - 6, trackY - 2, 12, 14); ctx.strokeRect(tx - 6, trackY - 2, 12, 14);
+        ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03';
+        ctx.beginPath(); ctx.arc(tx, trackY, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      // Sculpted Olympic Chariot Curved Prow, Breastplate Shield & Handrail
+      const cG = ctx.createLinearGradient(px, py - 12, px, py + p.h);
+      cG.addColorStop(0, '#fef9c3'); cG.addColorStop(0.35, '#f59e0b'); cG.addColorStop(0.75, '#b45309'); cG.addColorStop(1, '#78350f');
+      ctx.fillStyle = cG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(px + 2, py);
+      ctx.lineTo(px + p.w - 4, py);
+      ctx.quadraticCurveTo(px + p.w + 12, py + p.h * 0.42, px + p.w - 6, py + p.h);
+      ctx.lineTo(px + 6, py + p.h);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Decorative curved golden front rail loop
+      ctx.strokeStyle = '#fde047'; ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(px + p.w - 14, py);
+      ctx.quadraticCurveTo(px + p.w + 6, py - 10, px + p.w + 2, py + 4);
+      ctx.stroke();
+      // Aegean-blue Greek key fascia + central embossed golden sun medallion
+      ctx.fillStyle = '#0369a1';
+      ctx.fillRect(px + 12, py + 4.5, p.w - 26, 7.5);
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 1;
+      ctx.strokeRect(px + 12, py + 4.5, p.w - 26, 7.5);
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath(); ctx.arc(px + p.w * 0.5, py + 8.2, 3.2, 0, Math.PI * 2); ctx.fill();
+      // Two Rotating 8-Spoke Burnished-Bronze Olympic Chariot Wheels!
+      const rot = p.wheelRot || 0;
+      for (const wx of [px + 22, px + p.w - 22]) {
+        ctx.save();
+        ctx.translate(wx, py + p.h + 2);
+        ctx.rotate(rot);
+        ctx.fillStyle = 'rgba(69, 26, 3, 0.5)';
+        ctx.beginPath(); ctx.arc(0, 0, 11.5, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#d97706'; ctx.lineWidth = 3.2;
+        ctx.beginPath(); ctx.arc(0, 0, 11, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 1.2;
+        for (let s = 0; s < 8; s++) {
+          const a = (s * Math.PI) / 4;
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 10, Math.sin(a) * 10); ctx.stroke();
+        }
+        ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(0, 0, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.restore();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'greece_poseidon_wave') {
+      // Poseidon Aegean Wave Updraft Geyser (Organic Sculpted Water Plume + Marble Trident Shrine!)
+      const cx = px + p.w * 0.5;
+      const botY = py + p.h;
+      ctx.save();
+
+      if (p.waveWarn) {
+        // Swirling turquoise mist & bubbling sea-foam telegraph before wave surges!
+        const wGlow = ctx.createRadialGradient(cx, botY - 20, 4, cx, botY - 20, 38);
+        wGlow.addColorStop(0, 'rgba(125, 211, 252, 0.55)');
+        wGlow.addColorStop(1, 'rgba(125, 211, 252, 0)');
+        ctx.fillStyle = wGlow;
+        ctx.beginPath(); ctx.arc(cx, botY - 20, 38, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(240, 249, 255, 0.9)';
+        for (let b = 0; b < 6; b++) {
+          const bx = px + 14 + b * ((p.w - 28) / 5);
+          const by = botY - 18 - ((time * 52 + b * 11) % 30);
+          ctx.beginPath(); ctx.arc(bx, by, 3.8 + (b % 2), 0, Math.PI * 2); ctx.fill();
+        }
+      } else if (p.waveActive) {
+        // Organic Tapered Surging Aegean Water Column (Zero blocky rectangles!)
+        const pulse = Math.sin(time * 8 + px * 0.03) * 5;
+        const hwBot = (p.w - 20) * 0.5;
+        const hwTop = (p.w - 10) * 0.5;
+        const wG = ctx.createLinearGradient(px, botY, px, py);
+        wG.addColorStop(0, 'rgba(3, 105, 161, 0.92)');
+        wG.addColorStop(0.35, 'rgba(14, 165, 233, 0.78)');
+        wG.addColorStop(0.75, 'rgba(125, 211, 252, 0.56)');
+        wG.addColorStop(1, 'rgba(240, 249, 255, 0.22)');
+        ctx.fillStyle = wG;
+        ctx.beginPath();
+        ctx.moveTo(cx - hwBot, botY - 12);
+        ctx.bezierCurveTo(cx - hwBot - 5, botY - p.h * 0.4, cx - hwTop + 4, py + p.h * 0.28, cx - hwTop, py + 8 + pulse);
+        ctx.quadraticCurveTo(cx, py - 14 + pulse, cx + hwTop, py + 8 + pulse);
+        ctx.bezierCurveTo(cx + hwTop - 4, py + p.h * 0.28, cx + hwBot + 5, botY - p.h * 0.4, cx + hwBot, botY - 12);
+        ctx.closePath();
+        ctx.fill();
+
+        // Inner bright turquoise refraction core
+        ctx.fillStyle = 'rgba(224, 242, 254, 0.34)';
+        ctx.beginPath();
+        ctx.moveTo(cx - hwBot * 0.48, botY - 14);
+        ctx.quadraticCurveTo(cx - hwTop * 0.35, py + p.h * 0.45, cx, py + 2 + pulse);
+        ctx.quadraticCurveTo(cx + hwTop * 0.35, py + p.h * 0.45, cx + hwBot * 0.48, botY - 14);
+        ctx.closePath();
+        ctx.fill();
+
+        // Spiraling rising sea-foam ribbons
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.82)'; ctx.lineWidth = 2.3; ctx.lineCap = 'round';
+        for (let s = 0; s < 4; s++) {
+          const sy2 = botY - 22 - ((time * 255 + s * 62) % Math.max(48, p.h - 28));
+          const sw = hwBot * (0.75 + 0.25 * Math.sin(sy2 * 0.05));
+          ctx.beginPath();
+          ctx.moveTo(cx - sw, sy2);
+          ctx.quadraticCurveTo(cx, sy2 - 12, cx + sw, sy2);
+          ctx.stroke();
+        }
+        // Frothy white-foam crest & sparkling spray droplets at top of geyser
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        for (let f = -2; f <= 2; f++) {
+          const fx = cx + f * 9;
+          const fy = py + 6 + pulse + Math.abs(f) * 2.5 + Math.sin(time * 10 + f) * 2.5;
+          ctx.beginPath(); ctx.arc(fx, fy, 6.2 - Math.abs(f) * 0.8, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      // Sculpted Pentelic Marble Sea-Shrine Nozzle + Gleaming 3D Golden Poseidon Trident Emblem
+      const nozG = ctx.createLinearGradient(px + 4, botY - 18, px + p.w - 4, botY);
+      nozG.addColorStop(0, '#ffffff'); nozG.addColorStop(0.55, '#e7e5e4'); nozG.addColorStop(1, '#a8a29e');
+      ctx.fillStyle = nozG; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.roundRect(px + 4, botY - 18, p.w - 8, 18, [7, 7, 0, 0]); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#0369a1';
+      ctx.fillRect(px + 8, botY - 18, p.w - 16, 3.5);
+      // Golden Poseidon Trident with barbed outer prongs
+      ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx, botY - 3); ctx.lineTo(cx, botY - 15);
+      ctx.moveTo(cx - 8, botY - 14); ctx.quadraticCurveTo(cx - 8, botY - 9, cx, botY - 9);
+      ctx.quadraticCurveTo(cx + 8, botY - 9, cx + 8, botY - 14);
+      ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'greece_lyre_pillar') {
+      // Apollo's Golden Lyre on Fluted Corinthian Marble Column with Harmonic Light Rings!
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+      const active = (p.activeTimer || 0) > 0;
+      const strum = p.strumAnim || 0;
+      ctx.save();
+      // Fluted marble pedestal & stepped plinth
+      const pG = ctx.createLinearGradient(cx - 11, baseY - 26, cx + 11, baseY - 26);
+      pG.addColorStop(0, '#ffffff'); pG.addColorStop(0.55, '#e7e5e4'); pG.addColorStop(1, '#a8a29e');
+      ctx.fillStyle = pG; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.3;
+      ctx.fillRect(cx - 11, baseY - 26, 22, 22); ctx.strokeRect(cx - 11, baseY - 26, 22, 22);
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(cx - 14, baseY - 5, 28, 5); ctx.strokeRect(cx - 14, baseY - 5, 28, 5);
+      ctx.fillRect(cx - 13, baseY - 29, 26, 4); ctx.strokeRect(cx - 13, baseY - 29, 26, 4);
+
+      if (active) {
+        const lg = ctx.createRadialGradient(cx, py + 16, 4, cx, py + 16, 42);
+        lg.addColorStop(0, 'rgba(254, 240, 138, 0.72)'); lg.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = lg; ctx.beginPath(); ctx.arc(cx, py + 16, 42, 0, Math.PI * 2); ctx.fill();
+        // Expanding golden harmonic musical rings!
+        const ringR = 14 + ((time * 28) % 26);
+        const ringA = Math.max(0, 1 - (ringR - 14) / 26) * 0.65;
+        ctx.strokeStyle = `rgba(254, 240, 138, ${ringA.toFixed(2)})`;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(cx, py + 16, ringR, 0, Math.PI * 2); ctx.stroke();
+      }
+      // Sculpted Tortoiseshell Soundbox at Lyre Base
+      const sbG = ctx.createLinearGradient(cx - 10, py + 24, cx + 10, py + 34);
+      sbG.addColorStop(0, '#d97706'); sbG.addColorStop(1, '#78350f');
+      ctx.fillStyle = sbG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.ellipse(cx, py + 30, 11, 6, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Golden Curved Greek Lyre Horn Arms & Crossbar
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 3.6; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx - 8, py + 28); ctx.bezierCurveTo(cx - 21, py + 19, cx - 19, py + 3, cx - 10, py + 3);
+      ctx.moveTo(cx + 8, py + 28); ctx.bezierCurveTo(cx + 21, py + 19, cx + 19, py + 3, cx + 10, py + 3);
+      ctx.moveTo(cx - 13, py + 5); ctx.lineTo(cx + 13, py + 5);
+      ctx.stroke();
+      // Vibrating golden lyre strings
+      ctx.strokeStyle = active ? '#ffffff' : '#fef08a'; ctx.lineWidth = 1.1;
+      for (const sx of [-5.2, -1.7, 1.7, 5.2]) {
+        const vib = strum > 0 ? Math.sin(time * 48 + sx) * 2.8 * strum : 0;
+        ctx.beginPath(); ctx.moveTo(cx + sx, py + 5); ctx.quadraticCurveTo(cx + sx + vib, py + 18, cx + sx, py + 30); ctx.stroke();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'greece_marble_lift') {
+      // Ornate Winged-Gold & Pentelic Marble Sanctuary Lift with Fluted Doric Shaft
+      const active = (p.activeTimer || 0) > 0;
+      const cx = px + p.w * 0.5;
+      const shaftBottom = (p.baseY !== undefined ? p.baseY : p.y) + p.h - (p.y - py);
+      const shaftH = Math.max(8, shaftBottom - (py + p.h) + 6);
+      ctx.save();
+      // Fluted Doric marble guide column cleanly anchored to the lift's base pedestal
+      const shG = ctx.createLinearGradient(cx - 12, py + p.h, cx + 12, py + p.h);
+      shG.addColorStop(0, '#ffffff'); shG.addColorStop(0.5, '#e7e5e4'); shG.addColorStop(1, '#a8a29e');
+      ctx.fillStyle = shG; ctx.strokeStyle = '#78716c'; ctx.lineWidth = 1.2;
+      ctx.fillRect(cx - 11, py + p.h, 22, shaftH); ctx.strokeRect(cx - 11, py + p.h, 22, shaftH);
+      ctx.strokeStyle = 'rgba(120, 113, 108, 0.35)'; ctx.lineWidth = 1;
+      for (const fl of [-5.5, 0, 5.5]) {
+        ctx.beginPath(); ctx.moveTo(cx + fl, py + p.h + 2); ctx.lineTo(cx + fl, py + p.h + shaftH - 2); ctx.stroke();
+      }
+      // Sculpted golden winged brackets beneath lift corners
+      ctx.fillStyle = active ? '#fbbf24' : '#b45309'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.moveTo(px + 6, py + p.h); ctx.lineTo(px + 20, py + p.h); ctx.lineTo(px + 12, py + p.h + 8); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px + p.w - 6, py + p.h); ctx.lineTo(px + p.w - 20, py + p.h); ctx.lineTo(px + p.w - 12, py + p.h + 8); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // Pentelic marble lift deck with gold cornice & glowing Aegean sapphire strip
+      const lG = ctx.createLinearGradient(px, py, px, py + p.h);
+      lG.addColorStop(0, '#ffffff'); lG.addColorStop(0.55, '#f5f5f4'); lG.addColorStop(1, '#d6d3d1');
+      ctx.fillStyle = lG; ctx.strokeStyle = active ? '#fbbf24' : '#57534e'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.roundRect(px, py, p.w, p.h, 5); ctx.fill(); ctx.stroke();
+      const coreG = ctx.createLinearGradient(px + 10, py + 6, px + p.w - 10, py + 6);
+      coreG.addColorStop(0, active ? '#0284c7' : '#1e3a8a');
+      coreG.addColorStop(0.5, active ? '#7dd3fc' : '#0369a1');
+      coreG.addColorStop(1, active ? '#0284c7' : '#1e3a8a');
+      ctx.fillStyle = coreG;
+      ctx.fillRect(px + 10, py + 6, p.w - 20, 6);
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'greece_crumble_column') {
+      // Carved Ancient Doric Pentelic Marble Architrave Block with Triglyph Relief & 3D Cracks
+      if (p.broken) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(226, 232, 240, 0.38)';
+        ctx.lineWidth = 1.4;
+        ctx.setLineDash([5, 5]);
+        ctx.strokeRect(px + 2, py + 2, p.w - 4, p.h - 4);
+        ctx.setLineDash([]);
+        ctx.restore();
+        return;
+      }
+      const shake = p.crumbleTimer > 0 ? Math.sin(time * 55) * 2.5 : 0;
+      ctx.save();
+      ctx.translate(shake, 0);
+      const cG = ctx.createLinearGradient(px, py, px, py + p.h);
+      cG.addColorStop(0, '#ffffff'); cG.addColorStop(0.35, '#f5f5f4'); cG.addColorStop(0.75, '#d6d3d1'); cG.addColorStop(1, '#a8a29e');
+      ctx.fillStyle = cG; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(px, py, p.w, p.h, 3); ctx.fill(); ctx.stroke();
+      // Carved Doric triglyph grooves along the marble lintel face
+      ctx.fillStyle = 'rgba(120, 113, 108, 0.25)';
+      for (let gx = px + 10; gx < px + p.w - 14; gx += 24) {
+        ctx.fillRect(gx, py + 5, 3, p.h - 10);
+        ctx.fillRect(gx + 5, py + 5, 3, p.h - 10);
+      }
+      // 3D dual-pass fracture cracks (sunlit bevel + deep fissure)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(px + p.w * 0.32 + 1, py); ctx.lineTo(px + p.w * 0.38 + 1, py + p.h * 0.55); ctx.lineTo(px + p.w * 0.29 + 1, py + p.h);
+      ctx.moveTo(px + p.w * 0.68 + 1, py); ctx.lineTo(px + p.w * 0.63 + 1, py + p.h * 0.62); ctx.lineTo(px + p.w * 0.72 + 1, py + p.h);
+      ctx.stroke();
+      ctx.strokeStyle = p.crumbleTimer > 0 ? '#dc2626' : '#44403c';
+      ctx.lineWidth = p.crumbleTimer > 0 ? 1.9 : 1.3;
+      ctx.beginPath();
+      ctx.moveTo(px + p.w * 0.32, py); ctx.lineTo(px + p.w * 0.38, py + p.h * 0.55); ctx.lineTo(px + p.w * 0.29, py + p.h);
+      ctx.moveTo(px + p.w * 0.68, py); ctx.lineTo(px + p.w * 0.63, py + p.h * 0.62); ctx.lineTo(px + p.w * 0.72, py + p.h);
+      ctx.stroke();
+      // Falling marble dust specks when trembling!
+      if (p.crumbleTimer > 0) {
+        ctx.fillStyle = 'rgba(248, 250, 252, 0.85)';
+        for (let d = 0; d < 4; d++) {
+          const dx = px + p.w * (0.28 + d * 0.14);
+          const dy = py + p.h + ((time * 75 + d * 9) % 24);
+          ctx.beginPath(); ctx.arc(dx, dy, 1.8, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'greece_medusa_aegis') {
+      // 1. GORGONEION MEDUSA AEGIS STATUE (3D Bronze-Serpent Shield + Gaze-Petrification Beam with Clear Safe Crouch Gap!)
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+      const gDir = p.gazeDir || -1;
+      const gRange = p.gazeRange || 220;
+      const state = p.gazeState || 'dormant';
+      const warnR = p.gazeRatio || 0;
+      const shieldY = baseY - 46;
+      const eyeX = cx + gDir * 8;
+      const eyeY = shieldY - 1;
+      ctx.save();
+
+      // Volumetric Petrifying Emerald Gaze Cone (drawn first so shield overlaps cleanly; bottom edge sits at baseY-28 showing crouch clearance!)
+      if (state === 'warn' || state === 'active') {
+        const endX = eyeX + gDir * gRange;
+        const coneTopY = py - 8;
+        const coneBotY = baseY - 28; // Leaves visible 28px safe crouch gap above marble floor!
+        if (state === 'warn') {
+          const wAlpha = (0.12 + 0.22 * warnR).toFixed(2);
+          const wG = ctx.createLinearGradient(eyeX, eyeY, endX, eyeY);
+          wG.addColorStop(0, `rgba(52, 211, 153, ${wAlpha})`);
+          wG.addColorStop(1, 'rgba(52, 211, 153, 0)');
+          ctx.fillStyle = wG;
+          ctx.beginPath();
+          ctx.moveTo(eyeX, eyeY - 4);
+          ctx.lineTo(endX, coneTopY);
+          ctx.lineTo(endX, coneBotY);
+          ctx.lineTo(eyeX, eyeY + 5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = `rgba(110, 231, 183, ${(0.35 + 0.45 * warnR).toFixed(2)})`;
+          ctx.lineWidth = 1.4;
+          ctx.setLineDash([6, 6]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        } else {
+          const bG = ctx.createLinearGradient(eyeX, eyeY, endX, eyeY);
+          bG.addColorStop(0.00, 'rgba(167, 243, 208, 0.82)');
+          bG.addColorStop(0.28, 'rgba(16, 185, 129, 0.52)');
+          bG.addColorStop(0.75, 'rgba(5, 150, 105, 0.24)');
+          bG.addColorStop(1.00, 'rgba(5, 150, 105, 0)');
+          ctx.fillStyle = bG;
+          ctx.beginPath();
+          ctx.moveTo(eyeX, eyeY - 5);
+          ctx.lineTo(endX, coneTopY);
+          ctx.lineTo(endX, coneBotY);
+          ctx.lineTo(eyeX, eyeY + 6);
+          ctx.closePath();
+          ctx.fill();
+
+          // Bright inner optic petrification ray + traveling emerald rings
+          ctx.strokeStyle = 'rgba(236, 253, 245, 0.78)';
+          ctx.lineWidth = 2.0;
+          ctx.beginPath();
+          ctx.moveTo(eyeX, eyeY);
+          ctx.lineTo(eyeX + gDir * (gRange * 0.88), (coneTopY + coneBotY) * 0.5);
+          ctx.stroke();
+
+          for (let r = 0; r < 3; r++) {
+            const prog = ((time * 1.9 + r * 0.33) % 1);
+            const rx = eyeX + gDir * (prog * gRange * 0.9);
+            const rh = 6 + prog * 16;
+            const ry = eyeY + ((coneTopY + coneBotY) * 0.5 - eyeY) * prog;
+            ctx.strokeStyle = `rgba(167, 243, 208, ${((1 - prog) * 0.65).toFixed(2)})`;
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.ellipse(rx, ry, 4.5, rh, 0, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Stepped Pentelic Marble Pedestal & Fluted Ionic Support Column
+      const pedG = ctx.createLinearGradient(cx - 14, baseY - 30, cx + 14, baseY);
+      pedG.addColorStop(0, '#ffffff'); pedG.addColorStop(0.55, '#e7e5e4'); pedG.addColorStop(1, '#9ca3af');
+      ctx.fillStyle = pedG; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.3;
+      ctx.fillRect(cx - 11, baseY - 28, 22, 24); ctx.strokeRect(cx - 11, baseY - 28, 22, 24);
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath(); ctx.roundRect(cx - 16, baseY - 6, 32, 6, 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(cx - 12, baseY - 27, 24, 3.5);
+
+      // 8 Writhing Sculpted Bronze Snakes Coiling Around the Gorgoneion Aegis!
+      const snakeSpd = (state === 'active' || state === 'warn') ? 7.5 : 2.2;
+      for (let sn = 0; sn < 8; sn++) {
+        const baseA = (sn * Math.PI) / 4;
+        const wrig = Math.sin(time * snakeSpd + sn * 1.3) * ((state === 'active' || state === 'warn') ? 4.2 : 1.5);
+        const sx0 = cx + Math.cos(baseA) * 16;
+        const sy0 = shieldY + Math.sin(baseA) * 16;
+        const sx1 = cx + Math.cos(baseA + 0.18) * (24 + Math.abs(wrig) * 0.5);
+        const sy1 = shieldY + Math.sin(baseA + 0.18) * (24 + Math.abs(wrig) * 0.5) + wrig * 0.4;
+        ctx.strokeStyle = state === 'active' ? '#10b981' : '#b45309';
+        ctx.lineWidth = 3.0; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(sx0, sy0);
+        ctx.quadraticCurveTo((sx0 + sx1) * 0.5 - Math.sin(baseA) * 5, (sy0 + sy1) * 0.5 + Math.cos(baseA) * 5, sx1, sy1);
+        ctx.stroke();
+        ctx.fillStyle = state === 'active' ? '#6ee7b7' : '#fbbf24';
+        ctx.beginPath(); ctx.arc(sx1, sy1, 2.0, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // 3D Hammered-Bronze Athena/Medusa Aegis Shield Boss
+      const aegG = ctx.createRadialGradient(cx - 5, shieldY - 6, 2, cx, shieldY, 19);
+      aegG.addColorStop(0, '#fef9c3'); aegG.addColorStop(0.48, '#d97706'); aegG.addColorStop(1, '#451a03');
+      ctx.fillStyle = aegG; ctx.strokeStyle = '#290f02'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(cx, shieldY, 18.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = state === 'active' ? '#34d399' : '#fde047';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.arc(cx, shieldY, 15.2, 0, Math.PI * 2); ctx.stroke();
+
+      // Sculpted Marble Gorgon Face Relief oriented toward gazeDir
+      const fcG = ctx.createRadialGradient(cx + gDir * 2, shieldY - 3, 2, cx, shieldY, 13);
+      fcG.addColorStop(0, '#ffffff'); fcG.addColorStop(0.65, '#d6d3d1'); fcG.addColorStop(1, '#78716c');
+      ctx.fillStyle = fcG; ctx.strokeStyle = '#44403c'; ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.ellipse(cx + gDir * 1.5, shieldY, 10.5, 11.8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      // Medusa Eyes (Closed Stone Lids when dormant/stunned -> Glowing Emerald Slits when warning/active!)
+      for (const eo of [-3.6, 3.6]) {
+        const ex = cx + gDir * 2.8 + eo;
+        const ey = shieldY - 2.2;
+        if (state === 'dormant' || state === 'stunned') {
+          ctx.strokeStyle = '#44403c'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.arc(ex, ey, 2.4, 0.15, Math.PI - 0.15); ctx.stroke();
+        } else {
+          const openH = state === 'active' ? 2.6 : (0.7 + warnR * 1.8);
+          ctx.fillStyle = state === 'active' ? '#ecfdf5' : '#34d399';
+          ctx.beginPath(); ctx.ellipse(ex, ey, 2.8, openH, 0, 0, Math.PI * 2); ctx.fill();
+          if (state === 'active') {
+            ctx.fillStyle = '#065f46';
+            ctx.fillRect(ex - 0.5, ey - openH, 1.0, openH * 2);
+          }
+        }
+      }
+      // Chiseled Gorgon brow & stern mouth
+      ctx.strokeStyle = '#44403c'; ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.moveTo(cx + gDir * 2.5 - 4, shieldY + 4.8); ctx.lineTo(cx + gDir * 2.5 + 4, shieldY + 4.8); ctx.stroke();
+
+      // Clear Floating Status Cue above Shield (Stunned Stars or Gaze Warning Eye)
+      if (state === 'stunned') {
+        ctx.fillStyle = '#fde047';
+        for (let st = 0; st < 3; st++) {
+          const sa = time * 4.5 + st * 2.09;
+          ctx.beginPath(); ctx.arc(cx + Math.cos(sa) * 12, shieldY - 24 + Math.sin(sa) * 3, 2.2, 0, Math.PI * 2); ctx.fill();
+        }
+      } else if (state === 'warn') {
+        ctx.fillStyle = `rgba(16, 185, 129, ${(0.5 + 0.5 * Math.sin(time * 18)).toFixed(2)})`;
+        ctx.beginPath(); ctx.arc(cx, shieldY - 25, 4.5, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'greece_discobolus') {
+      // 2. OLYMPIC BRONZE DISCOBOLUS STATUE & RETURNING BOOMERANG DISCUS (Low Outward -> High Return!)
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+      const tDir = p.throwDir || -1;
+      const pose = p.pose || 'idle';
+      const windR = p.windupRatio || 0;
+      ctx.save();
+
+      // Faint Golden Boomerang Loop Telegraph during Wind-Up so player sees the 2-level trajectory!
+      if (pose === 'windup') {
+        const reachW = (p.throwDist || 255) * (0.4 + 0.6 * windR);
+        const startHx = cx + tDir * 16;
+        ctx.strokeStyle = `rgba(253, 224, 71, ${(0.22 + 0.28 * windR).toFixed(2)})`;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 6]);
+        ctx.beginPath();
+        ctx.moveTo(startHx, baseY - 18);
+        ctx.lineTo(startHx + tDir * reachW, baseY - 18);
+        ctx.arc(startHx + tDir * reachW, baseY - 28, 10, Math.PI * 0.5, -Math.PI * 0.5, tDir < 0);
+        ctx.lineTo(startHx, baseY - 38);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Carved Pentelic Marble Olympic Plinth with Golden Laurel Emblem
+      const plG = ctx.createLinearGradient(cx - 20, baseY - 16, cx + 20, baseY);
+      plG.addColorStop(0, '#ffffff'); plG.addColorStop(0.6, '#e7e5e4'); plG.addColorStop(1, '#9ca3af');
+      ctx.fillStyle = plG; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.35;
+      ctx.beginPath(); ctx.roundRect(cx - 20, baseY - 15, 40, 15, [4, 4, 0, 0]); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(cx, baseY - 7.5, 4.5, 0.3, Math.PI - 0.3); ctx.stroke();
+
+      // 3D Sculpted Classical Bronze Athlete (Myron's Discobolus — Articulated Coil / Throw / Catch Poses!)
+      ctx.save();
+      ctx.translate(cx, baseY - 15);
+      ctx.scale(tDir, 1); // Positive X is now always the throwing direction!
+
+      const coil = pose === 'windup' ? -0.42 * windR : (pose === 'throw' ? 0.32 : (pose === 'catch' ? 0.15 : -0.08));
+      const brzG = ctx.createLinearGradient(-14, -56, 16, 0);
+      brzG.addColorStop(0, '#fef08a'); brzG.addColorStop(0.42, '#d97706'); brzG.addColorStop(0.82, '#92400e'); brzG.addColorStop(1, '#451a03');
+
+      // Athletic bronze legs planted firmly on plinth
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 5.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-4, -22); ctx.lineTo(-10, -11); ctx.lineTo(-12, -2); // Back leg
+      ctx.stroke();
+      ctx.strokeStyle = '#b45309'; ctx.lineWidth = 5.8;
+      ctx.beginPath();
+      ctx.moveTo(4, -22); ctx.lineTo(10, -11); ctx.lineTo(9, -2); // Lead leg
+      ctx.stroke();
+
+      // Draped white Olympic loincloth (perizoma)
+      ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.moveTo(-8, -26); ctx.lineTo(8, -26); ctx.lineTo(10, -18); ctx.lineTo(-9, -18); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // Twisting Bronze Torso, Head with Golden Fillet & Throwing Arm
+      ctx.save();
+      ctx.translate(0, -24);
+      ctx.rotate(coil);
+      ctx.fillStyle = brzG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.roundRect(-8.5, -21, 17, 20, 5); ctx.fill(); ctx.stroke();
+
+      // Sculpted bronze head + Olympic victor's laurel headband
+      ctx.beginPath(); ctx.arc(2, -27, 6.4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(-4, -29); ctx.lineTo(8, -28); ctx.stroke();
+
+      // Lead balance arm & Discus-throwing arm
+      const armAng = pose === 'windup' ? (-2.2 - windR * 0.45) : (pose === 'throw' ? -0.12 : (pose === 'catch' ? -0.25 : -1.1));
+      const handLx = 5 + Math.cos(armAng) * 19;
+      const handLy = -16 + Math.sin(armAng) * 19;
+      ctx.strokeStyle = '#d97706'; ctx.lineWidth = 4.6; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(5, -16); ctx.lineTo(handLx, handLy); ctx.stroke();
+      ctx.strokeStyle = '#92400e'; ctx.lineWidth = 4.0;
+      ctx.beginPath(); ctx.moveTo(-5, -16); ctx.lineTo(pose === 'windup' ? 9 : -12, -8); ctx.stroke();
+
+      // Held Olympic Discus when not in flight!
+      if (!p.discActive) {
+        if (pose === 'windup') {
+          const gHalo = ctx.createRadialGradient(handLx, handLy, 2, handLx, handLy, 16);
+          gHalo.addColorStop(0, 'rgba(254, 240, 138, 0.85)'); gHalo.addColorStop(1, 'rgba(251, 191, 36, 0)');
+          ctx.fillStyle = gHalo; ctx.beginPath(); ctx.arc(handLx, handLy, 16, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.ellipse(handLx, handLy, 9.5, 4.5, 0.35, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath(); ctx.ellipse(handLx, handLy, 4.2, 2.0, 0.35, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      ctx.restore();
+
+      // Whirling Boomerang Olympic Discus in Flight!
+      if (p.discActive && p.discX !== undefined) {
+        const dx = px + (p.discX - p.x);
+        const dy = py + (p.discY - p.y);
+        const isHigh = !!p.discHigh;
+
+        // Golden-Sapphire Aerodynamic Wake Ribbon behind the Spinning Discus
+        const wakeDir = (p.discU || 0) < 0.5 ? tDir : -tDir;
+        const wkG = ctx.createLinearGradient(dx, dy, dx - wakeDir * 44, dy);
+        wkG.addColorStop(0, isHigh ? 'rgba(56, 189, 248, 0.65)' : 'rgba(253, 224, 71, 0.72)');
+        wkG.addColorStop(1, 'rgba(253, 224, 71, 0)');
+        ctx.fillStyle = wkG;
+        ctx.beginPath();
+        ctx.moveTo(dx, dy - 6);
+        ctx.lineTo(dx - wakeDir * 44, dy - 1.5);
+        ctx.lineTo(dx - wakeDir * 44, dy + 1.5);
+        ctx.lineTo(dx, dy + 6);
+        ctx.closePath();
+        ctx.fill();
+
+        // Spinning 3D Bladed Bronze-and-Sapphire Discus
+        ctx.save();
+        ctx.translate(dx, dy);
+        // Outer spinning golden aura
+        const dHalo = ctx.createRadialGradient(0, 0, 3, 0, 0, 20);
+        dHalo.addColorStop(0, isHigh ? 'rgba(186, 230, 253, 0.75)' : 'rgba(254, 249, 195, 0.80)');
+        dHalo.addColorStop(1, 'rgba(251, 191, 36, 0)');
+        ctx.fillStyle = dHalo;
+        ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.fill();
+
+        const dBodyG = ctx.createLinearGradient(-15, -6, 15, 6);
+        dBodyG.addColorStop(0, '#fffbeb'); dBodyG.addColorStop(0.45, '#f59e0b'); dBodyG.addColorStop(1, '#78350f');
+        ctx.fillStyle = dBodyG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.ellipse(0, 0, 15, 6.2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        // Spinning internal Greek sun-blades
+        ctx.strokeStyle = isHigh ? '#38bdf8' : '#fef08a';
+        ctx.lineWidth = 1.5;
+        const rot = p.discRot || (time * 16);
+        for (let b = 0; b < 4; b++) {
+          const ba = rot + b * (Math.PI * 0.5);
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(ba) * 3, Math.sin(ba) * 1.2);
+          ctx.lineTo(Math.cos(ba) * 13, Math.sin(ba) * 5.0);
+          ctx.stroke();
+        }
+        ctx.fillStyle = isHigh ? '#0284c7' : '#fbbf24';
+        ctx.beginPath(); ctx.ellipse(0, 0, 5.2, 2.4, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'greece_zeus_obelisk') {
+      // 3. ALTAR OF ZEUS SKY-LIGHTNING OBELISK (Pentelic Marble Obelisk + Golden Eagle + Target-Locking Sky Bolt!)
+      const cx = px + p.w * 0.5;
+      const baseY = py + p.h;
+      const bState = p.boltState || 'idle';
+      const strikeX = px + ((p.strikeX !== undefined ? p.strikeX : (p.x + p.w * 0.5)) - p.x);
+      ctx.save();
+
+      // 1. Sculpted Pentelic Marble Obelisk & Golden Eagle of Zeus
+      ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.roundRect(cx - 20, baseY - 8, 40, 8, 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(cx - 16, baseY - 16, 32, 8, 2); ctx.fill(); ctx.stroke();
+
+      const obG = ctx.createLinearGradient(cx - 12, py + 12, cx + 12, baseY - 16);
+      obG.addColorStop(0, '#ffffff'); obG.addColorStop(0.55, '#e2e8f0'); obG.addColorStop(1, '#94a3b8');
+      ctx.fillStyle = obG; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.35;
+      ctx.beginPath();
+      ctx.moveTo(cx - 12, baseY - 16); ctx.lineTo(cx - 7.5, py + 18);
+      ctx.lineTo(cx, py + 8);
+      ctx.lineTo(cx + 7.5, py + 18); ctx.lineTo(cx + 12, baseY - 16);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // Glowing Zeus lightning glyph carved into the obelisk face
+      const activeGlow = (bState === 'track' || bState === 'lock' || bState === 'strike');
+      ctx.strokeStyle = activeGlow ? '#fde047' : '#0284c7';
+      ctx.lineWidth = 2.0; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx + 2, py + 24); ctx.lineTo(cx - 4, py + 37);
+      ctx.lineTo(cx + 3, py + 37); ctx.lineTo(cx - 3, py + 52);
+      ctx.stroke();
+
+      // Golden Eagle of Zeus perched with spread wings atop the obelisk!
+      const egG = ctx.createLinearGradient(cx - 16, py - 6, cx + 16, py + 10);
+      egG.addColorStop(0, '#fef9c3'); egG.addColorStop(0.5, '#f59e0b'); egG.addColorStop(1, '#92400e');
+      ctx.fillStyle = egG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(cx, py + 6);
+      ctx.quadraticCurveTo(cx - 11, py - 6, cx - 18, py + 1);
+      ctx.quadraticCurveTo(cx - 10, py + 5, cx - 3, py + 9);
+      ctx.lineTo(cx + 3, py + 9);
+      ctx.quadraticCurveTo(cx + 10, py + 5, cx + 18, py + 1);
+      ctx.quadraticCurveTo(cx + 11, py - 6, cx, py + 6);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, py + 1, 3.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      // 2. Sky Storm Cloud, Floor Target Reticle & Vertical Zeus Thunderbolt!
+      const cloudY = baseY - 275;
+      if (bState === 'track' || bState === 'lock' || bState === 'strike') {
+        const isLock = bState === 'lock';
+        const lockR = p.lockRatio || 0;
+
+        // Floor Warning Target Ring & Vertical Sight Guide during Track/Lock
+        if (bState === 'track' || bState === 'lock') {
+          const pulse = isLock ? (0.55 + 0.45 * Math.sin(time * 28)) : 0.45;
+          const ringR = isLock ? (26 - lockR * 6) : 28;
+          ctx.strokeStyle = isLock ? `rgba(250, 204, 21, ${(0.65 + pulse * 0.35).toFixed(2)})` : 'rgba(125, 211, 252, 0.65)';
+          ctx.lineWidth = isLock ? 2.6 : 1.8;
+          ctx.beginPath(); ctx.ellipse(strikeX, baseY - 2, ringR, 6.5, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.fillStyle = isLock ? 'rgba(254, 240, 138, 0.28)' : 'rgba(56, 189, 248, 0.16)';
+          ctx.beginPath(); ctx.ellipse(strikeX, baseY - 2, ringR, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+
+          // Vertical sky guide line showing exact upcoming strike column
+          ctx.strokeStyle = isLock ? `rgba(254, 240, 138, ${(0.28 + lockR * 0.42).toFixed(2)})` : 'rgba(186, 230, 253, 0.22)';
+          ctx.lineWidth = isLock ? 2.0 : 1.2;
+          ctx.setLineDash([7, 7]);
+          ctx.beginPath(); ctx.moveTo(strikeX, cloudY + 12); ctx.lineTo(strikeX, baseY - 4); ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        // Strike Bolt!
+        if (bState === 'strike') {
+          const sA = p.strikeAlpha !== undefined ? p.strikeAlpha : 1;
+          // Volumetric golden-electric column glow
+          const colG = ctx.createLinearGradient(strikeX - 28, 0, strikeX + 28, 0);
+          colG.addColorStop(0, 'rgba(254, 240, 138, 0)');
+          colG.addColorStop(0.5, `rgba(254, 240, 138, ${(0.58 * sA).toFixed(2)})`);
+          colG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+          ctx.fillStyle = colG;
+          ctx.fillRect(strikeX - 28, cloudY, 56, baseY - cloudY);
+
+          // Jagged Main Thunderbolt of Zeus + Secondary Electric Branches
+          const buildBolt = () => {
+            ctx.moveTo(strikeX, cloudY + 6);
+            const steps = 8;
+            for (let s = 1; s < steps; s++) {
+              const u = s / steps;
+              const jx = strikeX + ((s % 2 === 0 ? 1 : -1) * (8 + Math.sin(time * 60 + s) * 5));
+              ctx.lineTo(jx, cloudY + u * (baseY - cloudY));
+            }
+            ctx.lineTo(strikeX, baseY - 2);
+          };
+          ctx.strokeStyle = `rgba(250, 204, 21, ${sA.toFixed(2)})`;
+          ctx.lineWidth = 7.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+          ctx.beginPath(); buildBolt(); ctx.stroke();
+          ctx.strokeStyle = `rgba(255, 255, 255, ${sA.toFixed(2)})`;
+          ctx.lineWidth = 3.0;
+          ctx.beginPath(); buildBolt(); ctx.stroke();
+
+          // Ground impact sunburst crater flash
+          const impG = ctx.createRadialGradient(strikeX, baseY - 4, 3, strikeX, baseY - 4, 36);
+          impG.addColorStop(0, `rgba(255, 255, 255, ${sA.toFixed(2)})`);
+          impG.addColorStop(0.45, `rgba(250, 204, 21, ${(0.75 * sA).toFixed(2)})`);
+          impG.addColorStop(1, 'rgba(250, 204, 21, 0)');
+          ctx.fillStyle = impG;
+          ctx.beginPath(); ctx.arc(strikeX, baseY - 4, 36, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Brooding Dark Olympian Thundercloud Swirling Overhead at (strikeX, cloudY)!
+        const clG = ctx.createLinearGradient(strikeX, cloudY - 22, strikeX, cloudY + 16);
+        clG.addColorStop(0, '#475569'); clG.addColorStop(0.6, '#1e293b'); clG.addColorStop(1, '#0f172a');
+        ctx.fillStyle = clG;
+        ctx.beginPath();
+        ctx.arc(strikeX - 20, cloudY + 3, 14, 0, Math.PI * 2);
+        ctx.arc(strikeX, cloudY - 4, 19, 0, Math.PI * 2);
+        ctx.arc(strikeX + 20, cloudY + 3, 14, 0, Math.PI * 2);
+        ctx.fill();
+        // Internal golden lightning pulse inside the storm cloud
+        const flashA = bState === 'strike' ? 0.85 : (0.28 + 0.25 * Math.sin(time * 22));
+        ctx.fillStyle = `rgba(254, 240, 138, ${flashA.toFixed(2)})`;
+        ctx.beginPath(); ctx.ellipse(strikeX, cloudY + 5, 18, 6, 0, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    // =========================================================================
+    // STAGE 26: BATTIR, PALESTINE (UNESCO Terraces, Springs, Railway & Groves)
+    // =========================================================================
+    if (p.type === 'battir_terrace') {
+      ctx.save();
+      const isGround = p.h >= 60;
+      // Base Jerusalem dry-stone limestone masonry (السلاسل الحجرية)
+      const stG = ctx.createLinearGradient(px, py, px, py + p.h);
+      stG.addColorStop(0, '#e7dcc8'); stG.addColorStop(0.22, '#d5c3a3'); stG.addColorStop(0.7, '#b59d78'); stG.addColorStop(1, '#856e4d');
+      ctx.fillStyle = stG;
+      ctx.beginPath(); ctx.roundRect(px, py + 4, p.w, p.h - 4, isGround ? 3 : 6); ctx.fill();
+      // Hand-fitted interlocking dry-stone courses with chiseled shadows
+      ctx.save();
+      ctx.beginPath(); ctx.roundRect(px, py + 4, p.w, p.h - 4, isGround ? 3 : 6); ctx.clip();
+      const rowH = isGround ? 22 : 11;
+      const rows = Math.ceil(p.h / rowH);
+      const tones = ['#efe5d2', '#dfd0b4', '#c9b391', '#b99f7b', '#e4d6bc'];
+      for (let r = 0; r < rows; r++) {
+        const ry = py + 8 + r * rowH;
+        let bx = px - ((r % 2) * 19);
+        let idx = r * 7 + Math.floor(p.x * 0.05);
+        while (bx < px + p.w) {
+          const bw = 34 + ((idx * 17) % 24);
+          ctx.fillStyle = tones[Math.abs(idx) % tones.length];
+          ctx.strokeStyle = 'rgba(71, 56, 36, 0.55)'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.roundRect(bx + 1, ry + 1, bw - 2, rowH - 2, 3); ctx.fill(); ctx.stroke();
+          // Subtle sunlit limestone bevel along top edge of stone
+          ctx.strokeStyle = 'rgba(255, 251, 235, 0.45)'; ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.moveTo(bx + 3, ry + 2.2); ctx.lineTo(bx + bw - 4, ry + 2.2); ctx.stroke();
+          // Occasional mossy dry-stone crevice
+          if (idx % 5 === 0 && r > 0) {
+            ctx.fillStyle = 'rgba(101, 132, 62, 0.52)';
+            ctx.beginPath(); ctx.ellipse(bx + bw - 2, ry + rowH - 1, 5, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+          }
+          bx += bw;
+          idx++;
+        }
+      }
+      ctx.restore();
+      // Fertile Palestinian terra-rossa topsoil & lush Mediterranean terrace verge
+      const rimG = ctx.createLinearGradient(px, py, px, py + 11);
+      rimG.addColorStop(0, '#65a30d'); rimG.addColorStop(0.55, '#4d7c0f'); rimG.addColorStop(1, '#7c4a2d');
+      ctx.fillStyle = rimG;
+      ctx.beginPath(); ctx.roundRect(px - 1, py, p.w + 2, 9.5, [4, 4, 2, 2]); ctx.fill();
+      // Sunlit grass tufts, wild cyclamen & slender Battiri eggplants along terrace rim
+      const step = isGround ? 68 : 54;
+      for (let gx = 20; gx < p.w - 20; gx += step) {
+        const seed = Math.abs(Math.floor(p.x + gx));
+        ctx.strokeStyle = '#84cc16'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(px + gx, py + 2); ctx.lineTo(px + gx - 4, py - 5);
+        ctx.moveTo(px + gx + 2, py + 2); ctx.lineTo(px + gx + 5, py - 6);
+        ctx.stroke();
+        if (isGround && seed % 3 === 0) {
+          // Famous slender light-purple Battiri Eggplant bush (الباذنجان البتيري)!
+          ctx.fillStyle = '#365314';
+          ctx.beginPath(); ctx.ellipse(px + gx + 10, py - 5, 9, 4.2, -0.2, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#9333ea'; ctx.strokeStyle = '#4c1d95'; ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.ellipse(px + gx + 15, py - 1, 3.8, 8.2, 0.35, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#e9d5ff';
+          ctx.beginPath(); ctx.ellipse(px + gx + 13.8, py - 2.8, 1.1, 3.8, 0.35, 0, Math.PI * 2); ctx.fill();
+        } else if (seed % 3 === 1) {
+          // Wild Scarlet Palestinian Poppy (شقائق النعمان / الدحنون)!
+          ctx.strokeStyle = '#3f6212'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.moveTo(px + gx - 2, py + 1); ctx.lineTo(px + gx - 3, py - 10); ctx.stroke();
+          ctx.fillStyle = '#dc2626';
+          ctx.beginPath(); ctx.arc(px + gx - 3, py - 11, 3.8, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#18181b';
+          ctx.beginPath(); ctx.arc(px + gx - 3, py - 11, 1.3, 0, Math.PI * 2); ctx.fill();
+        } else {
+          // Delicate pink Palestinian wild cyclamen (عصا الراعي)
+          ctx.fillStyle = '#f472b6';
+          ctx.beginPath(); ctx.arc(px + gx - 2, py - 8, 2.8, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.strokeStyle = '#574631'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(px, py + 1, p.w, p.h - 1, isGround ? 3 : 6); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_water_sluice') {
+      // Ancient Roman Ma'dud Irrigation Sluice Gate (بوابة قناة المعدود)
+      ctx.save();
+      const open = p.openAnim || 0;
+      // Carved limestone sluice frame & stone basin
+      const frG = ctx.createLinearGradient(px, py, px + p.w, py + p.h);
+      frG.addColorStop(0, '#e7dcc8'); frG.addColorStop(0.5, '#cbb591'); frG.addColorStop(1, '#8c7451');
+      ctx.fillStyle = frG; ctx.strokeStyle = '#473824'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(px, py + 6, 10, p.h - 6, 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(px + p.w - 10, py + 6, 10, p.h - 6, 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(px - 3, py, p.w + 6, 10, 3); ctx.fill(); ctx.stroke();
+      // Inner dark channel arch
+      ctx.fillStyle = '#0c4a6e';
+      ctx.fillRect(px + 10, py + 10, p.w - 20, p.h - 10);
+      // Flowing turquoise spring water when open
+      if (open > 0.05) {
+        const wG = ctx.createLinearGradient(px + 10, py + 12, px + p.w - 10, py + p.h);
+        wG.addColorStop(0, 'rgba(56, 189, 248, 0.92)'); wG.addColorStop(1, 'rgba(14, 165, 233, 0.85)');
+        ctx.fillStyle = wG;
+        ctx.fillRect(px + 10, py + p.h - (p.h - 16) * open, p.w - 20, (p.h - 16) * open);
+        ctx.strokeStyle = 'rgba(224, 242, 254, 0.85)'; ctx.lineWidth = 1.4;
+        for (let k = 0; k < 3; k++) {
+          const wy = py + 18 + ((time * 42 + k * 14) % Math.max(8, p.h - 20));
+          ctx.beginPath(); ctx.moveTo(px + 14, wy); ctx.quadraticCurveTo(px + p.w * 0.5, wy + 4, px + p.w - 14, wy); ctx.stroke();
+        }
+      }
+      // Sliding aged cedar & iron sluice gate lifting upward with openAnim
+      const gateY = py + 12 - open * 24;
+      const gG = ctx.createLinearGradient(px + 10, gateY, px + p.w - 10, gateY + 34);
+      gG.addColorStop(0, '#92400e'); gG.addColorStop(1, '#451a03');
+      ctx.fillStyle = gG; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.4;
+      ctx.fillRect(px + 11, gateY, p.w - 22, 34);
+      ctx.strokeRect(px + 11, gateY, p.w - 22, 34);
+      // Wrought-iron lift handle ring at top
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.arc(px + p.w * 0.5, gateY - 6, 5.5, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_canal_raft') {
+      // Buoyant Cedar Irrigation Canal Raft floating inside a REAL stationary carved-stone Battir aqueduct trough!
+      ctx.save();
+      const active = (p.activeTimer || 0) > 0;
+      const camOffX = p.x - px;
+      const sX = (p.startX !== undefined ? p.startX : p.x) - camOffX - 18;
+      const eX = (p.endX !== undefined ? p.endX : p.x + 260) - camOffX + p.w + 18;
+      const troughW = Math.max(p.w + 36, eX - sX);
+      const troughY = py + p.h - 4;
+      // Stationary carved Jerusalem-stone aqueduct trough & arched support piers spanning the canal gap
+      const trG = ctx.createLinearGradient(0, troughY, 0, troughY + 28);
+      trG.addColorStop(0, '#dfd0b4'); trG.addColorStop(1, '#8c7451');
+      ctx.fillStyle = trG; ctx.strokeStyle = '#473824'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(sX, troughY + 6, troughW, 18, 4); ctx.fill(); ctx.stroke();
+      // Flowing turquoise spring water inside the stationary stone trough
+      const cwG = ctx.createLinearGradient(0, troughY, 0, troughY + 12);
+      cwG.addColorStop(0, active ? '#38bdf8' : '#7dd3fc'); cwG.addColorStop(1, '#0284c7');
+      ctx.fillStyle = cwG;
+      ctx.fillRect(sX + 6, troughY + 1, troughW - 12, 9);
+      // Shimmering turquoise canal water ribbons beneath raft
+      ctx.strokeStyle = active ? 'rgba(224, 242, 254, 0.92)' : 'rgba(186, 230, 253, 0.55)';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(px - 10, py + p.h + 2);
+      ctx.quadraticCurveTo(px + p.w * 0.25, py + p.h + 5 + Math.sin(time * 5) * 2, px + p.w * 0.5, py + p.h + 2);
+      ctx.quadraticCurveTo(px + p.w * 0.75, py + p.h - 1 - Math.sin(time * 5) * 2, px + p.w + 10, py + p.h + 2);
+      ctx.stroke();
+      // Hand-lashed cedar logs
+      const logG = ctx.createLinearGradient(px, py, px, py + p.h);
+      logG.addColorStop(0, '#b45309'); logG.addColorStop(0.5, '#92400e'); logG.addColorStop(1, '#451a03');
+      ctx.fillStyle = logG; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(px, py + 4, p.w, p.h - 4, 8); ctx.fill(); ctx.stroke();
+      // Deck planks & hemp rope lashings
+      ctx.fillStyle = '#d97706';
+      for (let sx = px + 8; sx < px + p.w - 10; sx += 16) {
+        ctx.fillRect(sx, py, 13, 6);
+        ctx.strokeRect(sx, py, 13, 6);
+      }
+      ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.moveTo(px + 22, py + 2); ctx.lineTo(px + 22, py + p.h); ctx.moveTo(px + p.w - 22, py + 2); ctx.lineTo(px + p.w - 22, py + p.h); ctx.stroke();
+      // Traditional Palestinian terracotta water jug (جرّة فخار) on prow
+      ctx.fillStyle = '#c2410c'; ctx.strokeStyle = '#431407'; ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.ellipse(px + p.w - 14, py - 5, 5.5, 6.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillRect(px + p.w - 16.5, py - 13, 5, 3);
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_spring_geyser') {
+      // Pressurized Ain al-Balad Roman Spring Updraft (نبع عين البلد)
+      ctx.save();
+      const pwr = p.geyserPower || 0;
+      const cx = px + p.w * 0.5;
+      const botY = py + p.h;
+      // Carved arched limestone spring spout base
+      const bG = ctx.createLinearGradient(cx - 28, botY - 18, cx + 28, botY);
+      bG.addColorStop(0, '#e7dcc8'); bG.addColorStop(1, '#9c8360');
+      ctx.fillStyle = bG; ctx.strokeStyle = '#473824'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(cx - 28, botY - 16, 56, 16, [8, 8, 2, 2]); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#0369a1';
+      ctx.beginPath(); ctx.ellipse(cx, botY - 15, 18, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+      // Sculpted organic rising water-jet ribbons (NO flat rectangles!)
+      if (pwr > 0.05) {
+        const jetH = (p.h - 14) * pwr;
+        const topY = botY - 14 - jetH;
+        ctx.save();
+        ctx.globalAlpha = 0.72 * pwr;
+        const jG = ctx.createLinearGradient(cx, botY - 14, cx, topY);
+        jG.addColorStop(0, 'rgba(14, 165, 233, 0.85)'); jG.addColorStop(0.55, 'rgba(125, 211, 252, 0.55)'); jG.addColorStop(1, 'rgba(224, 242, 254, 0.12)');
+        ctx.fillStyle = jG;
+        ctx.beginPath();
+        ctx.moveTo(cx - 15, botY - 14);
+        ctx.bezierCurveTo(cx - 20 + Math.sin(time * 7) * 4, botY - jetH * 0.4, cx - 26 - Math.sin(time * 6) * 4, topY + 24, cx - 18, topY);
+        ctx.quadraticCurveTo(cx, topY - 14, cx + 18, topY);
+        ctx.bezierCurveTo(cx + 26 + Math.sin(time * 6) * 4, topY + 24, cx + 20 - Math.sin(time * 7) * 4, botY - jetH * 0.4, cx + 15, botY - 14);
+        ctx.closePath(); ctx.fill();
+        // Rising pearlescent spray droplets & foam crown
+        ctx.fillStyle = '#e0f2fe';
+        for (let d = 0; d < 10; d++) {
+          const prog = ((time * 1.85 + d * 0.11) % 1);
+          const dy = botY - 16 - prog * jetH;
+          const dx = cx + Math.sin(prog * 9 + d * 1.7) * (10 + prog * 12);
+          ctx.beginPath(); ctx.arc(dx, dy, Math.max(1.2, 3.6 - prog * 1.8), 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_olive_bough') {
+      // Elastic Ancient Palestinian Olive Tree Bough anchored by a sculpted gnarled olive trunk!
+      ctx.save();
+      const flex = (p.bounceAnim || 0) * 8.5;
+      const by = py + flex;
+      // Supporting gnarled olive trunk descending cleanly into the terrace below
+      const trkG = ctx.createLinearGradient(px + 6, by + 10, px + 34, by + 135);
+      trkG.addColorStop(0, '#8c7a65'); trkG.addColorStop(0.55, '#5c4d3c'); trkG.addColorStop(1, '#362c22');
+      ctx.fillStyle = trkG; ctx.strokeStyle = '#291e14'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(px + 10, by + 14); ctx.quadraticCurveTo(px + 4, by + 68, px - 2, by + 130);
+      ctx.lineTo(px + 28, by + 130); ctx.quadraticCurveTo(px + 22, by + 68, px + 26, by + 16);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Gnarled silver-brown olive wood limb
+      const wG = ctx.createLinearGradient(px, by, px, by + p.h);
+      wG.addColorStop(0, '#9c8971'); wG.addColorStop(0.5, '#705e49'); wG.addColorStop(1, '#443729');
+      ctx.fillStyle = wG; ctx.strokeStyle = '#291e14'; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(px + 4, by + 12);
+      ctx.quadraticCurveTo(px + p.w * 0.35, by + 2 + flex * 0.4, px + p.w * 0.65, by + 6 + flex * 0.5);
+      ctx.quadraticCurveTo(px + p.w - 8, by + 8, px + p.w - 2, by + 14);
+      ctx.quadraticCurveTo(px + p.w * 0.5, by + 23 + flex * 0.4, px + 4, by + 19);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Silvery-green lanceolate olive leaves & hanging olives
+      for (let lx = 14; lx < p.w - 14; lx += 16) {
+        const side = (Math.floor(lx / 16) % 2 === 0) ? -1 : 1;
+        ctx.save();
+        ctx.translate(px + lx, by + 8 + (side > 0 ? 4 : -2));
+        ctx.rotate(side * 0.48);
+        ctx.fillStyle = side < 0 ? '#84a955' : '#658340';
+        ctx.strokeStyle = '#365314'; ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.ellipse(0, 0, 9.5, 3.6, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.restore();
+        if (Math.floor(lx / 16) % 3 === 1) {
+          ctx.fillStyle = (Math.floor(lx / 16) % 2 === 0) ? '#3f6212' : '#312e2b';
+          ctx.beginPath(); ctx.ellipse(px + lx + 3, by + 20, 3.5, 4.6, 0.2, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_vine_trellis') {
+      // Sun-Warmed Grapevine Pergola (عريشة الدوالي) that creaks & drops!
+      ctx.save();
+      const shake = (p.crumbleTimer > 0 && !p.broken) ? Math.sin(time * 42) * 2.8 : 0;
+      const tx = px + shake;
+      // Weathered cedar pergola cross-beams
+      const wdG = ctx.createLinearGradient(tx, py, tx, py + 12);
+      wdG.addColorStop(0, '#b47b44'); wdG.addColorStop(1, '#6b4222');
+      ctx.fillStyle = wdG; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.roundRect(tx, py + 2, p.w, 10, 3); ctx.fill(); ctx.stroke();
+      // Cross slats
+      for (let sx = 12; sx < p.w - 10; sx += 22) {
+        ctx.fillStyle = '#8a582c';
+        ctx.fillRect(tx + sx, py, 7, 14);
+        ctx.strokeRect(tx + sx, py, 7, 14);
+      }
+      // Lush grapevine leaves & hanging purple/green grape clusters
+      for (let gx = 16; gx < p.w - 16; gx += 26) {
+        ctx.fillStyle = '#4d7c0f'; ctx.strokeStyle = '#1a2e05'; ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.arc(tx + gx, py + 2, 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#65a30d';
+        ctx.beginPath(); ctx.arc(tx + gx + 8, py + 4, 6.2, 0, Math.PI * 2); ctx.fill();
+        if (Math.floor(gx / 26) % 2 === 0) {
+          const isPurple = Math.floor(gx / 26) % 4 === 0;
+          ctx.fillStyle = isPurple ? '#6b21a8' : '#84cc16';
+          for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 3 - r; c++) {
+              ctx.beginPath(); ctx.arc(tx + gx + 3 + (c - (2 - r) * 0.5) * 4.2, py + 14 + r * 3.8, 2.5, 0, Math.PI * 2); ctx.fill();
+            }
+          }
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_railway_handcar') {
+      // Historic 1892/1905 Ottoman Jaffa–Jerusalem Railway Handcar riding on REAL steel rails & viaduct bridge!
+      ctx.save();
+      const pump = Math.sin(p.pumpPhase || 0) * 0.34;
+      const wheelAng = (p.pumpPhase || 0) * 1.4;
+      // Stationary Ottoman steel railway rails, wooden sleepers & stone bridge girder spanning startX..endX
+      const camOffX = p.x - px;
+      const rStart = (p.startX !== undefined ? p.startX : p.x) - camOffX - 24;
+      const rEnd = (p.endX !== undefined ? p.endX : p.x + 420) - camOffX + p.w + 24;
+      const railY = py + p.h + 10;
+      ctx.fillStyle = '#475569'; ctx.fillRect(rStart, railY, rEnd - rStart, 5);
+      ctx.fillStyle = '#94a3b8'; ctx.fillRect(rStart, railY, rEnd - rStart, 1.8);
+      ctx.fillStyle = '#6b4222';
+      for (let sl = rStart + 6; sl < rEnd - 6; sl += 22) ctx.fillRect(sl, railY + 4, 12, 5);
+      ctx.fillStyle = '#8c7451'; ctx.strokeStyle = '#473824'; ctx.lineWidth = 1.2;
+      ctx.fillRect(rStart, railY + 9, rEnd - rStart, 8); ctx.strokeRect(rStart, railY + 9, rEnd - rStart, 8);
+      // Cast-iron flanged wheels with rotating spokes
+      const wheelXs = [px + 22, px + p.w - 22];
+      for (const wx of wheelXs) {
+        const wy = py + p.h;
+        ctx.fillStyle = '#334155'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(wx, wy, 11, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.4;
+        for (let s = 0; s < 4; s++) {
+          const a = wheelAng + s * (Math.PI * 0.5);
+          ctx.beginPath(); ctx.moveTo(wx - Math.cos(a) * 8, wy - Math.sin(a) * 8); ctx.lineTo(wx + Math.cos(a) * 8, wy + Math.sin(a) * 8); ctx.stroke();
+        }
+      }
+      // Wooden flatbed chassis with dark Ottoman red-brown trim
+      const bdG = ctx.createLinearGradient(px, py, px, py + 14);
+      bdG.addColorStop(0, '#b45309'); bdG.addColorStop(1, '#78350f');
+      ctx.fillStyle = bdG; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(px, py, p.w, 13, 3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#7f1d1d';
+      ctx.fillRect(px + 2, py + 11, p.w - 4, 5);
+      // Central cast-iron A-frame & seesaw pumping walking-beam
+      const cx = px + p.w * 0.5;
+      ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 3.2;
+      ctx.beginPath(); ctx.moveTo(cx - 12, py); ctx.lineTo(cx, py - 24); ctx.lineTo(cx + 12, py); ctx.stroke();
+      ctx.save();
+      ctx.translate(cx, py - 24);
+      ctx.rotate(pump);
+      ctx.strokeStyle = '#475569'; ctx.lineWidth = 3.6;
+      ctx.beginPath(); ctx.moveTo(-26, 0); ctx.lineTo(26, 0); ctx.stroke();
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath(); ctx.arc(-26, 0, 3.6, 0, Math.PI * 2); ctx.arc(26, 0, 3.6, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      // Warm brass Ottoman rail lantern at front edge
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(px + p.w - 10, py - 5, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_stone_roller') {
+      // Carved Limestone Olive-Press Millstone (حجر معصرة الزيتون)
+      ctx.save();
+      const r = p.w * 0.5;
+      const cx = px + r, cy = py + r;
+      const rot = p.wheelRot || 0;
+      // Ground contact shadow
+      ctx.fillStyle = 'rgba(28, 25, 23, 0.30)';
+      ctx.beginPath(); ctx.ellipse(cx, py + p.h, r * 0.85, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+      // Dressed limestone wheel body with golden olive-oil patina
+      const mG = ctx.createRadialGradient(-r * 0.25, -r * 0.25, 4, 0, 0, r);
+      mG.addColorStop(0, '#f3e8d2'); mG.addColorStop(0.65, '#cbb591'); mG.addColorStop(1, '#856e4d');
+      ctx.fillStyle = mG; ctx.strokeStyle = '#473824'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.arc(0, 0, r - 1, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Radial hand-chiseled olive-press grinding grooves
+      ctx.strokeStyle = 'rgba(71, 56, 36, 0.55)'; ctx.lineWidth = 1.4;
+      for (let g = 0; g < 8; g++) {
+        const a = g * (Math.PI * 0.25);
+        ctx.beginPath(); ctx.moveTo(Math.cos(a) * 8, Math.sin(a) * 8); ctx.lineTo(Math.cos(a) * (r - 4), Math.sin(a) * (r - 4)); ctx.stroke();
+      }
+      // Iron-banded wooden axle hub
+      ctx.fillStyle = '#5c3a21'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.arc(0, 0, 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_roman_bath_vent') {
+      // Ancient Roman Bath Thermal Steam Grate (الحمام الروماني البخاري)
+      ctx.save();
+      const cx = px + p.w * 0.5;
+      const botY = py + p.h;
+      const pwr = p.steamPower || 0;
+      const tele = p.telegraph || 0;
+      // Carved Roman limestone bath pedestal with bronze lattice grate & valve wheel
+      const bG = ctx.createLinearGradient(cx - 34, botY - 22, cx + 34, botY);
+      bG.addColorStop(0, '#efe4cf'); bG.addColorStop(0.55, '#cbb591'); bG.addColorStop(1, '#856e4d');
+      ctx.fillStyle = bG; ctx.strokeStyle = '#473824'; ctx.lineWidth = 1.7;
+      ctx.beginPath(); ctx.roundRect(cx - 34, botY - 20, 68, 20, [7, 7, 2, 2]); ctx.fill(); ctx.stroke();
+      // Bronze hypocaust steam grate
+      ctx.fillStyle = tele ? '#d97706' : '#78350f';
+      ctx.beginPath(); ctx.roundRect(cx - 24, botY - 23, 48, 7, 3); ctx.fill(); ctx.stroke();
+      // Side Roman bronze valve wheel (reacts to Meow!)
+      ctx.strokeStyle = '#b45309'; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.arc(cx + 36, botY - 11, 7.5, 0, Math.PI * 2); ctx.stroke();
+      if (tele && pwr < 0.2) {
+        ctx.fillStyle = 'rgba(253, 224, 71, 0.65)';
+        for (let b = 0; b < 4; b++) {
+          const bx = cx - 16 + b * 10 + Math.sin(time * 8 + b) * 3;
+          const by = botY - 26 - ((time * 36 + b * 9) % 24);
+          ctx.beginPath(); ctx.arc(bx, by, 3.2, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      if (pwr > 0.05) {
+        // Sculpted rising warm golden-ivory Roman Bath steam curls (zero flat rectangles!)
+        const colH = (p.h - 22) * pwr;
+        ctx.save();
+        for (let k = 0; k < 11; k++) {
+          const prog = ((time * 1.15 + k * 0.095) % 1);
+          const sy = botY - 24 - prog * colH;
+          const sx = cx + Math.sin(prog * 8 + k * 1.4) * (10 + prog * 15);
+          const rad = 11 + prog * 16;
+          const a = Math.max(0, (1 - prog) * 0.42 * pwr);
+          const sG = ctx.createRadialGradient(sx, sy, 2, sx, sy, rad);
+          sG.addColorStop(0, `rgba(255, 251, 235, ${a.toFixed(2)})`);
+          sG.addColorStop(0.6, `rgba(254, 243, 199, ${(a * 0.55).toFixed(2)})`);
+          sG.addColorStop(1, 'rgba(254, 243, 199, 0)');
+          ctx.fillStyle = sG;
+          ctx.beginPath(); ctx.arc(sx, sy, rad, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_hosh_arch_swing') {
+      // Seven Widows Quarter (حوش السبع أرامل) Hanging Heritage Lantern Archway Pendulum
+      ctx.save();
+      const cx = px + p.w * 0.5;
+      const ax = (p.anchorX !== undefined ? p.anchorX - (p.x - px) : cx);
+      const ay = (p.anchorY !== undefined ? p.anchorY - (p.y - py) : py - 135);
+      // Overhead carved stone Hosh archway bracket
+      ctx.fillStyle = '#d5c3a3'; ctx.strokeStyle = '#473824'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(ax - 24, ay - 12, 48, 14, 5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#475569';
+      ctx.beginPath(); ctx.arc(ax, ay + 2, 5, 0, Math.PI * 2); ctx.fill();
+      // Twin wrought-iron suspension chains connecting solidly to the archway bracket
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(ax, ay + 2); ctx.lineTo(px + 14, py + 4);
+      ctx.moveTo(ax, ay + 2); ctx.lineTo(px + p.w - 14, py + 4);
+      ctx.stroke();
+      // Warm glowing Palestinian heritage brass lantern hanging beneath tray
+      const glowG = ctx.createRadialGradient(cx, py + 26, 4, cx, py + 26, 46);
+      glowG.addColorStop(0, 'rgba(254, 240, 138, 0.72)'); glowG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      ctx.fillStyle = glowG;
+      ctx.beginPath(); ctx.arc(cx, py + 26, 46, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(cx - 8, py + 18); ctx.lineTo(cx + 8, py + 18); ctx.lineTo(cx + 6, py + 34); ctx.lineTo(cx - 6, py + 34); ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Sculpted carved-limestone & iron-rimmed platform tray
+      const tG = ctx.createLinearGradient(px, py, px, py + p.h);
+      tG.addColorStop(0, '#efe4cf'); tG.addColorStop(0.55, '#cbb591'); tG.addColorStop(1, '#78350f');
+      ctx.fillStyle = tG; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.7;
+      ctx.beginPath(); ctx.roundRect(px, py, p.w, p.h, 6); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_madud_scale') {
+      // Ancient Ma'dud Twin Water-Balance Seesaw (ميزان قصبة المعدود)
+      ctx.save();
+      const cx = px + p.w * 0.5;
+      const cy = py + (p.sinkOffset || 0) + 10;
+      const tilt = p.tilt || 0;
+      // Carved Jerusalem stone fulcrum pedestal below beam
+      ctx.fillStyle = '#cbb591'; ctx.strokeStyle = '#473824'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(cx - 18, cy + 32); ctx.lineTo(cx - 8, cy + 2); ctx.lineTo(cx + 8, cy + 2); ctx.lineTo(cx + 18, cy + 32); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.translate(cx, cy);
+      ctx.rotate(tilt);
+      // Carved olive-wood Ma'dud measuring beam with notched hour marks
+      const bmG = ctx.createLinearGradient(0, -10, 0, 10);
+      bmG.addColorStop(0, '#b47b44'); bmG.addColorStop(0.5, '#8a582c'); bmG.addColorStop(1, '#451a03');
+      ctx.fillStyle = bmG; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(-p.w * 0.5, -10, p.w, 16, 5); ctx.fill(); ctx.stroke();
+      // Traditional Ma'dud carved notches along beam
+      ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 1.3;
+      for (let nx = -p.w * 0.36; nx <= p.w * 0.36; nx += 18) {
+        ctx.beginPath(); ctx.moveTo(nx, -8); ctx.lineTo(nx, -2); ctx.stroke();
+      }
+      // Twin copper-banded terracotta water buckets hanging at both ends
+      for (const side of [-1, 1]) {
+        const bx = side * (p.w * 0.44);
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(bx, 6); ctx.lineTo(bx, 18); ctx.stroke();
+        ctx.fillStyle = '#c2410c'; ctx.strokeStyle = '#431407'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.roundRect(bx - 10, 18, 20, 15, [2, 2, 6, 6]); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(bx - 8, 19, 16, 4);
+      }
+      // Brass pivot bolt
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(0, -2, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
     origDrawPlatform(ctx, p, px, py, nv, time);
     if (p.climbable) {
       drawClimbWallSign(ctx, p, px, py, time);
     }
+  }
+
+  // =========================================================================
+  // 10. STAGE 16: ARCTIC SNOWY KINGDOM (Aurora Borealis, Mountains, Cabins & Igloos)
+  // =========================================================================
+  function drawSnowSkyAndHorizon(ctx, camX, w, h, time) {
+    ensureTextures(ctx);
+
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, '#040b1e');
+    sky.addColorStop(0.28, '#0b1e3f');
+    sky.addColorStop(0.58, '#163c6b');
+    sky.addColorStop(0.84, '#2a628f');
+    sky.addColorStop(1, '#93c5fd');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, h);
+
+    for (let s = 0; s < 64; s++) {
+      const sx = ((s * 173 - camX * 0.015) % w + w) % w;
+      const sy = 12 + ((s * 53) % 210);
+      const tw = 0.3 + 0.65 * Math.abs(Math.sin(time * 1.9 + s * 1.3));
+      ctx.fillStyle = s % 4 === 0 ? `rgba(186, 230, 253, ${tw})` : `rgba(255, 255, 255, ${tw})`;
+      ctx.beginPath(); ctx.arc(sx, sy, s % 5 === 0 ? 1.8 : 1.1, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Flowing Multi-Layered Aurora Borealis Ribbons
+    ctx.save();
+    for (let band = 0; band < 3; band++) {
+      const baseY = 76 + band * 34;
+      const aurG = ctx.createLinearGradient(0, baseY - 42, 0, baseY + 68);
+      if (band === 0) {
+        aurG.addColorStop(0, 'rgba(52, 211, 153, 0)');
+        aurG.addColorStop(0.45, 'rgba(52, 211, 153, 0.24)');
+        aurG.addColorStop(1, 'rgba(56, 189, 248, 0)');
+      } else if (band === 1) {
+        aurG.addColorStop(0, 'rgba(56, 189, 248, 0)');
+        aurG.addColorStop(0.48, 'rgba(34, 211, 238, 0.22)');
+        aurG.addColorStop(1, 'rgba(129, 140, 248, 0)');
+      } else {
+        aurG.addColorStop(0, 'rgba(167, 139, 250, 0)');
+        aurG.addColorStop(0.5, 'rgba(167, 139, 250, 0.18)');
+        aurG.addColorStop(1, 'rgba(52, 211, 153, 0)');
+      }
+      ctx.fillStyle = aurG;
+      ctx.beginPath();
+      ctx.moveTo(0, baseY + 60);
+      for (let x = 0; x <= w + 40; x += 40) {
+        const wave = Math.sin((x + camX * 0.03) * 0.008 + time * (0.65 + band * 0.18) + band * 2.1) * 28
+          + Math.cos((x + camX * 0.02) * 0.015 - time * 0.45) * 14;
+        ctx.lineTo(x, baseY + wave);
+      }
+      ctx.lineTo(w, baseY + 86);
+      ctx.lineTo(0, baseY + 86);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+
+    const moonX = 960 - camX * 0.02;
+    drawRealisticMoon(ctx, moonX, 92, 34, '#e0f2fe');
+
+    // Towering Snow-Capped Far Alpine Peaks
+    const farSpan = 260;
+    const farPar = 0.06;
+    const fStart = Math.floor((camX * farPar) / farSpan) - 1;
+    const fEnd = Math.ceil((camX * farPar + w) / farSpan) + 1;
+    for (let i = fStart; i <= fEnd; i++) {
+      const mx = i * farSpan - camX * farPar;
+      const peakH = 230 + ((Math.abs(i) * 71) % 110);
+      const peakX = mx + farSpan * 0.5;
+      const peakY = h - 120 - peakH;
+      ctx.fillStyle = '#1e3a5f';
+      ctx.beginPath();
+      ctx.moveTo(mx - 45, h - 110); ctx.lineTo(peakX, peakY); ctx.lineTo(peakX + 18, h - 110);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#3b6ea5';
+      ctx.beginPath();
+      ctx.moveTo(peakX, peakY); ctx.lineTo(mx + farSpan + 45, h - 110); ctx.lineTo(peakX + 14, h - 110);
+      ctx.closePath(); ctx.fill();
+      const capY = peakY + peakH * 0.36;
+      ctx.fillStyle = '#e0f2fe';
+      ctx.beginPath();
+      ctx.moveTo(peakX, peakY); ctx.lineTo(peakX + 52, capY); ctx.lineTo(peakX + 24, capY - 10);
+      ctx.lineTo(peakX + 6, capY + 8); ctx.lineTo(peakX - 18, capY - 8); ctx.lineTo(peakX - 46, capY);
+      ctx.closePath(); ctx.fill();
+    }
+
+    // Mid-Distance Frosted Pine Foothills & Soft Arctic Valley Mist
+    ctx.fillStyle = '#163558';
+    ctx.beginPath();
+    ctx.moveTo(0, h - 90);
+    for (let x = 0; x <= w + 60; x += 60) {
+      const wx = x + camX * 0.14;
+      const fy = h - 165 - Math.sin(wx * 0.0055) * 38 - Math.cos(wx * 0.012) * 18;
+      ctx.lineTo(x, fy);
+    }
+    ctx.lineTo(w, h - 90);
+    ctx.closePath();
+    ctx.fill();
+
+    const mistG = ctx.createLinearGradient(0, h - 220, 0, h - 60);
+    mistG.addColorStop(0, 'rgba(186, 230, 253, 0)');
+    mistG.addColorStop(0.65, 'rgba(186, 230, 253, 0.18)');
+    mistG.addColorStop(1, 'rgba(224, 242, 254, 0.32)');
+    ctx.fillStyle = mistG;
+    ctx.fillRect(0, h - 220, w, 160);
+  }
+
+  function drawSnowMidground(ctx, camX, w, h, time) {
+    ensureTextures(ctx);
+
+    const drawSnowPine = (tx, baseY, scale) => {
+      ctx.save();
+      ctx.translate(tx, baseY);
+      ctx.scale(scale, scale);
+      const sway = Math.sin(time * 1.4 + tx * 0.01) * 2.5;
+      ctx.fillStyle = '#3b2417';
+      ctx.fillRect(-6, -34, 12, 34);
+      const tiers = [
+        { y: -32, w: 46, h: 42 },
+        { y: -62, w: 38, h: 38 },
+        { y: -90, w: 29, h: 34 },
+        { y: -115, w: 20, h: 28 },
+      ];
+      for (let t = 0; t < tiers.length; t++) {
+        const tr = tiers[t];
+        const sx = sway * (t + 1) * 0.25;
+        const pineG = ctx.createLinearGradient(-tr.w, tr.y - tr.h, tr.w, tr.y);
+        pineG.addColorStop(0, '#064e3b'); pineG.addColorStop(0.55, '#0f766e'); pineG.addColorStop(1, '#042f2e');
+        ctx.fillStyle = pineG; ctx.strokeStyle = '#022c22'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(sx, tr.y - tr.h);
+        ctx.lineTo(tr.w + sx * 0.4, tr.y);
+        ctx.quadraticCurveTo(0, tr.y + 6, -tr.w + sx * 0.4, tr.y);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        ctx.fillStyle = '#f0f9ff';
+        ctx.beginPath();
+        ctx.moveTo(sx, tr.y - tr.h);
+        ctx.lineTo(tr.w * 0.72 + sx * 0.5, tr.y - tr.h * 0.34);
+        ctx.quadraticCurveTo(tr.w * 0.3, tr.y - tr.h * 0.16, sx, tr.y - tr.h * 0.32);
+        ctx.quadraticCurveTo(-tr.w * 0.3, tr.y - tr.h * 0.16, -tr.w * 0.72 + sx * 0.5, tr.y - tr.h * 0.34);
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    };
+
+    const span = 520;
+    const parallax = 0.38;
+    const startIdx = Math.floor((camX * parallax) / span) - 1;
+    const endIdx = Math.ceil((camX * parallax + w) / span) + 1;
+    const groundY = h - 88;
+
+    for (let i = startIdx; i <= endIdx; i++) {
+      const bx = i * span - camX * parallax;
+      const kind = ((i % 3) + 3) % 3;
+
+      drawSnowPine(bx + 42, groundY, 0.92);
+      drawSnowPine(bx + 106, groundY, 0.68);
+
+      if (kind === 0) {
+        // REALISTIC ALPINE SNOWY TIMBER CHALET (Stone Foundation, Interlocking Cedar Logs, Balcony, Covered Porch, Firewood, Icicles & Hearth Glow!)
+        const cx = bx + 158;
+        const cw = 232;
+        const ch = 154;
+        ctx.save();
+        ctx.translate(cx, groundY - ch);
+
+        // 1. Weathered Fieldstone Hearth Chimney (individual stone courses + snow cap + curling smoke)
+        const chimX = cw - 52;
+        const chimG = ctx.createLinearGradient(chimX, -92, chimX + 30, -92);
+        chimG.addColorStop(0, '#64748b');
+        chimG.addColorStop(0.45, '#475569');
+        chimG.addColorStop(1, '#1e293b');
+        ctx.fillStyle = chimG;
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1.6;
+        ctx.fillRect(chimX, -92, 30, 74);
+        ctx.strokeRect(chimX, -92, 30, 74);
+        // Individual stacked fieldstone masonry lines
+        ctx.strokeStyle = 'rgba(15, 23, 42, 0.55)';
+        ctx.lineWidth = 1.1;
+        for (let sy = -82; sy < -22; sy += 11) {
+          ctx.beginPath(); ctx.moveTo(chimX, sy); ctx.lineTo(chimX + 30, sy); ctx.stroke();
+          const jointX = chimX + ((Math.abs(sy) % 22 === 0) ? 11 : 19);
+          ctx.beginPath(); ctx.moveTo(jointX, sy); ctx.lineTo(jointX, sy + 11); ctx.stroke();
+        }
+        // Stone chimney crown & pillowy snow cap
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(chimX - 4, -97, 38, 6);
+        ctx.strokeRect(chimX - 4, -97, 38, 6);
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.roundRect(chimX - 5, -101, 40, 7, 4);
+        ctx.fill();
+        // Billowing cozy hearth smoke drifting into the Arctic night
+        for (let p = 0; p < 5; p++) {
+          const lift = (time * 16 + p * 16 + Math.abs(i) * 7) % 72;
+          const u = lift / 72;
+          ctx.fillStyle = `rgba(224, 242, 254, ${(0.28 * (1 - u)).toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(chimX + 15 + lift * 0.42 + Math.sin(time * 2 + p) * 4, -105 - lift, 6 + lift * 0.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 2. Ground-Floor Dressed-Stone Foundation Base (`tex.ashlarStone`) + Upper Interlocking Cedar Logs
+        const foundH = 30;
+        ctx.fillStyle = tex.ashlarStone;
+        ctx.fillRect(0, ch - foundH, cw, foundH);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.32)';
+        ctx.fillRect(0, ch - foundH, cw, foundH);
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1.6;
+        ctx.strokeRect(0, ch - foundH, cw, foundH);
+
+        // Interlocking 3D Rounded Horizontal Cedar Logs + Protruding Saddle-Notched Log Ends!
+        const logStartY = 6;
+        const logEndY = ch - foundH;
+        const logH = 12;
+        for (let ly = logStartY; ly < logEndY; ly += logH) {
+          const curH = Math.min(logH, logEndY - ly);
+          const lg = ctx.createLinearGradient(0, ly, 0, ly + curH);
+          lg.addColorStop(0, '#9a5428');
+          lg.addColorStop(0.28, '#7c3f1c');
+          lg.addColorStop(0.75, '#52260f');
+          lg.addColorStop(1, '#2b1105');
+          ctx.fillStyle = lg;
+          ctx.fillRect(-8, ly, cw + 16, curH);
+          ctx.strokeStyle = 'rgba(20, 8, 2, 0.72)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(-8, ly, cw + 16, curH);
+          // Circular cut log-end cross-sections protruding on left & right corners
+          ctx.fillStyle = '#c27b43';
+          ctx.strokeStyle = '#2b1105';
+          ctx.beginPath();
+          ctx.ellipse(-8, ly + curH * 0.5, 3.6, curH * 0.46, 0, 0, Math.PI * 2);
+          ctx.ellipse(cw + 8, ly + curH * 0.5, 3.6, curH * 0.46, 0, 0, Math.PI * 2);
+          ctx.fill(); ctx.stroke();
+        }
+        // Subtle 3D side-wall depth shading & cast eave shadow across logs
+        const wallShade = ctx.createLinearGradient(0, 0, cw, 0);
+        wallShade.addColorStop(0, 'rgba(15, 8, 4, 0.32)');
+        wallShade.addColorStop(0.18, 'rgba(255, 255, 255, 0)');
+        wallShade.addColorStop(0.82, 'rgba(255, 255, 255, 0)');
+        wallShade.addColorStop(1, 'rgba(15, 8, 4, 0.36)');
+        ctx.fillStyle = wallShade;
+        ctx.fillRect(0, logStartY, cw, logEndY - logStartY);
+        ctx.fillStyle = 'rgba(8, 12, 24, 0.44)';
+        ctx.fillRect(0, 6, cw, 16);
+
+        // 3. Steep Overhanging Alpine Timber Gable Attic & Snow-Blanketed Roof!
+        // Recessed warm cedar-plank gable triangle face
+        const gabG = ctx.createLinearGradient(0, -76, 0, 12);
+        gabG.addColorStop(0, '#5c2d12');
+        gabG.addColorStop(1, '#3b1a09');
+        ctx.fillStyle = gabG;
+        ctx.beginPath();
+        ctx.moveTo(-2, 10);
+        ctx.lineTo(cw * 0.5, -76);
+        ctx.lineTo(cw + 2, 10);
+        ctx.closePath();
+        ctx.fill();
+        // Vertical timber gable boards & Alpine diagonal bracing beams
+        ctx.strokeStyle = 'rgba(24, 10, 4, 0.45)';
+        ctx.lineWidth = 1.2;
+        for (let gx = 18; gx < cw - 12; gx += 16) {
+          const distCenter = Math.abs(gx - cw * 0.5) / (cw * 0.5);
+          const topGabY = -76 + distCenter * 86;
+          ctx.beginPath(); ctx.moveTo(gx, topGabY + 6); ctx.lineTo(gx, 10); ctx.stroke();
+        }
+
+        // Cozy Arched Glowing Attic Window + Carved Timber Alpine Balcony Under the Gable!
+        const awX = cw * 0.5 - 19;
+        const awY = -48;
+        const awG = ctx.createRadialGradient(cw * 0.5, awY + 18, 3, cw * 0.5, awY + 20, 28);
+        awG.addColorStop(0, '#fffbeb'); awG.addColorStop(0.55, '#fbbf24'); awG.addColorStop(1, '#b45309');
+        ctx.fillStyle = awG;
+        ctx.strokeStyle = '#240f04';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(awX, awY, 38, 38, [18, 18, 2, 2]);
+        ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cw * 0.5, awY); ctx.lineTo(cw * 0.5, awY + 38);
+        ctx.moveTo(awX, awY + 20); ctx.lineTo(awX + 38, awY + 20);
+        ctx.stroke();
+
+        // Carved Alpine Wooden Balcony Rail with Snow Dusting
+        const balX = cw * 0.5 - 46;
+        ctx.fillStyle = '#4a210c';
+        ctx.strokeStyle = '#1c0902';
+        ctx.lineWidth = 1.4;
+        ctx.fillRect(balX, -10, 92, 20);
+        ctx.strokeRect(balX, -10, 92, 20);
+        ctx.fillStyle = '#7c3f1c';
+        for (let bx = balX + 6; bx < balX + 86; bx += 11) {
+          ctx.fillRect(bx, -8, 6, 15);
+        }
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath(); ctx.roundRect(balX - 3, -13, 98, 5.5, 3); ctx.fill();
+
+        // Heavy Dark-Pine Overhanging Roof Eaves + Thick Sculpted 3D Snow Blanket + Translucent Icicles!
+        ctx.fillStyle = '#1e293b';
+        ctx.strokeStyle = '#090d16';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-28, 16);
+        ctx.lineTo(cw * 0.5, -88);
+        ctx.lineTo(cw + 28, 16);
+        ctx.lineTo(cw + 16, 22);
+        ctx.lineTo(cw * 0.5, -72);
+        ctx.lineTo(-16, 22);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // Thick sculpted pillowy roof snowdrift with blue-white shadow gradient
+        const roofSnowG = ctx.createLinearGradient(0, -96, 0, 22);
+        roofSnowG.addColorStop(0, '#ffffff');
+        roofSnowG.addColorStop(0.55, '#f0f9ff');
+        roofSnowG.addColorStop(1, '#bae6fd');
+        ctx.fillStyle = roofSnowG;
+        ctx.strokeStyle = '#7dd3fc';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-32, 16);
+        ctx.quadraticCurveTo(-34, 4, -22, -4);
+        ctx.lineTo(cw * 0.5 - 4, -95);
+        ctx.quadraticCurveTo(cw * 0.5, -99, cw * 0.5 + 4, -95);
+        ctx.lineTo(cw + 22, -4);
+        ctx.quadraticCurveTo(cw + 34, 4, cw + 32, 16);
+        ctx.quadraticCurveTo(cw + 14, 24, cw + 4, 10);
+        ctx.lineTo(cw * 0.5, -74);
+        ctx.lineTo(-4, 10);
+        ctx.quadraticCurveTo(-14, 24, -32, 16);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // Delicate glassy icicles hanging beneath the snow-laden roof eaves
+        ctx.fillStyle = 'rgba(224, 242, 254, 0.85)';
+        for (const [ix, iy, il] of [[-24, 18, 14], [-14, 16, 10], [cw + 14, 16, 11], [cw + 24, 18, 15]]) {
+          ctx.beginPath();
+          ctx.moveTo(ix - 2.5, iy); ctx.lineTo(ix, iy + il); ctx.lineTo(ix + 2.5, iy);
+          ctx.closePath(); ctx.fill();
+        }
+
+        // 4. Multi-Pane Shuttered Chalet Windows with Warm Interior Glow, Curtains & Snow-Piled Sills!
+        for (const wx of [22, cw - 72]) {
+          const wy = 40;
+          const ww = 50;
+          const wh = 46;
+          // Soft warm amber light spill glowing onto the logs around the window
+          const winHalo = ctx.createRadialGradient(wx + ww * 0.5, wy + wh * 0.5, 8, wx + ww * 0.5, wy + wh * 0.5, 52);
+          winHalo.addColorStop(0, 'rgba(254, 215, 110, 0.34)');
+          winHalo.addColorStop(1, 'rgba(254, 215, 110, 0)');
+          ctx.fillStyle = winHalo;
+          ctx.beginPath(); ctx.arc(wx + ww * 0.5, wy + wh * 0.5, 52, 0, Math.PI * 2); ctx.fill();
+
+          // Open dark-pine wooden shutters flanking each window
+          ctx.fillStyle = '#1e3a2f';
+          ctx.strokeStyle = '#091510';
+          ctx.lineWidth = 1.2;
+          ctx.fillRect(wx - 11, wy + 2, 10, wh - 2); ctx.strokeRect(wx - 11, wy + 2, 10, wh - 2);
+          ctx.fillRect(wx + ww + 1, wy + 2, 10, wh - 2); ctx.strokeRect(wx + ww + 1, wy + 2, 10, wh - 2);
+
+          // Recessed window casing & warm hearth-lit room gradient
+          const wg = ctx.createRadialGradient(wx + ww * 0.5, wy + wh * 0.42, 4, wx + ww * 0.5, wy + wh * 0.5, 38);
+          wg.addColorStop(0, '#fffbeb');
+          wg.addColorStop(0.55, '#fbbf24');
+          wg.addColorStop(1, '#c2410c');
+          ctx.fillStyle = wg;
+          ctx.strokeStyle = '#2b1105';
+          ctx.lineWidth = 2.4;
+          ctx.beginPath(); ctx.roundRect(wx, wy, ww, wh, 3); ctx.fill(); ctx.stroke();
+
+          // Interior draped curtains silhouette
+          ctx.fillStyle = 'rgba(124, 45, 18, 0.36)';
+          ctx.beginPath(); ctx.moveTo(wx + 2, wy + 2); ctx.quadraticCurveTo(wx + 14, wy + 20, wx + 6, wy + wh - 2); ctx.lineTo(wx + 2, wy + wh - 2); ctx.closePath(); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(wx + ww - 2, wy + 2); ctx.quadraticCurveTo(wx + ww - 14, wy + 20, wx + ww - 6, wy + wh - 2); ctx.lineTo(wx + ww - 2, wy + wh - 2); ctx.closePath(); ctx.fill();
+
+          // Crisp wooden window mullions
+          ctx.strokeStyle = '#3b1a09';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(wx + ww * 0.5, wy); ctx.lineTo(wx + ww * 0.5, wy + wh);
+          ctx.moveTo(wx, wy + wh * 0.5); ctx.lineTo(wx + ww, wy + wh * 0.5);
+          ctx.stroke();
+
+          // Timber windowsill with pillowy snow drift
+          ctx.fillStyle = '#4a210c'; ctx.fillRect(wx - 4, wy + wh, ww + 8, 6);
+          ctx.fillStyle = '#f8fafc';
+          ctx.beginPath(); ctx.roundRect(wx - 5, wy + wh - 3, ww + 10, 6.5, 3); ctx.fill();
+        }
+
+        // 5. Recessed Heavy Planked Oak Front Door + Covered Timber Porch + Glowing Brass Lantern + Stacked Firewood!
+        const dx = cw * 0.5 - 22;
+        const dy = ch - 76;
+        // Porch awning overhang with snow cap & twin timber posts
+        ctx.fillStyle = '#3b1a09';
+        ctx.fillRect(dx - 16, dy - 10, 76, 8);
+        ctx.fillRect(dx - 13, dy - 2, 6, 78);
+        ctx.fillRect(dx + 51, dy - 2, 6, 78);
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath(); ctx.roundRect(dx - 18, dy - 15, 80, 7, 4); ctx.fill();
+
+        // Heavy oak arched door with iron strap hinges & frosted upper window pane
+        const doorG = ctx.createLinearGradient(dx, dy, dx + 44, dy + 76);
+        doorG.addColorStop(0, '#5c2812'); doorG.addColorStop(0.6, '#3b1808'); doorG.addColorStop(1, '#1f0b03');
+        ctx.fillStyle = doorG;
+        ctx.strokeStyle = '#1c0902';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(dx, dy, 44, 76, [18, 18, 0, 0]);
+        ctx.fill(); ctx.stroke();
+        // Glowing upper door window & brass handle
+        ctx.fillStyle = '#fde68a';
+        ctx.beginPath(); ctx.roundRect(dx + 11, dy + 12, 22, 20, [10, 10, 2, 2]); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath(); ctx.arc(dx + 36, dy + 46, 2.6, 0, Math.PI * 2); ctx.fill();
+
+        // Glowing warm brass porch lantern hanging beside the door
+        const lanX = dx - 4;
+        const lanY = dy + 16;
+        const lGlow = ctx.createRadialGradient(lanX, lanY, 2, lanX, lanY, 32);
+        lGlow.addColorStop(0, 'rgba(254, 240, 138, 0.58)');
+        lGlow.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = lGlow;
+        ctx.beginPath(); ctx.arc(lanX, lanY, 32, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath(); ctx.roundRect(lanX - 3.5, lanY - 5, 7, 10, 2); ctx.fill();
+
+        // Stacked cut firewood logs tucked neatly beside the right stone wall!
+        for (let row = 0; row < 3; row++) {
+          for (let col = 0; col < 4 - row; col++) {
+            const fx = cw - 56 + col * 8 + row * 4;
+            const fy = ch - 6 - row * 6.5;
+            ctx.fillStyle = '#b46936';
+            ctx.strokeStyle = '#3b1a09';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(fx, fy, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          }
+        }
+
+        // Soft sculpted snowdrift mounds banking naturally against the cabin's stone base
+        ctx.fillStyle = '#f0f9ff';
+        ctx.beginPath();
+        ctx.ellipse(22, ch + 1, 36, 9, 0, Math.PI, 0);
+        ctx.ellipse(cw - 18, ch + 1, 32, 8, 0, Math.PI, 0);
+        ctx.fill();
+        ctx.restore();
+      } else if (kind === 1) {
+        // REALISTIC ARCTIC ICE-BLOCK IGLOO (Staggered Sculpted Snow Masonry, Recessed Arch Tunnel, Warm Lamp Spill & Wooden Sled!)
+        const ix = bx + 255;
+        ctx.save();
+        ctx.translate(ix, groundY);
+
+        // Soft ambient snow shadow beneath igloo
+        ctx.fillStyle = 'rgba(12, 74, 110, 0.28)';
+        ctx.beginPath(); ctx.ellipse(0, 2, 92, 10, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Main Sculpted Snow-Dome with Moonlit Rim & Cool Glacial Shadow Shading
+        const igG = ctx.createRadialGradient(-22, -62, 10, 0, -18, 92);
+        igG.addColorStop(0, '#ffffff');
+        igG.addColorStop(0.45, '#e0f2fe');
+        igG.addColorStop(0.78, '#7dd3fc');
+        igG.addColorStop(1, '#0284c7');
+        ctx.fillStyle = igG;
+        ctx.strokeStyle = '#0c4a6e';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(0, 0, 78, Math.PI, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Clipped Perspective Snow-Block Courses & Staggered Vertical Mortar Joints!
+        ctx.save();
+        ctx.beginPath(); ctx.arc(0, 0, 77, Math.PI, 0); ctx.closePath(); ctx.clip();
+        ctx.strokeStyle = 'rgba(3, 105, 161, 0.34)';
+        ctx.lineWidth = 1.3;
+        const courses = [-15, -31, -46, -60, -70];
+        for (let cIdx = 0; cIdx < courses.length; cIdx++) {
+          const cy = courses[cIdx];
+          ctx.beginPath();
+          ctx.moveTo(-80, cy);
+          ctx.quadraticCurveTo(0, cy + 8, 80, cy);
+          ctx.stroke();
+          // Staggered vertical ice-block joints per course
+          const prevY = cIdx === 0 ? 0 : courses[cIdx - 1];
+          const off = (cIdx % 2) * 14;
+          for (let jx = -70 + off; jx <= 70; jx += 26) {
+            ctx.beginPath();
+            ctx.moveTo(jx, prevY + 4);
+            ctx.lineTo(jx * 0.92, cy + 4);
+            ctx.stroke();
+          }
+        }
+        // Subtle warm interior light glow bleeding softly through thin ice blocks near center
+        const subG = ctx.createRadialGradient(-18, -14, 4, -18, -14, 46);
+        subG.addColorStop(0, 'rgba(254, 215, 110, 0.22)');
+        subG.addColorStop(1, 'rgba(254, 215, 110, 0)');
+        ctx.fillStyle = subG;
+        ctx.beginPath(); ctx.arc(-18, -14, 46, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        // Recessed Vaulted Ice-Block Entrance Tunnel + Warm Oil-Lamp Spill onto the Snow!
+        const tunG = ctx.createLinearGradient(-76, -34, -22, 0);
+        tunG.addColorStop(0, '#f0f9ff');
+        tunG.addColorStop(0.65, '#bae6fd');
+        tunG.addColorStop(1, '#38bdf8');
+        ctx.fillStyle = tunG;
+        ctx.strokeStyle = '#0c4a6e';
+        ctx.lineWidth = 1.7;
+        ctx.beginPath();
+        ctx.arc(-48, 0, 30, Math.PI, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Warm amber glow spilling out onto the snowdrift outside the doorway
+        const spillG = ctx.createRadialGradient(-48, 0, 6, -48, 4, 44);
+        spillG.addColorStop(0, 'rgba(254, 240, 138, 0.45)');
+        spillG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = spillG;
+        ctx.beginPath(); ctx.ellipse(-48, 4, 44, 12, 0, 0, Math.PI * 2); ctx.fill();
+
+        const inG = ctx.createRadialGradient(-48, -9, 2, -48, -8, 22);
+        inG.addColorStop(0, '#fffbeb');
+        inG.addColorStop(0.55, '#f59e0b');
+        inG.addColorStop(1, '#78350f');
+        ctx.fillStyle = inG;
+        ctx.strokeStyle = '#451a03';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(-48, 0, 18.5, Math.PI, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Cozy Wooden Arctic Sled resting beside the igloo!
+        ctx.strokeStyle = '#78350f';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(58, -1); ctx.lineTo(94, -1); ctx.quadraticCurveTo(100, -2, 100, -8);
+        ctx.stroke();
+        ctx.fillStyle = '#b45309';
+        ctx.fillRect(60, -8, 32, 3.5);
+        ctx.fillStyle = '#3b1a09';
+        ctx.fillRect(66, -5, 2.5, 4); ctx.fillRect(84, -5, 2.5, 4);
+
+        ctx.restore();
+      } else {
+        const lx = bx + 265;
+        ctx.save();
+        ctx.fillStyle = '#1e293b'; ctx.fillRect(lx - 3, groundY - 142, 6, 142);
+        ctx.fillRect(lx - 11, groundY - 8, 22, 8);
+        const lHalo = ctx.createRadialGradient(lx, groundY - 146, 4, lx, groundY - 146, 68);
+        lHalo.addColorStop(0, 'rgba(254, 240, 138, 0.55)'); lHalo.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = lHalo; ctx.beginPath(); ctx.arc(lx, groundY - 146, 68, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.roundRect(lx - 8, groundY - 158, 16, 20, 4); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(lx, groundY - 160, 11, Math.PI, 0); ctx.fill();
+        ctx.restore();
+      }
+
+      drawSnowPine(bx + 425, groundY, 1.08);
+    }
+
+    // Multi-Depth Drifting Winter Snowfall
+    for (let f = 0; f < 58; f++) {
+      const layer = f % 3;
+      const spdY = 26 + layer * 16;
+      const driftX = Math.sin(time * (1.2 + layer * 0.4) + f * 1.7) * (18 + layer * 10);
+      const fx = ((f * 137 - camX * (0.15 + layer * 0.14) + time * (12 + layer * 8) + driftX) % (w + 40) + (w + 40)) % (w + 40) - 20;
+      const fy = ((f * 97 + time * spdY) % (h + 20)) - 10;
+      const rad = layer === 2 ? 3.2 : layer === 1 ? 2.1 : 1.3;
+      ctx.fillStyle = layer === 2 ? 'rgba(255, 255, 255, 0.88)' : 'rgba(224, 242, 254, 0.65)';
+      ctx.beginPath(); ctx.arc(fx, fy, rad, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  // =========================================================================
+  // 11. STAGE 16: COLOSSAL FLEETING KILLER WHALE (ORCA) IN ARCTIC WATER GAPS
+  // =========================================================================
+  const origDrawWorldTeasers = Art.drawWorldTeasers;
+
+  function drawSnowOrcaTeasers(ctx, level, camX, camY, time, cullW) {
+    if (!level || level.theme !== 'snow' || !level.puddles) return;
+    const viewW = cullW || 1280;
+
+    for (let idx = 0; idx < level.puddles.length; idx++) {
+      const pud = level.puddles[idx];
+      const px = pud.x - camX;
+      const py = pud.y - camY;
+      if (px + pud.w < -280 || px > viewW + 280) continue;
+
+      // Spaced, fleeting pass (~14–18s cycle, visible for ~3.4s per pass)
+      const period = 14.2 + (idx % 3) * 1.9;
+      const phaseOffset = idx * 4.7 + 2.2;
+      const cycle = (time + phaseOffset) % period;
+      const passDur = 3.4;
+      if (cycle > passDur) continue;
+
+      const u = cycle / passDur; // 0 -> 1 smooth porpoising dive
+      const dir = idx % 2 === 0 ? 1 : -1;
+      // Travel naturally across the center of the water gap (emerging from deep below & diving back under)
+      const travelSpan = Math.min(pud.w * 0.72, 260);
+      const centerX = px + pud.w * 0.5;
+      const orcaX = centerX + dir * (u - 0.5) * travelSpan;
+
+      // Smooth organic breach curve: starts submerged deep below surface, crests smoothly, dives back under
+      const breach = Math.sin(u * Math.PI);
+      const lift = Math.pow(breach, 0.78);
+      const surfaceY = py + 10;
+      const bodyY = surfaceY + 132 - lift * 136; // deep underwater at u=0/1 -> towering fin & upper back cresting at u=0.5!
+      // Natural predatory surfacing/diving pitch (tilted upward on emergence, downward on dive)
+      const pitch = -Math.cos(u * Math.PI) * 0.25;
+      const alpha = Math.min(1, breach * 3.2);
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      // Natural WAVY Ocean Waterline Clip (NO horizontal box cutoffs — full viewport width!)
+      ctx.beginPath();
+      ctx.moveTo(-120, -260);
+      ctx.lineTo(viewW + 120, -260);
+      ctx.lineTo(viewW + 120, surfaceY + 6);
+      for (let wx = viewW + 120; wx >= -120; wx -= 28) {
+        const waveY = surfaceY + Math.sin((wx + camX) * 0.045 + time * 4.2) * 3.2;
+        ctx.lineTo(wx, waveY);
+      }
+      ctx.closePath();
+      ctx.clip();
+
+      ctx.save();
+      ctx.translate(orcaX, bodyY);
+      ctx.scale(dir, 1);
+      ctx.rotate(pitch);
+
+      // 1. Colossal Glossy Obsidian-Black Upper Dorsal Body (~460px scale — only upper ridge & fin emerge!)
+      const backG = ctx.createLinearGradient(0, -100, 0, 75);
+      backG.addColorStop(0, '#334155');
+      backG.addColorStop(0.22, '#0f172a');
+      backG.addColorStop(0.68, '#020617');
+      backG.addColorStop(1, '#020617');
+      ctx.fillStyle = backG;
+      ctx.strokeStyle = 'rgba(2, 6, 23, 0.92)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-235, 58);
+      ctx.bezierCurveTo(-165, -18, -52, -52, 68, -42);
+      ctx.bezierCurveTo(154, -35, 212, -4, 232, 30);
+      ctx.quadraticCurveTo(222, 68, 175, 86);
+      ctx.lineTo(-225, 86);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 2. Towering Iconic Curved Male Orca Dorsal Fin (~92px tall above dorsal ridge)
+      const finG = ctx.createLinearGradient(-16, -138, 34, -34);
+      finG.addColorStop(0, '#475569');
+      finG.addColorStop(0.28, '#0f172a');
+      finG.addColorStop(1, '#020617');
+      ctx.fillStyle = finG;
+      ctx.strokeStyle = '#020617';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-38, -34);
+      ctx.bezierCurveTo(-25, -78, -9, -126, 11, -138);
+      ctx.bezierCurveTo(20, -132, 13, -90, 30, -40);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Wet moonlight specular gleam along leading edge of dorsal fin
+      ctx.strokeStyle = 'rgba(186, 230, 253, 0.48)';
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(23, -47);
+      ctx.quadraticCurveTo(12, -94, 11, -133);
+      ctx.stroke();
+
+      // 3. Signature Pale Silver-White Orca Saddle Patch sweeping behind the dorsal fin
+      const saddleG = ctx.createLinearGradient(-96, -36, -14, -6);
+      saddleG.addColorStop(0, 'rgba(203, 213, 225, 0.08)');
+      saddleG.addColorStop(0.45, 'rgba(226, 232, 240, 0.72)');
+      saddleG.addColorStop(1, 'rgba(148, 163, 184, 0.25)');
+      ctx.fillStyle = saddleG;
+      ctx.beginPath();
+      ctx.moveTo(-26, -33);
+      ctx.bezierCurveTo(-58, -30, -88, -16, -102, 10);
+      ctx.quadraticCurveTo(-68, 3, -34, -10);
+      ctx.quadraticCurveTo(-22, -18, -26, -33);
+      ctx.closePath();
+      ctx.fill();
+
+      // 4. Crisp Iconic White Post-Ocular Orca Eye Patch + Subtle White Lower Jaw Accent
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.ellipse(148, -6, 24, 9.5, 0.18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(241, 245, 249, 0.85)';
+      ctx.beginPath();
+      ctx.ellipse(188, 28, 34, 11, 0.14, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Glossy wet-skin moonlight sheen along colossal arched back
+      ctx.strokeStyle = 'rgba(186, 230, 253, 0.36)';
+      ctx.lineWidth = 3.2;
+      ctx.beginPath();
+      ctx.moveTo(-128, -12);
+      ctx.quadraticCurveTo(26, -46, 170, -18);
+      ctx.stroke();
+
+      // 5. Fleeting Cold Blowhole Mist Plume bursting upward near crest
+      if (u > 0.24 && u < 0.64) {
+        const blowU = (u - 0.24) / 0.40;
+        const bx = 114;
+        const by = -32;
+        for (let m = 0; m < 5; m++) {
+          const bLift = blowU * (46 + m * 14);
+          const spread = (m - 2) * (6 + blowU * 12);
+          ctx.fillStyle = `rgba(224, 242, 254, ${(0.44 * (1 - blowU)).toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(bx + spread, by - bLift, 4.5 + blowU * 9.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // 6. Sparkling Water Droplets Streaming Off the Towering Dorsal Fin as It Breaches
+      if (breach > 0.35) {
+        ctx.fillStyle = `rgba(224, 242, 254, ${(0.65 * breach).toFixed(2)})`;
+        for (let d = 0; d < 6; d++) {
+          const dropPhase = (time * 3.2 + d * 0.29) % 1;
+          const dx = -8 + d * 5.5;
+          const dy = -112 + d * 12 + dropPhase * 52;
+          ctx.beginPath();
+          ctx.arc(dx, dy, 1.8 * (1 - dropPhase * 0.4), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+
+      // 7. Churning White Arctic Sea Foam & Spray Collar Right Along the Wavy Waterline
+      const foamSpan = Math.min(130, pud.w * 0.44);
+      ctx.fillStyle = `rgba(224, 242, 254, ${(0.74 * breach).toFixed(2)})`;
+      for (let f = -foamSpan; f <= foamSpan; f += 22) {
+        const fx = orcaX + f * dir;
+        if (fx < px + 6 || fx > px + pud.w - 6) continue;
+        const fBob = Math.sin(time * 11 + f * 0.18) * 2.8;
+        const fRad = 13 + (1 - Math.abs(f) / Math.max(1, foamSpan)) * 9;
+        ctx.beginPath();
+        ctx.ellipse(fx, surfaceY - 1 + fBob * 0.5, fRad, 3.8 + breach * 2.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+  }
+
+  function drawWorldTeasersExtended(ctx, level, cat, camX, camY, time, cullW) {
+    if (origDrawWorldTeasers) {
+      origDrawWorldTeasers(ctx, level, cat, camX, camY, time, cullW);
+    }
+    drawSnowOrcaTeasers(ctx, level, camX, camY, time, cullW);
   }
 
   Art.drawCoin = drawCoin;
@@ -4075,5 +12094,10635 @@ window.Game = window.Game || {};
   Art.drawNeonRooftopMidground = drawNeonRooftopMidground;
   Art.drawHomewardSkyAndHorizon = drawHomewardSkyAndHorizon;
   Art.drawHomewardMidground = drawHomewardMidground;
+  // =========================================================================
+  // 12. STAGE 17: MIDNIGHT GRAND CIRCUS (Ferris Wheel, Dirigible Blimp, Big-Top Tents & Wagons)
+  // =========================================================================
+  function drawCircusSkyAndHorizon(ctx, camX, w, h, time) {
+    ensureTextures(ctx);
+
+    // Velvety Midnight-Plum to Warm Carnival-Amber Twilight Sky
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, '#070418');
+    sky.addColorStop(0.32, '#180d36');
+    sky.addColorStop(0.68, '#3b1544');
+    sky.addColorStop(0.92, '#6b2242');
+    sky.addColorStop(1, '#260d1f');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, h);
+
+    // Twinkling Night Stars
+    for (let s = 0; s < 56; s++) {
+      const sx = ((s * 181 - camX * 0.015) % w + w) % w;
+      const sy = 14 + ((s * 47) % 220);
+      const tw = 0.28 + 0.65 * Math.abs(Math.sin(time * 2.1 + s * 1.4));
+      ctx.fillStyle = s % 4 === 0 ? `rgba(254, 240, 138, ${tw})` : `rgba(255, 255, 255, ${tw})`;
+      ctx.beginPath(); ctx.arc(sx, sy, s % 5 === 0 ? 1.7 : 1.1, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Sweeping Volumetric Golden & Rose Carnival Searchlight Beams
+    for (let b = 0; b < 4; b++) {
+      const bx = 180 + b * 310 - ((camX * 0.04) % 310);
+      const ang = Math.sin(time * 0.65 + b * 1.6) * 0.34;
+      ctx.save();
+      ctx.translate(bx, h - 85);
+      ctx.rotate(ang);
+      const rayG = ctx.createLinearGradient(0, 0, 0, -640);
+      rayG.addColorStop(0, b % 2 === 0 ? 'rgba(254, 240, 138, 0.20)' : 'rgba(251, 113, 133, 0.16)');
+      rayG.addColorStop(0.6, b % 2 === 0 ? 'rgba(254, 240, 138, 0.05)' : 'rgba(251, 113, 133, 0.04)');
+      rayG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      ctx.fillStyle = rayG;
+      ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(-78, -640); ctx.lineTo(78, -640); ctx.lineTo(12, 0); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+    // Drifting Realistic Vintage Zeppelin / Circus Dirigible Airship ('Dr.MAX07') — zero outer aura circle!
+    const blimpX = ((time * 22 - camX * 0.04 + 420) % (w + 460) + (w + 460)) % (w + 460) - 230;
+    const blimpY = 98 + Math.sin(time * 1.05) * 7;
+    const rx = 116;
+    const ry = 40;
+    ctx.save();
+    ctx.translate(blimpX, blimpY);
+    ctx.rotate(Math.sin(time * 0.85) * 0.018);
+
+    // 1. Cruciform Tail Stabilizer Fins (Dorsal, Ventral & Side Horizontal Fin with Rudder Trim)
+    ctx.fillStyle = '#991b1b'; ctx.strokeStyle = '#290a0a'; ctx.lineWidth = 1.5;
+    // Upper dorsal fin
+    ctx.beginPath(); ctx.moveTo(-78, -14); ctx.lineTo(-122, -40); ctx.lineTo(-126, -34); ctx.lineTo(-108, -4); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath(); ctx.moveTo(-114, -35); ctx.lineTo(-122, -40); ctx.lineTo(-126, -34); ctx.lineTo(-118, -28); ctx.closePath(); ctx.fill();
+    // Lower ventral fin
+    ctx.fillStyle = '#7f1d1d';
+    ctx.beginPath(); ctx.moveTo(-78, 14); ctx.lineTo(-120, 38); ctx.lineTo(-125, 31); ctx.lineTo(-108, 4); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Side horizontal stabilizer fin
+    ctx.fillStyle = '#b91c1c';
+    ctx.beginPath(); ctx.moveTo(-84, -3); ctx.lineTo(-128, 0); ctx.lineTo(-124, 7); ctx.lineTo(-84, 5); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    // 2. Sculpted 3D Zeppelin Airship Envelope (Silk Panels, Longitudinal Ribs & Crimson Banner)
+    ctx.save();
+    ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.clip();
+    const envG = ctx.createLinearGradient(0, -ry, 0, ry);
+    envG.addColorStop(0, '#fffbeb');
+    envG.addColorStop(0.28, '#fef3c7');
+    envG.addColorStop(0.62, '#e2b866');
+    envG.addColorStop(0.88, '#9a5b1e');
+    envG.addColorStop(1, '#52290a');
+    ctx.fillStyle = envG; ctx.fillRect(-rx - 4, -ry - 4, rx * 2 + 8, ry * 2 + 8);
+
+    // Longitudinal structural canvas rib seams curving from nose to tail
+    ctx.strokeStyle = 'rgba(120, 53, 15, 0.24)'; ctx.lineWidth = 1.1;
+    for (const rFrac of [-0.62, -0.32, 0.32, 0.62]) {
+      ctx.beginPath();
+      ctx.ellipse(0, 0, rx, Math.abs(rFrac) * ry, 0, rFrac < 0 ? Math.PI : 0, rFrac < 0 ? Math.PI * 2 : Math.PI);
+      ctx.stroke();
+    }
+    // Vertical circumferential frame ring seams
+    for (let vx = -84; vx <= 84; vx += 28) {
+      const norm = vx / rx;
+      const halfH = ry * Math.sqrt(Math.max(0, 1 - norm * norm));
+      ctx.beginPath(); ctx.ellipse(vx, 0, 6, halfH, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    // Deep Crimson & Gold Royal Banner Band across hull waist
+    const bandG = ctx.createLinearGradient(0, -14, 0, 14);
+    bandG.addColorStop(0, '#dc2626'); bandG.addColorStop(0.5, '#b91c1c'); bandG.addColorStop(1, '#7f1d1d');
+    ctx.fillStyle = bandG;
+    ctx.beginPath(); ctx.ellipse(0, 0, rx, 14.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.ellipse(0, 0, rx, 14.5, 0, 0, Math.PI * 2); ctx.stroke();
+
+    // Subtle sunlit upper silk sheen
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.26)';
+    ctx.beginPath(); ctx.ellipse(-10, -24, rx * 0.72, 7.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    // Outer envelope outline & Brass Mooring Nose Cone
+    ctx.strokeStyle = '#290a0a'; ctx.lineWidth = 1.7;
+    ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#d97706'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.moveTo(rx - 10, -10); ctx.quadraticCurveTo(rx + 6, 0, rx - 10, 10); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(rx + 1, 0, 2.2, 0, Math.PI * 2); ctx.fill();
+
+    // Crisp 'Dr.MAX07' Inscription on the Airship Hull
+    ctx.save();
+    ctx.font = 'bold 14.5px "Segoe UI", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#290a0a';
+    ctx.fillText('Dr.MAX07', 2, 1.5);
+    ctx.fillStyle = '#fef08a';
+    ctx.fillText('Dr.MAX07', 1, 0.5);
+    ctx.restore();
+
+    // 3. Rigging Cables + Detailed Suspended Passenger Gondola + Spinning Rear Propeller
+    ctx.strokeStyle = 'rgba(203, 213, 225, 0.72)'; ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.moveTo(-38, 36); ctx.lineTo(-28, 49);
+    ctx.moveTo(-18, 38); ctx.lineTo(-14, 49);
+    ctx.moveTo(18, 38); ctx.lineTo(14, 49);
+    ctx.moveTo(38, 36); ctx.lineTo(28, 49);
+    ctx.stroke();
+
+    // Mahogany & Brass Enclosed Observation Gondola
+    const gonG = ctx.createLinearGradient(0, 48, 0, 64);
+    gonG.addColorStop(0, '#334155'); gonG.addColorStop(0.45, '#1e293b'); gonG.addColorStop(1, '#0f172a');
+    ctx.fillStyle = gonG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.roundRect(-34, 48, 68, 16, [4, 7, 7, 5]); ctx.fill(); ctx.stroke();
+    // Warm illuminated cabin portholes/windows
+    ctx.fillStyle = '#fef08a';
+    for (const wx of [-22, -11, 0, 11, 22]) {
+      ctx.beginPath(); ctx.roundRect(wx - 3.2, 52, 6.4, 6, 1.5); ctx.fill();
+    }
+    // Front headlamp beam cone
+    const headG = ctx.createLinearGradient(34, 56, 86, 56);
+    headG.addColorStop(0, 'rgba(254, 240, 138, 0.42)'); headG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+    ctx.fillStyle = headG;
+    ctx.beginPath(); ctx.moveTo(34, 54); ctx.lineTo(86, 42); ctx.lineTo(86, 70); ctx.lineTo(34, 58); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fffbeb'; ctx.beginPath(); ctx.arc(34, 56, 2.3, 0, Math.PI * 2); ctx.fill();
+
+    // Spinning Rear Brass Propeller behind Gondola
+    ctx.fillStyle = '#94a3b8'; ctx.fillRect(-38, 54, 4, 4);
+    const propH = 10 * Math.abs(Math.sin(time * 28));
+    ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 2.0; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-39, 56 - propH); ctx.lineTo(-39, 56 + propH); ctx.stroke();
+    ctx.restore();
+
+    // HERO LANDMARK: Colossal Rotating Illuminated Ferris Wheel on the Horizon!
+    const fwSpan = 1080;
+    const fwPar = 0.14;
+    const fwStart = Math.floor((camX * fwPar) / fwSpan) - 1;
+    const fwEnd = Math.ceil((camX * fwPar + w) / fwSpan) + 1;
+    for (let i = fwStart; i <= fwEnd; i++) {
+      const fx = i * fwSpan + 520 - camX * fwPar;
+      const fy = h - 320;
+      const R = 178;
+      const rot = time * 0.22 + i * 0.8;
+
+      ctx.save();
+      // Soft warm golden carnival aura behind wheel
+      const fwGlow = ctx.createRadialGradient(fx, fy, 24, fx, fy, R + 55);
+      fwGlow.addColorStop(0, 'rgba(254, 215, 110, 0.22)');
+      fwGlow.addColorStop(0.7, 'rgba(244, 114, 182, 0.08)');
+      fwGlow.addColorStop(1, 'rgba(244, 114, 182, 0)');
+      ctx.fillStyle = fwGlow; ctx.beginPath(); ctx.arc(fx, fy, R + 55, 0, Math.PI * 2); ctx.fill();
+
+      // Towering A-frame steel support legs
+      ctx.strokeStyle = '#1e1b4b'; ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(fx - 108, h - 80); ctx.lineTo(fx, fy); ctx.lineTo(fx + 108, h - 80);
+      ctx.stroke();
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(fx - 108, h - 80); ctx.lineTo(fx, fy); ctx.lineTo(fx + 108, h - 80);
+      ctx.stroke();
+
+      // Rotating concentric steel rims & 16 radial spokes
+      ctx.strokeStyle = 'rgba(253, 224, 71, 0.58)'; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.arc(fx, fy, R, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = 'rgba(244, 114, 182, 0.45)'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.arc(fx, fy, R * 0.72, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = 'rgba(254, 240, 138, 0.28)'; ctx.lineWidth = 1.4;
+      for (let sp = 0; sp < 16; sp++) {
+        const a = rot + (sp * Math.PI * 2) / 16;
+        ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(fx + Math.cos(a) * R, fy + Math.sin(a) * R); ctx.stroke();
+      }
+
+      // 12 Swinging Illuminated Passenger Gondolas (stay upright via gravity!)
+      const gonCols = ['#ef4444', '#38bdf8', '#fbbf24', '#f472b6', '#4ade80', '#a78bfa'];
+      for (let g = 0; g < 12; g++) {
+        const a = rot + (g * Math.PI * 2) / 12;
+        const gx = fx + Math.cos(a) * R;
+        const gy = fy + Math.sin(a) * R;
+        const sway = Math.sin(time * 2.2 + g) * 0.05;
+        ctx.save();
+        ctx.translate(gx, gy); ctx.rotate(sway);
+        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 9); ctx.stroke();
+        ctx.fillStyle = gonCols[g % gonCols.length]; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.roundRect(-10, 8, 20, 14, [3, 3, 6, 6]); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fef9c3'; ctx.fillRect(-6, 10, 12, 5);
+        ctx.restore();
+        // Twinkling rim chase light bulb
+        const lit = Math.sin(time * 7 + g * 0.9) > 0;
+        ctx.fillStyle = lit ? '#fef9c3' : '#f59e0b';
+        ctx.beginPath(); ctx.arc(gx, gy, lit ? 3.2 : 2.1, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Illuminated center star hub
+      ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(fx, fy, 18, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fef9c3'; ctx.beginPath(); ctx.arc(fx, fy, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+
+    // Distant Carnival Horizon Silhouette & Warm Golden Glow Mist
+    const hGlow = ctx.createLinearGradient(0, h - 220, 0, h - 60);
+    hGlow.addColorStop(0, 'rgba(251, 191, 36, 0)');
+    hGlow.addColorStop(0.65, 'rgba(244, 114, 182, 0.14)');
+    hGlow.addColorStop(1, 'rgba(251, 191, 36, 0.24)');
+    ctx.fillStyle = hGlow; ctx.fillRect(0, h - 220, w, 160);
+  }
+
+  function drawCircusMidground(ctx, camX, w, h, time) {
+    ensureTextures(ctx);
+    const span = 560;
+    const parallax = 0.36;
+    const startIdx = Math.floor((camX * parallax) / span) - 1;
+    const endIdx = Math.ceil((camX * parallax + w) / span) + 1;
+    const groundY = h - 88;
+
+    for (let i = startIdx; i <= endIdx; i++) {
+      const bx = i * span - camX * parallax;
+      const kind = ((i % 3) + 3) % 3;
+
+      if (kind === 0) {
+        // GRAND STRIPED CIRCUS BIG-TOP TENT (Colossal Scale, Realistic Draped Canvas Pleats, Pennant Spire, Glowing Curtain Entrance!)
+        const tx = bx + 260;
+        const tw = 520;
+        const wallH = 216;
+        const roofH = 248;
+        ctx.save();
+        ctx.translate(tx, groundY);
+
+        // Warm ambient golden glow behind tent entrance
+        const tentGlow = ctx.createRadialGradient(0, -96, 20, 0, -96, 250);
+        tentGlow.addColorStop(0, 'rgba(254, 240, 138, 0.34)'); tentGlow.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = tentGlow; ctx.beginPath(); ctx.arc(0, -96, 250, 0, Math.PI * 2); ctx.fill();
+
+        // Side lower tent wall (alternating crimson & cream canvas panels with 3D cylindrical shadow)
+        const panels = 12;
+        const pw = tw / panels;
+        for (let p = 0; p < panels; p++) {
+          const px0 = -tw * 0.5 + p * pw;
+          ctx.fillStyle = p % 2 === 0 ? '#b91c1c' : '#fef3c7';
+          ctx.fillRect(px0, -wallH, pw + 0.6, wallH);
+        }
+        const wallShade = ctx.createLinearGradient(-tw * 0.5, 0, tw * 0.5, 0);
+        wallShade.addColorStop(0, 'rgba(15, 5, 10, 0.54)');
+        wallShade.addColorStop(0.22, 'rgba(15, 5, 10, 0.08)');
+        wallShade.addColorStop(0.78, 'rgba(15, 5, 10, 0.08)');
+        wallShade.addColorStop(1, 'rgba(15, 5, 10, 0.56)');
+        ctx.fillStyle = wallShade; ctx.fillRect(-tw * 0.5, -wallH, tw, wallH);
+
+        // Billowing Swept Big-Top Canopy Roof with Curved Fabric Pleats!
+        const apexY = -wallH - roofH;
+        for (let p = 0; p < panels; p++) {
+          const x0 = -tw * 0.5 - 20 + (p / panels) * (tw + 40);
+          const x1 = -tw * 0.5 - 20 + ((p + 1) / panels) * (tw + 40);
+          const xm = (x0 + x1) * 0.5;
+          ctx.fillStyle = p % 2 === 0 ? '#dc2626' : '#fffbeb';
+          ctx.beginPath();
+          ctx.moveTo(0, apexY);
+          ctx.quadraticCurveTo(x0 * 0.52, -wallH - roofH * 0.22, x0, -wallH + 10);
+          ctx.quadraticCurveTo(xm, -wallH + 26, x1, -wallH + 10);
+          ctx.quadraticCurveTo(x1 * 0.52, -wallH - roofH * 0.22, 0, apexY);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(28, 8, 12, 0.36)'; ctx.lineWidth = 1.4; ctx.stroke();
+        }
+        // Gilded scalloped valence trim & glowing bulbs along roof eave
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(-tw * 0.5 - 20, -wallH + 10); ctx.lineTo(tw * 0.5 + 20, -wallH + 10); ctx.stroke();
+        for (let lx = -tw * 0.5 + 12; lx <= tw * 0.5 - 12; lx += 28) {
+          const lit = Math.sin(time * 5 + lx * 0.1) > -0.2;
+          ctx.fillStyle = lit ? '#fef9c3' : '#b45309';
+          ctx.beginPath(); ctx.arc(lx, -wallH + 10, 4.2, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Golden Roof Finial Pole + Fluttering Crimson Circus Pennant Flag
+        ctx.fillStyle = '#fbbf24'; ctx.fillRect(-3.5, apexY - 52, 7, 54);
+        ctx.beginPath(); ctx.arc(0, apexY - 54, 7, 0, Math.PI * 2); ctx.fill();
+        const wave = Math.sin(time * 5.2 + i) * 7;
+        ctx.fillStyle = '#ef4444'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(3.5, apexY - 49); ctx.quadraticCurveTo(36, apexY - 45 + wave, 68, apexY - 35 + wave);
+        ctx.lineTo(3.5, apexY - 22); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Parted Crimson Velvet Entrance Curtains with Warm Glowing Arena Interior!
+        const entG = ctx.createRadialGradient(0, -82, 10, 0, -82, 102);
+        entG.addColorStop(0, '#fffbeb'); entG.addColorStop(0.5, '#fbbf24'); entG.addColorStop(1, '#92400e');
+        ctx.fillStyle = entG;
+        ctx.beginPath(); ctx.moveTo(-76, 0); ctx.lineTo(-56, -152); ctx.lineTo(56, -152); ctx.lineTo(76, 0); ctx.closePath(); ctx.fill();
+        // Draped tie-back velvet curtains
+        ctx.fillStyle = '#7f1d1d'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(-76, 0); ctx.quadraticCurveTo(-22, -66, -48, -152); ctx.lineTo(-76, -152); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(76, 0); ctx.quadraticCurveTo(22, -66, 48, -152); ctx.lineTo(76, -152); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.restore();
+      } else if (kind === 1) {
+        // VINTAGE CARVED CARNIVAL TICKET & POPCORN WAGON + BOBBING HELIUM BALLOONS!
+        const wx = bx + 220;
+        const ww = 164;
+        const wh = 104;
+        ctx.save();
+        ctx.translate(wx, groundY - wh - 18);
+
+        // Floating colorful helium balloons tied to wagon corner
+        const bCols = ['#ef4444', '#38bdf8', '#facc15', '#f472b6'];
+        for (let b = 0; b < 4; b++) {
+          const bSway = Math.sin(time * 2.4 + b * 1.4 + i) * 7;
+          const bx0 = -16 + b * 12 + bSway;
+          const by0 = -48 - (b % 2) * 18;
+          ctx.strokeStyle = 'rgba(226, 232, 240, 0.55)'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(4, 14); ctx.quadraticCurveTo(bx0 * 0.5, by0 * 0.5, bx0, by0 + 13); ctx.stroke();
+          ctx.fillStyle = bCols[b];
+          ctx.beginPath(); ctx.ellipse(bx0, by0, 11, 14, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,0.45)';
+          ctx.beginPath(); ctx.ellipse(bx0 - 3.5, by0 - 4.5, 3, 5, -0.3, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Ornate carved crimson & gold circus wagon body
+        const wagG = ctx.createLinearGradient(0, 0, 0, wh);
+        wagG.addColorStop(0, '#dc2626'); wagG.addColorStop(0.55, '#991b1b'); wagG.addColorStop(1, '#450a0a');
+        ctx.fillStyle = wagG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.roundRect(0, 0, ww, wh, [10, 10, 3, 3]); ctx.fill(); ctx.stroke();
+        // Glowing ticket & popcorn counter window
+        const winG = ctx.createLinearGradient(0, 22, 0, 68);
+        winG.addColorStop(0, '#fffbeb'); winG.addColorStop(1, '#f59e0b');
+        ctx.fillStyle = winG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.roundRect(24, 24, ww - 48, 46, 5); ctx.fill(); ctx.stroke();
+        // Scalloped red & cream striped canopy awning
+        for (let st = 0; st < 6; st++) {
+          ctx.fillStyle = st % 2 === 0 ? '#b91c1c' : '#fef3c7';
+          ctx.fillRect(14 + st * 22.6, 8, 22.6, 14);
+          ctx.beginPath(); ctx.arc(25.3 + st * 22.6, 22, 11.3, 0, Math.PI); ctx.fill();
+        }
+        // Vintage spoked gilded wooden carriage wheels
+        for (const cx0 of [34, ww - 34]) {
+          ctx.fillStyle = '#451a03'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.arc(cx0, wh + 4, 20, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#d97706'; ctx.lineWidth = 1.6;
+          for (let s = 0; s < 8; s++) {
+            const a = (s * Math.PI) / 4;
+            ctx.beginPath(); ctx.moveTo(cx0, wh + 4); ctx.lineTo(cx0 + Math.cos(a) * 18, wh + 4 + Math.sin(a) * 18); ctx.stroke();
+          }
+          ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(cx0, wh + 4, 4.5, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+      } else {
+        // TALL STRIPED CARNIVAL FESTOON LIGHT MASTS & WARM DRAPED STRING LIGHTS
+        const mx = bx + 260;
+        ctx.save();
+        ctx.fillStyle = '#991b1b'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+        ctx.fillRect(mx - 5, groundY - 190, 10, 190); ctx.strokeRect(mx - 5, groundY - 190, 10, 190);
+        ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(mx, groundY - 194, 7, 0, Math.PI * 2); ctx.fill();
+        // Draped warm Edison bulb festoon wire
+        ctx.strokeStyle = 'rgba(15, 23, 42, 0.72)'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.moveTo(mx, groundY - 182); ctx.quadraticCurveTo(mx + 140, groundY - 132, mx + 280, groundY - 182); ctx.stroke();
+        for (let b = 1; b <= 7; b++) {
+          const u = b / 8;
+          const lx = mx + u * 280;
+          const ly = (groundY - 182) + 4 * u * (1 - u) * 28;
+          ctx.fillStyle = 'rgba(254, 240, 138, 0.32)'; ctx.beginPath(); ctx.arc(lx, ly, 11, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = b % 2 === 0 ? '#fef08a' : '#fda4af';
+          ctx.beginPath(); ctx.arc(lx, ly, 3.6, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+
+    // Floating Warm Golden Carnival Sparks & Confetti Motes
+    for (let f = 0; f < 28; f++) {
+      const fx = ((f * 167 - camX * 0.22 + time * 18) % w + w) % w;
+      const fy = ((f * 91 + time * 24 + Math.sin(time * 2.2 + f) * 16) % (h - 70));
+      const a = 0.3 + 0.55 * Math.abs(Math.sin(time * 3 + f));
+      ctx.fillStyle = f % 3 === 0 ? `rgba(254, 240, 138, ${a})` : f % 3 === 1 ? `rgba(251, 113, 133, ${a})` : `rgba(125, 211, 252, ${a})`;
+      ctx.beginPath(); ctx.arc(fx, fy, 2.2, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  // =========================================================================
+  // 13. STAGE 18: GOLDEN SAHARA OASIS (Pyramids, Layered Dunes, Date Oasis & Bedouin Tents)
+  // =========================================================================
+  function drawDesertSkyAndHorizon(ctx, camX, w, h, time) {
+    ensureTextures(ctx);
+
+    // Rich Sahara Sunset-to-Twilight Sky
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, '#0a0b24');
+    sky.addColorStop(0.28, '#361745');
+    sky.addColorStop(0.56, '#9a3412');
+    sky.addColorStop(0.82, '#f59e0b');
+    sky.addColorStop(1, '#fde68a');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
+
+    // Crisp Upper Desert Stars
+    for (let s = 0; s < 54; s++) {
+      const sx = ((s * 179 - camX * 0.015) % w + w) % w;
+      const sy = 14 + ((s * 43) % 165);
+      const tw = 0.25 + 0.65 * Math.abs(Math.sin(time * 2.0 + s * 1.2));
+      ctx.fillStyle = `rgba(255, 248, 220, ${tw})`;
+      ctx.beginPath(); ctx.arc(sx, sy, s % 4 === 0 ? 1.6 : 1.0, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Crisp Sahara Crescent Moon (ZERO artificial circular halo!)
+    const moonX = 240 - camX * 0.02;
+    ctx.save();
+    ctx.fillStyle = '#fef3c7';
+    ctx.beginPath(); ctx.arc(moonX, 92, 26, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#180f33';
+    ctx.beginPath(); ctx.arc(moonX + 10, 86, 22.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    // MONUMENTAL 3D GIZA PYRAMIDS (Balanced Atmospheric 3D Ashlar Masonry, Smooth Distance Haze, Tura Summit Casing & Sphinx!)
+    if (!tex.pyramids) tex.pyramids = {};
+    const getPyramidSprite = (key, halfW, pyrH, hasCasing, hasEntrance, seed) => {
+      if (tex.pyramids[key]) return tex.pyramids[key];
+      const padX = 16;
+      const padTop = 14;
+      const padBot = 14;
+      const cw = Math.ceil(halfW * 2 + padX * 2);
+      const ch = Math.ceil(pyrH + padTop + padBot);
+      const ax = cw * 0.5;
+      const ay = ch - padBot;
+      const ridgeX = ax + halfW * 0.15;
+
+      const hash = (a, b) => {
+        const v = Math.sin(a * 127.1 + b * 311.7 + seed * 74.7) * 43758.5453;
+        return v - Math.floor(v);
+      };
+
+      const spr = makeOffscreen(cw, ch, (g) => {
+        // 1. Smooth Sunlit & Shaded 3D Pyramid Faces (Clean Monumental Silhouette)
+        const baseLitG = g.createLinearGradient(ax - halfW, ay - pyrH, ridgeX, ay);
+        baseLitG.addColorStop(0, '#fde68a');
+        baseLitG.addColorStop(0.24, '#f0ae43');
+        baseLitG.addColorStop(0.68, '#c97822');
+        baseLitG.addColorStop(1, '#9a4c14');
+        g.fillStyle = baseLitG;
+        g.beginPath();
+        g.moveTo(ax - halfW, ay + 2);
+        g.lineTo(ax, ay - pyrH);
+        g.lineTo(ridgeX, ay);
+        g.closePath();
+        g.fill();
+
+        const baseShG = g.createLinearGradient(ax, ay - pyrH, ax + halfW, ay);
+        baseShG.addColorStop(0, '#8a4012');
+        baseShG.addColorStop(0.45, '#59260a');
+        baseShG.addColorStop(1, '#2f1104');
+        g.fillStyle = baseShG;
+        g.beginPath();
+        g.moveTo(ax, ay - pyrH);
+        g.lineTo(ax + halfW, ay + 3);
+        g.lineTo(ridgeX, ay);
+        g.closePath();
+        g.fill();
+
+        // Perspective-tilted course Y helper (subtle 3D slope away from central ridge)
+        const courseY = (u, x) => {
+          const base = ay - pyrH * (1 - u);
+          const mx = ax + (ridgeX - ax) * u;
+          const distFrac = Math.abs(x - mx) / Math.max(1, halfW);
+          return base + distFrac * (x < mx ? 2.4 : 3.2) * u;
+        };
+
+        // 2. Soft Painterly 3D Limestone Masonry Courses (Clipped cleanly to pyramid faces for smooth distant silhouette!)
+        const courses = Math.max(10, Math.round(pyrH / 14.5));
+
+        // --- A. Sunlit Left Face Soft 3D Ashlar Blocks ---
+        g.save();
+        g.beginPath();
+        g.moveTo(ax - halfW, ay + 2);
+        g.lineTo(ax, ay - pyrH);
+        g.lineTo(ridgeX, ay);
+        g.closePath();
+        g.clip();
+
+        for (let c = 1; c < courses; c++) {
+          const uTop = (c - 1) / courses;
+          const uBot = c / courses;
+          const lxBot = ax - halfW * uBot;
+          const mxBot = ax + (ridgeX - ax) * uBot;
+          const leftSpan = mxBot - lxBot;
+          const avgBlockW = 16 + uBot * 12;
+          const numL = Math.max(1, Math.round(leftSpan / avgBlockW));
+          const staggerL = (c % 2) * 0.45;
+
+          for (let b = 0; b < numL; b++) {
+            const f0 = b === 0 ? 0 : Math.max(0, (b - staggerL * 0.35) / numL);
+            const f1 = b === numL - 1 ? 1 : Math.min(1, (b + 1 - staggerL * 0.35) / numL);
+            if (f1 - f0 < 0.03) continue;
+            const x0 = lxBot + leftSpan * f0;
+            const x1 = lxBot + leftSpan * f1;
+            const yTop0 = courseY(uTop, x0), yTop1 = courseY(uTop, x1);
+            const yBot0 = courseY(uBot, x0), yBot1 = courseY(uBot, x1);
+            const hVal = hash(c, b);
+
+            // Soft tonal block variation (gentle warm highlights & weathered ochre blocks)
+            let tone = null;
+            if (hVal > 0.66) {
+              tone = `rgba(255, 248, 220, ${(0.07 + (hVal - 0.66) * 0.22).toFixed(2)})`;
+            } else if (hVal < 0.32) {
+              tone = `rgba(92, 38, 8, ${(0.07 + (0.32 - hVal) * 0.24).toFixed(2)})`;
+            }
+            if (tone) {
+              g.fillStyle = tone;
+              g.beginPath();
+              g.moveTo(x0, yTop0); g.lineTo(x1, yTop1); g.lineTo(x1, yBot1); g.lineTo(x0, yBot0);
+              g.closePath(); g.fill();
+            }
+
+            // Soft vertical stone joint
+            if (b > 0) {
+              g.strokeStyle = 'rgba(69, 26, 3, 0.16)';
+              g.lineWidth = 0.85;
+              g.beginPath(); g.moveTo(x0, yTop0); g.lineTo(x0, yBot0); g.stroke();
+              g.strokeStyle = 'rgba(255, 251, 235, 0.12)';
+              g.lineWidth = 0.7;
+              g.beginPath(); g.moveTo(x0 + 0.9, yTop0); g.lineTo(x0 + 0.9, yBot0); g.stroke();
+            }
+          }
+
+          // Smooth 3D stepped-course horizontal bevel (soft sunlit top rim + soft cast shadow underneath)
+          const yL = courseY(uBot, lxBot), yM = courseY(uBot, mxBot);
+          g.strokeStyle = 'rgba(255, 250, 224, 0.22)';
+          g.lineWidth = 1.4;
+          g.beginPath(); g.moveTo(lxBot, yL - 1.1); g.lineTo(mxBot, yM - 1.1); g.stroke();
+          g.strokeStyle = 'rgba(58, 22, 5, 0.26)';
+          g.lineWidth = 1.3;
+          g.beginPath(); g.moveTo(lxBot, yL + 0.3); g.lineTo(mxBot, yM + 0.3); g.stroke();
+        }
+        g.restore();
+
+        // --- B. Shaded Right Face Soft 3D Ashlar Blocks ---
+        g.save();
+        g.beginPath();
+        g.moveTo(ax, ay - pyrH);
+        g.lineTo(ax + halfW, ay + 3);
+        g.lineTo(ridgeX, ay);
+        g.closePath();
+        g.clip();
+
+        for (let c = 1; c < courses; c++) {
+          const uTop = (c - 1) / courses;
+          const uBot = c / courses;
+          const mxBot = ax + (ridgeX - ax) * uBot;
+          const rxBot = ax + halfW * uBot;
+          const rightSpan = rxBot - mxBot;
+          const avgBlockW = 16 + uBot * 12;
+          const numR = Math.max(1, Math.round(rightSpan / avgBlockW));
+          const staggerR = ((c + 1) % 2) * 0.45;
+
+          for (let b = 0; b < numR; b++) {
+            const f0 = b === 0 ? 0 : Math.max(0, (b - staggerR * 0.35) / numR);
+            const f1 = b === numR - 1 ? 1 : Math.min(1, (b + 1 - staggerR * 0.35) / numR);
+            if (f1 - f0 < 0.03) continue;
+            const x0 = mxBot + rightSpan * f0;
+            const x1 = mxBot + rightSpan * f1;
+            const yTop0 = courseY(uTop, x0), yTop1 = courseY(uTop, x1);
+            const yBot0 = courseY(uBot, x0), yBot1 = courseY(uBot, x1);
+            const hVal = hash(c + 51, b + 19);
+
+            let tone = null;
+            if (hVal > 0.68) {
+              tone = 'rgba(180, 95, 25, 0.14)';
+            } else if (hVal < 0.30) {
+              tone = 'rgba(20, 6, 1, 0.16)';
+            }
+            if (tone) {
+              g.fillStyle = tone;
+              g.beginPath();
+              g.moveTo(x0, yTop0); g.lineTo(x1, yTop1); g.lineTo(x1, yBot1); g.lineTo(x0, yBot0);
+              g.closePath(); g.fill();
+            }
+
+            if (b > 0) {
+              g.strokeStyle = 'rgba(15, 5, 1, 0.24)';
+              g.lineWidth = 0.85;
+              g.beginPath(); g.moveTo(x0, yTop0); g.lineTo(x0, yBot0); g.stroke();
+            }
+          }
+
+          const yM = courseY(uBot, mxBot), yR = courseY(uBot, rxBot);
+          g.strokeStyle = 'rgba(194, 112, 24, 0.15)';
+          g.lineWidth = 1.0;
+          g.beginPath(); g.moveTo(mxBot, yM - 0.9); g.lineTo(rxBot, yR - 0.9); g.stroke();
+          g.strokeStyle = 'rgba(15, 5, 1, 0.30)';
+          g.lineWidth = 1.2;
+          g.beginPath(); g.moveTo(mxBot, yM + 0.3); g.lineTo(rxBot, yR + 0.3); g.stroke();
+        }
+        g.restore();
+
+        // 3. Subtle Corbeled Gable Entrance on Khufu's Lower Sunlit Face
+        if (hasEntrance) {
+          const entX = ax - halfW * 0.15;
+          const entY = ay - pyrH * 0.22;
+          g.fillStyle = 'rgba(34, 12, 3, 0.72)';
+          g.fillRect(entX - 7, entY - 2, 14, 12);
+          g.fillStyle = 'rgba(246, 206, 132, 0.85)';
+          g.strokeStyle = 'rgba(69, 26, 3, 0.55)';
+          g.lineWidth = 1.0;
+          g.beginPath();
+          g.moveTo(entX - 14, entY + 2);
+          g.lineTo(entX, entY - 11);
+          g.lineTo(entX + 14, entY + 2);
+          g.lineTo(entX + 9, entY + 4);
+          g.lineTo(entX, entY - 5);
+          g.lineTo(entX - 9, entY + 4);
+          g.closePath();
+          g.fill();
+          g.stroke();
+        }
+
+        // 4. Smooth Polished White-Gold Tura Limestone Summit Casing (Khafre's Pyramid!)
+        if (hasCasing) {
+          const capU = 0.26;
+          const capY = ay - pyrH * (1 - capU);
+          const lx = ax - halfW * capU;
+          const mx = ax + (ridgeX - ax) * capU;
+          const rx = ax + halfW * capU;
+
+          // Soft cast shadow beneath broken casing edge
+          g.fillStyle = 'rgba(41, 13, 2, 0.28)';
+          g.beginPath();
+          g.moveTo(lx, capY + 1);
+          g.lineTo(lx + (mx - lx) * 0.32, capY - 2);
+          g.lineTo(lx + (mx - lx) * 0.65, capY + 5);
+          g.lineTo(mx, capY + 1);
+          g.lineTo(mx + (rx - mx) * 0.48, capY + 6);
+          g.lineTo(rx, capY + 2);
+          g.lineTo(rx, capY + 7);
+          g.lineTo(mx + (rx - mx) * 0.48, capY + 10);
+          g.lineTo(mx, capY + 5);
+          g.lineTo(lx + (mx - lx) * 0.65, capY + 9);
+          g.lineTo(lx, capY + 5);
+          g.closePath();
+          g.fill();
+
+          const capLitG = g.createLinearGradient(lx, ay - pyrH, mx, capY);
+          capLitG.addColorStop(0, '#fffbeb');
+          capLitG.addColorStop(0.55, '#fef0c7');
+          capLitG.addColorStop(1, '#e7ba6a');
+          g.fillStyle = capLitG;
+          g.beginPath();
+          g.moveTo(ax, ay - pyrH);
+          g.lineTo(lx, capY);
+          g.lineTo(lx + (mx - lx) * 0.32, capY - 4);
+          g.lineTo(lx + (mx - lx) * 0.65, capY + 3);
+          g.lineTo(mx, capY - 1);
+          g.closePath();
+          g.fill();
+
+          const capShG = g.createLinearGradient(ax, ay - pyrH, rx, capY);
+          capShG.addColorStop(0, '#be6e1b');
+          capShG.addColorStop(0.65, '#8a4412');
+          capShG.addColorStop(1, '#5c280a');
+          g.fillStyle = capShG;
+          g.beginPath();
+          g.moveTo(ax, ay - pyrH);
+          g.lineTo(mx, capY - 1);
+          g.lineTo(mx + (rx - mx) * 0.48, capY + 4);
+          g.lineTo(rx, capY);
+          g.closePath();
+          g.fill();
+        }
+
+        // 5. Crisp Sunlit Left Rim Highlight & Smooth 3D Central Corner Ridge
+        g.strokeStyle = 'rgba(255, 251, 235, 0.46)';
+        g.lineWidth = 1.5;
+        g.beginPath();
+        g.moveTo(ax - halfW, ay + 2);
+        g.lineTo(ax, ay - pyrH);
+        g.stroke();
+
+        g.strokeStyle = 'rgba(254, 243, 199, 0.24)';
+        g.lineWidth = 1.0;
+        g.beginPath();
+        g.moveTo(ax - 0.6, ay - pyrH);
+        g.lineTo(ridgeX - 0.6, ay);
+        g.stroke();
+
+        g.strokeStyle = 'rgba(41, 13, 2, 0.38)';
+        g.lineWidth = 1.1;
+        g.beginPath();
+        g.moveTo(ax + 0.5, ay - pyrH);
+        g.lineTo(ridgeX + 0.5, ay);
+        g.stroke();
+
+        // 6. Soft Golden Desert Atmospheric Haze & Base Sand Drifts (blends pyramids naturally into the horizon!)
+        const hazeG = g.createLinearGradient(0, ay - pyrH * 0.45, 0, ay + 5);
+        hazeG.addColorStop(0, 'rgba(245, 158, 11, 0)');
+        hazeG.addColorStop(0.75, 'rgba(217, 119, 6, 0.16)');
+        hazeG.addColorStop(1, 'rgba(180, 83, 9, 0.42)');
+        g.fillStyle = hazeG;
+        g.beginPath();
+        g.moveTo(ax - halfW - 4, ay + 5);
+        g.lineTo(ax, ay - pyrH);
+        g.lineTo(ax + halfW + 4, ay + 5);
+        g.closePath();
+        g.fill();
+      });
+
+      tex.pyramids[key] = spr;
+      return spr;
+    };
+
+    const drawDetailedPyramid = (px0, baseY, halfW, pyrH, hasCasing, key, hasEntrance = false, seed = 1) => {
+      const spr = getPyramidSprite(key, halfW, pyrH, hasCasing, hasEntrance, seed);
+      ctx.drawImage(spr, px0 - spr.width * 0.5, baseY - (spr.height - 14));
+    };
+
+    const pyrSpan = 1120;
+    const pyrPar = 0.08;
+    const pStart = Math.floor((camX * pyrPar) / pyrSpan) - 1;
+    const pEnd = Math.ceil((camX * pyrPar + w) / pyrSpan) + 1;
+    for (let i = pStart; i <= pEnd; i++) {
+      const px0 = i * pyrSpan + 390 - camX * pyrPar;
+      const baseY = h - 122;
+      drawDetailedPyramid(px0 + 280, baseY, 168, 194, true, 'khafre', false, 2);      // Khafre (smooth Tura summit casing!)
+      drawDetailedPyramid(px0, baseY, 232, 256, false, 'khufu', true, 1);             // Great Pyramid of Khufu (gable entrance!)
+      drawDetailedPyramid(px0 - 214, baseY + 6, 118, 132, false, 'menkaure', false, 3); // Menkaure companion pyramid
+
+      // Sculpted 3D Great Sphinx resting near the Pyramid plateau (Sunlit Limestone Body, Striped Nemes Headdress & Forepaws!)
+      const spX = px0 + 175, spY = baseY + 4;
+      const spG = ctx.createLinearGradient(spX - 42, spY - 46, spX + 54, spY);
+      spG.addColorStop(0, '#d9822b');
+      spG.addColorStop(0.45, '#92400e');
+      spG.addColorStop(1, '#451a03');
+      ctx.fillStyle = spG;
+      ctx.strokeStyle = '#290d02'; ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(spX - 44, spY);
+      ctx.lineTo(spX - 38, spY - 22);
+      ctx.quadraticCurveTo(spX - 10, spY - 27, spX + 8, spY - 22);
+      ctx.lineTo(spX + 12, spY - 42);
+      ctx.lineTo(spX + 27, spY - 46);
+      ctx.lineTo(spX + 34, spY - 35);
+      ctx.lineTo(spX + 29, spY - 24);
+      ctx.lineTo(spX + 54, spY - 12);
+      ctx.lineTo(spX + 54, spY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Sandstone horizontal masonry strata & royal Nemes headdress stripes
+      ctx.strokeStyle = 'rgba(254, 240, 138, 0.36)'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(spX - 38, spY - 22); ctx.lineTo(spX + 12, spY - 42); ctx.lineTo(spX + 27, spY - 46);
+      ctx.moveTo(spX + 13, spY - 37); ctx.lineTo(spX + 28, spY - 37);
+      ctx.moveTo(spX + 12, spY - 32); ctx.lineTo(spX + 30, spY - 32);
+      ctx.moveTo(spX - 34, spY - 11); ctx.lineTo(spX + 46, spY - 11);
+      ctx.stroke();
+    }
+
+    // Helper: Painterly 3D Wind-Carved Sahara Sand Dune Ridge (Sunlit Slope + Sharp Shadow Slip-Face + Wind Ripples!)
+    const drawDuneRidge = (parallax, baseOff, amp1, amp2, litCol1, litCol2, shCol, rippleAlpha) => {
+      const pts = [];
+      for (let x = -40; x <= w + 80; x += 40) {
+        const wx = x + camX * parallax;
+        const y = h - baseOff - Math.sin(wx * 0.0046) * amp1 - Math.cos(wx * 0.0105 + parallax * 8) * amp2;
+        pts.push([x, y]);
+      }
+      // Main sunlit dune body gradient
+      const dG = ctx.createLinearGradient(0, h - baseOff - amp1 - amp2, 0, h - 50);
+      dG.addColorStop(0, litCol1); dG.addColorStop(0.55, litCol2); dG.addColorStop(1, shCol);
+      ctx.fillStyle = dG;
+      ctx.beginPath();
+      ctx.moveTo(-40, h - 50);
+      for (const [x, y] of pts) ctx.lineTo(x, y);
+      ctx.lineTo(w + 80, h - 50);
+      ctx.closePath(); ctx.fill();
+
+      // Wind-carved shadow slip-faces descending from each dune crest toward the right
+      ctx.fillStyle = shCol;
+      for (let k = 1; k < pts.length - 1; k++) {
+        if (pts[k][1] < pts[k - 1][1] && pts[k][1] <= pts[k + 1][1]) {
+          const [cx0, cy0] = pts[k];
+          ctx.beginPath();
+          ctx.moveTo(cx0, cy0);
+          ctx.quadraticCurveTo(cx0 + 55, cy0 + 28, cx0 + 135, h - 50);
+          ctx.lineTo(cx0 + 18, h - 50);
+          ctx.quadraticCurveTo(cx0 + 12, cy0 + 32, cx0, cy0);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+
+      // Crisp golden sunlit dune crest line + subtle wind-blown sand ripples
+      ctx.strokeStyle = 'rgba(254, 243, 199, 0.44)'; ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      for (let k = 0; k < pts.length; k++) {
+        if (k === 0) ctx.moveTo(pts[k][0], pts[k][1]); else ctx.lineTo(pts[k][0], pts[k][1]);
+      }
+      ctx.stroke();
+
+      if (rippleAlpha > 0) {
+        ctx.strokeStyle = `rgba(254, 243, 199, ${rippleAlpha})`; ctx.lineWidth = 1.0;
+        for (let r = 1; r <= 3; r++) {
+          ctx.beginPath();
+          for (let k = 0; k < pts.length; k++) {
+            const ry = pts[k][1] + r * 14 + Math.sin(k * 0.9 + r) * 2.5;
+            if (k === 0) ctx.moveTo(pts[k][0], ry); else ctx.lineTo(pts[k][0], ry);
+          }
+          ctx.stroke();
+        }
+      }
+    };
+
+    // 3 Layered 3D Sahara Sand Dune Ranges
+    drawDuneRidge(0.11, 152, 34, 15, '#e59a28', '#b45309', 'rgba(92, 40, 10, 0.55)', 0.12);
+
+    // Distant Silhouetted Desert Camel Caravan trekking along the far dune crest
+    const carX = ((time * 12 - camX * 0.11 + 280) % (w + 360) + (w + 360)) % (w + 360) - 180;
+    ctx.fillStyle = '#3b1506';
+    for (let c = 0; c < 3; c++) {
+      const cx0 = carX - c * 32;
+      const wx = cx0 + camX * 0.11;
+      const cy0 = h - 152 - Math.sin(wx * 0.0046) * 34 - Math.cos(wx * 0.0105 + 0.11 * 8) * 15;
+      const step = Math.sin(time * 4 + c) * 2;
+      ctx.beginPath();
+      ctx.ellipse(cx0, cy0 - 11, 8, 4.5, 0, 0, Math.PI * 2);
+      ctx.arc(cx0 - 1, cy0 - 16, 4.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#3b1506'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx0 + 6, cy0 - 11); ctx.quadraticCurveTo(cx0 + 11, cy0 - 14, cx0 + 12, cy0 - 19);
+      ctx.moveTo(cx0 - 4, cy0 - 8); ctx.lineTo(cx0 - 5 + step, cy0);
+      ctx.moveTo(cx0 + 4, cy0 - 8); ctx.lineTo(cx0 + 5 - step, cy0);
+      ctx.stroke();
+    }
+
+    drawDuneRidge(0.18, 114, 28, 12, '#d97706', '#92400e', 'rgba(69, 26, 3, 0.62)', 0.16);
+    drawDuneRidge(0.25, 86, 18, 8, '#b45309', '#78350f', 'rgba(41, 13, 2, 0.58)', 0.14);
+  }
+
+  function drawDesertMidground(ctx, camX, w, h, time) {
+    ensureTextures(ctx);
+    const span = 560;
+    const parallax = 0.36;
+    const startIdx = Math.floor((camX * parallax) / span) - 1;
+    const endIdx = Math.ceil((camX * parallax + w) / span) + 1;
+    const groundY = h - 88;
+
+    for (let i = startIdx; i <= endIdx; i++) {
+      const bx = i * span - camX * parallax;
+      const kind = ((i % 3) + 3) % 3;
+
+      if (kind === 0) {
+        // LUSH DESERT DATE PALM OASIS (Organic Natural Lagoon Shoreline, Crystal Layered Water, Sky Reflections, Lotus & Papyrus Reeds!)
+        const ox = bx + 270;
+        ctx.save();
+        ctx.translate(ox, groundY);
+
+        // 1. Irregular Sculpted Wet-Sand & Lush Mossy Oasis Bank Rim
+        const bankG = ctx.createLinearGradient(0, -24, 0, 14);
+        bankG.addColorStop(0, '#a16207'); bankG.addColorStop(0.5, '#78350f'); bankG.addColorStop(1, '#451a03');
+        ctx.fillStyle = bankG;
+        ctx.beginPath();
+        ctx.moveTo(-148, -2);
+        ctx.bezierCurveTo(-136, -22, -64, -24, -12, -19);
+        ctx.bezierCurveTo(46, -25, 134, -20, 146, -2);
+        ctx.bezierCurveTo(132, 14, 54, 18, 0, 13);
+        ctx.bezierCurveTo(-62, 18, -134, 14, -148, -2);
+        ctx.closePath(); ctx.fill();
+
+        // 2. Organic Lagoon Water Body (Shallow Turquoise Edge -> Deep Sapphire-Teal Center + Sunset Reflection!)
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(-134, -3);
+        ctx.bezierCurveTo(-120, -17, -56, -19, -10, -14);
+        ctx.bezierCurveTo(42, -19, 118, -16, 132, -3);
+        ctx.bezierCurveTo(118, 9, 46, 12, 0, 8);
+        ctx.bezierCurveTo(-56, 12, -120, 9, -134, -3);
+        ctx.closePath();
+        const poolG = ctx.createRadialGradient(-10, -5, 10, 0, -4, 132);
+        poolG.addColorStop(0, '#155e75');
+        poolG.addColorStop(0.45, '#0891b2');
+        poolG.addColorStop(0.78, '#22d3ee');
+        poolG.addColorStop(1, '#a5f3fc');
+        ctx.fillStyle = poolG; ctx.fill();
+        ctx.clip();
+
+        // Warm Sahara sunset sky reflection shimmering on lagoon water
+        const refG = ctx.createLinearGradient(-45, -14, 45, 8);
+        refG.addColorStop(0, 'rgba(251, 191, 36, 0.28)');
+        refG.addColorStop(0.5, 'rgba(249, 115, 22, 0.16)');
+        refG.addColorStop(1, 'rgba(254, 240, 138, 0.22)');
+        ctx.fillStyle = refG; ctx.fillRect(-135, -20, 270, 34);
+
+        // Animated shimmering breeze-ripple highlights & expanding spring caustics
+        ctx.strokeStyle = 'rgba(240, 249, 255, 0.48)'; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
+        for (let wv = 0; wv < 7; wv++) {
+          const wx = -92 + wv * 31 + Math.sin(time * 2.2 + wv * 1.3) * 8;
+          const wy = -9 + (wv % 3) * 5;
+          ctx.beginPath(); ctx.moveTo(wx - 12, wy); ctx.quadraticCurveTo(wx, wy - 1.5, wx + 12, wy); ctx.stroke();
+        }
+        for (let rp = 0; rp < 2; rp++) {
+          const rAge = (time * 15 + rp * 20) % 40;
+          const rA = Math.sin((rAge / 40) * Math.PI) * 0.45;
+          ctx.strokeStyle = `rgba(224, 242, 254, ${rA.toFixed(2)})`;
+          ctx.beginPath(); ctx.ellipse(-18 + rp * 48, -4, 12 + rAge, 2 + rAge * 0.11, 0, 0, Math.PI * 2); ctx.stroke();
+        }
+        ctx.restore();
+
+        // Crisp foam shoreline rim + smooth desert bank boulders + floating Nile Lotus blooms!
+        ctx.strokeStyle = 'rgba(224, 242, 254, 0.55)'; ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(-128, -3); ctx.bezierCurveTo(-112, -15, -52, -17, -10, -13);
+        ctx.bezierCurveTo(40, -17, 112, -14, 126, -3); ctx.stroke();
+        ctx.fillStyle = '#92400e'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.1;
+        for (const [bx0, by0, rx, ry] of [[-126, 2, 10, 5], [-112, 5, 7, 3.8], [118, 3, 11, 5.2], [102, 6, 7, 3.5]]) {
+          ctx.beginPath(); ctx.ellipse(bx0, by0, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        }
+        for (const [lx, ly] of [[-46, -2], [44, 0]]) {
+          ctx.fillStyle = '#15803d'; ctx.beginPath(); ctx.ellipse(lx, ly, 9, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#f472b6'; ctx.beginPath(); ctx.arc(lx, ly - 2.5, 3.2, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.arc(lx, ly - 3, 1.3, 0, Math.PI * 2); ctx.fill();
+        }
+        for (const rx of [-122, -114, -104, 102, 112, 122]) {
+          const sway = Math.sin(time * 2.1 + rx * 0.1) * 3.5;
+          ctx.strokeStyle = '#15803d'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(rx, -4); ctx.quadraticCurveTo(rx + sway * 0.5, -22, rx + sway, -34); ctx.stroke();
+          ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 1.1;
+          for (let f = -2; f <= 2; f++) {
+            ctx.beginPath(); ctx.moveTo(rx + sway, -34); ctx.lineTo(rx + sway + f * 3.2, -39 + Math.abs(f)); ctx.stroke();
+          }
+        }
+        for (const [tx, topX, topY, sc] of [[-86, -104, -225, 1.04], [80, 98, -182, 0.86]]) {
+          const ctrlX = tx + (topX - tx) * 0.35;
+          const ctrlY = topY * 0.5;
+          for (let seg = 0; seg < 14; seg++) {
+            const u0 = seg / 14, u1 = (seg + 1) / 14;
+            const x0 = (1 - u0) * (1 - u0) * tx + 2 * (1 - u0) * u0 * ctrlX + u0 * u0 * topX;
+            const y0 = (1 - u0) * (1 - u0) * (-6) + 2 * (1 - u0) * u0 * ctrlY + u0 * u0 * topY;
+            const x1 = (1 - u1) * (1 - u1) * tx + 2 * (1 - u1) * u1 * ctrlX + u1 * u1 * topX;
+            const y1 = (1 - u1) * (1 - u1) * (-6) + 2 * (1 - u1) * u1 * ctrlY + u1 * u1 * topY;
+            ctx.strokeStyle = seg % 2 === 0 ? '#78350f' : '#5c280a';
+            ctx.lineWidth = (13 - u0 * 5) * sc;
+            ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+          }
+          ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 0.8;
+          for (const [dx, dy] of [[-8, 12], [0, 15], [8, 12], [-4, 19], [4, 19]]) {
+            ctx.beginPath(); ctx.arc(topX + dx * sc, topY + dy * sc, 4.2 * sc, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          }
+          for (let f = 0; f < 9; f++) {
+            const ang = -Math.PI * 0.95 + (f / 8) * Math.PI * 1.15 + Math.sin(time * 1.6 + f + i) * 0.04;
+            const ex = topX + Math.cos(ang) * 82 * sc;
+            const ey = topY + Math.sin(ang) * 46 * sc + 22 * sc;
+            const mx = (topX + ex) * 0.5;
+            const my = topY - 22 * sc;
+            ctx.strokeStyle = f % 2 === 0 ? '#22c55e' : '#15803d'; ctx.lineWidth = 2.4 * sc;
+            ctx.beginPath(); ctx.moveTo(topX, topY); ctx.quadraticCurveTo(mx, my, ex, ey); ctx.stroke();
+            ctx.fillStyle = f % 2 === 0 ? '#16a34a' : '#14532d';
+            for (let l = 2; l <= 9; l++) {
+              const lu = l / 10;
+              const lx = (1 - lu) * (1 - lu) * topX + 2 * (1 - lu) * lu * mx + lu * lu * ex;
+              const ly = (1 - lu) * (1 - lu) * topY + 2 * (1 - lu) * lu * my + lu * lu * ey;
+              const leafL = (12 + Math.sin(lu * Math.PI) * 14) * sc;
+              ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + (ex > topX ? 4 : -4), ly + leafL); ctx.lineTo(lx + (ex > topX ? -2 : 2), ly + leafL * 0.7); ctx.closePath(); ctx.fill();
+            }
+          }
+        }
+        ctx.restore();
+      } else if (kind === 1) {
+        // AUTHENTIC BEDOUIN NOMAD TENT (Bait Al-Sha'ar — Guy-Ropes Anchored Directly to Pole Peaks, Stakes, Carpet & Campfire!)
+        const tx = bx + 260;
+        ctx.save();
+        ctx.translate(tx, groundY);
+        // Timber tent poles (left, center, right)
+        ctx.strokeStyle = '#3b1806'; ctx.lineWidth = 5.5;
+        ctx.beginPath();
+        ctx.moveTo(-108, 0); ctx.lineTo(-92, -106);
+        ctx.moveTo(0, 0); ctx.lineTo(0, -152);
+        ctx.moveTo(108, 0); ctx.lineTo(92, -106);
+        ctx.stroke();
+        // Taut diagonal guy-ropes tied DIRECTLY from the exact tops of the outer poles (-92,-106 & 92,-106) and center peak (0,-152) to ground stakes!
+        ctx.strokeStyle = '#d6c7b2'; ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(-150, 0); ctx.lineTo(-92, -106);
+        ctx.moveTo(150, 0); ctx.lineTo(92, -106);
+        ctx.moveTo(-150, 0); ctx.lineTo(0, -152);
+        ctx.moveTo(150, 0); ctx.lineTo(0, -152);
+        ctx.stroke();
+        // Wooden ground stakes & pole-top rope knots
+        ctx.fillStyle = '#451a03';
+        ctx.fillRect(-153, -10, 5, 10); ctx.fillRect(148, -10, 5, 10);
+        ctx.fillStyle = '#d6c7b2';
+        ctx.beginPath(); ctx.arc(-92, -106, 3.2, 0, Math.PI * 2); ctx.arc(92, -106, 3.2, 0, Math.PI * 2); ctx.arc(0, -152, 3.6, 0, Math.PI * 2); ctx.fill();
+
+        const tentG = ctx.createLinearGradient(0, -152, 0, 0);
+        tentG.addColorStop(0, '#290d0a'); tentG.addColorStop(0.35, '#7f1d1d'); tentG.addColorStop(0.75, '#451a03'); tentG.addColorStop(1, '#1c0802');
+        ctx.fillStyle = tentG; ctx.strokeStyle = '#140502'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-92, -106); ctx.quadraticCurveTo(-48, -134, 0, -152); ctx.quadraticCurveTo(48, -134, 92, -106);
+        ctx.lineTo(116, -24); ctx.lineTo(104, 0); ctx.lineTo(-104, 0); ctx.lineTo(-116, -24); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 4.2;
+        ctx.beginPath(); ctx.moveTo(-98, -68); ctx.quadraticCurveTo(0, -90, 98, -68); ctx.stroke();
+        ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 2.6;
+        ctx.beginPath(); ctx.moveTo(-104, -56); ctx.quadraticCurveTo(0, -76, 104, -56); ctx.stroke();
+        ctx.fillStyle = '#b91c1c'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+        ctx.fillRect(-52, -10, 104, 10); ctx.strokeRect(-52, -10, 104, 10);
+        const lGlow = ctx.createRadialGradient(0, -54, 4, 0, -54, 54);
+        lGlow.addColorStop(0, 'rgba(254, 240, 138, 0.55)'); lGlow.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = lGlow; ctx.beginPath(); ctx.arc(0, -54, 54, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.arc(0, -54, 5.2, 0, Math.PI * 2); ctx.fill();
+        const fx = 112;
+        ctx.fillStyle = '#451a03';
+        ctx.beginPath(); ctx.moveTo(fx - 14, 0); ctx.lineTo(fx + 14, -6); ctx.lineTo(fx + 12, 0); ctx.lineTo(fx - 14, -5); ctx.fill();
+        const flk = Math.sin(time * 14 + i) * 3.5;
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath(); ctx.moveTo(fx - 9, -2); ctx.quadraticCurveTo(fx - 2, -24 - flk, fx, -26 - flk); ctx.quadraticCurveTo(fx + 5, -18, fx + 9, -2); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath(); ctx.moveTo(fx - 4.5, -2); ctx.quadraticCurveTo(fx, -15 - flk * 0.6, fx + 4.5, -2); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      } else {
+        // MONUMENTAL 3D LUXOR-STYLE EGYPTIAN OBELISK (Two-Face 3D Shaft, Electrum Pyramidion, Royal Cartouche & Papyrus Ruin Column!)
+        const rx = bx + 260;
+        ctx.save();
+        ctx.translate(rx, groundY);
+
+        // Soft cast desert shadows across the sand floor
+        ctx.fillStyle = 'rgba(28, 10, 2, 0.34)';
+        ctx.beginPath();
+        ctx.ellipse(-74, 2, 24, 5.5, 0, 0, Math.PI * 2);
+        ctx.ellipse(6, 3, 46, 7.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 1. WEATHERED BUNDLED-PAPYRUS TEMPLE COLUMN RUIN (flanking the obelisk)
+        ctx.save();
+        ctx.translate(-74, 0);
+        // Carved circular column plinth base
+        const pBaseG = ctx.createLinearGradient(-19, -12, 19, 0);
+        pBaseG.addColorStop(0, '#f0c472'); pBaseG.addColorStop(0.55, '#b86819'); pBaseG.addColorStop(1, '#4a1d06');
+        ctx.fillStyle = pBaseG; ctx.strokeStyle = '#290d02'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.roundRect(-19, -11, 38, 11, 3); ctx.fill(); ctx.stroke();
+
+        // Broken fluted stone shaft with diagonal fractured top
+        const colG = ctx.createLinearGradient(-15, -112, 15, -11);
+        colG.addColorStop(0, '#fae0a2');
+        colG.addColorStop(0.28, '#d98a32');
+        colG.addColorStop(0.68, '#92400e');
+        colG.addColorStop(1, '#3b1506');
+        ctx.fillStyle = colG;
+        ctx.beginPath();
+        ctx.moveTo(-14, -11);
+        ctx.lineTo(-13, -104);
+        ctx.lineTo(-5, -114);
+        ctx.lineTo(3, -102);
+        ctx.lineTo(13, -94);
+        ctx.lineTo(14, -11);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // Vertical bundled-reed flutes & carved horizontal binding collars
+        ctx.strokeStyle = 'rgba(41, 13, 2, 0.38)'; ctx.lineWidth = 1.1;
+        for (const fx of [-7, -1, 5]) {
+          ctx.beginPath(); ctx.moveTo(fx, -12); ctx.lineTo(fx, -96); ctx.stroke();
+        }
+        ctx.strokeStyle = 'rgba(255, 248, 214, 0.32)'; ctx.lineWidth = 0.9;
+        for (const fx of [-10, -4, 2]) {
+          ctx.beginPath(); ctx.moveTo(fx, -12); ctx.lineTo(fx, -96); ctx.stroke();
+        }
+        // Horizontal temple necking bands
+        for (const by of [-34, -72]) {
+          ctx.fillStyle = 'rgba(41, 13, 2, 0.35)'; ctx.fillRect(-13.5, by, 27, 2.4);
+          ctx.fillStyle = 'rgba(254, 243, 199, 0.28)'; ctx.fillRect(-13.5, by - 1.4, 27, 1.3);
+        }
+        // Fallen carved stone drum chunk resting beside the ruined column
+        ctx.fillStyle = '#a85a1a'; ctx.strokeStyle = '#290d02'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.roundRect(14, -13, 18, 12, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(254, 243, 199, 0.35)'; ctx.fillRect(16, -11.5, 13, 2);
+        ctx.restore();
+
+        // 2. MONUMENTAL 3D TWO-FACE EGYPTIAN OBELISK
+        const pedTop = -28;
+        const shaftTop = -224;
+        const apexY = -262;
+        const ridgeBot = 8;
+        const ridgeTop = 5;
+
+        // A) Stepped 3D Granite Pedestal Base (Lower Plinth + Upper Tapered Die)
+        // Lower tier: sunlit front-left + shaded right face
+        ctx.fillStyle = '#c97c2b'; ctx.strokeStyle = '#290d02'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(-36, 0); ctx.lineTo(-34, -12); ctx.lineTo(14, -12); ctx.lineTo(14, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#5c2609';
+        ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(14, -12); ctx.lineTo(34, -12); ctx.lineTo(36, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Upper pedestal die: sunlit front-left + shaded right face + cavetto cornice lip
+        const pLitG = ctx.createLinearGradient(-28, pedTop, 11, -12);
+        pLitG.addColorStop(0, '#f3ca82'); pLitG.addColorStop(1, '#b4621b');
+        ctx.fillStyle = pLitG;
+        ctx.beginPath(); ctx.moveTo(-29, -12); ctx.lineTo(-25, pedTop); ctx.lineTo(11, pedTop); ctx.lineTo(12, -12); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#4a1d06';
+        ctx.beginPath(); ctx.moveTo(12, -12); ctx.lineTo(11, pedTop); ctx.lineTo(25, pedTop); ctx.lineTo(29, -12); ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Top sunlit pedestal rim
+        ctx.fillStyle = '#fef3c7'; ctx.fillRect(-25, pedTop, 36, 2.2);
+
+        // B) 3D Tapered Monolithic Shaft — Sunlit Front-Left Face
+        const sLitG = ctx.createLinearGradient(-20, shaftTop, ridgeBot, pedTop);
+        sLitG.addColorStop(0, '#fae2a8');
+        sLitG.addColorStop(0.28, '#e39e48');
+        sLitG.addColorStop(0.72, '#c27124');
+        sLitG.addColorStop(1, '#924814');
+        ctx.fillStyle = sLitG;
+        ctx.strokeStyle = '#290d02'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-21, pedTop);
+        ctx.lineTo(-13, shaftTop);
+        ctx.lineTo(ridgeTop, shaftTop);
+        ctx.lineTo(ridgeBot, pedTop);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // C) 3D Tapered Monolithic Shaft — Deep Shaded Right Side Face
+        const sShG = ctx.createLinearGradient(ridgeTop, shaftTop, 22, pedTop);
+        sShG.addColorStop(0, '#7c3a12');
+        sShG.addColorStop(0.5, '#522208');
+        sShG.addColorStop(1, '#260c02');
+        ctx.fillStyle = sShG;
+        ctx.beginPath();
+        ctx.moveTo(ridgeBot, pedTop);
+        ctx.lineTo(ridgeTop, shaftTop);
+        ctx.lineTo(14, shaftTop);
+        ctx.lineTo(22, pedTop);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // Subtle Aswan rose-granite weathering grain & fine horizontal stone seams on shaft
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(-21, pedTop); ctx.lineTo(-13, shaftTop); ctx.lineTo(ridgeTop, shaftTop); ctx.lineTo(ridgeBot, pedTop);
+        ctx.closePath(); ctx.clip();
+        for (let sp = 0; sp < 16; sp++) {
+          const sx0 = -16 + ((sp * 11) % 22);
+          const sy0 = shaftTop + 10 + sp * 11.5;
+          ctx.fillStyle = sp % 2 === 0 ? 'rgba(69, 26, 3, 0.16)' : 'rgba(255, 250, 224, 0.18)';
+          ctx.fillRect(sx0, sy0, 2.5, 1.4);
+        }
+
+        // D) Vertical Recessed Hieroglyphic Column Borders + Royal Cartouche & Sunken-Relief Glyphs!
+        const colCx = (y) => {
+          const u = (y - shaftTop) / (pedTop - shaftTop);
+          const lX = -13 + (-21 - (-13)) * u;
+          const rX = ridgeTop + (ridgeBot - ridgeTop) * u;
+          return (lX + rX) * 0.5;
+        };
+        // Twin vertical incised column framing lines
+        ctx.strokeStyle = 'rgba(58, 22, 5, 0.42)'; ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(-10.2, shaftTop + 8); ctx.lineTo(-15.5, pedTop - 8);
+        ctx.moveTo(2.2, shaftTop + 8); ctx.lineTo(2.5, pedTop - 8);
+        ctx.stroke();
+
+        // Royal Oval Cartouche near top of shaft (with carved base bar & mini glyphs!)
+        const cartY = -194;
+        const cartX = colCx(cartY);
+        ctx.strokeStyle = 'rgba(41, 13, 2, 0.62)'; ctx.lineWidth = 1.25;
+        ctx.beginPath(); ctx.roundRect(cartX - 4.8, cartY - 14, 9.6, 26, 4.8); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cartX - 6.2, cartY + 13.5); ctx.lineTo(cartX + 6.2, cartY + 13.5); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255, 248, 214, 0.34)'; ctx.lineWidth = 0.7;
+        ctx.beginPath(); ctx.roundRect(cartX - 4.1, cartY - 13.2, 9.6, 26, 4.8); ctx.stroke();
+        // Sun disc + twin mini bars inside cartouche
+        ctx.fillStyle = 'rgba(120, 42, 12, 0.55)';
+        ctx.beginPath(); ctx.arc(cartX, cartY - 7, 2.2, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(41, 13, 2, 0.55)'; ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(cartX - 2.6, cartY - 1); ctx.lineTo(cartX + 2.6, cartY - 1);
+        ctx.moveTo(cartX - 2.4, cartY + 4); ctx.lineTo(cartX + 2.4, cartY + 4);
+        ctx.moveTo(cartX, cartY + 4); ctx.lineTo(cartX, cartY + 9);
+        ctx.stroke();
+
+        // Authentic Sunken-Relief Hieroglyphic Column descending down the sunlit face
+        const glyphSlots = [-164, -142, -120, -98, -76, -54];
+        for (let gIdx = 0; gIdx < glyphSlots.length; gIdx++) {
+          const gy = glyphSlots[gIdx];
+          const gx = colCx(gy);
+          const drawGlyph = (ox, oy, col, lw) => {
+            ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.lineCap = 'round';
+            ctx.beginPath();
+            if (gIdx % 4 === 0) {
+              // Ankh (Key of Life)
+              ctx.ellipse(gx + ox, gy - 4 + oy, 2.6, 3.0, 0, 0, Math.PI * 2);
+              ctx.moveTo(gx + ox, gy - 1 + oy); ctx.lineTo(gx + ox, gy + 7 + oy);
+              ctx.moveTo(gx - 3.8 + ox, gy + 1.5 + oy); ctx.lineTo(gx + 3.8 + ox, gy + 1.5 + oy);
+            } else if (gIdx % 4 === 1) {
+              // Eye of Horus / Wadjet motif
+              ctx.moveTo(gx - 5 + ox, gy + oy); ctx.quadraticCurveTo(gx + ox, gy - 4.5 + oy, gx + 5 + ox, gy + oy);
+              ctx.quadraticCurveTo(gx + ox, gy + 3.5 + oy, gx - 5 + ox, gy + oy);
+              ctx.moveTo(gx + 1 + ox, gy + 2 + oy); ctx.lineTo(gx + 2.5 + ox, gy + 6.5 + oy);
+            } else if (gIdx % 4 === 2) {
+              // Akhet (Sun rising over horizon twin peaks) + Nile water wave
+              ctx.moveTo(gx - 5 + ox, gy + 1 + oy); ctx.lineTo(gx - 2.5 + ox, gy - 3 + oy); ctx.lineTo(gx + ox, gy + 1 + oy);
+              ctx.lineTo(gx + 2.5 + ox, gy - 3 + oy); ctx.lineTo(gx + 5 + ox, gy + 1 + oy);
+              ctx.moveTo(gx - 5 + ox, gy + 5.5 + oy); ctx.lineTo(gx - 2.5 + ox, gy + 4 + oy); ctx.lineTo(gx + ox, gy + 5.5 + oy);
+              ctx.lineTo(gx + 2.5 + ox, gy + 4 + oy); ctx.lineTo(gx + 5 + ox, gy + 5.5 + oy);
+            } else {
+              // Djed Pillar of Stability
+              ctx.moveTo(gx + ox, gy - 5 + oy); ctx.lineTo(gx + ox, gy + 6.5 + oy);
+              ctx.moveTo(gx - 4.2 + ox, gy - 4 + oy); ctx.lineTo(gx + 4.2 + ox, gy - 4 + oy);
+              ctx.moveTo(gx - 3.6 + ox, gy - 1.5 + oy); ctx.lineTo(gx + 3.6 + ox, gy - 1.5 + oy);
+              ctx.moveTo(gx - 3.0 + ox, gy + 1 + oy); ctx.lineTo(gx + 3.0 + ox, gy + 1 + oy);
+              ctx.moveTo(gx - 4.5 + ox, gy + 6.5 + oy); ctx.lineTo(gx + 4.5 + ox, gy + 6.5 + oy);
+            }
+            ctx.stroke();
+          };
+          // Sunlit chiseled rim pass + deep sunken shadow pass
+          drawGlyph(0.8, 0.7, 'rgba(255, 248, 214, 0.36)', 0.85);
+          drawGlyph(0, 0, 'rgba(41, 13, 2, 0.58)', 1.25);
+        }
+        ctx.restore();
+
+        // Subtle low-contrast engraved hieroglyph traces on the shaded right face for 3D continuity
+        ctx.strokeStyle = 'rgba(18, 6, 1, 0.45)'; ctx.lineWidth = 1.0;
+        for (let gy = -196; gy <= -52; gy += 24) {
+          const u = (gy - shaftTop) / (pedTop - shaftTop);
+          const rxM = (ridgeTop + 14) * 0.5 + ((ridgeBot + 22) * 0.5 - (ridgeTop + 14) * 0.5) * u;
+          ctx.beginPath();
+          ctx.moveTo(rxM - 2.2, gy); ctx.lineTo(rxM + 2.2, gy);
+          ctx.moveTo(rxM, gy - 2.5); ctx.lineTo(rxM, gy + 3.5);
+          ctx.stroke();
+        }
+
+        // E) 3D Gilded Electrum Pyramidion Cap (Benben Summit) — Gleaming Sunlit Facet + Burnished Bronze Shaded Facet!
+        const pyrLitG = ctx.createLinearGradient(-13, apexY, ridgeTop, shaftTop);
+        pyrLitG.addColorStop(0, '#fffbeb');
+        pyrLitG.addColorStop(0.32, '#fde047');
+        pyrLitG.addColorStop(0.75, '#eab308');
+        pyrLitG.addColorStop(1, '#ca8a04');
+        ctx.fillStyle = pyrLitG;
+        ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(-13, shaftTop);
+        ctx.lineTo(0, apexY);
+        ctx.lineTo(ridgeTop, shaftTop);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        const pyrShG = ctx.createLinearGradient(0, apexY, 14, shaftTop);
+        pyrShG.addColorStop(0, '#ca8a04');
+        pyrShG.addColorStop(0.55, '#92400e');
+        pyrShG.addColorStop(1, '#451a03');
+        ctx.fillStyle = pyrShG;
+        ctx.beginPath();
+        ctx.moveTo(0, apexY);
+        ctx.lineTo(14, shaftTop);
+        ctx.lineTo(ridgeTop, shaftTop);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // Sunlit specular highlight along the left edge & golden collar trim under pyramidion
+        ctx.strokeStyle = 'rgba(255, 255, 240, 0.72)'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.moveTo(-12.5, shaftTop); ctx.lineTo(0, apexY + 1); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255, 248, 214, 0.48)'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(-20.4, pedTop); ctx.lineTo(-12.5, shaftTop); ctx.stroke();
+        // Crisp sunlit edge along central 3D vertical corner ridge
+        ctx.strokeStyle = 'rgba(254, 243, 199, 0.35)'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.moveTo(ridgeTop - 0.7, shaftTop); ctx.lineTo(ridgeBot - 0.7, pedTop); ctx.stroke();
+
+        // F) Soft Windblown Desert Sand Mound banking naturally around both bases
+        const moundG = ctx.createLinearGradient(0, -10, 0, 5);
+        moundG.addColorStop(0, '#eab308');
+        moundG.addColorStop(0.5, '#c27018');
+        moundG.addColorStop(1, '#78350f');
+        ctx.fillStyle = moundG;
+        ctx.beginPath();
+        ctx.moveTo(-104, 4);
+        ctx.quadraticCurveTo(-72, -11, -36, -2);
+        ctx.quadraticCurveTo(4, -12, 48, 4);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+      }
+    }
+
+    for (let s = 0; s < 26; s++) {
+      const sx = ((s * 173 + time * 68) % (w + 60)) - 30;
+      const sy = ((s * 89 + Math.sin(time * 2.1 + s) * 18) % (h - 80));
+      ctx.fillStyle = 'rgba(254, 243, 199, 0.48)';
+      ctx.beginPath(); ctx.arc(sx, sy, 1.8, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  // =========================================================================
+  // 14. STAGE 18 GOAL: GRAND PHARAONIC TEMPLE & EGYPTIAN MUSEUM SANCTUARY
+  // =========================================================================
+  function drawPharaonicMuseumGate(ctx, g, gx, gy, time, goalLabel) {
+    const cx = gx + g.w * 0.5;
+    const baseY = gy + g.h;
+    ctx.save();
+
+    // 1. Stepped Sandstone Temple Dais & Grounded Shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.36)';
+    ctx.beginPath(); ctx.ellipse(cx, baseY + 2, 112, 8, 0, 0, Math.PI * 2); ctx.fill();
+    const stepG = ctx.createLinearGradient(cx - 102, baseY - 14, cx + 102, baseY);
+    stepG.addColorStop(0, '#fde68a'); stepG.addColorStop(0.5, '#d97706'); stepG.addColorStop(1, '#78350f');
+    ctx.fillStyle = stepG; ctx.strokeStyle = '#3b1806'; ctx.lineWidth = 1.6;
+    ctx.fillRect(cx - 102, baseY - 7, 204, 7); ctx.strokeRect(cx - 102, baseY - 7, 204, 7);
+    ctx.fillRect(cx - 92, baseY - 14, 184, 7); ctx.strokeRect(cx - 92, baseY - 14, 184, 7);
+
+    // 2. Monumental Sloping Pharaonic Pylon Temple Facade
+    const wallY = baseY - 14;
+    const pylonH = 136;
+    const wallG = ctx.createLinearGradient(cx - 88, wallY - pylonH, cx + 88, wallY);
+    wallG.addColorStop(0, '#fef3c7');
+    wallG.addColorStop(0.35, '#e5a93c');
+    wallG.addColorStop(0.75, '#b45309');
+    wallG.addColorStop(1, '#78350f');
+    ctx.fillStyle = wallG; ctx.strokeStyle = '#3b1806'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx - 88, wallY);
+    ctx.lineTo(cx - 76, wallY - pylonH);
+    ctx.lineTo(cx + 76, wallY - pylonH);
+    ctx.lineTo(cx + 88, wallY);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    // Dressed limestone ashlar block courses across the temple facade
+    ctx.strokeStyle = 'rgba(69, 26, 3, 0.25)'; ctx.lineWidth = 1.1;
+    for (let cy = wallY - 22; cy > wallY - pylonH + 14; cy -= 20) {
+      const frac = (wallY - cy) / pylonH;
+      const halfW = 88 - frac * 12;
+      ctx.beginPath(); ctx.moveTo(cx - halfW, cy); ctx.lineTo(cx + halfW, cy); ctx.stroke();
+    }
+
+    // 3. Flared Royal Cavetto Cornice Crown (Lapis-Blue, Crimson, Turquoise & Gold Stripes!)
+    const corY = wallY - pylonH;
+    ctx.fillStyle = '#fde68a'; ctx.strokeStyle = '#3b1806'; ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(cx - 76, corY);
+    ctx.quadraticCurveTo(cx - 86, corY - 10, cx - 88, corY - 18);
+    ctx.lineTo(cx + 88, corY - 18);
+    ctx.quadraticCurveTo(cx + 86, corY - 10, cx + 76, corY);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    const stripeCols = ['#1d4ed8', '#dc2626', '#0d9488', '#fbbf24'];
+    for (let sx = cx - 78, idx = 0; sx < cx + 74; sx += 11, idx++) {
+      ctx.fillStyle = stripeCols[idx % stripeCols.length];
+      ctx.fillRect(sx, corY - 15, 7, 12);
+    }
+    ctx.fillStyle = '#fbbf24'; ctx.fillRect(cx - 78, corY - 2, 156, 4.5); ctx.strokeRect(cx - 78, corY - 2, 156, 4.5);
+
+    // 4. Gleaming Winged Golden Solar Disk Emblem over the Temple Entrance!
+    const sdY = corY + 18;
+    for (const side of [-1, 1]) {
+      ctx.fillStyle = '#1d4ed8'; ctx.strokeStyle = '#3b1806'; ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(cx + side * 8, sdY - 3);
+      ctx.quadraticCurveTo(cx + side * 34, sdY - 11, cx + side * 56, sdY - 4);
+      ctx.quadraticCurveTo(cx + side * 34, sdY + 5, cx + side * 8, sdY + 3);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.moveTo(cx + side * 8, sdY - 2);
+      ctx.quadraticCurveTo(cx + side * 28, sdY - 7, cx + side * 46, sdY - 2);
+      ctx.quadraticCurveTo(cx + side * 26, sdY + 2, cx + side * 8, sdY + 1);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#ef4444'; ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(cx, sdY, 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+    // 5. Recessed Glowing Golden Sanctuary Portal + Twin Fluted Papyrus-Capital Columns
+    const doorW = 54, doorH = 84;
+    const doorG = ctx.createRadialGradient(cx, wallY - doorH * 0.45, 6, cx, wallY - doorH * 0.45, 58);
+    doorG.addColorStop(0, '#fffbeb');
+    doorG.addColorStop(0.55, '#fbbf24');
+    doorG.addColorStop(1, '#92400e');
+    ctx.fillStyle = doorG; ctx.strokeStyle = '#3b1806'; ctx.lineWidth = 2;
+    ctx.fillRect(cx - doorW * 0.5, wallY - doorH, doorW, doorH);
+    ctx.strokeRect(cx - doorW * 0.5, wallY - doorH, doorW, doorH);
+    for (const side of [-1, 1]) {
+      const colX = cx + side * 34;
+      const cG = ctx.createLinearGradient(colX - 7, 0, colX + 7, 0);
+      cG.addColorStop(0, '#92400e'); cG.addColorStop(0.45, '#fef3c7'); cG.addColorStop(1, '#78350f');
+      ctx.fillStyle = cG; ctx.strokeStyle = '#3b1806'; ctx.lineWidth = 1.3;
+      ctx.fillRect(colX - 6, wallY - doorH + 6, 12, doorH - 6);
+      ctx.strokeRect(colX - 6, wallY - doorH + 6, 12, doorH - 6);
+      ctx.fillStyle = '#fde68a';
+      ctx.beginPath();
+      ctx.moveTo(colX - 10, wallY - doorH - 2); ctx.lineTo(colX + 10, wallY - doorH - 2);
+      ctx.lineTo(colX + 6, wallY - doorH + 8); ctx.lineTo(colX - 6, wallY - doorH + 8);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#1d4ed8'; ctx.fillRect(colX - 6, wallY - doorH + 10, 12, 3.5);
+    }
+
+    // 6. Authentic Carved Pharaonic Relief Murals & Hieroglyphic Cartouches on Both Pylon Towers!
+    for (const side of [-1, 1]) {
+      const tx = cx + side * 59;
+      ctx.fillStyle = 'rgba(120, 53, 15, 0.28)'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.roundRect(tx - 15, wallY - 92, 30, 74, 5); ctx.fill(); ctx.stroke();
+
+      // Eye of Horus (Wedjat) in Lapis-Blue & Gold
+      const ey = wallY - 78;
+      ctx.strokeStyle = '#1e3a8a'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(tx - 9, ey); ctx.quadraticCurveTo(tx, ey - 6, tx + 9, ey); ctx.quadraticCurveTo(tx, ey + 5, tx - 9, ey); ctx.stroke();
+      ctx.fillStyle = '#1e3a8a'; ctx.beginPath(); ctx.arc(tx, ey, 2.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(tx, ey + 3); ctx.lineTo(tx, ey + 9); ctx.moveTo(tx + 4, ey + 2); ctx.quadraticCurveTo(tx + 8, ey + 7, tx + 5, ey + 10); ctx.stroke();
+
+      // Golden Egyptian Ankh Relief
+      const ay = wallY - 54;
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.ellipse(tx, ay - 5, 3.5, 4.5, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(tx, ay); ctx.lineTo(tx, ay + 11); ctx.moveTo(tx - 6, ay + 3); ctx.lineTo(tx + 6, ay + 3); ctx.stroke();
+
+      // Carved Nile Lotus & Sun-Disk Band
+      const ly = wallY - 28;
+      ctx.fillStyle = '#0d9488';
+      ctx.beginPath(); ctx.moveTo(tx, ly + 6); ctx.lineTo(tx - 7, ly - 3); ctx.lineTo(tx, ly - 7); ctx.lineTo(tx + 7, ly - 3); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#dc2626'; ctx.beginPath(); ctx.arc(tx, ly - 9, 2.5, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // 7. Twin Ceremonial Golden Temple Braziers with Flickering Flames flanking the stairs!
+    for (const side of [-1, 1]) {
+      const bx = cx + side * 96;
+      ctx.fillStyle = '#b45309'; ctx.strokeStyle = '#3b1806'; ctx.lineWidth = 1.3;
+      ctx.fillRect(bx - 6, baseY - 26, 12, 26); ctx.strokeRect(bx - 6, baseY - 26, 12, 26);
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.moveTo(bx - 11, baseY - 32); ctx.lineTo(bx + 11, baseY - 32); ctx.lineTo(bx + 7, baseY - 25); ctx.lineTo(bx - 7, baseY - 25); ctx.closePath(); ctx.fill(); ctx.stroke();
+      const flk = Math.sin(time * 13 + side * 2) * 3;
+      const bGlow = ctx.createRadialGradient(bx, baseY - 38, 2, bx, baseY - 38, 24);
+      bGlow.addColorStop(0, 'rgba(254, 240, 138, 0.55)'); bGlow.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      ctx.fillStyle = bGlow; ctx.beginPath(); ctx.arc(bx, baseY - 38, 24, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath(); ctx.moveTo(bx - 6, baseY - 32); ctx.quadraticCurveTo(bx, baseY - 48 - flk, bx + 6, baseY - 32); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath(); ctx.moveTo(bx - 3, baseY - 32); ctx.quadraticCurveTo(bx, baseY - 41 - flk * 0.6, bx + 3, baseY - 32); ctx.closePath(); ctx.fill();
+    }
+
+    // Floating Golden Goal Label Banner above the Pharaonic Museum
+    const labelText = goalLabel || 'متحف الصحراء الفرعوني 🏛️';
+    const bob = Math.sin(time * 3.2) * 3;
+    ctx.font = 'bold 13px "Cairo", "Tajawal", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    const tw = Math.max(130, ctx.measureText(labelText).width + 26);
+    ctx.fillStyle = 'rgba(30, 18, 8, 0.86)'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.roundRect(cx - tw * 0.5, corY - 52 + bob, tw, 24, 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fef08a';
+    ctx.fillText(labelText, cx, corY - 36 + bob);
+
+    ctx.restore();
+  }
+
+  Art.drawSnowSkyAndHorizon = drawSnowSkyAndHorizon;
+  Art.drawSnowMidground = drawSnowMidground;
+  Art.drawCircusSkyAndHorizon = drawCircusSkyAndHorizon;
+  Art.drawCircusMidground = drawCircusMidground;
+  // =========================================================================
+  // 15. STAGE 19: TRADITIONAL JAPANESE OLD TOWN (Ukiyo-e Mt. Fuji, 5-Tier Pagodas, Machiya Koshi, Koi Canal & Sakura!)
+  // =========================================================================
+  function drawJapanSkyAndHorizon(ctx, camX, w, h, time) {
+    // Deep Indigo-Sakura Kyoto Twilight Sunset Sky
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, '#0a0d26');
+    sky.addColorStop(0.26, '#231746');
+    sky.addColorStop(0.52, '#732955');
+    sky.addColorStop(0.76, '#d96b6b');
+    sky.addColorStop(1, '#f8b992');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
+
+    // Twinkling twilight stars
+    for (let s = 0; s < 42; s++) {
+      const sx = ((s * 179 - camX * 0.015) % w + w) % w;
+      const sy = 14 + ((s * 47) % 165);
+      const tw = 0.25 + 0.6 * Math.abs(Math.sin(time * 1.8 + s));
+      ctx.fillStyle = `rgba(255, 241, 242, ${tw.toFixed(2)})`;
+      ctx.fillRect(sx, sy, 1.8, 1.8);
+    }
+
+    // Luminous Warm Full Harvest Moon
+    const moonX = 920 - camX * 0.02;
+    drawRealisticMoon(ctx, moonX, 96, 35, '#fff1f2');
+
+    // MONUMENTAL UKIYO-E MOUNT FUJI with Sculpted Snow Ridges & Drifting Waist Cloud Band!
+    const fujiX = 560 - camX * 0.03;
+    const fujiBaseY = h - 130;
+    const fujiG = ctx.createLinearGradient(fujiX - 180, fujiBaseY - 245, fujiX + 200, fujiBaseY);
+    fujiG.addColorStop(0, '#5a4482'); fujiG.addColorStop(0.52, '#352556'); fujiG.addColorStop(1, '#1e1436');
+    ctx.fillStyle = fujiG;
+    ctx.beginPath();
+    ctx.moveTo(fujiX - 375, fujiBaseY);
+    ctx.quadraticCurveTo(fujiX - 145, fujiBaseY - 92, fujiX - 38, fujiBaseY - 242);
+    ctx.lineTo(fujiX + 38, fujiBaseY - 242);
+    ctx.quadraticCurveTo(fujiX + 145, fujiBaseY - 92, fujiX + 375, fujiBaseY);
+    ctx.closePath(); ctx.fill();
+    // Iconic sunlit sakura-tinted snow cap with 3D ridge shading
+    const snowG = ctx.createLinearGradient(fujiX - 60, fujiBaseY - 242, fujiX + 90, fujiBaseY - 145);
+    snowG.addColorStop(0, '#fff5f7'); snowG.addColorStop(0.58, '#fbcfe8'); snowG.addColorStop(1, '#c084fc');
+    ctx.fillStyle = snowG;
+    ctx.beginPath();
+    ctx.moveTo(fujiX - 38, fujiBaseY - 242); ctx.lineTo(fujiX + 38, fujiBaseY - 242);
+    ctx.lineTo(fujiX + 122, fujiBaseY - 150); ctx.lineTo(fujiX + 68, fujiBaseY - 172); ctx.lineTo(fujiX + 28, fujiBaseY - 142);
+    ctx.lineTo(fujiX - 18, fujiBaseY - 168); ctx.lineTo(fujiX - 64, fujiBaseY - 144); ctx.lineTo(fujiX - 122, fujiBaseY - 152);
+    ctx.closePath(); ctx.fill();
+    // Soft drifting Ukiyo-e golden-rose cloud ribbon curling past Fuji's waist
+    for (let c = 0; c < 3; c++) {
+      const cx0 = fujiX - 190 + c * 175 + Math.sin(time * 0.25 + c) * 16;
+      const cy0 = fujiBaseY - 82 - (c % 2) * 18;
+      const cG = ctx.createRadialGradient(cx0, cy0, 10, cx0, cy0, 120);
+      cG.addColorStop(0, 'rgba(255, 241, 242, 0.26)'); cG.addColorStop(1, 'rgba(255, 241, 242, 0)');
+      ctx.fillStyle = cG; ctx.beginPath(); ctx.ellipse(cx0, cy0, 130, 18, 0, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Distant Misty Kyoto Cedar Foothills & 5-Tier Gojunoto Wooden Pagoda Silhouettes with Golden Sorin Spire!
+    ctx.fillStyle = '#241538';
+    ctx.beginPath(); ctx.moveTo(0, h - 100);
+    for (let x = 0; x <= w + 60; x += 60) {
+      const wx = x + camX * 0.08;
+      ctx.lineTo(x, h - 156 - Math.sin(wx * 0.005) * 32 - Math.cos(wx * 0.011) * 14);
+    }
+    ctx.lineTo(w, h - 100); ctx.closePath(); ctx.fill();
+
+    const pagSpan = 880;
+    const pagPar = 0.11;
+    const pStart = Math.floor((camX * pagPar) / pagSpan) - 1;
+    const pEnd = Math.ceil((camX * pagPar + w) / pagSpan) + 1;
+    for (let i = pStart; i <= pEnd; i++) {
+      const px0 = i * pagSpan + 240 - camX * pagPar;
+      const py0 = h - 134;
+      // Golden Sorin pagoda spire finial
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.moveTo(px0, py0 - 172); ctx.lineTo(px0, py0 - 216); ctx.stroke();
+      ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(px0, py0 - 216, 3, 0, Math.PI * 2); ctx.fill();
+      for (let t = 0; t < 5; t++) {
+        const ty = py0 - 26 - t * 32;
+        const tw = 58 - t * 7.2;
+        ctx.fillStyle = '#1b102d';
+        ctx.fillRect(px0 - tw * 0.54, ty, tw * 1.08, 22);
+        // Sculpted upturned Gojunoto eaves with twilight pink rim highlight
+        ctx.beginPath();
+        ctx.moveTo(px0 - tw, ty + 2); ctx.quadraticCurveTo(px0, ty - 14, px0 + tw, ty + 2);
+        ctx.lineTo(px0 + tw * 0.72, ty + 9); ctx.lineTo(px0 - tw * 0.72, ty + 9); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = 'rgba(249, 168, 212, 0.25)'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.moveTo(px0 - tw, ty + 2); ctx.quadraticCurveTo(px0, ty - 14, px0 + tw, ty + 2); ctx.stroke();
+        ctx.fillStyle = 'rgba(254, 240, 138, 0.56)';
+        ctx.fillRect(px0 - 5, ty + 11, 10, 8);
+      }
+    }
+
+    // Soft pink-gold twilight valley mist
+    const hazeG = ctx.createLinearGradient(0, h - 220, 0, h - 65);
+    hazeG.addColorStop(0, 'rgba(244, 114, 182, 0)');
+    hazeG.addColorStop(0.65, 'rgba(251, 146, 60, 0.16)');
+    hazeG.addColorStop(1, 'rgba(253, 186, 116, 0.28)');
+    ctx.fillStyle = hazeG; ctx.fillRect(0, h - 220, w, 155);
+  }
+
+  function drawJapanMidground(ctx, camX, w, h, time) {
+    const span = 520;
+    const par = 0.36;
+    const startIdx = Math.floor((camX * par) / span) - 1;
+    const endIdx = Math.ceil((camX * par + w) / span) + 1;
+    const groundY = h - 88;
+
+    for (let i = startIdx; i <= endIdx; i++) {
+      const bx = i * span - camX * par;
+      const kind = ((i % 3) + 3) % 3;
+
+      if (kind === 0 || kind === 1) {
+        // TRADITIONAL KYOTO MACHIYA TOWNHOUSE & IZAKAYA (Kawara Roofs, Fine Koshi Lattices, Backlit Shoji & Swaying Noren!)
+        const bw = 276, bh = kind === 0 ? 256 : 230, topY = groundY - bh;
+        ctx.save();
+        ctx.translate(bx + 22, topY);
+        // White Shikkui plaster upper wall + dark charred cedar Machiya lower facade
+        ctx.fillStyle = '#f1f5f9'; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.8;
+        ctx.fillRect(0, 0, bw, bh * 0.45); ctx.strokeRect(0, 0, bw, bh * 0.45);
+        const lowG = ctx.createLinearGradient(0, bh * 0.45, 0, bh);
+        lowG.addColorStop(0, '#4a2518'); lowG.addColorStop(1, '#261009');
+        ctx.fillStyle = lowG;
+        ctx.fillRect(0, bh * 0.45, bw, bh * 0.55); ctx.strokeRect(0, bh * 0.45, bw, bh * 0.55);
+        // Fine vertical wooden Koshi lattice slats on left & right ground-floor bays
+        ctx.strokeStyle = 'rgba(24, 9, 4, 0.65)'; ctx.lineWidth = 1.4;
+        for (let kx = 8; kx < 30; kx += 4.5) { ctx.beginPath(); ctx.moveTo(kx, bh * 0.55); ctx.lineTo(kx, bh - 4); ctx.stroke(); }
+        for (let kx = bw - 28; kx < bw - 6; kx += 4.5) { ctx.beginPath(); ctx.moveTo(kx, bh * 0.55); ctx.lineTo(kx, bh - 4); ctx.stroke(); }
+        // Curved charcoal-blue Kawara tiled upper & mid-story eaves with ridge ornament
+        for (const ey of [0, bh * 0.45]) {
+          const rG = ctx.createLinearGradient(0, ey - 24, 0, ey + 20);
+          rG.addColorStop(0, '#334155'); rG.addColorStop(0.55, '#1e293b'); rG.addColorStop(1, '#090d16');
+          ctx.fillStyle = rG; ctx.strokeStyle = '#020617'; ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(-24, ey + 14); ctx.quadraticCurveTo(bw * 0.5, ey - 30, bw + 24, ey + 14);
+          ctx.lineTo(bw + 12, ey + 21); ctx.lineTo(-12, ey + 21); ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.28)'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(-18, ey + 15); ctx.lineTo(bw + 18, ey + 15); ctx.stroke();
+        }
+        // Warm backlit Shoji paper lattice windows with subtle interior bonsai/screen silhouettes
+        for (const wx of [34, 154]) {
+          const wG = ctx.createLinearGradient(wx, 24, wx, 84);
+          wG.addColorStop(0, '#fffbeb'); wG.addColorStop(0.65, '#fde047'); wG.addColorStop(1, '#d97706');
+          ctx.fillStyle = wG; ctx.strokeStyle = '#290d02'; ctx.lineWidth = 1.6;
+          ctx.fillRect(wx, 26, 86, 56); ctx.strokeRect(wx, 26, 86, 56);
+          ctx.fillStyle = 'rgba(120, 53, 15, 0.25)'; ctx.beginPath(); ctx.arc(wx + 42, 66, 12, Math.PI, 0); ctx.fill();
+          ctx.strokeStyle = 'rgba(69, 26, 3, 0.55)'; ctx.lineWidth = 1.2;
+          for (let lx = wx + 21; lx < wx + 84; lx += 21) { ctx.beginPath(); ctx.moveTo(lx, 26); ctx.lineTo(lx, 82); ctx.stroke(); }
+          ctx.beginPath(); ctx.moveTo(wx, 54); ctx.lineTo(wx + 86, 54); ctx.stroke();
+        }
+        // Ground-floor warm Izakaya doorway + swaying split Noren curtains with crests
+        const doorY = bh * 0.58;
+        const dG = ctx.createLinearGradient(0, doorY, 0, bh);
+        dG.addColorStop(0, '#fef08a'); dG.addColorStop(1, '#d97706');
+        ctx.fillStyle = dG; ctx.fillRect(36, doorY, bw - 72, bh - doorY);
+        const sway = Math.sin(time * 2.2 + i) * 3.0;
+        for (let n = 0; n < 4; n++) {
+          const nx = 34 + n * 53;
+          ctx.fillStyle = kind === 0 ? '#b91c1c' : '#1e3a8a';
+          ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(nx, doorY - 4); ctx.lineTo(nx + 47, doorY - 4);
+          ctx.lineTo(nx + 47 + sway, doorY + 42); ctx.lineTo(nx + sway, doorY + 42); ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = 'rgba(254, 243, 199, 0.78)'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(nx + 23.5 + sway * 0.5, doorY + 20, 8.5, 0, Math.PI * 2); ctx.stroke();
+        }
+        // Hanging glowing ribbed red Chochin lanterns under eaves
+        for (const lx of [16, bw - 16]) {
+          const ly = bh * 0.45 + 34;
+          const lg = ctx.createRadialGradient(lx, ly, 3, lx, ly, 36);
+          lg.addColorStop(0, 'rgba(254, 240, 138, 0.48)'); lg.addColorStop(0.5, 'rgba(239, 68, 68, 0.20)'); lg.addColorStop(1, 'rgba(239, 68, 68, 0)');
+          ctx.fillStyle = lg; ctx.beginPath(); ctx.arc(lx, ly, 36, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#ef4444'; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.ellipse(lx, ly, 11, 15, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = 'rgba(254, 240, 138, 0.48)'; ctx.beginPath(); ctx.ellipse(lx, ly, 6, 9.5, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#1c0a05'; ctx.fillRect(lx - 6, ly - 16, 12, 3); ctx.fillRect(lx - 5, ly + 13, 10, 3);
+        }
+        ctx.restore();
+      } else {
+        // 3D VERMILION TORII SHRINE GATE + CARVED GAKUZUKA PLAQUE + STONE TORO LANTERN!
+        const gx = bx + 148;
+        ctx.save(); ctx.translate(gx, groundY);
+        const pilG = ctx.createLinearGradient(-58, 0, -42, 0);
+        pilG.addColorStop(0, '#991b1b'); pilG.addColorStop(0.35, '#ef4444'); pilG.addColorStop(1, '#7f1d1d');
+        ctx.fillStyle = pilG; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.6;
+        ctx.fillRect(-58, -168, 16, 168); ctx.strokeRect(-58, -168, 16, 168);
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(42, -168, 16, 168); ctx.strokeRect(42, -168, 16, 168);
+        // Stone Kamebara pedestal bases
+        ctx.fillStyle = '#1e293b'; ctx.fillRect(-62, -22, 24, 22); ctx.fillRect(38, -22, 24, 22);
+        // Nuki lower tie beam + carved black & gold Gakuzuka center plaque
+        ctx.fillStyle = '#dc2626'; ctx.fillRect(-76, -142, 152, 12); ctx.strokeRect(-76, -142, 152, 12);
+        ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.3;
+        ctx.fillRect(-10, -158, 20, 26); ctx.strokeRect(-10, -158, 20, 26);
+        ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(0, -153); ctx.lineTo(0, -138); ctx.moveTo(-4, -147); ctx.lineTo(4, -147); ctx.stroke();
+        // Curved black-capped top Kasagi lintel
+        ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(-90, -168); ctx.quadraticCurveTo(0, -157, 90, -168); ctx.lineTo(84, -152); ctx.quadraticCurveTo(0, -145, -84, -152); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.moveTo(-92, -174); ctx.quadraticCurveTo(0, -162, 92, -174); ctx.lineTo(90, -167); ctx.quadraticCurveTo(0, -156, -90, -167); ctx.closePath(); ctx.fill();
+        // Stone Toro lantern beside Torii
+        ctx.fillStyle = '#64748b'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.2;
+        ctx.fillRect(74, -36, 12, 36); ctx.strokeRect(74, -36, 12, 36);
+        ctx.fillStyle = '#fef08a'; ctx.fillRect(72, -50, 16, 14); ctx.strokeRect(72, -50, 16, 14);
+        ctx.fillStyle = '#475569'; ctx.beginPath(); ctx.moveTo(66, -50); ctx.lineTo(80, -62); ctx.lineTo(94, -50); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.restore();
+      }
+
+      // Painterly Blooming Sakura Cherry Blossom Tree with Gnarled Boughs & Layered Blossoms!
+      const sx = bx + 388;
+      ctx.save(); ctx.translate(sx, groundY);
+      ctx.fillStyle = '#3b201c'; ctx.strokeStyle = '#1c0d0a'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(-13, 0); ctx.quadraticCurveTo(-6, -56, -9, -118); ctx.lineTo(8, -118); ctx.quadraticCurveTo(7, -56, 15, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#3b201c'; ctx.lineWidth = 6.5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-4, -92); ctx.quadraticCurveTo(-28, -112, -48, -124); ctx.moveTo(4, -98); ctx.quadraticCurveTo(28, -116, 50, -120); ctx.stroke();
+      const clusters = [[-46, -124, 30, 18], [46, -120, 32, 19], [-18, -142, 34, 21], [22, -144, 32, 20], [2, -158, 28, 18]];
+      for (const [cx0, cy0, rx0, ry0] of clusters) {
+        const sg = ctx.createRadialGradient(cx0 + 6, cy0 - 6, 2, cx0, cy0, rx0 * 1.1);
+        sg.addColorStop(0, '#fff1f2'); sg.addColorStop(0.42, '#f9a8d4'); sg.addColorStop(0.8, '#ec4899'); sg.addColorStop(1, '#9d174d');
+        ctx.fillStyle = sg; ctx.beginPath(); ctx.ellipse(cx0, cy0, rx0, ry0, 0, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // SHIMMERING KYOTO KOI CANAL WATERLINE (visible beneath all 7 canal crossings so gaps look like living Koi canals!)
+    const canalY = h - 72;
+    const waterG = ctx.createLinearGradient(0, canalY, 0, h);
+    waterG.addColorStop(0, '#133b5c'); waterG.addColorStop(0.45, '#0b2540'); waterG.addColorStop(1, '#040e1c');
+    ctx.fillStyle = waterG; ctx.fillRect(0, canalY, w, h - canalY);
+    // Warm reflected lantern ripples & swimming golden/white Koi fish silhouettes!
+    for (let r = 0; r < 8; r++) {
+      const rx0 = ((r * 185 - camX * 0.6) % (w + 180) + (w + 180)) % (w + 180) - 90;
+      const ry0 = canalY + 12 + (r % 3) * 18;
+      ctx.fillStyle = r % 2 === 0 ? 'rgba(251, 113, 133, 0.22)' : 'rgba(254, 240, 138, 0.20)';
+      ctx.beginPath(); ctx.ellipse(rx0 + Math.sin(time * 2.5 + r) * 8, ry0, 28, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    for (let k = 0; k < 5; k++) {
+      const dir = k % 2 === 0 ? 1 : -1;
+      const kx = ((k * 260 + time * dir * 34 - camX * 0.75) % (w + 120) + (w + 120)) % (w + 120) - 60;
+      const ky = canalY + 24 + (k % 3) * 14 + Math.sin(time * 3 + k) * 3;
+      ctx.save(); ctx.translate(kx, ky); ctx.scale(dir, 1);
+      ctx.fillStyle = k % 2 === 0 ? '#f97316' : '#f8fafc';
+      ctx.beginPath(); ctx.ellipse(0, 0, 11, 3.8, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(-16, -4 + Math.sin(time * 9 + k) * 2); ctx.lineTo(-16, 4 + Math.sin(time * 9 + k) * 2); ctx.closePath(); ctx.fill();
+      if (k % 2 === 1) { ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(3, 0, 2.5, 0, Math.PI * 2); ctx.fill(); }
+      ctx.restore();
+    }
+
+    // Drifting Pink Sakura Petals Floating Across the Kyoto Twilight Street
+    for (let p = 0; p < 30; p++) {
+      const px0 = ((p * 173 + time * 42) % (w + 60)) - 30;
+      const py0 = ((p * 89 + time * 26 + Math.sin(time * 2 + p) * 16) % (h - 70));
+      ctx.save(); ctx.translate(px0, py0); ctx.rotate(time * 2.2 + p);
+      ctx.fillStyle = p % 2 === 0 ? 'rgba(255, 241, 242, 0.88)' : 'rgba(249, 168, 212, 0.84)';
+      ctx.beginPath(); ctx.ellipse(0, 0, 4.6, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // =========================================================================
+  // 16. STAGE 19 GOAL: GRAND KYOTO VERMILION TORII & DOUBLE-TIER SHRINE SANCTUARY
+  // =========================================================================
+  function drawJapaneseShrineGate(ctx, g, gx, gy, time, goalLabel) {
+    const cx = gx + g.w * 0.5;
+    const baseY = gy + g.h;
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+    ctx.beginPath(); ctx.ellipse(cx, baseY + 2, 118, 8.5, 0, 0, Math.PI * 2); ctx.fill();
+
+    // Stone Shrine Steps
+    ctx.fillStyle = '#94a3b8'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.5;
+    ctx.fillRect(cx - 102, baseY - 8, 204, 8); ctx.strokeRect(cx - 102, baseY - 8, 204, 8);
+    ctx.fillRect(cx - 90, baseY - 16, 180, 8); ctx.strokeRect(cx - 90, baseY - 16, 180, 8);
+
+    // Warm Glowing Wooden Kyoto Shrine Sanctuary Backdrop
+    const sY = baseY - 16;
+    ctx.fillStyle = '#4a2518'; ctx.strokeStyle = '#1c0a05'; ctx.lineWidth = 1.6;
+    ctx.fillRect(cx - 68, sY - 98, 136, 98); ctx.strokeRect(cx - 68, sY - 98, 136, 98);
+    const doorG = ctx.createLinearGradient(cx, sY - 84, cx, sY);
+    doorG.addColorStop(0, '#fffbeb'); doorG.addColorStop(0.55, '#fde047'); doorG.addColorStop(1, '#d97706');
+    ctx.fillStyle = doorG; ctx.fillRect(cx - 34, sY - 80, 68, 80); ctx.strokeRect(cx - 34, sY - 80, 68, 80);
+    ctx.strokeStyle = 'rgba(69, 26, 3, 0.45)'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(cx, sY - 80); ctx.lineTo(cx, sY); ctx.moveTo(cx - 34, sY - 40); ctx.lineTo(cx + 34, sY - 40); ctx.stroke();
+    // Double-Tier Curved Kawara Shrine Roof with Golden Ridge Ornaments
+    ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.moveTo(cx - 92, sY - 92); ctx.quadraticCurveTo(cx, sY - 144, cx + 92, sY - 92); ctx.lineTo(cx + 78, sY - 84); ctx.lineTo(cx - 78, sY - 84); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fbbf24'; ctx.fillRect(cx - 28, sY - 122, 56, 4);
+
+    // Grand Vermilion Front Torii Pillars, Carved Gold Gakuzuka Plaque & Curved Kasagi Beam!
+    ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.8;
+    ctx.fillRect(cx - 82, sY - 148, 16, 148); ctx.strokeRect(cx - 82, sY - 148, 16, 148);
+    ctx.fillRect(cx + 66, sY - 148, 16, 148); ctx.strokeRect(cx + 66, sY - 148, 16, 148);
+    ctx.fillRect(cx - 96, sY - 124, 192, 12); ctx.strokeRect(cx - 96, sY - 124, 192, 12);
+    ctx.beginPath(); ctx.moveTo(cx - 110, sY - 150); ctx.quadraticCurveTo(cx, sY - 138, cx + 110, sY - 150); ctx.lineTo(cx + 102, sY - 134); ctx.quadraticCurveTo(cx, sY - 126, cx - 102, sY - 134); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.moveTo(cx - 112, sY - 156); ctx.quadraticCurveTo(cx, sY - 144, cx + 112, sY - 156); ctx.lineTo(cx + 110, sY - 149); ctx.quadraticCurveTo(cx, sY - 138, cx - 110, sY - 149); ctx.closePath(); ctx.fill();
+    // Carved black & gold Gakuzuka shrine plaque
+    ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.4;
+    ctx.fillRect(cx - 11, sY - 140, 22, 26); ctx.strokeRect(cx - 11, sY - 140, 22, 26);
+    ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(cx, sY - 135); ctx.lineTo(cx, sY - 120); ctx.moveTo(cx - 5, sY - 129); ctx.lineTo(cx + 5, sY - 129); ctx.stroke();
+
+    // Braided Golden Shimenawa Sacred Rope & White Paper Shide Zigzags
+    ctx.strokeStyle = '#eab308'; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.moveTo(cx - 66, sY - 108); ctx.quadraticCurveTo(cx, sY - 94, cx + 66, sY - 108); ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    for (const sx of [cx - 32, cx, cx + 32]) {
+      ctx.beginPath(); ctx.moveTo(sx, sY - 100); ctx.lineTo(sx - 4, sY - 90); ctx.lineTo(sx + 3, sY - 88); ctx.lineTo(sx - 2, sY - 78); ctx.lineTo(sx + 5, sY - 86); ctx.closePath(); ctx.fill();
+    }
+
+    // Twin Flickering Stone Toro Lanterns flanking the Sanctuary Steps
+    for (const side of [-1, 1]) {
+      const lx = cx + side * 98;
+      const tGlow = ctx.createRadialGradient(lx, baseY - 40, 2, lx, baseY - 40, 22);
+      tGlow.addColorStop(0, 'rgba(254, 240, 138, 0.45)'); tGlow.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      ctx.fillStyle = tGlow; ctx.beginPath(); ctx.arc(lx, baseY - 40, 22, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#64748b'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.3;
+      ctx.fillRect(lx - 6, baseY - 32, 12, 32); ctx.strokeRect(lx - 6, baseY - 32, 12, 32);
+      ctx.fillStyle = '#fef08a'; ctx.fillRect(lx - 8, baseY - 46, 16, 14); ctx.strokeRect(lx - 8, baseY - 46, 16, 14);
+      ctx.fillStyle = '#475569'; ctx.beginPath(); ctx.moveTo(lx - 14, baseY - 46); ctx.lineTo(lx, baseY - 58); ctx.lineTo(lx + 14, baseY - 46); ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+
+    // Floating Goal Label Banner
+    const labelText = goalLabel || 'بوابة كيوتو الشعبية ⛩️';
+    const bob = Math.sin(time * 3.2) * 3;
+    ctx.font = 'bold 13px "Cairo", "Tajawal", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    const tw = Math.max(130, ctx.measureText(labelText).width + 26);
+    ctx.fillStyle = 'rgba(30, 14, 18, 0.86)'; ctx.strokeStyle = '#f9a8d4'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.roundRect(cx - tw * 0.5, sY - 190 + bob, tw, 24, 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fff1f2';
+    ctx.fillText(labelText, cx, sY - 174 + bob);
+    ctx.restore();
+  }
+
+  // =========================================================================
+  // STAGE 20: ALPINE STEAM EXPRESS (مرحلة القطارات البخارية — Sunset Viaduct)
+  // =========================================================================
+  function drawSteamTrainSkyAndHorizon(ctx, camX, w, h, time) {
+    // Cinematic Golden-Amber Alpine Sunset Sky with Backlit Stratocumulus Clouds
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, '#0f172a');
+    sky.addColorStop(0.24, '#311b47');
+    sky.addColorStop(0.52, '#83283d');
+    sky.addColorStop(0.76, '#d95b26');
+    sky.addColorStop(0.92, '#f59e0b');
+    sky.addColorStop(1, '#fef08a');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, h);
+
+    // Warm Golden Setting Sun with Atmospheric Halo
+    const sunX = w * 0.72 - ((camX * 0.015) % 240);
+    const sunY = h * 0.36;
+    const sunGlow = ctx.createRadialGradient(sunX, sunY, 10, sunX, sunY, 220);
+    sunGlow.addColorStop(0, 'rgba(255, 251, 235, 0.96)');
+    sunGlow.addColorStop(0.26, 'rgba(253, 186, 116, 0.52)');
+    sunGlow.addColorStop(0.6, 'rgba(234, 88, 12, 0.18)');
+    sunGlow.addColorStop(1, 'rgba(234, 88, 12, 0)');
+    ctx.fillStyle = sunGlow;
+    ctx.beginPath(); ctx.arc(sunX, sunY, 220, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fffbeb';
+    ctx.beginPath(); ctx.arc(sunX, sunY, 36, 0, Math.PI * 2); ctx.fill();
+
+    // Sculpted Sunset Alpine Cloud Ribbons with Warm Golden Under-Rims
+    const pCloud = -(camX * 0.03 + time * 8) % 580;
+    for (let cx = pCloud - 580; cx < w + 580; cx += 290) {
+      const cy = 84 + (Math.abs(Math.floor(cx / 290)) % 3) * 36;
+      ctx.fillStyle = 'rgba(253, 186, 116, 0.22)';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + 16);
+      ctx.quadraticCurveTo(cx + 48, cy - 16, cx + 106, cy - 6);
+      ctx.quadraticCurveTo(cx + 158, cy - 22, cx + 220, cy + 16);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // ORGANIC, NON-REPEATING MULTI-HARMONIC ALPINE MOUNTAIN RANGES (3 Depth Layers!)
+    // Layer 1: Distant Tall Snow-Capped Alpine Massif (incommensurate wavelengths -> zero repetition!)
+    ctx.fillStyle = '#331d47';
+    ctx.beginPath(); ctx.moveTo(0, h);
+    for (let sx = 0; sx <= w + 24; sx += 24) {
+      const wx = sx + camX * 0.045;
+      const ridge = Math.sin(wx * 0.0029) * 58 + Math.sin(wx * 0.0073 + 1.4) * 36 + Math.cos(wx * 0.0141 + 0.6) * 18;
+      ctx.lineTo(sx, h * 0.44 - ridge);
+    }
+    ctx.lineTo(w, h); ctx.closePath(); ctx.fill();
+
+    // Sunlit golden-pink snow crests on Layer 1 high peaks
+    ctx.fillStyle = 'rgba(253, 186, 116, 0.28)';
+    ctx.beginPath(); ctx.moveTo(0, h * 0.56);
+    for (let sx = 0; sx <= w + 24; sx += 24) {
+      const wx = sx + camX * 0.045;
+      const ridge = Math.sin(wx * 0.0029) * 58 + Math.sin(wx * 0.0073 + 1.4) * 36 + Math.cos(wx * 0.0141 + 0.6) * 18;
+      const yTop = h * 0.44 - ridge;
+      ctx.lineTo(sx, yTop);
+    }
+    for (let sx = w + 24; sx >= 0; sx -= 24) {
+      const wx = sx + camX * 0.045;
+      const ridge = Math.sin(wx * 0.0029) * 58 + Math.sin(wx * 0.0073 + 1.4) * 36 + Math.cos(wx * 0.0141 + 0.6) * 18;
+      const yTop = h * 0.44 - ridge;
+      const snowDepth = Math.max(0, (h * 0.41 - yTop) * 0.55);
+      ctx.lineTo(sx, yTop + snowDepth);
+    }
+    ctx.closePath(); ctx.fill();
+
+    // Layer 2: Mid Jagged Alpine Crags (rich indigo-plum silhouettes with natural valleys)
+    ctx.fillStyle = '#211333';
+    ctx.beginPath(); ctx.moveTo(0, h);
+    for (let sx = 0; sx <= w + 20; sx += 20) {
+      const wx = sx + camX * 0.085;
+      const crag = Math.sin(wx * 0.0041 + 2.2) * 44 + Math.cos(wx * 0.0107 + 0.3) * 26 + Math.sin(wx * 0.023 + 1.9) * 11;
+      ctx.lineTo(sx, h * 0.54 - crag);
+    }
+    ctx.lineTo(w, h); ctx.closePath(); ctx.fill();
+
+    // Distant Monumental Stone Railway Viaduct + Detailed Steaming Express & Volumetric Smoke Plume!
+    const pVia = -(camX * 0.14) % 420;
+    ctx.fillStyle = '#191024';
+    ctx.fillRect(0, h * 0.60, w, 14);
+    for (let vx = pVia - 420; vx < w + 420; vx += 105) {
+      ctx.fillRect(vx, h * 0.60, 24, h * 0.40);
+      ctx.beginPath(); ctx.arc(vx + 64, h * 0.66, 40, Math.PI, 0); ctx.fill();
+    }
+
+    // Detailed Distant Silhouette Steam Locomotive + Tender + Lit Carriages!
+    const distTrainX = ((time * 42 - camX * 0.12) % (w + 460) + (w + 460)) % (w + 460) - 200;
+    const trY = h * 0.60;
+    // Soft warm headlight cone piercing the alpine dusk ahead of the distant locomotive
+    const hlG = ctx.createLinearGradient(distTrainX + 52, trY - 12, distTrainX + 128, trY - 12);
+    hlG.addColorStop(0, 'rgba(254, 249, 195, 0.68)'); hlG.addColorStop(1, 'rgba(254, 249, 195, 0)');
+    ctx.fillStyle = hlG;
+    ctx.beginPath(); ctx.moveTo(distTrainX + 50, trY - 13); ctx.lineTo(distTrainX + 128, trY - 24); ctx.lineTo(distTrainX + 128, trY - 2); ctx.closePath(); ctx.fill();
+    // Locomotive silhouette: boiler, cab, steam dome, tall smokestack & cowcatcher
+    ctx.fillStyle = '#0c0814';
+    ctx.fillRect(distTrainX + 4, trY - 17, 46, 15); // cylindrical boiler
+    ctx.fillRect(distTrainX, trY - 22, 16, 20); // engineer cab
+    ctx.beginPath(); ctx.arc(distTrainX + 28, trY - 17, 5, Math.PI, 0); ctx.fill(); // steam dome
+    ctx.fillRect(distTrainX + 38, trY - 27, 6.5, 12); // tall smokestack
+    ctx.beginPath(); ctx.moveTo(distTrainX + 50, trY - 8); ctx.lineTo(distTrainX + 58, trY); ctx.lineTo(distTrainX + 50, trY); ctx.closePath(); ctx.fill(); // cowcatcher
+    // Glowing orange firebox inside cab & linked tender + 3 lit passenger cars
+    ctx.fillStyle = '#fb923c'; ctx.fillRect(distTrainX + 3, trY - 17, 7, 5);
+    ctx.fillStyle = '#0c0814';
+    ctx.fillRect(distTrainX - 30, trY - 13, 26, 13); // coal tender
+    for (let c = 0; c < 3; c++) {
+      const cx = distTrainX - 80 - c * 50;
+      ctx.fillStyle = '#0c0814'; ctx.fillRect(cx, trY - 14, 46, 14);
+      ctx.fillStyle = '#fef08a';
+      for (let w0 = 5; w0 < 40; w0 += 11) ctx.fillRect(cx + w0, trY - 10, 6.5, 4.5);
+    }
+
+    // ULTRA-REALISTIC VOLUMETRIC CURLING SMOKE & STEAM PLUME billowing from the distant locomotive!
+    const stackX = distTrainX + 41;
+    const stackY = trY - 28;
+    for (let s = 0; s < 18; s++) {
+      const frac = ((s / 18) + (time * 0.38)) % 1;
+      const trailX = stackX - frac * 225 - Math.sin(frac * 5.2 + time * 2.5) * 6;
+      const trailY = stackY - Math.pow(frac, 0.72) * 58 + Math.sin(frac * 8 + s) * 3.5;
+      const rad = 5 + Math.pow(frac, 0.85) * 24;
+      const alpha = Math.sin(Math.min(1, frac * 4.5) * Math.PI * 0.5) * Math.pow(1 - frac, 1.15) * 0.56;
+      const puffG = ctx.createRadialGradient(trailX, trailY - rad * 0.25, rad * 0.15, trailX, trailY, rad);
+      puffG.addColorStop(0, `rgba(255, 251, 235, ${alpha.toFixed(3)})`);
+      puffG.addColorStop(0.55, `rgba(253, 186, 116, ${(alpha * 0.65).toFixed(3)})`);
+      puffG.addColorStop(1, 'rgba(148, 163, 184, 0)');
+      ctx.fillStyle = puffG;
+      ctx.beginPath(); ctx.arc(trailX, trailY, rad, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  function drawSteamTrainMidground(ctx, camX, w, h, time) {
+    // Deep Alpine Pine Forest Silhouettes & Canyon Mist
+    const pMid = -(camX * 0.28) % 360;
+    ctx.fillStyle = '#18141c';
+    ctx.beginPath(); ctx.moveTo(-360, h);
+    for (let rx = pMid - 360; rx < w + 360; rx += 180) {
+      ctx.quadraticCurveTo(rx + 90, h * 0.70, rx + 180, h * 0.77);
+    }
+    ctx.lineTo(w + 360, h); ctx.closePath(); ctx.fill();
+    // Crisp Pine Spire Silhouettes along ridge
+    ctx.fillStyle = '#111827';
+    for (let tx = pMid - 360; tx < w + 360; tx += 46) {
+      const th = 26 + (Math.abs(Math.floor(tx)) % 3) * 12;
+      const ty = h * 0.75;
+      ctx.beginPath(); ctx.moveTo(tx, ty - th); ctx.lineTo(tx - 12, ty + 14); ctx.lineTo(tx + 12, ty + 14); ctx.closePath(); ctx.fill();
+    }
+
+    // Rushing Victorian Telegraph Poles + Sagging Copper Wires (authentic train-speed sensation!)
+    const poleSpan = 260;
+    const pPole = -((camX * 0.55 + time * 150) % poleSpan);
+    ctx.strokeStyle = 'rgba(251, 191, 36, 0.30)'; ctx.lineWidth = 1.4;
+    for (let px = pPole - poleSpan; px < w + poleSpan; px += poleSpan) {
+      ctx.beginPath();
+      ctx.moveTo(px, h * 0.52);
+      ctx.quadraticCurveTo(px + poleSpan * 0.5, h * 0.57, px + poleSpan, h * 0.52);
+      ctx.stroke();
+      ctx.fillStyle = '#29150c';
+      ctx.fillRect(px - 3.5, h * 0.49, 7, h * 0.51);
+      ctx.fillRect(px - 20, h * 0.515, 40, 4.5);
+      // Ceramic white telegraph insulators
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(px - 16, h * 0.509, 3, 6); ctx.fillRect(px + 13, h * 0.509, 3, 6);
+    }
+
+    // Drifting Golden-Lit Steam Plumes & Warm Furnace Embers blowing past the express
+    for (let i = 0; i < 6; i++) {
+      const sx = w - (((time * (145 + i * 24) + i * 240) % (w + 260)) - 130);
+      const sy = 140 + (i % 3) * 120 + Math.sin(time * 2 + i) * 18;
+      const rad = 36 + (i % 3) * 14;
+      const g = ctx.createRadialGradient(sx, sy, 4, sx, sy, rad);
+      g.addColorStop(0, 'rgba(255, 251, 235, 0.16)');
+      g.addColorStop(1, 'rgba(255, 251, 235, 0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(sx, sy, rad, 0, Math.PI * 2); ctx.fill();
+    }
+    for (let e = 0; e < 12; e++) {
+      const ex = w - (((time * (210 + (e % 4) * 35) + e * 137) % (w + 80)) - 40);
+      const ey = 260 + ((e * 73) % 320) + Math.sin(time * 5 + e) * 12;
+      ctx.fillStyle = 'rgba(253, 186, 116, 0.65)';
+      ctx.beginPath(); ctx.arc(ex, ey, 1.8, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  function drawGrandTrainStationGate(ctx, g, sx, sy, time, goalLabel) {
+    // Grand Illuminated Victorian Railway Terminal Victory Arch crowning the Lead Black Steam Locomotive!
+    // Open glowing golden portal arch (so it frames the locomotive roof cleanly!) with wrought-iron scrollwork,
+    // radial amber glass fanlight, fluttering crimson pennants, brass globe lamps & Roman-numeral Station Clock!
+    ctx.save();
+    const cx = sx + g.w * 0.5;
+    const baseY = sy + g.h;
+    const archR = 98;
+    const springY = baseY - 104;
+
+    // 1. Soft Golden Arrival Aura framing the open archway above the locomotive
+    const portalGlow = ctx.createRadialGradient(cx, baseY - 62, 10, cx, baseY - 62, 105);
+    portalGlow.addColorStop(0, 'rgba(254, 249, 195, 0.52)');
+    portalGlow.addColorStop(0.55, 'rgba(251, 191, 36, 0.22)');
+    portalGlow.addColorStop(1, 'rgba(251, 191, 36, 0)');
+    ctx.fillStyle = portalGlow;
+    ctx.beginPath(); ctx.arc(cx, baseY - 62, 105, 0, Math.PI * 2); ctx.fill();
+
+    // 2. Ornate Wrought-Iron & Brass Arched Canopy Rim with Amber Radial Fanlight Glass!
+    const fanG = ctx.createRadialGradient(cx, springY, 16, cx, springY, archR);
+    fanG.addColorStop(0, 'rgba(254, 240, 138, 0.28)');
+    fanG.addColorStop(0.7, 'rgba(245, 158, 11, 0.45)');
+    fanG.addColorStop(1, 'rgba(30, 41, 59, 0.88)');
+    ctx.fillStyle = fanG;
+    ctx.beginPath();
+    ctx.arc(cx, springY, archR, Math.PI, 0);
+    ctx.arc(cx, springY, archR - 30, 0, Math.PI, true);
+    ctx.closePath();
+    ctx.fill();
+    // Double gilded arch rings & radial Victorian wrought-iron ribs
+    ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 6.5;
+    ctx.beginPath(); ctx.arc(cx, springY, archR, Math.PI, 0); ctx.stroke();
+    ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.arc(cx, springY, archR, Math.PI, 0); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, springY, archR - 30, Math.PI, 0); ctx.stroke();
+    ctx.strokeStyle = 'rgba(254, 240, 138, 0.72)'; ctx.lineWidth = 1.6;
+    for (let r = 1; r < 10; r++) {
+      const a = Math.PI + (r / 10) * Math.PI;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * (archR - 30), springY + Math.sin(a) * (archR - 30));
+      ctx.lineTo(cx + Math.cos(a) * archR, springY + Math.sin(a) * archR);
+      ctx.stroke();
+    }
+
+    // 3. Flanking Cast-Iron & Brass Terminal Pillars with Fluttering Crimson Pennants & Globe Lamps!
+    for (const side of [-1, 1]) {
+      const px0 = cx + side * (archR - 4);
+      const pilG = ctx.createLinearGradient(px0 - 11, springY, px0 + 11, baseY);
+      pilG.addColorStop(0, '#475569'); pilG.addColorStop(0.45, '#1e293b'); pilG.addColorStop(1, '#020617');
+      ctx.fillStyle = pilG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.7;
+      ctx.fillRect(px0 - 9, springY - 4, 18, baseY - springY + 4);
+      ctx.strokeRect(px0 - 9, springY - 4, 18, baseY - springY + 4);
+      // Heavy stepped cast-iron pillar pedestal resting flush on locomotive roof
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(px0 - 14, baseY - 12, 28, 12); ctx.strokeRect(px0 - 14, baseY - 12, 28, 12);
+      // Fluttering crimson-and-gold victory pennant streaming backward in the express wind!
+      const wave = Math.sin(time * 7 + side) * 4;
+      ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(px0, springY + 14);
+      ctx.quadraticCurveTo(px0 - 18, springY + 10 + wave, px0 - 36, springY + 18 + wave * 1.2);
+      ctx.lineTo(px0 - 28, springY + 24 + wave);
+      ctx.lineTo(px0 - 36, springY + 30 + wave * 1.2);
+      ctx.quadraticCurveTo(px0 - 18, springY + 26 + wave, px0, springY + 28);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Glowing Victorian brass station globe lamp atop pillar
+      const ly = springY - 18;
+      const lGlow = ctx.createRadialGradient(px0, ly, 2, px0, ly, 28);
+      lGlow.addColorStop(0, 'rgba(255, 251, 235, 0.9)'); lGlow.addColorStop(0.5, 'rgba(251, 191, 36, 0.35)'); lGlow.addColorStop(1, 'rgba(251, 191, 36, 0)');
+      ctx.fillStyle = lGlow; ctx.beginPath(); ctx.arc(px0, ly, 28, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#b45309'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(px0, ly, 8.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
+
+    // 4. Ornate Victorian Pediment Crest, Illuminated Grand Station Clock & Emerald "ARRIVAL" Signal Lamp!
+    const clkY = springY - archR + 4;
+    // Brass crown finial atop clock
+    ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(cx - 10, clkY - 26); ctx.lineTo(cx, clkY - 40); ctx.lineTo(cx + 10, clkY - 26); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#451a03'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.arc(cx, clkY, 28, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#b45309'; ctx.lineWidth = 2.0;
+    ctx.beginPath(); ctx.arc(cx, clkY, 22, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.4;
+    for (let hIdx = 0; hIdx < 12; hIdx++) {
+      const a = (hIdx / 12) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * 16, clkY + Math.sin(a) * 16);
+      ctx.lineTo(cx + Math.cos(a) * 20, clkY + Math.sin(a) * 20);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx, clkY); ctx.lineTo(cx + Math.cos(time * 0.35 - 1.2) * 10, clkY + Math.sin(time * 0.35 - 1.2) * 10);
+    ctx.moveTo(cx, clkY); ctx.lineTo(cx + Math.cos(time * 1.6) * 15, clkY + Math.sin(time * 1.6) * 15);
+    ctx.stroke();
+
+    // Brass Arch Nameplate ("Dr.MAX07 EXPRESS") with emerald arrival lights
+    ctx.fillStyle = '#1c0a05'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.roundRect(cx - 64, springY - 22, 128, 22, 5); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#4ade80';
+    ctx.beginPath(); ctx.arc(cx - 53, springY - 11, 3.6, 0, Math.PI * 2); ctx.arc(cx + 53, springY - 11, 3.6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fef08a'; ctx.font = 'bold 10px system-ui, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('Dr.MAX07 EXPRESS', cx, springY - 7.5);
+
+    // Floating Arabic Goal Label Banner
+    const labelText = goalLabel || 'محطة القطار الكبرى 🚂';
+    const bob = Math.sin(time * 3.2) * 3;
+    ctx.font = 'bold 13.5px "Cairo", "Tajawal", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    const tw = Math.max(150, ctx.measureText(labelText).width + 28);
+    ctx.fillStyle = 'rgba(15, 12, 20, 0.90)'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.roundRect(cx - tw * 0.5, clkY - 70 + bob, tw, 26, 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fef3c7';
+    ctx.fillText(labelText, cx, clkY - 52 + bob);
+    ctx.restore();
+  }
+
+  // =========================================================================
+  // STAGE 21: VENICE CANALS & GONDOLAS (قنوات البندقية الإيطالية — Twilight Lagoon)
+  // =========================================================================
+  function drawVeniceSkyAndHorizon(ctx, camX, w, h, time) {
+    // Painterly Mediterranean Rose-Gold & Venetian Twilight Sky with Layered Backlit Clouds
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, '#131136');
+    sky.addColorStop(0.22, '#3b1c54');
+    sky.addColorStop(0.48, '#9d3659');
+    sky.addColorStop(0.72, '#ea6a47');
+    sky.addColorStop(0.88, '#f59e0b');
+    sky.addColorStop(1, '#fef08a');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, h);
+
+    // Subtle twilight stars in upper indigo zenith
+    ctx.fillStyle = 'rgba(254, 249, 195, 0.55)';
+    for (let s = 0; s < 18; s++) {
+      const sx = ((s * 197 + 31) % w);
+      const sy = 14 + ((s * 53) % 96);
+      const tw = 0.4 + 0.6 * Math.sin(time * 2.1 + s * 1.4);
+      ctx.globalAlpha = tw * 0.6;
+      ctx.beginPath(); ctx.arc(sx, sy, (s % 3 === 0) ? 1.5 : 1.0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // Warm Golden Adriatic Sunset Disc & Soft Atmospheric Halo
+    const sunX = w * 0.66 - ((camX * 0.014) % 240);
+    const sunY = h * 0.44;
+    const sGlow = ctx.createRadialGradient(sunX, sunY, 10, sunX, sunY, 230);
+    sGlow.addColorStop(0, 'rgba(255, 251, 235, 0.96)');
+    sGlow.addColorStop(0.28, 'rgba(253, 186, 116, 0.52)');
+    sGlow.addColorStop(0.62, 'rgba(234, 88, 12, 0.16)');
+    sGlow.addColorStop(1, 'rgba(234, 88, 12, 0)');
+    ctx.fillStyle = sGlow; ctx.beginPath(); ctx.arc(sunX, sunY, 230, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fffbeb'; ctx.beginPath(); ctx.arc(sunX, sunY, 34, 0, Math.PI * 2); ctx.fill();
+
+    // Organic Multi-Layered Painterly Sunset Clouds with Non-Repeating Silhouettes & Warm Sunset Underbelly Reflection!
+    const cloudSpan = 1960;
+    const cloudDefs = [
+      { ox: 60,   y: 78,  sc: 1.18, sp: 4.2, puffs: [[-68, 8, 42, 14], [-24, -6, 52, 22], [32, -11, 58, 25], [86, 2, 46, 17], [128, 10, 32, 11]] },
+      { ox: 340,  y: 152, sc: 0.92, sp: 6.0, puffs: [[-54, 7, 36, 11], [-8, -5, 48, 18], [44, -2, 42, 15], [84, 7, 28, 9]] },
+      { ox: 590,  y: 62,  sc: 1.32, sp: 3.5, puffs: [[-82, 9, 44, 13], [-32, -4, 56, 20], [18, -14, 62, 26], [76, -5, 54, 21], [126, 6, 42, 14], [164, 11, 26, 9]] },
+      { ox: 880,  y: 124, sc: 0.85, sp: 5.4, puffs: [[-48, 6, 32, 11], [2, -7, 44, 18], [46, 2, 36, 13]] },
+      { ox: 1120, y: 186, sc: 1.05, sp: 6.8, puffs: [[-64, 6, 40, 10], [-14, -4, 54, 16], [42, -7, 50, 17], [92, 4, 38, 11]] },
+      { ox: 1360, y: 88,  sc: 1.24, sp: 4.6, puffs: [[-74, 8, 46, 15], [-20, -10, 58, 24], [36, -6, 52, 20], [88, 4, 44, 14], [126, 9, 28, 9]] },
+      { ox: 1620, y: 146, sc: 0.96, sp: 5.8, puffs: [[-52, 7, 38, 12], [-4, -8, 48, 19], [48, -3, 44, 16], [88, 6, 30, 10]] },
+      { ox: 1810, y: 108, sc: 0.80, sp: 4.9, puffs: [[-44, 5, 34, 10], [6, -6, 42, 15], [52, 4, 32, 10]] },
+    ];
+    // High-altitude wispy rose-gold cirrus streaks
+    for (let cs = 0; cs < 6; cs++) {
+      const cx = ((cs * 347 + 85 - camX * 0.014 - time * (2.2 + (cs % 3) * 0.6)) % (w + 460) + (w + 460)) % (w + 460) - 230;
+      const cy = 44 + ((cs * 41) % 92);
+      const cw = 130 + (cs % 3) * 58;
+      const prox = Math.max(0, 1 - Math.hypot(cx - sunX, cy - sunY) / 560);
+      const cirG = ctx.createLinearGradient(cx - cw * 0.5, cy, cx + cw * 0.5, cy);
+      cirG.addColorStop(0, 'rgba(253, 186, 116, 0)');
+      cirG.addColorStop(0.5, `rgba(254, 215, 160, ${(0.14 + prox * 0.22).toFixed(3)})`);
+      cirG.addColorStop(1, 'rgba(253, 186, 116, 0)');
+      ctx.fillStyle = cirG;
+      ctx.beginPath(); ctx.ellipse(cx, cy, cw * 0.5, 4.5 + (cs % 2) * 2.5, -0.04 + (cs % 3) * 0.02, 0, Math.PI * 2); ctx.fill();
+    }
+    // Mid-altitude sculpted billowing sunset cloud banks with dynamic sun-proximity underlighting
+    for (const cl of cloudDefs) {
+      const cx = ((cl.ox - camX * (0.018 + cl.sc * 0.008) - time * cl.sp) % cloudSpan + cloudSpan) % cloudSpan - 260;
+      if (cx < -260 || cx > w + 260) continue;
+      const cy = cl.y;
+      const sc = cl.sc;
+      const distSun = Math.hypot(cx - sunX, cy - sunY);
+      const sunProx = Math.max(0, 1 - distSun / 520);
+      const rimShiftX = (sunX - cx) > 0 ? 5 * sc : -5 * sc;
+
+      // Layer 1: Soft golden-amber sunlit underbelly reflection (brightest near sunset disc!)
+      const glowA = (0.34 + sunProx * 0.42).toFixed(3);
+      ctx.fillStyle = `rgba(255, 224, 152, ${glowA})`;
+      ctx.beginPath();
+      for (const [px2, py2, rx, ry] of cl.puffs) {
+        ctx.moveTo(cx + px2 * sc + rimShiftX * 0.4 + rx * sc * 1.04, cy + (py2 + 5) * sc);
+        ctx.ellipse(cx + px2 * sc + rimShiftX * 0.4, cy + (py2 + 5) * sc, rx * sc * 1.04, ry * sc * 0.82, 0, 0, Math.PI * 2);
+      }
+      ctx.fill();
+
+      // Layer 2: Warm rose-coral backlit cloud body
+      const bodyG = ctx.createLinearGradient(cx, cy - 34 * sc, cx, cy + 20 * sc);
+      bodyG.addColorStop(0, `rgba(74, 34, 82, ${(0.44 - sunProx * 0.10).toFixed(3)})`);
+      bodyG.addColorStop(0.55, `rgba(178, 72, 92, ${(0.42 + sunProx * 0.10).toFixed(3)})`);
+      bodyG.addColorStop(0.88, `rgba(244, 136, 94, ${(0.48 + sunProx * 0.18).toFixed(3)})`);
+      bodyG.addColorStop(1, `rgba(254, 215, 140, ${(0.44 + sunProx * 0.28).toFixed(3)})`);
+      ctx.fillStyle = bodyG;
+      ctx.beginPath();
+      for (const [px2, py2, rx, ry] of cl.puffs) {
+        ctx.moveTo(cx + px2 * sc + rx * sc, cy + py2 * sc);
+        ctx.ellipse(cx + px2 * sc, cy + py2 * sc, rx * sc, ry * sc, 0, 0, Math.PI * 2);
+      }
+      ctx.fill();
+
+      // Layer 3: Delicate sunlit peach-gold rim highlight kissing the sun-facing lower edge
+      if (sunProx > 0.12) {
+        ctx.fillStyle = `rgba(255, 247, 214, ${(sunProx * 0.42).toFixed(3)})`;
+        ctx.beginPath();
+        for (let pi = 0; pi < cl.puffs.length; pi++) {
+          const [px2, py2, rx, ry] = cl.puffs[pi];
+          const hx = cx + px2 * sc + rimShiftX * 0.6;
+          const hy = cy + (py2 + ry * 0.46) * sc;
+          ctx.moveTo(hx + rx * sc * 0.68, hy);
+          ctx.ellipse(hx, hy, rx * sc * 0.68, ry * sc * 0.28, 0, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      }
+    }
+
+    // Monumental Illuminated Venetian Skyline:
+    // 1. St. Mark's Campanile (warm sunlit brick shaft, carved Istrian marble belfry loggia, pyramid spire & golden angel)
+    // 2. Santa Maria della Salute (ribbed Baroque Istrian dome, scrolled volute buttresses, clerestory drum & cupola)
+    // 3. Stepped Istrian Marble Rialto Bridge (twin arched arcade + central triumphal portico)
+    const pSky = -(camX * 0.08) % 920;
+    for (let bx = pSky - 920; bx < w + 920; bx += 920) {
+      // 1. ST. MARK'S CAMPANILE (San Marco — 3D Venetian Red-Brick Shaft, Carved Istrian Marble Belfry, Bronze Bell, Lion Attic & Faceted Spire!)
+      const cx = bx + 146;
+      const baseH = h * 0.69;
+      const shaftTop = h * 0.27;
+      const shaftW = 46;
+      const shaftH = baseH - shaftTop;
+
+      // 3D Shadowed Left Bevel + Warm Sunlit Venetian Red-Brick Main Shaft
+      ctx.fillStyle = '#4a1b24';
+      ctx.fillRect(cx - shaftW * 0.5 - 8, shaftTop + 2, 9, shaftH - 2);
+      const cG = ctx.createLinearGradient(cx - shaftW * 0.5, shaftTop, cx + shaftW * 0.5, baseH);
+      cG.addColorStop(0, '#b54632'); cG.addColorStop(0.45, '#8c2f26'); cG.addColorStop(0.85, '#591e27'); cG.addColorStop(1, '#311322');
+      ctx.fillStyle = cG; ctx.strokeStyle = '#29101a'; ctx.lineWidth = 1.3;
+      ctx.fillRect(cx - shaftW * 0.5, shaftTop, shaftW, shaftH);
+      ctx.strokeRect(cx - shaftW * 0.5, shaftTop, shaftW, shaftH);
+
+      // Tactile Venetian brick horizontal courses & sunlit amber right-edge rim-light
+      ctx.strokeStyle = 'rgba(245, 222, 195, 0.14)'; ctx.lineWidth = 0.8;
+      for (let by = shaftTop + 10; by < baseH - 6; by += 9) {
+        ctx.beginPath(); ctx.moveTo(cx - shaftW * 0.5 + 1, by); ctx.lineTo(cx + shaftW * 0.5 - 1, by); ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(253, 186, 116, 0.26)';
+      ctx.fillRect(cx + shaftW * 0.5 - 8, shaftTop + 2, 7, shaftH - 4);
+
+      // Sculpted Vertical Fluted Brick Pilasters (Lesene) topped by Carved Blind Arches!
+      for (const px2 of [-14, -5, 5, 14]) {
+        ctx.fillStyle = 'rgba(38, 12, 18, 0.42)';
+        ctx.fillRect(cx + px2 - 1.5, shaftTop + 14, 3, shaftH - 20);
+        ctx.fillStyle = 'rgba(253, 210, 170, 0.18)';
+        ctx.fillRect(cx + px2 + 1.2, shaftTop + 14, 1.4, shaftH - 20);
+      }
+      ctx.strokeStyle = '#d6b89e'; ctx.lineWidth = 1.2;
+      for (const ax of [-14, -5, 4, 13]) {
+        ctx.beginPath(); ctx.arc(cx + ax, shaftTop + 14, 4.5, Math.PI, 0); ctx.stroke();
+      }
+      // Carved Istrian marble cornice belt beneath the belfry loggia
+      ctx.fillStyle = '#f5e8d6'; ctx.strokeStyle = '#4a2b30'; ctx.lineWidth = 1.1;
+      ctx.fillRect(cx - shaftW * 0.5 - 6, shaftTop - 5, shaftW + 12, 6);
+      ctx.strokeRect(cx - shaftW * 0.5 - 6, shaftTop - 5, shaftW + 12, 6);
+
+      // Sculpted White Istrian Marble Belfry Loggia (Cella Campanaria) with 3 Arched Bays & Hanging Bronze Bell!
+      const belH = 42;
+      const belY = shaftTop - 5 - belH;
+      const bG = ctx.createLinearGradient(cx - 26, belY, cx + 26, belY + belH);
+      bG.addColorStop(0, '#fff7ed'); bG.addColorStop(0.55, '#e2cfc0'); bG.addColorStop(1, '#9c7c7e');
+      ctx.fillStyle = bG; ctx.strokeStyle = '#3b1d30'; ctx.lineWidth = 1.2;
+      ctx.fillRect(cx - 25, belY, 50, belH); ctx.strokeRect(cx - 25, belY, 50, belH);
+      // 3 Deeply Recessed Illuminated Arched Belfry Bays + Bronze Bell Silhouette in Center Arch
+      for (let bi = -1; bi <= 1; bi++) {
+        const lx = cx + bi * 14 - 5;
+        const archG = ctx.createLinearGradient(lx, belY + 7, lx, belY + belH - 7);
+        archG.addColorStop(0, '#fef9c3'); archG.addColorStop(0.6, '#fbbf24'); archG.addColorStop(1, '#92400e');
+        ctx.fillStyle = archG; ctx.strokeStyle = '#5c342e'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.roundRect(lx, belY + 7, 10, 27, [5, 5, 0, 0]); ctx.fill(); ctx.stroke();
+        if (bi === 0) {
+          // Sculpted hanging bronze bell inside the central belfry bay
+          ctx.fillStyle = '#451a03';
+          ctx.beginPath();
+          ctx.moveTo(cx - 2.5, belY + 14); ctx.lineTo(cx + 2.5, belY + 14);
+          ctx.lineTo(cx + 4.5, belY + 25); ctx.lineTo(cx - 4.5, belY + 25); ctx.closePath(); ctx.fill();
+        }
+      }
+      // Carved marble balustrade along belfry floor
+      ctx.fillStyle = '#fffbeb'; ctx.fillRect(cx - 25, belY + belH - 7, 50, 7);
+      ctx.strokeStyle = '#786258'; ctx.lineWidth = 0.9;
+      for (let bl = cx - 21; bl <= cx + 21; bl += 6) {
+        ctx.beginPath(); ctx.moveTo(bl, belY + belH - 7); ctx.lineTo(bl, belY + belH); ctx.stroke();
+      }
+
+      // Carved Marble Attic Story (Dado) with Gilded Winged Lion of St. Mark Medallion + Corner Pinnacles!
+      const attY = belY - 18;
+      ctx.fillStyle = '#efe2d2'; ctx.strokeStyle = '#3b1d30'; ctx.lineWidth = 1.1;
+      ctx.fillRect(cx - 24, attY, 48, 18); ctx.strokeRect(cx - 24, attY, 48, 18);
+      ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 0.9;
+      ctx.beginPath(); ctx.roundRect(cx - 10, attY + 4, 20, 10, 3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fffbeb'; ctx.fillRect(cx - 28, attY - 4, 56, 5); ctx.strokeRect(cx - 28, attY - 4, 56, 5);
+      // Corner marble pinnacles
+      for (const side of [-1, 1]) {
+        ctx.beginPath(); ctx.moveTo(cx + side * 26, attY - 4); ctx.lineTo(cx + side * 24, attY - 14); ctx.lineTo(cx + side * 22, attY - 4); ctx.closePath(); ctx.fill();
+      }
+
+      // 3D Faceted Pyramidal Copper-Patina & Terracotta Spire + Golden Archangel Gabriel Weathervane!
+      const tipY = attY - 84;
+      const spLeft = ctx.createLinearGradient(cx - 24, tipY, cx, attY - 4);
+      spLeft.addColorStop(0, '#4d7c73'); spLeft.addColorStop(0.6, '#345258'); spLeft.addColorStop(1, '#23273d');
+      ctx.fillStyle = spLeft;
+      ctx.beginPath(); ctx.moveTo(cx - 24, attY - 4); ctx.lineTo(cx, tipY); ctx.lineTo(cx + 2, attY - 4); ctx.closePath(); ctx.fill();
+      const spRight = ctx.createLinearGradient(cx, tipY, cx + 24, attY - 4);
+      spRight.addColorStop(0, '#c88d68'); spRight.addColorStop(0.45, '#7ba38f'); spRight.addColorStop(1, '#3b5d5e');
+      ctx.fillStyle = spRight;
+      ctx.beginPath(); ctx.moveTo(cx, tipY); ctx.lineTo(cx + 24, attY - 4); ctx.lineTo(cx + 2, attY - 4); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#241422'; ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.moveTo(cx - 24, attY - 4); ctx.lineTo(cx, tipY); ctx.lineTo(cx + 24, attY - 4); ctx.stroke();
+      // Gleaming Golden Archangel Gabriel Statue with Outstretched Wings!
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#92400e'; ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.moveTo(cx, tipY); ctx.lineTo(cx, tipY - 14); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, tipY - 14, 2.8, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(cx - 7, tipY - 16); ctx.quadraticCurveTo(cx, tipY - 11, cx + 7, tipY - 17); ctx.stroke();
+
+      // 2. BASILICA DI SANTA MARIA DELLA SALUTE (Museum-Grade Baroque Masterpiece:
+      //    Istrian Limestone Ashlar Portico, Corinthian Columns, Sculpted Spiral Volutes, Faceted Octagonal Drum,
+      //    Bezier-Sculpted Ribbed Lead Dome, Arched Marble Lantern Cupola & Twin Baroque Campanili!)
+      const sx = bx + 476;
+      const lowerTopY = h * 0.56;
+      const drumTopY = h * 0.455;
+      const drumW = 114;
+
+      // A) Twin Detailed Rear Baroque Bell-Towers (Campanili) & Secondary Ribbed Choir Dome
+      for (const tx of [sx + 80, sx + 124]) {
+        const twG = ctx.createLinearGradient(tx - 8, drumTopY - 10, tx + 8, baseH);
+        twG.addColorStop(0, '#c8afa8'); twG.addColorStop(0.55, '#7c5362'); twG.addColorStop(1, '#361c32');
+        ctx.fillStyle = twG; ctx.strokeStyle = '#241024'; ctx.lineWidth = 1.0;
+        ctx.fillRect(tx - 8, drumTopY - 8, 16, baseH - (drumTopY - 8));
+        ctx.strokeRect(tx - 8, drumTopY - 8, 16, baseH - (drumTopY - 8));
+        // Arched belfry opening + marble cornice + ribbed copper cupola
+        ctx.fillStyle = 'rgba(254, 240, 138, 0.72)';
+        ctx.beginPath(); ctx.roundRect(tx - 3.5, drumTopY - 3, 7, 13, [3.5, 3.5, 0, 0]); ctx.fill();
+        ctx.fillStyle = '#efe2d2'; ctx.fillRect(tx - 10, drumTopY - 12, 20, 4);
+        ctx.fillStyle = '#5c7c76';
+        ctx.beginPath(); ctx.moveTo(tx - 8, drumTopY - 12); ctx.quadraticCurveTo(tx, drumTopY - 28, tx + 8, drumTopY - 12); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(tx, drumTopY - 24, 1.8, 0, Math.PI * 2); ctx.fill();
+      }
+      // Secondary Choir Dome with ribbed lead seams & mini lantern
+      const sdCx = sx + 102, sdY = lowerTopY - 22;
+      const sdG = ctx.createRadialGradient(sdCx + 10, sdY - 14, 4, sdCx, sdY - 6, 36);
+      sdG.addColorStop(0, '#d8c5c4'); sdG.addColorStop(0.45, '#7c586b'); sdG.addColorStop(1, '#2d1832');
+      ctx.fillStyle = sdG; ctx.strokeStyle = '#241024'; ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(sdCx - 32, sdY);
+      ctx.bezierCurveTo(sdCx - 32, sdY - 28, sdCx - 14, sdY - 38, sdCx, sdY - 40);
+      ctx.bezierCurveTo(sdCx + 14, sdY - 38, sdCx + 32, sdY - 28, sdCx + 32, sdY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(254, 232, 205, 0.32)'; ctx.lineWidth = 1.0;
+      for (const r2 of [-16, 0, 16]) {
+        ctx.beginPath(); ctx.moveTo(sdCx + r2 * 0.25, sdY - 39); ctx.quadraticCurveTo(sdCx + r2 * 1.1, sdY - 18, sdCx + r2, sdY); ctx.stroke();
+      }
+      ctx.fillStyle = '#e5d5c8'; ctx.fillRect(sdCx - 5, sdY - 50, 10, 11);
+      ctx.fillStyle = '#fef08a'; ctx.fillRect(sdCx - 2, sdY - 47, 4, 6);
+      ctx.fillStyle = '#7c586b'; ctx.beginPath(); ctx.arc(sdCx, sdY - 50, 5, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = '#5c364d'; ctx.fillRect(sdCx - 34, sdY, 68, baseH - sdY);
+
+      // B) Lower Octagonal Istrian Limestone Basilica Body + Triumphal Classical Entrance Portico!
+      const lbG = ctx.createLinearGradient(sx - 86, lowerTopY, sx + 86, baseH);
+      lbG.addColorStop(0, '#785061'); lbG.addColorStop(0.35, '#bfa5a2'); lbG.addColorStop(0.75, '#e8d8ca'); lbG.addColorStop(1, '#9c7d82');
+      ctx.fillStyle = lbG; ctx.strokeStyle = '#291426'; ctx.lineWidth = 1.3;
+      ctx.fillRect(sx - 86, lowerTopY, 172, baseH - lowerTopY);
+      ctx.strokeRect(sx - 86, lowerTopY, 172, baseH - lowerTopY);
+      // Subtle cut-stone ashlar horizontal seams across Istrian limestone facade
+      ctx.strokeStyle = 'rgba(41, 20, 38, 0.18)'; ctx.lineWidth = 0.8;
+      for (let ay = lowerTopY + 12; ay < baseH - 6; ay += 11) {
+        ctx.beginPath(); ctx.moveTo(sx - 84, ay); ctx.lineTo(sx + 84, ay); ctx.stroke();
+      }
+      // Carved marble roofline balustrade & side chapel arched windows
+      ctx.fillStyle = '#f5ebe0'; ctx.fillRect(sx - 89, lowerTopY - 4, 178, 5);
+      for (const side of [-1, 1]) {
+        const cx3 = sx + side * 58;
+        ctx.fillStyle = 'rgba(254, 240, 138, 0.72)'; ctx.strokeStyle = '#4a2b38'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.roundRect(cx3 - 9, lowerTopY + 16, 18, 30, [9, 9, 0, 0]); ctx.fill(); ctx.stroke();
+        // Triangular stone pediment above each side chapel bay
+        ctx.fillStyle = '#efe2d2';
+        ctx.beginPath(); ctx.moveTo(cx3 - 15, lowerTopY + 11); ctx.lineTo(cx3, lowerTopY + 2); ctx.lineTo(cx3 + 15, lowerTopY + 11); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      // Central Triumphal Corinthian Portico with 4 Fluted Columns, Grand Arched Portal & Pediment Statues!
+      const ptW = 64, ptY = lowerTopY + 4;
+      ctx.fillStyle = '#efe2d2'; ctx.strokeStyle = '#3b1d30'; ctx.lineWidth = 1.2;
+      ctx.fillRect(sx - ptW * 0.5, ptY + 14, ptW, baseH - (ptY + 14));
+      ctx.strokeRect(sx - ptW * 0.5, ptY + 14, ptW, baseH - (ptY + 14));
+      // Warm glowing grand arched cathedral portal inside portico
+      const pGlow = ctx.createLinearGradient(sx, ptY + 24, sx, baseH);
+      pGlow.addColorStop(0, '#fef08a'); pGlow.addColorStop(0.55, '#d97706'); pGlow.addColorStop(1, '#451a03');
+      ctx.fillStyle = pGlow;
+      ctx.beginPath(); ctx.roundRect(sx - 12, ptY + 24, 24, baseH - (ptY + 24), [12, 12, 0, 0]); ctx.fill();
+      // 4 Fluted Istrian Marble Corinthian Columns with Capitals
+      for (const colOff of [-25, -16, 16, 25]) {
+        ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#5c3c44'; ctx.lineWidth = 0.9;
+        ctx.fillRect(sx + colOff - 2.5, ptY + 16, 5, baseH - (ptY + 22));
+        ctx.strokeRect(sx + colOff - 2.5, ptY + 16, 5, baseH - (ptY + 22));
+        ctx.fillRect(sx + colOff - 3.8, ptY + 14, 7.6, 3.5);
+      }
+      // Sculpted Classical Triangular Pediment crowning the entrance portico + 3 Rooftop Statues
+      ctx.fillStyle = '#f5ebe0'; ctx.strokeStyle = '#3b1d30'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(sx - ptW * 0.5 - 5, ptY + 15); ctx.lineTo(sx, ptY - 5); ctx.lineTo(sx + ptW * 0.5 + 5, ptY + 15); ctx.closePath(); ctx.fill(); ctx.stroke();
+      for (const [stX, stY] of [[sx - ptW * 0.5, ptY + 10], [sx, ptY - 12], [sx + ptW * 0.5, ptY + 10]]) {
+        ctx.fillStyle = '#fffbeb'; ctx.fillRect(stX - 2, stY, 4, 8);
+        ctx.beginPath(); ctx.arc(stX, stY - 1.5, 2.0, 0, Math.PI * 2); ctx.fill();
+      }
+      // Grand Marble Waterfront Steps descending to the lagoon
+      ctx.fillStyle = '#e7d8c5'; ctx.fillRect(sx - 44, baseH - 6, 88, 6);
+      ctx.fillStyle = '#cbb5a3'; ctx.fillRect(sx - 48, baseH - 3, 96, 3);
+
+      // C) Faceted 3D Octagonal Stone Drum (Tamburo) + Twin-Arched Clerestory Windows + Sculpted Spiral Volutes!
+      const drH = lowerTopY - drumTopY;
+      // Left-shadowed, center-warm, right-sunlit octagonal drum facets
+      ctx.fillStyle = '#633c52'; ctx.fillRect(sx - drumW * 0.5, drumTopY, drumW * 0.28, drH);
+      ctx.fillStyle = '#a8838c'; ctx.fillRect(sx - drumW * 0.22, drumTopY, drumW * 0.44, drH);
+      ctx.fillStyle = '#e2cdc2'; ctx.fillRect(sx + drumW * 0.22, drumTopY, drumW * 0.28, drH);
+      ctx.strokeStyle = '#291426'; ctx.lineWidth = 1.2;
+      ctx.strokeRect(sx - drumW * 0.5, drumTopY, drumW, drH);
+      // Paired vertical classical pilasters & carved entablature cornice
+      ctx.fillStyle = '#f5ebe0';
+      ctx.fillRect(sx - drumW * 0.5 - 5, drumTopY - 4, drumW + 10, 6);
+      ctx.strokeRect(sx - drumW * 0.5 - 5, drumTopY - 4, drumW + 10, 6);
+      for (const plX of [-54, -26, 0, 26, 54]) {
+        ctx.fillStyle = plX > 0 ? '#fffbeb' : '#cbb5a8';
+        ctx.fillRect(sx + plX - 2.2, drumTopY + 2, 4.4, drH - 4);
+      }
+      // Illuminated twin-arched Palladian clerestory windows on the drum facets
+      for (const wx3 of [-40, -13, 13, 40]) {
+        ctx.fillStyle = 'rgba(254, 240, 138, 0.80)'; ctx.strokeStyle = '#4a2838'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.roundRect(sx + wx3 - 7, drumTopY + 14, 14, 28, [7, 7, 0, 0]); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#4a2838'; ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.moveTo(sx + wx3, drumTopY + 14); ctx.lineTo(sx + wx3, drumTopY + 42); ctx.stroke();
+        ctx.fillStyle = '#f5ebe0';
+        ctx.beginPath(); ctx.moveTo(sx + wx3 - 9, drumTopY + 13); ctx.lineTo(sx + wx3, drumTopY + 7); ctx.lineTo(sx + wx3 + 9, drumTopY + 13); ctx.closePath(); ctx.fill();
+      }
+      // Iconic Multi-Layer Baroque Scrolled Spiral Volute Buttresses (Orecchioni) flanking the drum!
+      for (const side of [-1, 1]) {
+        const vx0 = sx + side * (drumW * 0.5);
+        ctx.fillStyle = side > 0 ? '#dfcbc0' : '#785063';
+        ctx.strokeStyle = '#291426'; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(vx0, drumTopY + 12);
+        ctx.bezierCurveTo(vx0 + side * 24, drumTopY + 8, vx0 + side * 34, drumTopY + 26, vx0 + side * 28, lowerTopY - 2);
+        ctx.lineTo(vx0, lowerTopY - 2);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Carved double spiral volute curls & classical saint statue perched on top
+        ctx.strokeStyle = side > 0 ? '#fffbeb' : 'rgba(255, 240, 225, 0.55)'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(vx0 + side * 14, drumTopY + 26, 6.2, 0, Math.PI * 1.75); ctx.stroke();
+        ctx.beginPath(); ctx.arc(vx0 + side * 18, lowerTopY - 14, 5.2, 0, Math.PI * 1.75); ctx.stroke();
+        ctx.fillStyle = '#fffbeb'; ctx.fillRect(vx0 + side * 16 - 2, drumTopY - 2, 4, 12);
+        ctx.beginPath(); ctx.arc(vx0 + side * 16, drumTopY - 4, 2.1, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // D) Monumental Bezier-Sculpted Ribbed Lead-Sheathed Baroque Dome (Cupola Maggiore)!
+      const dBaseY = drumTopY - 4;
+      const dTopY = dBaseY - 76;
+      const dHalfW = 58;
+      const dmG = ctx.createRadialGradient(sx + 24, dBaseY - 38, 6, sx - 6, dBaseY - 24, 82);
+      dmG.addColorStop(0, '#f7e6de');
+      dmG.addColorStop(0.28, '#b89ea8');
+      dmG.addColorStop(0.62, '#644862');
+      dmG.addColorStop(1, '#261730');
+      ctx.fillStyle = dmG; ctx.strokeStyle = '#241024'; ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(sx - dHalfW, dBaseY);
+      ctx.bezierCurveTo(sx - dHalfW - 4, dBaseY - 46, sx - 30, dTopY + 6, sx, dTopY);
+      ctx.bezierCurveTo(sx + 30, dTopY + 6, sx + dHalfW + 4, dBaseY - 46, sx + dHalfW, dBaseY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // Raised double-line lead dome seam ribs & warm sunset rim reflection!
+      for (const ribX of [-42, -26, -10, 10, 26, 42]) {
+        const isSun = ribX > 0;
+        ctx.strokeStyle = isSun ? 'rgba(255, 240, 220, 0.58)' : 'rgba(32, 16, 36, 0.48)';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(sx + ribX * 0.16, dTopY + 2);
+        ctx.bezierCurveTo(sx + ribX * 0.85, dTopY + 18, sx + ribX * 1.12, dBaseY - 24, sx + ribX, dBaseY);
+        ctx.stroke();
+      }
+      // Subtle horizontal lead-sheet seam rings across dome
+      ctx.strokeStyle = 'rgba(255, 240, 220, 0.18)'; ctx.lineWidth = 0.9;
+      ctx.beginPath(); ctx.moveTo(sx - 50, dBaseY - 24); ctx.quadraticCurveTo(sx, dBaseY - 19, sx + 50, dBaseY - 24); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sx - 36, dBaseY - 48); ctx.quadraticCurveTo(sx, dBaseY - 44, sx + 36, dBaseY - 48); ctx.stroke();
+
+      // E) Ornate Octagonal Marble Lantern Cupola (Lanterna) + Golden Statue Finial!
+      const lanW = 28, lanH = 28, lanY = dTopY - lanH + 2;
+      ctx.fillStyle = '#f5ebe0'; ctx.strokeStyle = '#3b1d30'; ctx.lineWidth = 1.1;
+      ctx.fillRect(sx - lanW * 0.5 - 3, dTopY - 2, lanW + 6, 4); // marble oculus collar
+      ctx.fillRect(sx - lanW * 0.5, lanY, lanW, lanH); ctx.strokeRect(sx - lanW * 0.5, lanY, lanW, lanH);
+      // 3 arched glowing lantern colonnade windows
+      ctx.fillStyle = '#fef08a';
+      for (const lx2 of [-9, -2.5, 4]) {
+        ctx.beginPath(); ctx.roundRect(sx + lx2, lanY + 6, 5, 16, [2.5, 2.5, 0, 0]); ctx.fill();
+      }
+      // Mini scalloped lead lantern cap + golden orb & sculpted golden statue of the Virgin!
+      ctx.fillStyle = '#f5ebe0'; ctx.fillRect(sx - lanW * 0.5 - 3, lanY - 3, lanW + 6, 3.5);
+      const capG = ctx.createLinearGradient(sx - 12, lanY - 18, sx + 12, lanY - 3);
+      capG.addColorStop(0, '#59405c'); capG.addColorStop(0.65, '#c2a6ac'); capG.addColorStop(1, '#f5dfd5');
+      ctx.fillStyle = capG;
+      ctx.beginPath();
+      ctx.moveTo(sx - 12, lanY - 3); ctx.quadraticCurveTo(sx, lanY - 22, sx + 12, lanY - 3);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#92400e'; ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.arc(sx, lanY - 19, 3.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillRect(sx - 1.4, lanY - 28, 2.8, 7);
+      ctx.beginPath(); ctx.arc(sx, lanY - 29.5, 1.8, 0, Math.PI * 2); ctx.fill();
+
+      // 3. PALAZZO DUCALE (Doge's Palace — Pink-and-White Verona Marble Diamond Facade,
+      //    Double Venetian Gothic Istrian Marble Colonnades, Pierced Quatrefoils, Central Gothic Balcony & Marble Merlatura Cresting!)
+      const dpX = bx + 678;
+      const dpW = 196;
+      const dpTopY = h * 0.505;
+      const dpH = baseH - dpTopY;
+      const dpCx = dpX + dpW * 0.5;
+
+      // Upper Pink-and-White Verona Marble Facade with Signature Diamond Diaper Pattern!
+      const upH = dpH * 0.56;
+      const dpG = ctx.createLinearGradient(dpX, dpTopY, dpX + dpW, dpTopY + upH);
+      dpG.addColorStop(0, '#c8989c'); dpG.addColorStop(0.45, '#e8c4be'); dpG.addColorStop(0.85, '#f5dfd6'); dpG.addColorStop(1, '#d8b4b0');
+      ctx.fillStyle = dpG; ctx.strokeStyle = '#3b1d2e'; ctx.lineWidth = 1.2;
+      ctx.fillRect(dpX, dpTopY, dpW, upH); ctx.strokeRect(dpX, dpTopY, dpW, upH);
+      // Subtle Verona pink-and-cream diamond-diaper marble stonework
+      ctx.strokeStyle = 'rgba(255, 250, 245, 0.34)'; ctx.lineWidth = 0.85;
+      for (let dx = dpX + 8; dx < dpX + dpW - 8; dx += 14) {
+        for (let dy = dpTopY + 8; dy < dpTopY + upH - 8; dy += 14) {
+          ctx.beginPath();
+          ctx.moveTo(dx, dy - 5); ctx.lineTo(dx + 5, dy); ctx.lineTo(dx, dy + 5); ctx.lineTo(dx - 5, dy);
+          ctx.closePath(); ctx.stroke();
+        }
+      }
+      // Pierced White Istrian Marble Rooftop Cresting (Merlatura) along Palazzo Ducale parapet!
+      ctx.fillStyle = '#fff7ed'; ctx.strokeStyle = '#5c3c48'; ctx.lineWidth = 0.9;
+      ctx.fillRect(dpX - 2, dpTopY - 4, dpW + 4, 4.5);
+      for (let mx2 = dpX + 4; mx2 < dpX + dpW - 4; mx2 += 12) {
+        ctx.beginPath(); ctx.moveTo(mx2 - 4, dpTopY - 4); ctx.lineTo(mx2, dpTopY - 13); ctx.lineTo(mx2 + 4, dpTopY - 4); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      // Tall Illuminated Venetian Gothic Lancet Windows + Grand Central Balcony Gable!
+      for (const wx4 of [dpX + 24, dpX + 56, dpX + 140, dpX + 172]) {
+        ctx.fillStyle = 'rgba(254, 240, 138, 0.80)'; ctx.strokeStyle = '#fffbeb'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.roundRect(wx4 - 7, dpTopY + 18, 14, 34, [7, 7, 1, 1]); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#5c342e'; ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.moveTo(wx4, dpTopY + 18); ctx.lineTo(wx4, dpTopY + 52); ctx.stroke();
+      }
+      // Grand Central Balcone della Loggia with Carved Gothic Pinnacle Spire!
+      ctx.fillStyle = '#fff7ed'; ctx.strokeStyle = '#4a2838'; ctx.lineWidth = 1.2;
+      ctx.fillRect(dpCx - 18, dpTopY + 8, 36, upH - 10); ctx.strokeRect(dpCx - 18, dpTopY + 8, 36, upH - 10);
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath(); ctx.roundRect(dpCx - 10, dpTopY + 18, 20, 34, [10, 10, 1, 1]); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fffbeb';
+      ctx.beginPath(); ctx.moveTo(dpCx - 19, dpTopY + 8); ctx.lineTo(dpCx, dpTopY - 22); ctx.lineTo(dpCx + 19, dpTopY + 8); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(dpCx, dpTopY - 24, 2.2, 0, Math.PI * 2); ctx.fill();
+
+      // Middle Open Gothic Loggia (Istrian Marble Colonnade + Pierced Circular Quatrefoils!)
+      const logY = dpTopY + upH;
+      const logH = dpH * 0.22;
+      ctx.fillStyle = '#381b32'; ctx.fillRect(dpX, logY, dpW, logH);
+      ctx.fillStyle = '#f5ebe0'; ctx.fillRect(dpX - 2, logY - 2, dpW + 4, 4);
+      ctx.fillRect(dpX - 2, logY + logH - 3, dpW + 4, 4);
+      for (let lx3 = dpX + 8; lx3 < dpX + dpW - 6; lx3 += 14) {
+        // Pierced circular quatrefoil medallion in upper spandrel + slender white column
+        ctx.strokeStyle = '#fff7ed'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.arc(lx3, logY + 6, 3.2, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = '#f5ebe0'; ctx.fillRect(lx3 - 1.2, logY + 10, 2.4, logH - 12);
+      }
+
+      // Lower Ground-Floor Pointed Istrian Marble Arcade descending to the Waterfront!
+      const arcY = logY + logH;
+      const arcH = baseH - arcY;
+      ctx.fillStyle = '#291326'; ctx.fillRect(dpX, arcY, dpW, arcH);
+      for (let ax2 = dpX + 14; ax2 < dpX + dpW - 10; ax2 += 24) {
+        ctx.fillStyle = '#efe2d2';
+        ctx.fillRect(ax2 - 2.2, arcY + 8, 4.4, arcH - 8);
+        ctx.strokeStyle = '#fff7ed'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(ax2 + 12, arcY + 10, 10, Math.PI, 0); ctx.stroke();
+      }
+      ctx.strokeStyle = '#291426'; ctx.lineWidth = 1.2;
+      ctx.strokeRect(dpX, dpTopY, dpW, dpH);
+    }
+
+    // Shimmering Venetian Lagoon Water with Golden Sun Reflection Path & Distant Gliding Gondolas
+    const lagG = ctx.createLinearGradient(0, h * 0.68, 0, h);
+    lagG.addColorStop(0, '#164e63'); lagG.addColorStop(0.45, '#0c4a6e'); lagG.addColorStop(1, '#082f49');
+    ctx.fillStyle = lagG;
+    ctx.fillRect(0, h * 0.68, w, h * 0.32);
+    for (let r = 0; r < 18; r++) {
+      const spread = 24 + r * 9;
+      const ry = h * 0.69 + r * 11;
+      const rx = sunX + Math.sin(time * 2.2 + r * 0.9) * 18 - spread * 0.5;
+      ctx.fillStyle = `rgba(254, 240, 138, ${(0.36 - r * 0.016).toFixed(3)})`;
+      ctx.fillRect(rx, ry, spread, 2.2);
+    }
+    for (let g = 0; g < 2; g++) {
+      const gx = ((time * (18 + g * 7) * (g === 0 ? 1 : -1) + g * 540 - camX * 0.1) % (w + 200) + (w + 200)) % (w + 200) - 100;
+      const gy = h * 0.72 + g * 18;
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath(); ctx.moveTo(gx - 22, gy - 4); ctx.quadraticCurveTo(gx, gy + 5, gx + 22, gy - 5); ctx.lineTo(gx + 16, gy); ctx.lineTo(gx - 16, gy); ctx.closePath(); ctx.fill();
+    }
+  }
+
+  // Shared Deterministic Staggered Red-Brick Masonry Helper (Zero-Flicker, High-FPS Architectural Realism)
+  function drawBrickMasonry(ctx, x, y, w, h, tones, mortarCol, seed) {
+    ctx.fillStyle = mortarCol;
+    ctx.fillRect(x, y, w, h);
+    const bw = 20, bh = 8, gap = 1.4;
+    const rows = Math.ceil(h / bh);
+    const cols = Math.ceil(w / bw) + 1;
+    const nTones = tones.length;
+    for (let r = 0; r < rows; r++) {
+      const by = y + r * bh;
+      const drawH = Math.min(bh - gap, y + h - by);
+      if (drawH <= 0.5) continue;
+      const stagger = (r & 1) ? (bw * 0.5) : 0;
+      for (let c = -1; c < cols; c++) {
+        const rawX = x + c * bw + stagger;
+        const bx1 = Math.max(x, rawX);
+        const bx2 = Math.min(x + w, rawX + bw - gap);
+        if (bx2 - bx1 <= 0.5) continue;
+        const hVal = Math.abs((r * 73 + c * 37 + seed * 19) ^ (r * 13 + c * 97));
+        ctx.fillStyle = tones[hVal % nTones];
+        ctx.fillRect(bx1, by, bx2 - bx1, drawH);
+      }
+    }
+  }
+
+  function drawVeniceMidground(ctx, camX, w, h, time) {
+    // Museum-Grade Venetian Red-Brick & Istrian Limestone Palazzi along the Grand Canal:
+    // - Real Staggered Venetian Red Clay Brickwork (Mattone Veneziano) + Aged Lime Plaster Patches
+    // - Alternating Carved Istrian Marble Corner Quoins + Rusticated Stone Water-Level Plinth & Tidal Patina
+    // - 1-in-4 Open Side-Canal Red-Brick & Marble Bridge Vista (revealing St. Mark's Campanile & Salute Dome!)
+    // - Gothic Polifora Ogee Arches with Quatrefoil Tracery, Balustraded Balconies, Trailing Ivy & Geraniums
+    // - Scalloped Terracotta Barrel-Tile Roofs, Red-Brick Flared Camini Chimneys, Mask Atelier & Murano Gallery!
+    const slotW = 268;
+    const parallax = 0.28;
+    const baseCanalY = 626;
+    const startIdx = Math.floor((camX * parallax) / slotW) - 1;
+    const endIdx = Math.ceil((camX * parallax + w) / slotW) + 1;
+
+    const palConfigs = [
+      {
+        h: 294,
+        bricks: ['#a83c2a', '#912e20', '#ba4d36', '#7d261a', '#c45e40'],
+        mortar: '#d9c5ae',
+        stucco: 'rgba(244, 214, 184, 0.22)',
+        trim: '#fef3c7',
+        shutter: '#14532d',
+        shop: 'masks'
+      },
+      {
+        h: 326,
+        bricks: ['#b54a2c', '#9c3a21', '#c75d38', '#85301b', '#d17045'],
+        mortar: '#e3d0b8',
+        stucco: 'rgba(254, 232, 198, 0.20)',
+        trim: '#fffbeb',
+        shutter: '#1e3a5f',
+        shop: 'murano'
+      },
+      null, // Slot 2: OPEN SIDE-CANAL & RED-BRICK ARCHED VENETIAN FOOTBRIDGE VISTA!
+      {
+        h: 280,
+        bricks: ['#962b38', '#7d202c', '#ad3846', '#691924', '#b84852'],
+        mortar: '#dfd0c4',
+        stucco: 'rgba(255, 224, 226, 0.16)',
+        trim: '#ffe4e6',
+        shutter: '#14532d',
+        shop: 'watergate'
+      },
+    ];
+
+    for (let i = startIdx; i <= endIdx; i++) {
+      const px = i * slotW - camX * parallax;
+      const slot = ((i % 4) + 4) % 4;
+
+      if (slot === 2) {
+        // OPEN SIDE-CANAL VISTA WITH RED-BRICK & ISTRIAN MARBLE ARCHED VENETIAN BRIDGE (Ponte)!
+        const brCx = px + slotW * 0.5;
+        const brY = baseCanalY - 12;
+        ctx.save();
+        // Red-brick arched Venetian bridge body with curved stone soffit
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(px + 10, baseCanalY + 6);
+        ctx.lineTo(px + 10, brY - 22);
+        ctx.quadraticCurveTo(brCx, brY - 82, px + slotW - 10, brY - 22);
+        ctx.lineTo(px + slotW - 10, baseCanalY + 6);
+        ctx.lineTo(px + slotW - 44, baseCanalY + 6);
+        ctx.quadraticCurveTo(brCx, brY - 48, px + 44, baseCanalY + 6);
+        ctx.closePath();
+        ctx.clip();
+        drawBrickMasonry(ctx, px + 10, brY - 84, slotW - 20, 100, ['#a63b29', '#8c2d1f', '#b84c35', '#782519'], '#e2d0bc', i + 9);
+        ctx.restore();
+        // Crisp Istrian marble arch ring & stepped bridge coping
+        ctx.strokeStyle = '#f5ebe0'; ctx.lineWidth = 4.2;
+        ctx.beginPath(); ctx.moveTo(px + 42, baseCanalY + 4); ctx.quadraticCurveTo(brCx, brY - 50, px + slotW - 42, baseCanalY + 4); ctx.stroke();
+        ctx.strokeStyle = '#443527'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(px + 10, brY - 22); ctx.quadraticCurveTo(brCx, brY - 82, px + slotW - 10, brY - 22); ctx.stroke();
+
+        // Carved Istrian marble balustrade along the curved bridge crest
+        ctx.strokeStyle = '#fffbeb'; ctx.lineWidth = 3.0;
+        ctx.beginPath(); ctx.moveTo(px + 14, brY - 35); ctx.quadraticCurveTo(brCx, brY - 94, px + slotW - 14, brY - 35); ctx.stroke();
+        ctx.strokeStyle = '#e7d8c5'; ctx.lineWidth = 2.0;
+        for (let u = 0.06; u <= 0.94; u += 0.065) {
+          const bx2 = px + 14 + u * (slotW - 28);
+          const archLift = 4 * u * (1 - u) * 30;
+          ctx.beginPath(); ctx.moveTo(bx2, brY - 22 - archLift); ctx.lineTo(bx2, brY - 35 - archLift); ctx.stroke();
+        }
+        // Ornate wrought-iron Venetian streetlamp at bridge crest (clean open vista of Campanile & Salute!)
+        const lpX = brCx, lpY = brY - 66;
+        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.8;
+        ctx.beginPath(); ctx.moveTo(lpX, lpY); ctx.lineTo(lpX, lpY - 54); ctx.stroke();
+        const lGlow = ctx.createRadialGradient(lpX, lpY - 60, 3, lpX, lpY - 60, 42);
+        lGlow.addColorStop(0, 'rgba(254, 240, 138, 0.78)'); lGlow.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = lGlow; ctx.beginPath(); ctx.arc(lpX, lpY - 60, 42, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fef9c3'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(lpX - 6, lpY - 66); ctx.lineTo(lpX + 6, lpY - 66); ctx.lineTo(lpX + 4, lpY - 54); ctx.lineTo(lpX - 4, lpY - 54); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.restore();
+        continue;
+      }
+
+      const pc = palConfigs[slot];
+      const pw = slotW - 8;
+      const bx = px + 4;
+      const py = baseCanalY - pc.h;
+
+      ctx.save();
+      // 1. REAL STAGGERED VENETIAN RED-BRICK MASONRY FACADE + AGED LIME PLASTER VEILS!
+      drawBrickMasonry(ctx, bx, py, pw, pc.h - 32, pc.bricks, pc.mortar, i * 11 + slot);
+
+      // Soft sunset directional lighting & warm aged Venetian plaster patina over brickwork
+      const shG = ctx.createLinearGradient(bx, py, bx + pw, baseCanalY);
+      shG.addColorStop(0, 'rgba(255, 232, 195, 0.18)');
+      shG.addColorStop(0.55, 'rgba(0, 0, 0, 0)');
+      shG.addColorStop(1, 'rgba(28, 10, 6, 0.34)');
+      ctx.fillStyle = shG;
+      ctx.fillRect(bx, py, pw, pc.h - 32);
+
+      // Soft weathered lime-plaster patches revealing warm red brick beneath
+      ctx.fillStyle = pc.stucco;
+      ctx.beginPath(); ctx.roundRect(bx + 18, py + 14, 62, 54, 14); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(bx + pw - 78, py + 110, 58, 46, 12); ctx.fill();
+
+      // Alternating Carved Istrian Limestone Corner Quoins framing both palazzo edges!
+      for (let qy = py + 12; qy < baseCanalY - 40; qy += 14) {
+        const longQ = ((Math.floor((qy - py) / 14) & 1) === 0);
+        const qw = longQ ? 14 : 9;
+        ctx.fillStyle = '#efe5d6'; ctx.strokeStyle = 'rgba(68, 53, 39, 0.45)'; ctx.lineWidth = 0.9;
+        ctx.fillRect(bx, qy, qw, 12); ctx.strokeRect(bx, qy, qw, 12);
+        ctx.fillRect(bx + pw - qw, qy, qw, 12); ctx.strokeRect(bx + pw - qw, qy, qw, 12);
+      }
+
+      // Rusticated Istrian Limestone Water-Level Plinth + Dark Emerald Tidal Algae Patina!
+      const plinthH = 40;
+      const plG = ctx.createLinearGradient(bx, baseCanalY - plinthH, bx, baseCanalY + 6);
+      plG.addColorStop(0, '#e5ddd0'); plG.addColorStop(0.52, '#b0a89e'); plG.addColorStop(0.80, '#3f6259'); plG.addColorStop(1, '#115e59');
+      ctx.fillStyle = plG;
+      ctx.fillRect(bx, baseCanalY - plinthH, pw, plinthH + 6);
+      ctx.strokeStyle = 'rgba(28, 25, 23, 0.35)'; ctx.lineWidth = 1.0;
+      for (let sy = baseCanalY - plinthH + 12; sy < baseCanalY; sy += 12) {
+        ctx.beginPath(); ctx.moveTo(bx, sy); ctx.lineTo(bx + pw, sy); ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(28, 16, 12, 0.72)'; ctx.lineWidth = 1.6;
+      ctx.strokeRect(bx, py, pw, pc.h + 6);
+
+      // 2. SCALLOPED TERRACOTTA BARREL-TILE ROOF + RED-BRICK FLARED CAMINO CHIMNEY
+      const rfG = ctx.createLinearGradient(bx, py - 28, bx, py + 8);
+      rfG.addColorStop(0, '#b4421d'); rfG.addColorStop(0.55, '#8c2d14'); rfG.addColorStop(1, '#4a1508');
+      ctx.fillStyle = rfG; ctx.strokeStyle = '#290d04'; ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(bx - 10, py + 6); ctx.lineTo(bx + 22, py - 26); ctx.lineTo(bx + pw - 22, py - 26); ctx.lineTo(bx + pw + 10, py + 6);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Overlapping barrel-tile ribs & scalloped terracotta eaves
+      ctx.strokeStyle = 'rgba(253, 186, 116, 0.32)'; ctx.lineWidth = 1.2;
+      for (let tx = bx + 6; tx < bx + pw - 4; tx += 12) {
+        ctx.beginPath(); ctx.moveTo(tx, py - 24); ctx.lineTo(tx + (tx < bx + pw * 0.5 ? -5 : 5), py + 4); ctx.stroke();
+      }
+      ctx.fillStyle = '#9a3412';
+      for (let ex = bx - 4; ex <= bx + pw + 2; ex += 12) {
+        ctx.beginPath(); ctx.arc(ex, py + 5, 5.5, 0, Math.PI); ctx.fill();
+      }
+      // Classic Venetian Red-Brick Flared Inverted-Cone Chimney (Camino)
+      const chX = (slot === 1) ? (bx + pw - 54) : (bx + 30);
+      ctx.fillStyle = '#9a3412'; ctx.strokeStyle = '#290d04'; ctx.lineWidth = 1.2;
+      ctx.fillRect(chX + 4, py - 36, 12, 18); ctx.strokeRect(chX + 4, py - 36, 12, 18);
+      ctx.beginPath();
+      ctx.moveTo(chX - 4, py - 49); ctx.lineTo(chX + 24, py - 49); ctx.lineTo(chX + 16, py - 36); ctx.lineTo(chX + 4, py - 36);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = pc.trim; ctx.fillRect(chX - 6, py - 52, 32, 3.8);
+
+      // Carved Istrian Marble Dentil Cornice & Floor Stringcourses
+      ctx.fillStyle = pc.trim; ctx.strokeStyle = '#78716c'; ctx.lineWidth = 1.0;
+      ctx.fillRect(bx - 5, py + 2, pw + 10, 7); ctx.strokeRect(bx - 5, py + 2, pw + 10, 7);
+      for (let dx = bx + 2; dx < bx + pw - 4; dx += 10) {
+        ctx.fillStyle = 'rgba(68, 53, 39, 0.38)'; ctx.fillRect(dx, py + 9, 4.5, 4);
+      }
+      ctx.fillStyle = pc.trim;
+      ctx.fillRect(bx - 2, py + 84, pw + 4, 5.5);
+      ctx.fillRect(bx - 2, py + 180, pw + 4, 6);
+
+      // 3. TOP STORY: DEEPLY RECESSED ARCHED WINDOWS WITH LOUVERED VENETIAN SHUTTERS
+      for (const wx of [bx + 26, bx + pw * 0.5 - 15, bx + pw - 56]) {
+        const wy = py + 22;
+        ctx.fillStyle = pc.shutter; ctx.strokeStyle = '#052e16'; ctx.lineWidth = 1.0;
+        ctx.fillRect(wx - 10, wy + 4, 9, 44); ctx.strokeRect(wx - 10, wy + 4, 9, 44);
+        ctx.fillRect(wx + 31, wy + 4, 9, 44); ctx.strokeRect(wx + 31, wy + 4, 9, 44);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.24)'; ctx.lineWidth = 0.8;
+        for (let ly = wy + 9; ly < wy + 44; ly += 6) {
+          ctx.beginPath(); ctx.moveTo(wx - 9, ly); ctx.lineTo(wx - 2, ly); ctx.moveTo(wx + 32, ly); ctx.lineTo(wx + 39, ly); ctx.stroke();
+        }
+        const uG = ctx.createLinearGradient(wx, wy, wx, wy + 48);
+        uG.addColorStop(0, '#fffbeb'); uG.addColorStop(0.55, '#fbbf24'); uG.addColorStop(1, '#92400e');
+        ctx.fillStyle = uG; ctx.strokeStyle = pc.trim; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.roundRect(wx, wy, 30, 48, [15, 15, 2, 2]); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.moveTo(wx + 15, wy + 2); ctx.lineTo(wx + 15, wy + 48); ctx.moveTo(wx, wy + 24); ctx.lineTo(wx + 30, wy + 24); ctx.stroke();
+        ctx.fillStyle = pc.trim; ctx.fillRect(wx - 4, wy + 48, 38, 4.5);
+      }
+
+      // 4. PIANO NOBILE: VENETIAN GOTHIC POLIFORA (TRIPLE OGEE ARCHES + QUATREFOIL TRACERY + MARBLE BALCONY + IVY!)
+      const midY = py + 98;
+      const midCx = bx + pw * 0.5;
+      ctx.fillStyle = 'rgba(254, 243, 199, 0.22)'; ctx.strokeStyle = pc.trim; ctx.lineWidth = 1.8;
+      ctx.fillRect(midCx - 56, midY - 4, 112, 68); ctx.strokeRect(midCx - 56, midY - 4, 112, 68);
+      for (let a = -1; a <= 1; a++) {
+        const ax = midCx + a * 33 - 13;
+        const wG = ctx.createLinearGradient(ax, midY + 4, ax, midY + 62);
+        wG.addColorStop(0, '#fffbeb'); wG.addColorStop(0.45, '#fde047'); wG.addColorStop(1, '#b45309');
+        ctx.fillStyle = wG; ctx.strokeStyle = pc.trim; ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(ax, midY + 62); ctx.lineTo(ax, midY + 24);
+        ctx.bezierCurveTo(ax, midY + 10, ax + 10, midY + 8, ax + 13, midY + 2);
+        ctx.bezierCurveTo(ax + 16, midY + 8, ax + 26, midY + 10, ax + 26, midY + 24);
+        ctx.lineTo(ax + 26, midY + 62); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#29150c'; ctx.strokeStyle = pc.trim; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.arc(ax + 13, midY + 11, 3.3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      ctx.fillStyle = pc.trim;
+      for (const colX of [midCx - 17, midCx + 15]) {
+        ctx.fillRect(colX, midY + 20, 4, 42);
+        ctx.fillRect(colX - 2, midY + 18, 8, 4);
+      }
+      // Carved Marble Balustraded Balcony + Cascading Ivy & Geraniums
+      ctx.fillStyle = pc.trim; ctx.strokeStyle = '#78716c'; ctx.lineWidth = 1.2;
+      ctx.fillRect(midCx - 64, midY + 60, 128, 5); ctx.strokeRect(midCx - 64, midY + 60, 128, 5);
+      ctx.fillRect(midCx - 62, midY + 74, 124, 5); ctx.strokeRect(midCx - 62, midY + 74, 124, 5);
+      for (let bl = midCx - 56; bl <= midCx + 56; bl += 10) {
+        ctx.fillStyle = pc.trim; ctx.fillRect(bl - 2, midY + 65, 4, 9);
+      }
+      for (const fx of [midCx - 44, midCx + 44]) {
+        ctx.fillStyle = '#15803d';
+        ctx.beginPath(); ctx.ellipse(fx, midY + 58, 12, 4.4, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f43f5e';
+        for (const d of [-6, 0, 6]) { ctx.beginPath(); ctx.arc(fx + d, midY + 56, 2.5, 0, Math.PI * 2); ctx.fill(); }
+      }
+
+      // 5. GROUND-FLOOR WATERFRONT (Venetian Outdoor Caffè with Seated Guests & Waiter / Luxury Murano Crystal Boutique / Porta d'Acqua)
+      const gfY = py + 190;
+      const quayY = baseCanalY - 8;
+      if (pc.shop === 'masks') {
+        // A. CLASSIC VENETIAN WATERFRONT CAFFÈ WITH OUTDOOR TABLES, SEATED GUESTS & WAITER!
+        const cafX = bx + 16;
+        const cafW = pw - 32;
+        const cafH = quayY - gfY;
+
+        // Carved dark walnut café facade & warm golden interior window glow
+        ctx.fillStyle = '#3b1d12'; ctx.strokeStyle = '#1c0d07'; ctx.lineWidth = 1.6;
+        ctx.fillRect(cafX, gfY, cafW, cafH); ctx.strokeRect(cafX, gfY, cafW, cafH);
+
+        // Gilded café fascia signboard ("CAFFÈ VENEZIA")
+        ctx.fillStyle = '#1f0f0a'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.2;
+        ctx.fillRect(cafX + 18, gfY - 12, cafW - 36, 13); ctx.strokeRect(cafX + 18, gfY - 12, cafW - 36, 13);
+        ctx.fillStyle = '#fef08a'; ctx.font = 'bold 8px serif'; ctx.textAlign = 'center';
+        ctx.fillText('CAFFÈ VENEZIA', midCx, gfY - 3);
+
+        // Illuminated arched café windows & central glazed entrance door
+        const winG = ctx.createLinearGradient(cafX, gfY + 14, cafX, quayY - 8);
+        winG.addColorStop(0, '#fffbeb'); winG.addColorStop(0.5, '#fcd34d'); winG.addColorStop(1, '#b45309');
+        for (const [wx2, ww2] of [[cafX + 8, 66], [midCx - 24, 48], [cafX + cafW - 74, 66]]) {
+          ctx.fillStyle = winG; ctx.strokeStyle = '#5c2c16'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.roundRect(wx2, gfY + 14, ww2, cafH - 22, [10, 10, 1, 1]); ctx.fill(); ctx.stroke();
+          // Interior hanging warm pendant lamp inside window
+          ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.moveTo(wx2 + ww2 * 0.5, gfY + 14); ctx.lineTo(wx2 + ww2 * 0.5, gfY + 28); ctx.stroke();
+          ctx.fillStyle = '#fef9c3'; ctx.beginPath(); ctx.arc(wx2 + ww2 * 0.5, gfY + 30, 3.8, 0, Math.PI * 2); ctx.fill();
+          // Fine windowpane muntins
+          ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(wx2 + ww2 * 0.5, gfY + 16); ctx.lineTo(wx2 + ww2 * 0.5, quayY - 8); ctx.moveTo(wx2, gfY + 40); ctx.lineTo(wx2 + ww2, gfY + 40); ctx.stroke();
+        }
+
+        // Scalloped Burgundy & Cream Striped Café Awning with Cast Shadow
+        ctx.fillStyle = 'rgba(20, 8, 4, 0.28)';
+        ctx.fillRect(cafX - 2, gfY + 16, cafW + 4, 7);
+        const stCnt = 10;
+        const stW = (cafW + 10) / stCnt;
+        for (let s = 0; s < stCnt; s++) {
+          const sx2 = cafX - 5 + s * stW;
+          ctx.fillStyle = (s % 2 === 0) ? '#9f1239' : '#fffbeb';
+          ctx.fillRect(sx2, gfY + 1, stW + 0.5, 14);
+          ctx.beginPath(); ctx.arc(sx2 + stW * 0.5, gfY + 15, stW * 0.5, 0, Math.PI); ctx.fill();
+        }
+        ctx.strokeStyle = '#4c0519'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.moveTo(cafX - 5, gfY + 1); ctx.lineTo(cafX + cafW + 5, gfY + 1); ctx.stroke();
+
+        // Raised Istrian Stone Waterfront Café Terrace Floor (Fondamenta)
+        ctx.fillStyle = '#e7dfd3'; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.2;
+        ctx.fillRect(bx + 6, quayY - 6, pw - 12, 8); ctx.strokeRect(bx + 6, quayY - 6, pw - 12, 8);
+
+        // Classic A-frame Chalkboard Menu Easel on left terrace edge
+        ctx.fillStyle = '#1c1917'; ctx.strokeStyle = '#92400e'; ctx.lineWidth = 1.3;
+        ctx.fillRect(bx + 14, quayY - 27, 15, 20); ctx.strokeRect(bx + 14, quayY - 27, 15, 20);
+        ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.moveTo(bx + 17, quayY - 21); ctx.lineTo(bx + 26, quayY - 21); ctx.moveTo(bx + 17, quayY - 16); ctx.lineTo(bx + 25, quayY - 16); ctx.stroke();
+
+        // --- OUTDOOR TABLE 1 (LEFT): Couple Enjoying Venetian Espresso with Subtle Natural Motion! ---
+        const t1x = midCx - 54, ty = quayY - 6;
+        const g1Nod = Math.sin(time * 2.1 + i * 1.4) * 1.2;
+        const g1Breath = Math.sin(time * 1.5 + i) * 0.6;
+        const g1Sip = Math.max(0, (Math.sin(time * 0.95 + i * 1.7) - 0.58) / 0.42);
+        const l1Nod = Math.sin(time * 2.4 + i * 1.4 + 2.2) * 1.3;
+        const l1Talk = Math.sin(time * 2.8 + i) * 2.2;
+        const g2Nod = Math.sin(time * 1.9 + i * 2.1 + 1.0) * 1.2;
+        const g2Sip = Math.max(0, (Math.sin(time * 0.85 + i * 2.3 + 2.4) - 0.62) / 0.38);
+
+        // Wrought-iron bistro chairs
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.4;
+        for (const side of [-1, 1]) {
+          const chx = t1x + side * 22;
+          ctx.beginPath(); ctx.moveTo(chx, ty); ctx.lineTo(chx, ty - 22); ctx.moveTo(chx - side * 9, ty - 11); ctx.lineTo(chx, ty - 11); ctx.moveTo(chx - side * 8, ty); ctx.lineTo(chx - side * 8, ty - 11); ctx.stroke();
+        }
+        // Seated Gentleman (left: subtle nod, breathing & periodic espresso sip!)
+        ctx.fillStyle = '#1e3a8a'; ctx.beginPath(); ctx.roundRect(t1x - 25, ty - 29 + g1Breath, 13, 18, [5, 5, 1, 1]); ctx.fill();
+        ctx.fillStyle = '#e7b58a'; ctx.beginPath(); ctx.arc(t1x - 18 + g1Nod * 0.4, ty - 34 + g1Breath + g1Nod * 0.5, 4.8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#334155'; ctx.beginPath(); ctx.ellipse(t1x - 18 + g1Nod * 0.4, ty - 38 + g1Breath + g1Nod * 0.5, 7.2, 1.8, -0.08 + g1Nod * 0.03, 0, Math.PI * 2); ctx.fill();
+        ctx.fillRect(t1x - 22 + g1Nod * 0.4, ty - 42 + g1Breath + g1Nod * 0.5, 8, 4.5);
+        const cup1X = t1x - 8 - g1Sip * 4.5;
+        const cup1Y = ty - 22 - g1Sip * 9.5;
+        ctx.strokeStyle = '#1e3a8a'; ctx.lineWidth = 2.4;
+        ctx.beginPath(); ctx.moveTo(t1x - 14, ty - 25 + g1Breath); ctx.lineTo(cup1X, cup1Y); ctx.stroke();
+        if (g1Sip > 0.08) {
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(cup1X - 1.5, cup1Y - 2.5, 3.8, 3.8);
+        }
+
+        // Seated Lady (right: gentle conversational head tilt & animated hand gesture!)
+        ctx.fillStyle = '#be123c'; ctx.beginPath(); ctx.roundRect(t1x + 12, ty - 29 - g1Breath * 0.7, 13, 18, [5, 5, 1, 1]); ctx.fill();
+        ctx.fillStyle = '#f1c29b'; ctx.beginPath(); ctx.arc(t1x + 18 - l1Nod * 0.35, ty - 34 + l1Nod * 0.5, 4.6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#78350f'; ctx.beginPath(); ctx.arc(t1x + 21 - l1Nod * 0.35, ty - 35 + l1Nod * 0.5, 3.6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fde68a'; ctx.beginPath(); ctx.ellipse(t1x + 18 - l1Nod * 0.35, ty - 38 + l1Nod * 0.5, 8.2, 2.0, 0.1 - l1Nod * 0.03, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#be123c'; ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.moveTo(t1x + 14, ty - 25); ctx.lineTo(t1x + 8, ty - 22 - Math.abs(l1Talk) * 0.9); ctx.stroke();
+
+        // White-linen-draped bistro table + espresso cups & gently flickering brass candle
+        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.moveTo(t1x, ty); ctx.lineTo(t1x, ty - 17); ctx.moveTo(t1x - 7, ty); ctx.lineTo(t1x + 7, ty); ctx.stroke();
+        ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#d6c3aa'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.moveTo(t1x - 15, ty - 18); ctx.lineTo(t1x + 15, ty - 18); ctx.lineTo(t1x + 13, ty - 9); ctx.lineTo(t1x - 13, ty - 9); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        if (g1Sip <= 0.08) ctx.fillRect(t1x - 10, ty - 22, 4, 4);
+        ctx.fillRect(t1x + 6, ty - 22, 4, 4);
+        ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(t1x, ty - 22 + Math.sin(time * 9 + i) * 0.4, 2.3, 0, Math.PI * 2); ctx.fill();
+
+        // --- OUTDOOR TABLE 2 (RIGHT): Seated Guest with Subtle Motion ---
+        const t2x = midCx + 52;
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(t2x + 22, ty); ctx.lineTo(t2x + 22, ty - 22); ctx.moveTo(t2x + 13, ty - 11); ctx.lineTo(t2x + 22, ty - 11); ctx.stroke();
+        ctx.fillStyle = '#047857'; ctx.beginPath(); ctx.roundRect(t2x + 11, ty - 29 + g1Breath * 0.8, 13, 18, [5, 5, 1, 1]); ctx.fill();
+        ctx.fillStyle = '#e7b58a'; ctx.beginPath(); ctx.arc(t2x + 17 - g2Nod * 0.35, ty - 34 + g2Nod * 0.45, 4.7, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#1c1917'; ctx.beginPath(); ctx.arc(t2x + 17 - g2Nod * 0.35, ty - 36.5 + g2Nod * 0.45, 4.4, Math.PI, 0); ctx.fill();
+        const cup2X = t2x + 8 + g2Sip * 4.5;
+        const cup2Y = ty - 22 - g2Sip * 9.0;
+        ctx.strokeStyle = '#047857'; ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.moveTo(t2x + 14, ty - 25); ctx.lineTo(cup2X, cup2Y); ctx.stroke();
+        if (g2Sip > 0.08) {
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(cup2X - 2, cup2Y - 2.5, 3.8, 3.8);
+        }
+        // Table 2 with white tablecloth, cup & candle
+        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.moveTo(t2x, ty); ctx.lineTo(t2x, ty - 17); ctx.moveTo(t2x - 7, ty); ctx.lineTo(t2x + 7, ty); ctx.stroke();
+        ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#d6c3aa'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.moveTo(t2x - 15, ty - 18); ctx.lineTo(t2x + 15, ty - 18); ctx.lineTo(t2x + 13, ty - 9); ctx.lineTo(t2x - 13, ty - 9); ctx.closePath(); ctx.fill(); ctx.stroke();
+        if (g2Sip <= 0.08) { ctx.fillStyle = '#ffffff'; ctx.fillRect(t2x + 5, ty - 22, 4, 4); }
+        ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(t2x, ty - 22 + Math.cos(time * 8.5 + i) * 0.4, 2.3, 0, Math.PI * 2); ctx.fill();
+
+        // --- WALKING VENETIAN CAFÉ WAITER (Exits Central Door -> Serves Table 1 -> Serves Table 2 -> Enters Door!) ---
+        const wCyc = (time + Math.abs(i) * 3.7) % 14.0;
+        const doorX = midCx;
+        const stop1X = t1x + 28;
+        const stop2X = t2x - 24;
+        let wx3 = doorX, wAlpha = 0, wFacing = -1, wWalking = false, wBow = 0;
+
+        if (wCyc >= 1.6 && wCyc < 2.3) {
+          // Stepping out of central café door
+          wAlpha = (wCyc - 1.6) / 0.7;
+          wx3 = doorX; wFacing = -1;
+        } else if (wCyc >= 2.3 && wCyc < 4.3) {
+          // Walking left to Table 1
+          const u = (wCyc - 2.3) / 2.0;
+          wAlpha = 1; wx3 = doorX + (stop1X - doorX) * u; wFacing = -1; wWalking = true;
+        } else if (wCyc >= 4.3 && wCyc < 6.1) {
+          // Stopping & politely serving Table 1
+          wAlpha = 1; wx3 = stop1X; wFacing = -1; wBow = Math.sin(((wCyc - 4.3) / 1.8) * Math.PI) * 2.2;
+        } else if (wCyc >= 6.1 && wCyc < 8.8) {
+          // Walking right across terrace to Table 2
+          const u = (wCyc - 6.1) / 2.7;
+          wAlpha = 1; wx3 = stop1X + (stop2X - stop1X) * u; wFacing = 1; wWalking = true;
+        } else if (wCyc >= 8.8 && wCyc < 10.6) {
+          // Stopping & serving Table 2
+          wAlpha = 1; wx3 = stop2X; wFacing = 1; wBow = Math.sin(((wCyc - 8.8) / 1.8) * Math.PI) * 2.2;
+        } else if (wCyc >= 10.6 && wCyc < 12.2) {
+          // Walking back left to central café door
+          const u = (wCyc - 10.6) / 1.6;
+          wAlpha = 1; wx3 = stop2X + (doorX - stop2X) * u; wFacing = -1; wWalking = true;
+        } else if (wCyc >= 12.2 && wCyc < 12.9) {
+          // Stepping back inside the café
+          wAlpha = 1 - (wCyc - 12.2) / 0.7;
+          wx3 = doorX; wFacing = -1;
+        }
+
+        if (wAlpha > 0.02) {
+          const stride = wWalking ? Math.sin(wx3 * 0.45) * 4.2 : 0;
+          const stepBob = wWalking ? Math.abs(Math.cos(wx3 * 0.45)) * 1.4 : 0;
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, Math.min(1, wAlpha));
+          ctx.translate(wx3, ty - stepBob);
+          ctx.scale(wFacing, 1);
+          // Animated walking trousers (strictly displacement-driven!)
+          ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 3.2; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(-1.5, -15); ctx.lineTo(-1.5 - stride, 0); ctx.moveTo(1.5, -15); ctx.lineTo(1.5 + stride, 0); ctx.stroke();
+          // White waiter apron & crisp black vest
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(-5, -20, 10, 11);
+          ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.roundRect(-5.5 + wBow * 0.3, -34, 11, 15, [4, 4, 0, 0]); ctx.fill();
+          // Head & neatly combed hair
+          ctx.fillStyle = '#f1c29b'; ctx.beginPath(); ctx.arc(wBow * 0.6, -39, 4.6, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#1c1917'; ctx.beginPath(); ctx.arc(wBow * 0.6, -41, 4.3, Math.PI, 0); ctx.fill();
+          // Outstretched arm & gleaming silver espresso tray
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.2;
+          ctx.beginPath(); ctx.moveTo(4 + wBow * 0.3, -30); ctx.lineTo(12 + wBow * 0.8, -26); ctx.stroke();
+          ctx.fillStyle = '#cbd5e1'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.ellipse(14 + wBow * 0.8, -27, 8, 2.2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(12 + wBow * 0.8, -31, 4, 4);
+          ctx.restore();
+        }
+      } else if (pc.shop === 'murano') {
+        // B. LUXURY MURANO CRYSTAL CHANDELIER & ARTISAN GLASS BOUTIQUE (VETRERIA DI MURANO)!
+        const shX = bx + 16;
+        const shW = pw - 32;
+        const shH = quayY - gfY;
+
+        // Carved Deep-Teal & Gilded Walnut Boutique Frame
+        ctx.fillStyle = '#0f2933'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+        ctx.fillRect(shX, gfY, shW, shH); ctx.strokeRect(shX, gfY, shW, shH);
+
+        // Gilded Boutique Fascia Signboard ("MURANO • ARTE")
+        ctx.fillStyle = '#091b24'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.2;
+        ctx.fillRect(shX + 18, gfY - 12, shW - 36, 13); ctx.strokeRect(shX + 18, gfY - 12, shW - 36, 13);
+        ctx.fillStyle = '#fef08a'; ctx.font = 'bold 8px serif'; ctx.textAlign = 'center';
+        ctx.fillText('MURANO • ARTE', midCx, gfY - 3);
+
+        // Scalloped Cobalt-Blue & Cream Striped Boutique Awning
+        const stCnt = 10;
+        const stW = (shW + 10) / stCnt;
+        for (let s = 0; s < stCnt; s++) {
+          const sx2 = shX - 5 + s * stW;
+          ctx.fillStyle = (s % 2 === 0) ? '#1e3a8a' : '#fef3c7';
+          ctx.fillRect(sx2, gfY + 1, stW + 0.5, 13);
+          ctx.beginPath(); ctx.arc(sx2 + stW * 0.5, gfY + 14, stW * 0.5, 0, Math.PI); ctx.fill();
+        }
+        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.moveTo(shX - 5, gfY + 1); ctx.lineTo(shX + shW + 5, gfY + 1); ctx.stroke();
+
+        // Central Arched Walnut & Brass Double Entrance Door with Warm Interior Glow
+        const drX = midCx - 24, drY = gfY + 18, drW = 48, drH = quayY - drY - 6;
+        const drG = ctx.createLinearGradient(drX, drY, drX, drY + drH);
+        drG.addColorStop(0, '#fef9c3'); drG.addColorStop(0.65, '#f59e0b'); drG.addColorStop(1, '#78350f');
+        ctx.fillStyle = drG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.roundRect(drX, drY, drW, drH, [18, 18, 0, 0]); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#451a03'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.moveTo(midCx, drY); ctx.lineTo(midCx, drY + drH); ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath(); ctx.arc(midCx - 4, drY + drH * 0.58, 2.0, 0, Math.PI * 2); ctx.arc(midCx + 4, drY + drH * 0.58, 2.0, 0, Math.PI * 2); ctx.fill();
+
+        // Twin Illuminated Murano Crystal Gallery Vitrines (Left & Right of Door)
+        for (let side = 0; side < 2; side++) {
+          const vx = side === 0 ? (shX + 8) : (midCx + 30);
+          const vw = 76, vy = gfY + 18, vh = quayY - vy - 10;
+          const vG = ctx.createLinearGradient(vx, vy, vx, vy + vh);
+          vG.addColorStop(0, '#1e293b'); vG.addColorStop(0.45, '#0f172a'); vG.addColorStop(1, '#020617');
+          ctx.fillStyle = vG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.roundRect(vx, vy, vw, vh, [12, 12, 2, 2]); ctx.fill(); ctx.stroke();
+
+          // Warm golden spotlight & miniature hanging Murano crystal chandelier inside vitrine!
+          const vcx = vx + vw * 0.5;
+          const spG = ctx.createRadialGradient(vcx, vy + 18, 3, vcx, vy + 28, 36);
+          spG.addColorStop(0, 'rgba(254, 240, 138, 0.52)'); spG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+          ctx.fillStyle = spG; ctx.beginPath(); ctx.arc(vcx, vy + 26, 36, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.moveTo(vcx, vy + 2); ctx.lineTo(vcx, vy + 14); ctx.moveTo(vcx - 10, vy + 14); ctx.quadraticCurveTo(vcx, vy + 19, vcx + 10, vy + 14); ctx.stroke();
+          ctx.fillStyle = '#e0f2fe';
+          for (const cx2 of [-9, 0, 9]) { ctx.beginPath(); ctx.arc(vcx + cx2, vy + 16, 1.8, 0, Math.PI * 2); ctx.fill(); }
+
+          // Plush velvet display shelf + Sculpted Blown-Glass Murano Amphorae & Decanters
+          const shfY = vy + vh - 12;
+          ctx.fillStyle = '#4c0519'; ctx.fillRect(vx + 4, shfY, vw - 8, 10);
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 0.9; ctx.strokeRect(vx + 4, shfY, vw - 8, 10);
+
+          const pieces = side === 0
+            ? [{ x: vcx - 20, c: '#38bdf8', h: 24 }, { x: vcx, c: '#f43f5e', h: 30 }, { x: vcx + 20, c: '#fbbf24', h: 22 }]
+            : [{ x: vcx - 20, c: '#10b981', h: 23 }, { x: vcx, c: '#a855f7', h: 30 }, { x: vcx + 20, c: '#38bdf8', h: 25 }];
+          for (const pc2 of pieces) {
+            // Sculpted amphora silhouette with flared lip & glass specular gleam
+            ctx.fillStyle = pc2.c; ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(pc2.x - 4, shfY);
+            ctx.bezierCurveTo(pc2.x - 9, shfY - pc2.h * 0.35, pc2.x - 7, shfY - pc2.h * 0.65, pc2.x - 2.5, shfY - pc2.h * 0.85);
+            ctx.lineTo(pc2.x - 4.5, shfY - pc2.h); ctx.lineTo(pc2.x + 4.5, shfY - pc2.h);
+            ctx.lineTo(pc2.x + 2.5, shfY - pc2.h * 0.85);
+            ctx.bezierCurveTo(pc2.x + 7, shfY - pc2.h * 0.65, pc2.x + 9, shfY - pc2.h * 0.35, pc2.x + 4, shfY);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = 'rgba(255,255,255,0.55)';
+            ctx.beginPath(); ctx.ellipse(pc2.x - 2.2, shfY - pc2.h * 0.45, 1.4, 4.0, -0.2, 0, Math.PI * 2); ctx.fill();
+          }
+          // Subtle diagonal glass vitrine reflection sheen
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)'; ctx.lineWidth = 3.0;
+          ctx.beginPath(); ctx.moveTo(vx + 10, vy + 6); ctx.lineTo(vx + 28, vy + vh - 6); ctx.stroke();
+        }
+
+        // Raised Stone Terrace + Twin Terracotta Urns with Sculpted Clipped Boxwood Topiaries flanking the entrance!
+        ctx.fillStyle = '#e7dfd3'; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.2;
+        ctx.fillRect(bx + 6, quayY - 6, pw - 12, 8); ctx.strokeRect(bx + 6, quayY - 6, pw - 12, 8);
+        for (const tx of [midCx - 30, midCx + 30]) {
+          ctx.fillStyle = '#b45309'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.moveTo(tx - 6, quayY - 16); ctx.lineTo(tx + 6, quayY - 16); ctx.lineTo(tx + 4, quayY - 6); ctx.lineTo(tx - 4, quayY - 6); ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#15803d'; ctx.strokeStyle = '#052e16'; ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.arc(tx, quayY - 23, 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(tx - 2.2, quayY - 25, 2.8, 0, Math.PI * 2); ctx.fill();
+        }
+      } else {
+        // C. GRAND CANAL WATER-ENTRY PORTAL (Porta d'Acqua) with Carved Voussoir Arch & Marble Steps!
+        ctx.fillStyle = '#0c1220'; ctx.strokeStyle = pc.trim; ctx.lineWidth = 2.6;
+        ctx.beginPath(); ctx.arc(midCx, baseCanalY - 46, 26, Math.PI, 0); ctx.lineTo(midCx + 26, baseCanalY + 4); ctx.lineTo(midCx - 26, baseCanalY + 4); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = pc.trim; ctx.fillRect(midCx - 5, baseCanalY - 76, 10, 10);
+        // Marble water landing steps
+        ctx.fillStyle = '#e7dfd3'; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.0;
+        ctx.fillRect(midCx - 32, baseCanalY - 10, 64, 5); ctx.strokeRect(midCx - 32, baseCanalY - 10, 64, 5);
+        ctx.fillRect(midCx - 36, baseCanalY - 5, 72, 5); ctx.strokeRect(midCx - 36, baseCanalY - 5, 72, 5);
+      }
+
+      // Warm Glowing Wrought-Iron Wall Sconces casting amber light onto the red brickwork
+      for (const lx of [bx + 18, bx + pw - 18]) {
+        const ly = gfY + 12;
+        const lG = ctx.createRadialGradient(lx, ly, 2, lx, ly, 24);
+        lG.addColorStop(0, 'rgba(254, 240, 138, 0.72)'); lG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = lG; ctx.beginPath(); ctx.arc(lx, ly, 24, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.arc(lx, ly, 3.0, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // Classic Venetian Helical Striped Mooring Poles (Pali da Casada) rising from the canal
+    const pPole = -(camX * 0.46) % 340;
+    for (let mx = pPole - 340; mx < w + 340; mx += 340) {
+      const my = 560;
+      const isBlue = (Math.abs(Math.round(mx / 340)) % 2 === 1);
+      ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.4;
+      ctx.fillRect(mx - 6, my, 12, 110); ctx.strokeRect(mx - 6, my, 12, 110);
+      ctx.fillStyle = isBlue ? '#1d4ed8' : '#dc2626';
+      for (let sy = my + 10; sy < my + 95; sy += 20) {
+        ctx.beginPath(); ctx.moveTo(mx - 6, sy); ctx.lineTo(mx + 6, sy + 6); ctx.lineTo(mx + 6, sy + 15); ctx.lineTo(mx - 6, sy + 9); ctx.closePath(); ctx.fill();
+      }
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.arc(mx, my - 2, 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#d97706'; ctx.lineWidth = 2.6;
+      ctx.beginPath(); ctx.moveTo(mx - 8, my + 42); ctx.lineTo(mx + 8, my + 44); ctx.moveTo(mx - 8, my + 47); ctx.lineTo(mx + 8, my + 49); ctx.stroke();
+    }
+
+    // RAISED FULL-WIDTH REALISTIC VENETIAN CANAL WATER (y = 624..720):
+    // Deep Lagoon Emerald-Turquoise Gradient, Underwater Caustic Light Ribbons, Rippling Palazzo & Lantern Reflections,
+    // Swaying Lagoon Seagrass, Floating Water-Lily Pads with Blossoms & Organic Multi-Frequency Surface Wavelets!
+    const canalTop = 624;
+    const canalH = h - canalTop;
+    const cwG = ctx.createLinearGradient(0, canalTop, 0, h);
+    cwG.addColorStop(0.0, '#17828f');
+    cwG.addColorStop(0.24, '#0f657a');
+    cwG.addColorStop(0.58, '#0a435c');
+    cwG.addColorStop(1.0, '#052236');
+    ctx.fillStyle = cwG;
+    ctx.fillRect(0, canalTop, w, canalH);
+
+    // 1. Translucent Underwater Caustic Sunlight Ribbons & Gliding Lagoon Fish Silhouettes
+    for (let c = 0; c < 7; c++) {
+      const cx2 = ((c * 230 + 60 - camX * 0.55 + Math.sin(time * 0.9 + c * 1.4) * 26) % (w + 260) + (w + 260)) % (w + 260) - 130;
+      const rayG = ctx.createLinearGradient(cx2, canalTop, cx2 + 28, h);
+      rayG.addColorStop(0, 'rgba(125, 249, 255, 0.14)');
+      rayG.addColorStop(0.6, 'rgba(45, 212, 191, 0.06)');
+      rayG.addColorStop(1, 'rgba(13, 148, 136, 0)');
+      ctx.fillStyle = rayG;
+      ctx.beginPath();
+      ctx.moveTo(cx2 - 14, canalTop + 4); ctx.lineTo(cx2 + 22, canalTop + 4);
+      ctx.lineTo(cx2 + 54, h); ctx.lineTo(cx2 + 6, h);
+      ctx.closePath(); ctx.fill();
+    }
+    // Occasional tiny golden lagoon fish gliding peacefully beneath the surface
+    for (let f = 0; f < 3; f++) {
+      const dir = f % 2 === 0 ? 1 : -1;
+      const fx = ((time * (22 + f * 6) * dir + f * 470 - camX * 0.65) % (w + 180) + (w + 180)) % (w + 180) - 90;
+      const fy = canalTop + 44 + (f % 3) * 14 + Math.sin(time * 2.4 + f) * 3;
+      const wag = Math.sin(time * 8 + f * 2) * 2.2;
+      ctx.save();
+      ctx.translate(fx, fy); ctx.scale(dir, 1);
+      ctx.fillStyle = 'rgba(251, 146, 60, 0.32)';
+      ctx.beginPath(); ctx.ellipse(0, 0, 7.5, 2.8, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-6, 0); ctx.lineTo(-12, -3.5 + wag); ctx.lineTo(-12, 3.5 + wag); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+    // 2. Soft Rippling Terracotta Palazzo & Golden Sunset Reflections on the Canal Surface
+    for (let i = startIdx; i <= endIdx; i++) {
+      const rx = i * slotW - camX * parallax + 18;
+      const slot = ((i % 4) + 4) % 4;
+      if (slot === 2) continue;
+      const refCol = slot === 0 ? 'rgba(196, 84, 56, 0.18)' : (slot === 1 ? 'rgba(214, 108, 60, 0.18)' : 'rgba(182, 62, 76, 0.16)');
+      ctx.fillStyle = refCol;
+      for (let ry = 0; ry < 5; ry++) {
+        const wave = Math.sin(time * 2.4 + i + ry * 1.15) * 9;
+        const rw = (slotW - 44) * (1 - ry * 0.08);
+        ctx.beginPath();
+        ctx.ellipse(rx + rw * 0.5 + wave, canalTop + 9 + ry * 14, rw * 0.5, 3.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // 4. Organic Multi-Frequency Surface Wavelets, Foam Glints & Golden Sunset Sparkles
+    const wShift = (camX * 0.45) % 96;
+    ctx.strokeStyle = 'rgba(186, 230, 253, 0.55)'; ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    for (let wx = -48; wx <= w + 48; wx += 12) {
+      const wy = canalTop + 2.5 + Math.sin((wx + wShift) * 0.055 + time * 2.4) * 2.0 + Math.cos((wx + wShift) * 0.11 - time * 1.7) * 1.0;
+      if (wx === -48) ctx.moveTo(wx, wy);
+      else ctx.lineTo(wx, wy);
+    }
+    ctx.stroke();
+
+    // Secondary delicate cyan-gold surface ripple arcs across the canal depth
+    for (let r = 0; r < 18; r++) {
+      const rx = ((r * 118 + 25 - camX * 0.48 + Math.sin(time * 1.9 + r * 1.3) * 14) % (w + 120) + (w + 120)) % (w + 120) - 60;
+      const ry = canalTop + 12 + (r % 5) * 16;
+      const rLen = 22 + (r % 3) * 14;
+      ctx.strokeStyle = (r % 3 === 0) ? 'rgba(254, 240, 138, 0.34)' : 'rgba(165, 243, 252, 0.24)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(rx, ry); ctx.quadraticCurveTo(rx + rLen * 0.5, ry - 2.2, rx + rLen, ry);
+      ctx.stroke();
+    }
+
+    // Drifting Warm Murano Glass Carnival Lanterns in the Twilight Air
+    for (let i = 0; i < 8; i++) {
+      const lx = ((i * 190 - camX * 0.35 + Math.sin(time * 0.8 + i) * 18) % (w + 100) + (w + 100)) % (w + 100) - 50;
+      const ly = 125 + (i % 3) * 68 + Math.sin(time * 1.9 + i * 1.4) * 12;
+      const lg = ctx.createRadialGradient(lx, ly, 2, lx, ly, 22);
+      lg.addColorStop(0, 'rgba(255, 251, 235, 0.78)'); lg.addColorStop(0.5, 'rgba(251, 146, 60, 0.28)'); lg.addColorStop(1, 'rgba(251, 146, 60, 0)');
+      ctx.fillStyle = lg; ctx.beginPath(); ctx.arc(lx, ly, 22, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.arc(lx, ly, 3.2, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  function drawVenicePiazzaGate(ctx, g, sx, sy, time, goalLabel) {
+    // Monumental Piazza San Marco Byzantine-Gothic Marble Triumphal Arch with Gold-Leaf Mosaic Tympanum,
+    // Fluted Corinthian Columns, Damask Ceremonial Banners & Venetian Globe Lanterns!
+    ctx.save();
+    const cx = sx + g.w * 0.5;
+    const baseY = sy + g.h;
+    const archR = 102;
+    const springY = baseY - 110;
+
+    // 1. Sculpted Istrian Marble Arch Frame with Sparkling Gold-Leaf Byzantine Mosaic Band!
+    const mG = ctx.createLinearGradient(cx - archR, springY - archR, cx + archR, baseY);
+    mG.addColorStop(0, '#fffbeb'); mG.addColorStop(0.45, '#fde68a'); mG.addColorStop(0.85, '#d97706'); mG.addColorStop(1, '#92400e');
+    ctx.fillStyle = mG; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 2.8;
+    ctx.beginPath();
+    ctx.moveTo(cx - archR, baseY); ctx.lineTo(cx - archR, springY);
+    ctx.arc(cx, springY, archR, Math.PI, 0); ctx.lineTo(cx + archR, baseY);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 6.5;
+    ctx.beginPath(); ctx.arc(cx, springY, archR - 14, Math.PI, 0); ctx.stroke();
+    ctx.strokeStyle = '#1e3a8a'; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.arc(cx, springY, archR - 22, Math.PI, 0); ctx.stroke();
+
+    const inG = ctx.createRadialGradient(cx, baseY - 56, 8, cx, baseY - 56, 82);
+    inG.addColorStop(0, 'rgba(255, 251, 235, 0.96)'); inG.addColorStop(0.55, 'rgba(251, 191, 36, 0.44)'); inG.addColorStop(1, 'rgba(30, 27, 75, 0.22)');
+    ctx.fillStyle = inG;
+    ctx.beginPath(); ctx.arc(cx, springY + 6, 70, Math.PI, 0); ctx.lineTo(cx + 70, baseY); ctx.lineTo(cx - 70, baseY); ctx.closePath(); ctx.fill();
+
+    for (const side of [-1, 1]) {
+      const px0 = cx + side * (archR - 8);
+      ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.6;
+      ctx.fillRect(px0 - 11, springY - 6, 22, baseY - springY + 6); ctx.strokeRect(px0 - 11, springY - 6, 22, baseY - springY + 6);
+      ctx.fillStyle = '#fbbf24'; ctx.fillRect(px0 - 14, springY - 10, 28, 7); ctx.fillRect(px0 - 14, baseY - 10, 28, 10);
+      const ly = springY - 22;
+      const lGlow = ctx.createRadialGradient(px0, ly, 2, px0, ly, 26);
+      lGlow.addColorStop(0, 'rgba(255, 251, 235, 0.9)'); lGlow.addColorStop(1, 'rgba(251, 191, 36, 0)');
+      ctx.fillStyle = lGlow; ctx.beginPath(); ctx.arc(px0, ly, 26, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#b45309'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(px0, ly, 8.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      const bx = cx + side * 78;
+      const sway = Math.sin(time * 3.4 + side) * 3.2;
+      ctx.fillStyle = '#b91c1c'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(bx - 11, springY + 10); ctx.lineTo(bx + 11, springY + 10);
+      ctx.lineTo(bx + 11 + sway, baseY - 24); ctx.lineTo(bx + sway, baseY - 12); ctx.lineTo(bx - 11 + sway, baseY - 24);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+
+    // Star-Studded Lapis-Blue Winged Lion of St. Mark Medallion at Arch Apex
+    const topY = springY - archR + 8;
+    ctx.fillStyle = '#1e3a8a'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 3.0;
+    ctx.beginPath(); ctx.arc(cx, topY, 27, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fef08a'; ctx.font = 'bold 22px system-ui, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('🦁', cx, topY + 8);
+
+    // Engraved Classic Venetian Marble Frieze ("VENEZIA • SAN MARCO")
+    ctx.fillStyle = '#451a03'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.roundRect(cx - 66, springY - 22, 132, 22, 5); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fef08a'; ctx.font = 'bold 10px Georgia, serif'; ctx.textAlign = 'center';
+    ctx.fillText('VENEZIA • SAN MARCO', cx, springY - 7.5);
+
+    // Floating Arabic Goal Banner
+    const labelText = goalLabel || 'ساحة سان ماركو 🎭';
+    const bob = Math.sin(time * 3.2) * 3;
+    ctx.font = 'bold 13.5px "Cairo", "Tajawal", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    const tw = Math.max(150, ctx.measureText(labelText).width + 28);
+    ctx.fillStyle = 'rgba(20, 14, 28, 0.90)'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.roundRect(cx - tw * 0.5, topY - 64 + bob, tw, 26, 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fef3c7';
+    ctx.fillText(labelText, cx, topY - 46 + bob);
+    ctx.restore();
+  }
+
+  Art.drawDesertSkyAndHorizon = drawDesertSkyAndHorizon;
+  Art.drawDesertMidground = drawDesertMidground;
+  Art.drawPharaonicMuseumGate = drawPharaonicMuseumGate;
+  Art.drawJapanSkyAndHorizon = drawJapanSkyAndHorizon;
+  Art.drawJapanMidground = drawJapanMidground;
+  Art.drawJapaneseShrineGate = drawJapaneseShrineGate;
+  Art.drawSteamTrainSkyAndHorizon = drawSteamTrainSkyAndHorizon;
+  Art.drawSteamTrainMidground = drawSteamTrainMidground;
+  Art.drawGrandTrainStationGate = drawGrandTrainStationGate;
+  // =========================================================================
+  // STAGE 22: PARIS TWILIGHT SKY, MONUMENTAL EIFFEL TOWER, HAUSSMANNIAN
+  //           MANSARD MIDGROUND & ARC DE TRIOMPHE EXIT GATE
+  // =========================================================================
+  function drawParisSkyAndHorizon(ctx, camX, w, h, time) {
+    ensureTextures(ctx);
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    sky.addColorStop(0, '#090f24');
+    sky.addColorStop(0.28, '#1e2152');
+    sky.addColorStop(0.56, '#6d3566');
+    sky.addColorStop(0.80, '#d9776c');
+    sky.addColorStop(1, '#f8be82');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
+
+    for (let s = 0; s < 48; s++) {
+      const sx = ((s * 179 - camX * 0.012) % w + w) % w;
+      const sy = 14 + ((s * 53) % 210);
+      const a = 0.25 + 0.65 * Math.abs(Math.sin(time * 1.8 + s * 1.1));
+      ctx.fillStyle = `rgba(255, 248, 220, ${a.toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(sx, sy, s % 4 === 0 ? 1.7 : 1.0, 0, Math.PI * 2); ctx.fill();
+    }
+    const moonX = 210 - ((camX * 0.015) % 140);
+    const mGlow = ctx.createRadialGradient(moonX, 92, 14, moonX, 92, 95);
+    mGlow.addColorStop(0, 'rgba(254, 243, 199, 0.34)'); mGlow.addColorStop(1, 'rgba(254, 243, 199, 0)');
+    ctx.fillStyle = mGlow; ctx.beginPath(); ctx.arc(moonX, 92, 95, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fffbeb'; ctx.beginPath(); ctx.arc(moonX, 92, 24, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#14193d'; ctx.beginPath(); ctx.arc(moonX + 10, 86, 21, 0, Math.PI * 2); ctx.fill();
+
+    for (let c = 0; c < 7; c++) {
+      const cx = ((c * 240 - camX * 0.03 + time * 4.5) % (w + 320) + (w + 320)) % (w + 320) - 160;
+      const cy = 96 + (c % 3) * 44;
+      ctx.fillStyle = 'rgba(253, 186, 116, 0.20)';
+      ctx.beginPath(); ctx.ellipse(cx, cy + 5, 96, 17, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(244, 180, 200, 0.16)';
+      ctx.beginPath(); ctx.ellipse(cx - 24, cy, 74, 15, 0, 0, Math.PI * 2); ctx.ellipse(cx + 38, cy + 2, 56, 13, 0, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // 4. Distant Parisian Monumental Skyline (Sacré-Cœur, Les Invalides Golden Dome, Grand Palais & Atmospheric Rooftops!)
+    const scX = 240 - ((camX * 0.022) % 960);
+    ctx.fillStyle = 'rgba(34, 22, 56, 0.72)';
+    ctx.beginPath();
+    ctx.moveTo(0, h - 150);
+    ctx.quadraticCurveTo(scX, h - 255, scX + 240, h - 165);
+    ctx.lineTo(w, h - 165); ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(54, 34, 82, 0.86)';
+    ctx.fillRect(scX - 34, h - 252, 68, 34);
+    ctx.beginPath(); ctx.arc(scX, h - 254, 19, Math.PI, 0); ctx.fill();
+    ctx.beginPath(); ctx.arc(scX - 22, h - 245, 9.5, Math.PI, 0); ctx.arc(scX + 22, h - 245, 9.5, Math.PI, 0); ctx.fill();
+
+    // Distant Haussmannian silhouette & twinkling evening city lights along the Seine horizon
+    const skyLineY = h - 162;
+    for (let b = 0; b < 22; b++) {
+      const sbx = ((b * 72 - camX * 0.03) % (w + 140) + (w + 140)) % (w + 140) - 70;
+      const sbh = 26 + ((b * 37) % 34);
+      ctx.fillStyle = b % 2 === 0 ? 'rgba(32, 20, 52, 0.84)' : 'rgba(42, 26, 64, 0.80)';
+      ctx.fillRect(sbx, skyLineY - sbh, 68, sbh + 14);
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.52)';
+      for (let wy = skyLineY - sbh + 6; wy < skyLineY - 4; wy += 9) {
+        if ((b + wy) % 3 !== 0) ctx.fillRect(sbx + 10 + ((wy * 7) % 42), wy, 3.2, 4.2);
+      }
+    }
+
+    // Iconic Golden Dome of Les Invalides on the left horizon!
+    const invX = 390 - camX * 0.018;
+    ctx.save();
+    ctx.fillStyle = 'rgba(44, 28, 66, 0.90)';
+    ctx.fillRect(invX - 34, skyLineY - 38, 68, 38);
+    ctx.fillRect(invX - 20, skyLineY - 58, 40, 22);
+    const domG = ctx.createLinearGradient(invX - 20, skyLineY - 82, invX + 20, skyLineY - 56);
+    domG.addColorStop(0, '#fef08a'); domG.addColorStop(0.5, '#d97706'); domG.addColorStop(1, '#78350f');
+    ctx.fillStyle = domG;
+    ctx.beginPath(); ctx.arc(invX, skyLineY - 58, 19, Math.PI, 0); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(invX, skyLineY - 77); ctx.lineTo(invX, skyLineY - 94); ctx.stroke();
+    ctx.restore();
+
+    // 5. CHAMP DE MARS PARKLAND, SEINE RIVER & PONT D'IÉNA SURROUNDING THE EIFFEL TOWER!
+    const efX = 760 - camX * 0.014;
+    const baseY = h - 152;
+    const topY = 56;
+    const towerH = baseY - topY;
+    const deck1Y = baseY - towerH * 0.22;
+    const deck2Y = baseY - towerH * 0.44;
+    const deck3Y = topY + 38;
+
+    ctx.save();
+    for (const side of [-1, 1]) {
+      for (let tr = 0; tr < 7; tr++) {
+        const tx = efX + side * (112 + tr * 34);
+        const trR = 16 + (tr % 3) * 4;
+        const ty = baseY - 12 - (tr % 2) * 4;
+        const trG = ctx.createRadialGradient(tx - 4, ty - 6, 3, tx, ty, trR + 4);
+        trG.addColorStop(0, '#1e4d3a'); trG.addColorStop(0.65, '#0f2d24'); trG.addColorStop(1, '#081814');
+        ctx.fillStyle = trG;
+        ctx.beginPath(); ctx.arc(tx, ty, trR, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    for (let lp = -5; lp <= 5; lp++) {
+      if (Math.abs(lp) < 2) continue;
+      const lx = efX + lp * 44;
+      const lG = ctx.createRadialGradient(lx, baseY - 4, 1, lx, baseY - 4, 12);
+      lG.addColorStop(0, 'rgba(254, 240, 138, 0.85)'); lG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      ctx.fillStyle = lG; ctx.beginPath(); ctx.arc(lx, baseY - 4, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fffbeb'; ctx.beginPath(); ctx.arc(lx, baseY - 4, 1.8, 0, Math.PI * 2); ctx.fill();
+    }
+
+    const seineY = baseY + 6;
+    const seineG = ctx.createLinearGradient(0, seineY, 0, h);
+    seineG.addColorStop(0, '#3d2a52'); seineG.addColorStop(0.32, '#6b3a5b'); seineG.addColorStop(0.65, '#262348'); seineG.addColorStop(1, '#0f132b');
+    ctx.fillStyle = seineG; ctx.fillRect(0, seineY, w, h - seineY);
+    for (let r = 0; r < 14; r++) {
+      const rw = 88 - r * 4.5;
+      const rx = efX - rw * 0.5 + Math.sin(time * 2.8 + r * 0.9) * 6;
+      ctx.fillStyle = `rgba(254, 240, 138, ${(0.28 - r * 0.016).toFixed(2)})`;
+      ctx.fillRect(rx, seineY + 4 + r * 5.2, rw, 2.2);
+    }
+    ctx.fillStyle = 'rgba(46, 34, 54, 0.88)';
+    ctx.fillRect(0, seineY - 6, w, 12);
+    for (let ax = -((camX * 0.06) % 120); ax < w + 120; ax += 120) {
+      ctx.fillStyle = '#2a1d3d';
+      ctx.beginPath(); ctx.arc(ax + 60, seineY + 14, 42, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.45)';
+      ctx.beginPath(); ctx.arc(ax, seineY - 12, 8, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fef9c3'; ctx.beginPath(); ctx.arc(ax, seineY - 12, 2.0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+
+    // 6. MONUMENTAL LACY ARCHITECTURAL EIFFEL TOWER (True Open-Filigree Piers, Open Center Between Decks, Golden Uplighting!)
+    const outerW = (y) => {
+      const u = Math.max(0, Math.min(1, (baseY - y) / towerH));
+      return 118 * Math.pow(1 - u, 2.45) + 9.5;
+    };
+    const pierThick = (y) => {
+      const u = Math.max(0, Math.min(1, (baseY - y) / (baseY - deck2Y)));
+      return 28 * (1 - u * 0.56);
+    };
+
+    ctx.save();
+    ctx.translate(efX, 0);
+
+    const beamAng = Math.sin(time * 0.65) * 0.44;
+    for (const dir of [-1, 1]) {
+      ctx.save();
+      ctx.translate(0, topY + 16);
+      ctx.rotate(beamAng * dir);
+      const bG = ctx.createLinearGradient(0, 0, dir * 560, 0);
+      bG.addColorStop(0, 'rgba(255, 251, 235, 0.42)');
+      bG.addColorStop(0.45, 'rgba(254, 240, 138, 0.12)');
+      bG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      ctx.fillStyle = bG;
+      ctx.beginPath(); ctx.moveTo(0, -3.5); ctx.lineTo(dir * 560, -48); ctx.lineTo(dir * 560, 48); ctx.lineTo(0, 3.5); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+    const efGlow = ctx.createRadialGradient(0, baseY - towerH * 0.44, 20, 0, baseY - towerH * 0.44, 210);
+    efGlow.addColorStop(0, 'rgba(253, 224, 71, 0.26)'); efGlow.addColorStop(0.55, 'rgba(245, 158, 11, 0.08)'); efGlow.addColorStop(1, 'rgba(251, 191, 36, 0)');
+    ctx.fillStyle = efGlow; ctx.beginPath(); ctx.arc(0, baseY - towerH * 0.44, 210, 0, Math.PI * 2); ctx.fill();
+
+    const drawFiligreePier = (side, yBot, yTop, steps, alpha, scaleX) => {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      const pG = ctx.createLinearGradient(0, yTop, 0, yBot);
+      pG.addColorStop(0, 'rgba(217, 155, 78, 0.34)'); pG.addColorStop(0.5, 'rgba(92, 64, 46, 0.46)'); pG.addColorStop(1, 'rgba(42, 28, 22, 0.58)');
+      ctx.fillStyle = pG;
+      ctx.beginPath();
+      for (let s = 0; s <= steps; s++) {
+        const y = yBot - (s / steps) * (yBot - yTop);
+        const x = side * outerW(y) * scaleX;
+        if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      for (let s = steps; s >= 0; s--) {
+        const y = yBot - (s / steps) * (yBot - yTop);
+        const x = side * (outerW(y) - pierThick(y)) * scaleX;
+        ctx.lineTo(x, y);
+      }
+      ctx.closePath(); ctx.fill();
+
+      ctx.strokeStyle = '#d99b4e'; ctx.lineWidth = 1.15;
+      for (let s = 0; s < steps; s++) {
+        const y0 = yBot - (s / steps) * (yBot - yTop);
+        const y1 = yBot - ((s + 1) / steps) * (yBot - yTop);
+        const o0 = side * outerW(y0) * scaleX, i0 = side * (outerW(y0) - pierThick(y0)) * scaleX;
+        const o1 = side * outerW(y1) * scaleX, i1 = side * (outerW(y1) - pierThick(y1)) * scaleX;
+        ctx.beginPath();
+        ctx.moveTo(o0, y0); ctx.lineTo(i1, y1);
+        ctx.moveTo(i0, y0); ctx.lineTo(o1, y1);
+        ctx.moveTo(o1, y1); ctx.lineTo(i1, y1);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = '#3b261c'; ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      for (let s = 0; s <= steps; s++) {
+        const y = yBot - (s / steps) * (yBot - yTop);
+        const x = side * outerW(y) * scaleX;
+        if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.strokeStyle = '#f5c77e'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let s = 0; s <= steps; s++) {
+        const y = yBot - (s / steps) * (yBot - yTop);
+        const x = side * (outerW(y) - pierThick(y)) * scaleX;
+        if (s === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    for (const side of [-1, 1]) {
+      drawFiligreePier(side, baseY, deck2Y, 10, 0.48, 0.68);
+      drawFiligreePier(side, baseY, deck2Y, 12, 1.0, 1.0);
+      ctx.fillStyle = '#e7d8c5'; ctx.strokeStyle = '#3f3023'; ctx.lineWidth = 1.2;
+      const fx = side > 0 ? outerW(baseY) - pierThick(baseY) - 2 : -outerW(baseY) - 2;
+      ctx.fillRect(fx, baseY - 5, pierThick(baseY) + 4, 9);
+      ctx.strokeRect(fx, baseY - 5, pierThick(baseY) + 4, 9);
+    }
+
+    const archR = outerW(baseY) - pierThick(baseY);
+    const archCY = baseY + 12;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(-archR - 4, deck1Y + 8, (archR + 4) * 2, baseY - deck1Y - 6); ctx.clip();
+    ctx.strokeStyle = '#3b261c'; ctx.lineWidth = 4.2;
+    ctx.beginPath(); ctx.arc(0, archCY, archR, Math.PI + 0.14, -0.14); ctx.stroke();
+    ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(0, archCY, archR, Math.PI + 0.14, -0.14); ctx.stroke();
+    ctx.strokeStyle = 'rgba(245, 199, 126, 0.65)'; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.arc(0, archCY, archR + 7, Math.PI + 0.18, -0.18); ctx.stroke();
+    for (let k = -6; k <= 6; k++) {
+      const a = -Math.PI * 0.5 + k * 0.16;
+      const fx = Math.cos(a) * (archR + 4);
+      const fy = archCY + Math.sin(a) * (archR + 4);
+      if (fy > deck1Y + 9) { ctx.beginPath(); ctx.arc(fx, fy, 3.0, 0, Math.PI * 2); ctx.stroke(); }
+    }
+    ctx.restore();
+
+    const shaftSteps = 18;
+    const shG = ctx.createLinearGradient(0, deck3Y, 0, deck2Y);
+    shG.addColorStop(0, 'rgba(253, 224, 71, 0.30)'); shG.addColorStop(0.55, 'rgba(180, 120, 62, 0.34)'); shG.addColorStop(1, 'rgba(63, 42, 32, 0.48)');
+    ctx.fillStyle = shG;
+    ctx.beginPath();
+    for (let s = 0; s <= shaftSteps; s++) {
+      const y = deck2Y - (s / shaftSteps) * (deck2Y - deck3Y);
+      if (s === 0) ctx.moveTo(-outerW(y), y); else ctx.lineTo(-outerW(y), y);
+    }
+    for (let s = shaftSteps; s >= 0; s--) {
+      const y = deck2Y - (s / shaftSteps) * (deck2Y - deck3Y);
+      ctx.lineTo(outerW(y), y);
+    }
+    ctx.closePath(); ctx.fill();
+
+    ctx.strokeStyle = 'rgba(254, 240, 138, 0.52)'; ctx.lineWidth = 1.1;
+    for (let s = 0; s < shaftSteps; s++) {
+      const y0 = deck2Y - (s / shaftSteps) * (deck2Y - deck3Y);
+      const y1 = deck2Y - ((s + 1) / shaftSteps) * (deck2Y - deck3Y);
+      const w0 = outerW(y0), w1 = outerW(y1);
+      ctx.beginPath();
+      ctx.moveTo(-w0, y0); ctx.lineTo(w1, y1);
+      ctx.moveTo(w0, y0); ctx.lineTo(-w1, y1);
+      ctx.moveTo(-w1, y1); ctx.lineTo(w1, y1);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = '#3b261c'; ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    for (const side of [-1, 1]) {
+      for (let s = 0; s <= shaftSteps; s++) {
+        const y = deck2Y - (s / shaftSteps) * (deck2Y - deck3Y);
+        if (s === 0) ctx.moveTo(side * outerW(y), y); else ctx.lineTo(side * outerW(y), y);
+      }
+    }
+    ctx.stroke();
+
+    for (const [dy, dw, dh] of [[deck1Y - 6, outerW(deck1Y) * 2 + 18, 16], [deck2Y - 5, outerW(deck2Y) * 2 + 16, 13]]) {
+      ctx.fillStyle = '#3b261c'; ctx.strokeStyle = '#1c120d'; ctx.lineWidth = 1.4;
+      ctx.fillRect(-dw * 0.5, dy, dw, dh); ctx.strokeRect(-dw * 0.5, dy, dw, dh);
+      ctx.fillStyle = '#fef08a';
+      for (let gx = -dw * 0.44; gx < dw * 0.44; gx += 9) {
+        ctx.beginPath(); ctx.roundRect(gx, dy + 2.5, 5.2, dh * 0.48, [2.5, 2.5, 0, 0]); ctx.fill();
+      }
+      ctx.fillStyle = '#fbbf24'; ctx.fillRect(-dw * 0.5 - 3, dy - 2.2, dw + 6, 2.6);
+      ctx.fillStyle = '#d99b4e'; ctx.fillRect(-dw * 0.5 - 1, dy + dh - 2, dw + 2, 2.2);
+    }
+
+    ctx.fillStyle = '#3b261c'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.3;
+    ctx.fillRect(-14, deck3Y - 6, 28, 11); ctx.strokeRect(-14, deck3Y - 6, 28, 11);
+    ctx.fillStyle = '#fef08a'; ctx.fillRect(-10, deck3Y - 3, 20, 4);
+    ctx.fillStyle = '#4f382b';
+    ctx.beginPath(); ctx.arc(0, deck3Y - 6, 10.5, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#3b261c'; ctx.fillRect(-4, deck3Y - 22, 8, 8);
+    ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 2.0;
+    ctx.beginPath(); ctx.moveTo(0, deck3Y - 22); ctx.lineTo(0, topY - 20); ctx.stroke();
+    ctx.fillStyle = '#fffbeb'; ctx.beginPath(); ctx.arc(0, topY + 16, 4.4, 0, Math.PI * 2); ctx.fill();
+
+    for (let sp = 0; sp < 38; sp++) {
+      const u = (sp + 0.5) / 38;
+      const sy = deck3Y + u * (baseY - deck3Y - 12);
+      const maxW = outerW(sy) * 0.88;
+      const sx = Math.sin(sp * 9.7) * maxW;
+      const tw = Math.sin(time * 8.0 + sp * 2.3);
+      if (tw > 0.32) {
+        ctx.fillStyle = `rgba(255, 251, 235, ${((tw - 0.32) / 0.68).toFixed(2)})`;
+        ctx.beginPath(); ctx.arc(sx, sy, 1.8, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawParisMidground(ctx, camX, w, h, time) {
+    ensureTextures(ctx);
+    // Museum-Grade Parisian Place des Vosges "Brique et Pierre" (Red Brick & Carved Cream Lutetian Limestone)
+    // with 1-in-4 Open Champ-de-Mars Vista so the ENTIRE Eiffel Tower shines unobstructed,
+    // + Standing-Seam Blue-Zinc Mansard Roofs, Ornate Stone Lucarnes, Gilded Garde-Corps Balconies & Luxury Vitrines!
+    const span = 300;
+    const parallax = 0.34;
+    const startIdx = Math.floor((camX * parallax) / span) - 1;
+    const endIdx = Math.ceil((camX * parallax + w) / span) + 1;
+
+    const brickPalettes = [
+      ['#9f3428', '#872920', '#b34334', '#752119', '#a83c2e'],
+      ['#a83e2b', '#8f3020', '#bc4e38', '#7c271a', '#b04531'],
+      ['#942c30', '#7d2226', '#a83a3e', '#6b1b1f', '#9e3337'],
+    ];
+
+    for (let i = startIdx; i <= endIdx; i++) {
+      const bx = i * span - camX * parallax;
+      const slot = ((i % 4) + 4) % 4;
+
+      // OPEN CHAMP-DE-MARS BOULEVARD VISTA (1 in every 4 buildings omitted so the ENTIRE Eiffel Tower is unobstructed!)
+      if (slot === 2) {
+        const baseY = h - 78;
+        ctx.save();
+        // Low clipped chestnut-tree crowns framing only the far edges of the promenade
+        for (const tx of [bx + 18, bx + span - 18]) {
+          ctx.fillStyle = '#14332a';
+          ctx.beginPath(); ctx.arc(tx, baseY - 64, 22, 0, Math.PI * 2); ctx.arc(tx + (tx < bx + 100 ? 14 : -14), baseY - 54, 16, 0, Math.PI * 2); ctx.fill();
+        }
+        // Red-brick & cream limestone promenade parapet wall + classical urn piers
+        drawBrickMasonry(ctx, bx, baseY - 22, span, 22, ['#9f3428', '#872920', '#b34334', '#752119'], '#e7d8c5', i + 5);
+        ctx.fillStyle = '#f3e6d3'; ctx.strokeStyle = '#443527'; ctx.lineWidth = 1.4;
+        ctx.fillRect(bx, baseY - 26, span, 5); ctx.strokeRect(bx, baseY - 26, span, 5);
+        for (const px2 of [bx + 6, bx + span - 24]) {
+          ctx.fillStyle = '#efe3d0'; ctx.fillRect(px2, baseY - 54, 18, 54); ctx.strokeRect(px2, baseY - 54, 18, 54);
+          ctx.fillStyle = '#d6c3aa'; ctx.beginPath(); ctx.ellipse(px2 + 9, baseY - 60, 7.5, 5.2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        }
+        // Ornate Parisian wrought-iron railing with gilded spearhead tips
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.moveTo(bx + 24, baseY - 48); ctx.lineTo(bx + span - 24, baseY - 48); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(bx + 24, baseY - 30); ctx.lineTo(bx + span - 24, baseY - 30); ctx.stroke();
+        for (let rx = bx + 32; rx < bx + span - 26; rx += 16) {
+          ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.moveTo(rx, baseY - 48); ctx.lineTo(rx, baseY - 26); ctx.stroke();
+          ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(rx, baseY - 50, 2.0, 0, Math.PI * 2); ctx.fill();
+        }
+        // Classic Parisian Cast-Iron Réverbères (Streetlamps) with Warm Golden Halo
+        for (const lx of [bx + 42, bx + span - 42]) {
+          ctx.fillStyle = '#0f2922'; ctx.fillRect(lx - 3, baseY - 128, 6, 102);
+          ctx.fillStyle = '#134e4a'; ctx.strokeStyle = '#071713'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(lx - 8, baseY - 26); ctx.lineTo(lx - 5, baseY - 52); ctx.lineTo(lx + 5, baseY - 52); ctx.lineTo(lx + 8, baseY - 26); ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(lx - 6, baseY - 122); ctx.quadraticCurveTo(lx, baseY - 115, lx + 6, baseY - 122); ctx.stroke();
+          const lGlow = ctx.createRadialGradient(lx, baseY - 136, 4, lx, baseY - 136, 46);
+          lGlow.addColorStop(0, 'rgba(254, 240, 138, 0.56)'); lGlow.addColorStop(1, 'rgba(254, 240, 138, 0)');
+          ctx.fillStyle = lGlow; ctx.beginPath(); ctx.arc(lx, baseY - 136, 46, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#fef9c3'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.moveTo(lx - 7, baseY - 144); ctx.lineTo(lx + 7, baseY - 144); ctx.lineTo(lx + 5, baseY - 128); ctx.lineTo(lx - 5, baseY - 128); ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.moveTo(lx - 10, baseY - 144); ctx.lineTo(lx, baseY - 155); ctx.lineTo(lx + 10, baseY - 144); ctx.closePath(); ctx.fill();
+        }
+        ctx.restore();
+        continue;
+      }
+
+      const bw = 286;
+      const bh = 310 + ((Math.abs(i) * 43) % 62);
+      const topY = h - 78 - bh;
+      const shopKind = ((i % 3) + 3) % 3;
+      const bTones = brickPalettes[shopKind];
+
+      ctx.save();
+      ctx.translate(bx, topY);
+
+      // 1. STANDING-SEAM BLUE-ZINC MANSARD ROOF + WROUGHT-IRON CRESTING + RED-BRICK MITRON CHIMNEY
+      const roofH = 70;
+      const rG = ctx.createLinearGradient(0, -roofH, bw, 8);
+      rG.addColorStop(0, '#64748b'); rG.addColorStop(0.35, '#475569'); rG.addColorStop(0.75, '#334155'); rG.addColorStop(1, '#1e293b');
+      ctx.fillStyle = rG; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(-6, 6); ctx.lineTo(20, -roofH); ctx.lineTo(bw - 20, -roofH); ctx.lineTo(bw + 6, 6);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(226, 232, 240, 0.28)'; ctx.lineWidth = 1.2;
+      for (let rx = 24; rx < bw - 18; rx += 18) {
+        const lean = ((rx / bw) - 0.5) * 18;
+        ctx.beginPath(); ctx.moveTo(rx, -roofH + 2); ctx.lineTo(rx + lean, 5); ctx.stroke();
+      }
+      ctx.fillStyle = '#cbd5e1'; ctx.fillRect(18, -roofH - 3, bw - 36, 3.5);
+      ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.moveTo(22, -roofH - 9); ctx.lineTo(bw - 22, -roofH - 9); ctx.stroke();
+      for (let cr = 26; cr <= bw - 26; cr += 12) {
+        ctx.beginPath(); ctx.moveTo(cr, -roofH - 3); ctx.lineTo(cr, -roofH - 12); ctx.stroke();
+      }
+
+      // Red-Brick Parisian Chimney Stack + Terracotta Mitron Pots & Drifting Smoke
+      const chX = i % 2 === 0 ? 32 : bw - 68;
+      drawBrickMasonry(ctx, chX, -roofH - 28, 34, 28, bTones, '#e7d8c5', i + 3);
+      ctx.strokeStyle = '#3f2018'; ctx.lineWidth = 1.2;
+      ctx.strokeRect(chX, -roofH - 28, 34, 28);
+      ctx.fillStyle = '#efe3d0'; ctx.fillRect(chX - 3, -roofH - 31, 40, 4);
+      ctx.fillStyle = '#c2410c'; ctx.strokeStyle = '#431407'; ctx.lineWidth = 1.0;
+      for (const mp of [3, 13, 23]) {
+        ctx.fillRect(chX + mp, -roofH - 42, 7, 11); ctx.strokeRect(chX + mp, -roofH - 42, 7, 11);
+      }
+      for (let sm = 0; sm < 3; sm++) {
+        const lift = (time * 14 + sm * 16 + Math.abs(i) * 7) % 48;
+        ctx.fillStyle = `rgba(255, 241, 242, ${(0.16 * (1 - lift / 48)).toFixed(2)})`;
+        ctx.beginPath(); ctx.arc(chX + 16 + lift * 0.35, -roofH - 46 - lift, 5 + lift * 0.14, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Ornate Sculpted Cream-Stone Lucarne Dormer Windows with Curved Pediments & Side Scrolls
+      for (const dx of [58, bw - 100]) {
+        ctx.fillStyle = '#f3e6d3'; ctx.strokeStyle = '#3f3023'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.roundRect(dx - 5, -roofH + 16, 46, 48, [20, 20, 2, 2]); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#d6c3aa';
+        ctx.beginPath(); ctx.arc(dx - 5, -roofH + 46, 5, Math.PI * 0.5, Math.PI * 1.5); ctx.arc(dx + 41, -roofH + 46, 5, -Math.PI * 0.5, Math.PI * 0.5); ctx.fill();
+        const dwG = ctx.createLinearGradient(dx, -roofH + 22, dx, 0);
+        dwG.addColorStop(0, '#fffbeb'); dwG.addColorStop(0.55, '#fde047'); dwG.addColorStop(1, '#d97706');
+        ctx.fillStyle = dwG; ctx.beginPath(); ctx.roundRect(dx + 2, -roofH + 22, 32, 38, [14, 14, 1, 1]); ctx.fill();
+        ctx.strokeStyle = '#291d14'; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(dx + 18, -roofH + 22); ctx.lineTo(dx + 18, -roofH + 60);
+        ctx.moveTo(dx + 2, -roofH + 40); ctx.lineTo(dx + 34, -roofH + 40);
+        ctx.stroke();
+        ctx.fillStyle = '#fffbeb'; ctx.fillRect(dx + 15, -roofH + 14, 6, 7);
+      }
+
+      // 2. PARISIAN "BRIQUE ET PIERRE" FACADE: STAGGERED RED-BRICK MASONRY + CARVED CREAM LIMESTONE QUOINS & PILASTERS!
+      drawBrickMasonry(ctx, 0, 4, bw, bh, bTones, '#e8d8c4', i * 7 + shopKind);
+      // Warm golden-hour directional shading across the brickwork
+      const fShade = ctx.createLinearGradient(0, 4, bw, bh);
+      fShade.addColorStop(0, 'rgba(255, 232, 200, 0.16)');
+      fShade.addColorStop(0.55, 'rgba(0, 0, 0, 0)');
+      fShade.addColorStop(1, 'rgba(24, 10, 8, 0.30)');
+      ctx.fillStyle = fShade;
+      ctx.fillRect(0, 4, bw, bh);
+      ctx.strokeStyle = '#3b1e16'; ctx.lineWidth = 1.8;
+      ctx.strokeRect(0, 4, bw, bh);
+
+      // Alternating Cream Lutetian Limestone Corner Quoins (signature Place des Vosges Brique-et-Pierre!)
+      for (let qy = 14; qy < 110; qy += 14) {
+        const longQ = ((Math.floor(qy / 14) & 1) === 0);
+        const qw = longQ ? 15 : 9;
+        ctx.fillStyle = '#f3e6d3'; ctx.strokeStyle = 'rgba(63, 48, 35, 0.45)'; ctx.lineWidth = 0.9;
+        ctx.fillRect(0, qy, qw, 12); ctx.strokeRect(0, qy, qw, 12);
+        ctx.fillRect(bw - qw, qy, qw, 12); ctx.strokeRect(bw - qw, qy, qw, 12);
+      }
+
+      // Carved Dentil Cream-Limestone Roof Cornice Entablature + Continuous 2nd-Floor Balcon Filant & Stone Consoles!
+      ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#5c4734'; ctx.lineWidth = 1.3;
+      ctx.fillRect(-6, 4, bw + 12, 8); ctx.strokeRect(-6, 4, bw + 12, 8);
+      ctx.fillStyle = 'rgba(63, 48, 35, 0.38)';
+      for (let dt = 2; dt < bw - 4; dt += 10) ctx.fillRect(dt, 12, 4.5, 4);
+
+      ctx.fillStyle = '#f3e6d3'; ctx.strokeStyle = '#5c4734'; ctx.lineWidth = 1.4;
+      ctx.fillRect(-4, 112, bw + 8, 8); ctx.strokeRect(-4, 112, bw + 8, 8);
+      ctx.fillStyle = '#dfd0bc';
+      for (let cb = 14; cb < bw - 10; cb += 44) {
+        ctx.beginPath(); ctx.moveTo(cb, 120); ctx.lineTo(cb + 10, 120); ctx.lineTo(cb + 7, 127); ctx.lineTo(cb + 3, 127); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+
+      // 3. TALL FRENCH PORTE-FENÊTRE WINDOWS WITH CREAM-STONE QUOINED FRAMES, VELVET CURTAINS & GILDED GARDE-CORPS!
+      for (let col = 0; col < 3; col++) {
+        const wx = 26 + col * 86;
+        const wy = 24;
+        const lit = ((Math.abs(i) + col) % 3) !== 0;
+
+        // Carved cream Lutetian limestone surround & keystone crest contrasting sharply against red brick!
+        ctx.fillStyle = '#f5eadb'; ctx.strokeStyle = '#5c4430'; ctx.lineWidth = 1.2;
+        ctx.fillRect(wx - 6, wy - 4, 66, 86); ctx.strokeRect(wx - 6, wy - 4, 66, 86);
+        ctx.fillStyle = '#fffbeb'; ctx.fillRect(wx - 9, wy - 7, 72, 5); ctx.strokeRect(wx - 9, wy - 7, 72, 5);
+        ctx.fillStyle = '#efe3d0'; ctx.fillRect(wx + 23, wy - 9, 8, 8);
+
+        const winG = ctx.createLinearGradient(wx, wy, wx, wy + 80);
+        if (lit) { winG.addColorStop(0, '#fffbeb'); winG.addColorStop(0.55, '#fde047'); winG.addColorStop(1, '#d97706'); }
+        else { winG.addColorStop(0, '#1e293b'); winG.addColorStop(1, '#0f172a'); }
+        ctx.fillStyle = winG; ctx.strokeStyle = '#443527'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.roundRect(wx, wy, 54, 80, [22, 22, 2, 2]); ctx.fill(); ctx.stroke();
+
+        // Warm interior apartment depth: draped velvet curtains & glowing miniature chandelier
+        if (lit) {
+          ctx.fillStyle = 'rgba(159, 18, 57, 0.58)';
+          ctx.beginPath(); ctx.moveTo(wx + 1, wy + 16); ctx.quadraticCurveTo(wx + 13, wy + 42, wx + 4, wy + 78); ctx.lineTo(wx + 1, wy + 78); ctx.closePath(); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(wx + 53, wy + 16); ctx.quadraticCurveTo(wx + 41, wy + 42, wx + 50, wy + 78); ctx.lineTo(wx + 53, wy + 78); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = '#92400e'; ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.moveTo(wx + 27, wy + 2); ctx.lineTo(wx + 27, wy + 18); ctx.moveTo(wx + 19, wy + 17); ctx.quadraticCurveTo(wx + 27, wy + 21, wx + 35, wy + 17); ctx.stroke();
+        }
+
+        // French casement window muntins
+        ctx.strokeStyle = '#291d14'; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(wx + 27, wy); ctx.lineTo(wx + 27, wy + 80);
+        ctx.moveTo(wx, wy + 34); ctx.lineTo(wx + 54, wy + 34);
+        ctx.moveTo(wx, wy + 56); ctx.lineTo(wx + 54, wy + 56);
+        ctx.stroke();
+
+        // Ornate Haussmannian Wrought-Iron Garde-Corps Balcony Railing with Gilded Scroll Medallions
+        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.7;
+        ctx.strokeRect(wx - 5, wy + 56, 64, 28);
+        for (let rx = wx + 3; rx < wx + 54; rx += 10) {
+          ctx.beginPath(); ctx.moveTo(rx, wy + 56); ctx.lineTo(rx, wy + 84); ctx.stroke();
+        }
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.ellipse(wx + 27, wy + 70, 9, 6, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(wx + 11, wy + 70, 4, 0, Math.PI * 2); ctx.arc(wx + 43, wy + 70, 4, 0, Math.PI * 2); ctx.stroke();
+
+        // Lush Parisian Geranium Windowboxes & Trailing Ivy Leaves
+        if (col === 1 || (Math.abs(i) + col) % 2 === 0) {
+          ctx.fillStyle = '#15803d'; ctx.fillRect(wx + 4, wy + 51, 46, 5.5);
+          ctx.beginPath(); ctx.arc(wx + 8, wy + 60, 3.0, 0, Math.PI * 2); ctx.arc(wx + 46, wy + 60, 3.0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = col === 1 ? '#e11d48' : '#fb7185';
+          for (let fl = wx + 9; fl < wx + 48; fl += 9) { ctx.beginPath(); ctx.arc(fl, wy + 50, 2.7, 0, Math.PI * 2); ctx.fill(); }
+        }
+      }
+
+      // LUXURY CHAMPS-ÉLYSÉES GROUND-FLOOR BOUTIQUES (High-Fashion Couture Gowns / Iconic Crystal Parfumerie / Patisserie!)
+      const sfY = 128;
+      const sfH = bh - sfY;
+      if (shopKind === 0) {
+        // A. HAUTE COUTURE FASHION BOUTIQUE — Detailed Sweetheart Ballgown & Emerald Silk Mermaid Gown in Illuminated Vitrines!
+        ctx.fillStyle = '#0c1020'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+        ctx.fillRect(6, sfY, bw - 12, sfH); ctx.strokeRect(6, sfY, bw - 12, sfH);
+        ctx.fillStyle = '#fef08a'; ctx.font = 'bold 10px serif'; ctx.textAlign = 'center';
+        ctx.fillText('MAISON COUTURE • PARIS', bw * 0.5, sfY + 17);
+
+        for (let gIdx = 0; gIdx < 2; gIdx++) {
+          const vx = gIdx === 0 ? 16 : 154;
+          const vw = 116, vh = 122;
+          const vitG = ctx.createLinearGradient(vx, sfY + 24, vx, sfY + 24 + vh);
+          vitG.addColorStop(0, '#fffbeb'); vitG.addColorStop(0.55, '#fde68a'); vitG.addColorStop(1, '#92400e');
+          ctx.fillStyle = vitG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.roundRect(vx, sfY + 24, vw, vh, [18, 18, 2, 2]); ctx.fill(); ctx.stroke();
+
+          // Warm boutique spotlight cone & miniature multi-tier crystal chandelier
+          const mx = vx + vw * 0.5;
+          const spG = ctx.createLinearGradient(mx, sfY + 24, mx, sfY + 144);
+          spG.addColorStop(0, 'rgba(255, 255, 255, 0.36)'); spG.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.fillStyle = spG;
+          ctx.beginPath(); ctx.moveTo(mx - 12, sfY + 26); ctx.lineTo(mx + 12, sfY + 26); ctx.lineTo(vx + vw - 6, sfY + 144); ctx.lineTo(vx + 6, sfY + 144); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = '#d97706'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(mx, sfY + 24); ctx.lineTo(mx, sfY + 36); ctx.moveTo(mx - 10, sfY + 35); ctx.quadraticCurveTo(mx, sfY + 40, mx + 10, sfY + 35); ctx.stroke();
+          ctx.fillStyle = '#e0f2fe';
+          for (const dx of [-8, 0, 8]) { ctx.beginPath(); ctx.arc(mx + dx, sfY + 38, 1.8, 0, Math.PI * 2); ctx.fill(); }
+
+          // Plush velvet display podium & turned brass mannequin tripod stand
+          const podY = sfY + 134;
+          ctx.fillStyle = '#4c0519'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.roundRect(mx - 34, podY, 68, 10, [4, 4, 0, 0]); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#b45309'; ctx.fillRect(mx - 1.5, podY - 16, 3, 16);
+
+          // Cream-linen tailor's dress-form bust + brass neck finial + pearl necklace
+          const topGownY = sfY + 54;
+          ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(mx, topGownY - 4, 3.0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#fef3c7'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.ellipse(mx, topGownY + 4, 6.5, 5.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#ffffff';
+          for (let p = -2; p <= 2; p++) { ctx.beginPath(); ctx.arc(mx + p * 2.1, topGownY + 5 + Math.abs(p) * 0.4, 0.9, 0, Math.PI * 2); ctx.fill(); }
+
+          if (gIdx === 0) {
+            // GOWN 1: Parisian Crimson Velvet & Gold-Lace Sweetheart Ballgown with Pleated Drape Folds & Satin Bow!
+            const skG = ctx.createLinearGradient(mx - 32, topGownY + 8, mx + 32, podY);
+            skG.addColorStop(0, '#f43f5e'); skG.addColorStop(0.32, '#be123c'); skG.addColorStop(0.7, '#881337'); skG.addColorStop(1, '#4c0519');
+            ctx.fillStyle = skG; ctx.strokeStyle = '#2e0210'; ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(mx - 10, topGownY + 10); ctx.quadraticCurveTo(mx - 5, topGownY + 6, mx, topGownY + 11);
+            ctx.quadraticCurveTo(mx + 5, topGownY + 6, mx + 10, topGownY + 10);
+            ctx.lineTo(mx + 7, topGownY + 26); ctx.lineTo(mx - 7, topGownY + 26); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(mx - 7, topGownY + 26); ctx.lineTo(mx + 7, topGownY + 26);
+            ctx.bezierCurveTo(mx + 22, topGownY + 38, mx + 32, podY - 16, mx + 33, podY - 2);
+            ctx.quadraticCurveTo(mx + 16, podY + 3, mx, podY - 1);
+            ctx.quadraticCurveTo(mx - 16, podY + 3, mx - 33, podY - 2);
+            ctx.bezierCurveTo(mx - 32, podY - 16, mx - 22, topGownY + 38, mx - 7, topGownY + 26);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = 'rgba(255, 228, 230, 0.34)'; ctx.lineWidth = 1.2;
+            for (const fx of [-16, -6, 6, 16]) {
+              ctx.beginPath(); ctx.moveTo(mx + fx * 0.28, topGownY + 28); ctx.quadraticCurveTo(mx + fx * 0.85, topGownY + 52, mx + fx * 1.45, podY - 3); ctx.stroke();
+            }
+            ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.3;
+            ctx.beginPath(); ctx.moveTo(mx - 31, podY - 5); ctx.quadraticCurveTo(mx, podY - 1, mx + 31, podY - 5); ctx.stroke();
+            ctx.fillStyle = '#fbbf24'; ctx.fillRect(mx - 7.5, topGownY + 24, 15, 3.8);
+            ctx.beginPath(); ctx.ellipse(mx + 10, topGownY + 26, 4.5, 2.5, 0.25, 0, Math.PI * 2); ctx.fill();
+          } else {
+            // GOWN 2: Emerald & Champagne-Gold Silk Mermaid Couture Gown with Asymmetric Draped Skirt & Hatbox!
+            const emG = ctx.createLinearGradient(mx - 26, topGownY + 8, mx + 26, podY);
+            emG.addColorStop(0, '#34d399'); emG.addColorStop(0.35, '#059669'); emG.addColorStop(0.75, '#065f46'); emG.addColorStop(1, '#022c22');
+            ctx.fillStyle = emG; ctx.strokeStyle = '#022c22'; ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(mx - 10, topGownY + 8); ctx.lineTo(mx + 8, topGownY + 13);
+            ctx.lineTo(mx + 6.5, topGownY + 26); ctx.lineTo(mx - 6.5, topGownY + 26); ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(mx - 6.5, topGownY + 26); ctx.lineTo(mx + 6.5, topGownY + 26);
+            ctx.bezierCurveTo(mx + 16, topGownY + 38, mx + 12, topGownY + 54, mx + 29, podY - 1);
+            ctx.quadraticCurveTo(mx + 4, podY + 3, mx - 24, podY - 2);
+            ctx.bezierCurveTo(mx - 12, topGownY + 54, mx - 16, topGownY + 38, mx - 6.5, topGownY + 26);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = 'rgba(167, 243, 208, 0.42)'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(mx - 3, topGownY + 28); ctx.quadraticCurveTo(mx - 8, topGownY + 56, mx - 14, podY - 3); ctx.moveTo(mx + 4, topGownY + 28); ctx.quadraticCurveTo(mx + 10, topGownY + 56, mx + 19, podY - 3); ctx.stroke();
+            ctx.fillStyle = '#fde047'; ctx.fillRect(mx - 7, topGownY + 24.5, 14, 3.2);
+            ctx.fillStyle = '#fda4af'; ctx.strokeStyle = '#881337'; ctx.lineWidth = 0.9;
+            ctx.fillRect(mx - 31, podY - 10, 12, 10); ctx.strokeRect(mx - 31, podY - 10, 12, 10);
+            ctx.fillStyle = '#fbbf24'; ctx.fillRect(mx - 32, podY - 12, 14, 2.5);
+          }
+          ctx.fillStyle = 'rgba(255,255,255,0.20)';
+          ctx.beginPath(); ctx.moveTo(vx + 8, sfY + 26); ctx.lineTo(vx + 26, sfY + 26); ctx.lineTo(vx + 10, sfY + 144); ctx.lineTo(vx + 2, sfY + 144); ctx.closePath(); ctx.fill();
+        }
+      } else if (shopKind === 1) {
+        // B. LUXURY PARISIAN PARFUMERIE — Iconic French Perfume Flacons (Square Crystal, Amphora, Fluted Shell & Bulb Atomizer!)
+        ctx.fillStyle = '#172554'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+        ctx.fillRect(6, sfY, bw - 12, sfH); ctx.strokeRect(6, sfY, bw - 12, sfH);
+        ctx.fillStyle = '#fef08a'; ctx.font = 'bold 10px serif'; ctx.textAlign = 'center';
+        ctx.fillText('PARFUMS DE PARIS • LUXE', bw * 0.5, sfY + 17);
+        const vitG = ctx.createLinearGradient(16, sfY + 24, 16, sfY + 146);
+        vitG.addColorStop(0, '#fff1f2'); vitG.addColorStop(0.42, '#fde68a'); vitG.addColorStop(1, '#92400e');
+        ctx.fillStyle = vitG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.roundRect(16, sfY + 24, bw - 32, 122, [22, 22, 2, 2]); ctx.fill(); ctx.stroke();
+
+        const nicheG = ctx.createRadialGradient(bw * 0.5, sfY + 94, 4, bw * 0.5, sfY + 94, 48);
+        nicheG.addColorStop(0, 'rgba(255, 255, 255, 0.72)'); nicheG.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = nicheG; ctx.beginPath(); ctx.arc(bw * 0.5, sfY + 94, 48, 0, Math.PI * 2); ctx.fill();
+
+        ctx.fillStyle = '#92400e'; ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.0;
+        ctx.fillRect(26, sfY + 82, bw - 52, 4.5); ctx.strokeRect(26, sfY + 82, bw - 52, 4.5);
+        ctx.fillRect(26, sfY + 130, bw - 52, 5); ctx.strokeRect(26, sfY + 130, bw - 52, 5);
+
+        // 1. Iconic Square Beveled Crystal Flacon (Chanel No. 5 silhouette)
+        for (const [fx, fy, liq] of [[60, sfY + 82, '#f59e0b'], [216, sfY + 130, '#fbbf24']]) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.72)'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.roundRect(fx - 13, fy - 28, 26, 28, 3); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = liq; ctx.fillRect(fx - 10.5, fy - 24, 21, 21.5);
+          ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 0.8;
+          ctx.fillRect(fx - 8, fy - 20, 16, 12); ctx.strokeRect(fx - 8, fy - 20, 16, 12);
+          ctx.fillStyle = '#1e293b'; ctx.fillRect(fx - 5, fy - 15.5, 10, 1.6); ctx.fillRect(fx - 3.5, fy - 12.5, 7, 1.2);
+          ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.0;
+          ctx.fillRect(fx - 3.5, fy - 32, 7, 4);
+          ctx.beginPath(); ctx.roundRect(fx - 7.5, fy - 41, 15, 9, 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = 'rgba(255,255,255,0.65)'; ctx.fillRect(fx - 9, fy - 25, 2.5, 19);
+        }
+
+        // 2. Sculpted Teardrop Amphora Flacon with Ringed Gold Neck & Pearl Cap (Dior J'adore silhouette)
+        for (const [fx, fy, sc] of [[bw * 0.5, sfY + 130, 1.18], [142, sfY + 82, 0.88]]) {
+          ctx.save(); ctx.translate(fx, fy); ctx.scale(sc, sc);
+          const amG = ctx.createRadialGradient(-4, -14, 2, 0, -13, 15);
+          amG.addColorStop(0, '#fef9c3'); amG.addColorStop(0.5, '#f59e0b'); amG.addColorStop(1, '#b45309');
+          ctx.fillStyle = amG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.moveTo(-11, -4); ctx.bezierCurveTo(-13, -15, -6, -24, -3, -29); ctx.lineTo(3, -29);
+          ctx.bezierCurveTo(6, -24, 13, -15, 11, -4); ctx.quadraticCurveTo(0, 1, -11, -4);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fde047'; ctx.fillRect(-3.2, -41, 6.4, 12); ctx.strokeRect(-3.2, -41, 6.4, 12);
+          ctx.strokeStyle = '#92400e'; ctx.lineWidth = 0.8;
+          for (const ry of [-38, -35, -32]) { ctx.beginPath(); ctx.moveTo(-3.2, ry); ctx.lineTo(3.2, ry); ctx.stroke(); }
+          ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#b45309'; ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.arc(0, -45, 4.4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = 'rgba(255,255,255,0.62)'; ctx.beginPath(); ctx.ellipse(-5, -14, 2.0, 6.5, 0.22, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+
+        // 3. Vintage Ruby-Glass Bulb Atomizer Perfume Flacon with Braided Squeeze Bulb & Golden Tassel
+        { const fx = 72, fy = sfY + 130;
+          const rbG = ctx.createRadialGradient(fx - 3, fy - 14, 2, fx, fy - 12, 14);
+          rbG.addColorStop(0, '#fda4af'); rbG.addColorStop(0.45, '#e11d48'); rbG.addColorStop(1, '#881337');
+          ctx.fillStyle = rbG; ctx.strokeStyle = '#4c0519'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.ellipse(fx, fy - 13, 12, 13, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fbbf24'; ctx.fillRect(fx - 3.5, fy - 31, 7, 6); ctx.strokeRect(fx - 3.5, fy - 31, 7, 6);
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.moveTo(fx + 3, fy - 28); ctx.quadraticCurveTo(fx + 14, fy - 34, fx + 17, fy - 22); ctx.stroke();
+          ctx.fillStyle = '#be123c'; ctx.strokeStyle = '#4c0519'; ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.ellipse(fx + 17, fy - 18, 5.2, 6.2, 0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.moveTo(fx + 17, fy - 12); ctx.lineTo(fx + 17, fy - 4); ctx.stroke();
+        }
+
+        // 4. Sculpted Amethyst Fluted Crystal Flacon with Diamond Stopper
+        { const fx = 218, fy = sfY + 82;
+          const am2G = ctx.createLinearGradient(fx - 12, fy - 26, fx + 12, fy);
+          am2G.addColorStop(0, '#e9d5ff'); am2G.addColorStop(0.5, '#a855f7'); am2G.addColorStop(1, '#581c87');
+          ctx.fillStyle = am2G; ctx.strokeStyle = '#3b0764'; ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.moveTo(fx - 8, fy); ctx.lineTo(fx - 13, fy - 20); ctx.quadraticCurveTo(fx, fy - 28, fx + 13, fy - 20); ctx.lineTo(fx + 8, fy); ctx.closePath();
+          ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fde047';
+          ctx.beginPath(); ctx.moveTo(fx, fy - 39); ctx.lineTo(fx + 6, fy - 32); ctx.lineTo(fx, fy - 26); ctx.lineTo(fx - 6, fy - 32); ctx.closePath(); ctx.fill(); ctx.stroke();
+        }
+      } else {
+        ctx.fillStyle = '#14532d'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+        ctx.fillRect(6, sfY, bw - 12, sfH); ctx.strokeRect(6, sfY, bw - 12, sfH);
+        ctx.fillStyle = '#fef08a'; ctx.font = 'bold 10px serif'; ctx.textAlign = 'center';
+        ctx.fillText('LA PÂTISSERIE • PARIS', bw * 0.5, sfY + 17);
+        const vitG = ctx.createLinearGradient(18, sfY + 26, 18, sfY + 140);
+        vitG.addColorStop(0, '#fffbeb'); vitG.addColorStop(0.55, '#fde047'); vitG.addColorStop(1, '#d97706');
+        ctx.fillStyle = vitG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.roundRect(18, sfY + 28, bw - 36, 112, 8); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#b45309'; ctx.fillRect(28, sfY + 104, bw - 56, 4);
+        for (const cx0 of [62, 116, 170, 224]) {
+          ctx.fillStyle = '#d97706'; ctx.beginPath(); ctx.ellipse(cx0, sfY + 98, 14, 7, 0, Math.PI, 0); ctx.fill();
+          ctx.fillStyle = '#f472b6'; ctx.beginPath(); ctx.arc(cx0, sfY + 90, 4.5, 0, Math.PI * 2); ctx.fill();
+        }
+        for (let st = 0; st < 8; st++) {
+          ctx.fillStyle = st % 2 === 0 ? '#9f1239' : '#fffbeb';
+          ctx.fillRect(14 + st * 32, sfY + 24, 32, 14);
+          ctx.beginPath(); ctx.arc(30 + st * 32, sfY + 38, 16, 0, Math.PI); ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawParisArcGate(ctx, g, sx, sy, time, goalLabel) {
+    // Monumental Museum-Grade Carved Parisian Arc de Triomphe (Coffered Vault, High-Relief Sculptures, Attic Boucliers & Eternal Flame!)
+    const cx = sx + g.w * 0.5;
+    const baseY = sy + g.h;
+    const archW = 196;
+    const archH = 212;
+    const topY = baseY - archH;
+    const halfW = archW * 0.5;
+
+    ctx.save();
+    const aura = ctx.createRadialGradient(cx, baseY - 78, 18, cx, baseY - 78, 155);
+    aura.addColorStop(0, 'rgba(254, 240, 138, 0.48)'); aura.addColorStop(0.55, 'rgba(251, 146, 60, 0.18)'); aura.addColorStop(1, 'rgba(251, 146, 60, 0)');
+    ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(cx, baseY - 78, 155, 0, Math.PI * 2); ctx.fill();
+
+    const stG = ctx.createLinearGradient(cx - halfW, topY, cx + halfW, baseY);
+    stG.addColorStop(0, '#fffbeb'); stG.addColorStop(0.32, '#f0e2ce'); stG.addColorStop(0.75, '#cbb69c'); stG.addColorStop(1, '#8c745a');
+    ctx.fillStyle = stG; ctx.strokeStyle = '#3f3023'; ctx.lineWidth = 2.0;
+    ctx.fillRect(cx - halfW, topY, archW, archH); ctx.strokeRect(cx - halfW, topY, archW, archH);
+    ctx.strokeStyle = 'rgba(63, 48, 35, 0.16)'; ctx.lineWidth = 1.0;
+    for (let sy0 = topY + 56; sy0 < baseY - 12; sy0 += 18) {
+      ctx.beginPath(); ctx.moveTo(cx - halfW + 2, sy0); ctx.lineTo(cx + halfW - 2, sy0); ctx.stroke();
+    }
+
+    ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#3f3023'; ctx.lineWidth = 1.6;
+    ctx.fillRect(cx - halfW - 6, topY - 10, archW + 12, 11); ctx.strokeRect(cx - halfW - 6, topY - 10, archW + 12, 11);
+    ctx.fillStyle = '#e7d8c5';
+    ctx.fillRect(cx - halfW, topY + 1, archW, 24); ctx.strokeRect(cx - halfW, topY + 1, archW, 24);
+    for (let m = -3; m <= 3; m++) {
+      const mx = cx + m * 26;
+      ctx.fillStyle = '#f5ebe0'; ctx.strokeStyle = '#5c4632'; ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.arc(mx, topY + 13, 7.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#d97706'; ctx.beginPath(); ctx.arc(mx, topY + 13, 2.4, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#3f3023'; ctx.lineWidth = 1.5;
+    ctx.fillRect(cx - halfW - 9, topY + 25, archW + 18, 9); ctx.strokeRect(cx - halfW - 9, topY + 25, archW + 18, 9);
+    ctx.fillStyle = 'rgba(63, 48, 35, 0.42)';
+    for (let dx = cx - halfW - 4; dx < cx + halfW + 4; dx += 10) ctx.fillRect(dx, topY + 34, 5, 5);
+    ctx.fillStyle = '#e7d8c5'; ctx.strokeStyle = '#443527'; ctx.lineWidth = 1.3;
+    ctx.fillRect(cx - halfW - 2, topY + 39, archW + 4, 17); ctx.strokeRect(cx - halfW - 2, topY + 39, archW + 4, 17);
+    ctx.fillStyle = '#3f3023'; ctx.font = 'bold 9.5px serif'; ctx.textAlign = 'center';
+    ctx.fillText('PARIS • ARC DE TRIOMPHE', cx, topY + 51);
+
+    const vaultR = 46;
+    const springY = topY + 114;
+    ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#443527'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - vaultR - 9, baseY); ctx.lineTo(cx - vaultR - 9, springY);
+    ctx.arc(cx, springY, vaultR + 9, Math.PI, 0);
+    ctx.lineTo(cx + vaultR + 9, baseY); ctx.closePath(); ctx.fill(); ctx.stroke();
+    const vG = ctx.createLinearGradient(cx, springY - vaultR, cx, baseY);
+    vG.addColorStop(0, '#3b1506'); vG.addColorStop(0.42, '#92400e'); vG.addColorStop(0.82, '#f59e0b'); vG.addColorStop(1, '#fef08a');
+    ctx.fillStyle = vG; ctx.strokeStyle = '#291509'; ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.moveTo(cx - vaultR, baseY); ctx.lineTo(cx - vaultR, springY);
+    ctx.arc(cx, springY, vaultR, Math.PI, 0);
+    ctx.lineTo(cx + vaultR, baseY); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = 'rgba(254, 240, 138, 0.36)'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(cx, springY, vaultR - 8, Math.PI + 0.12, -0.12); ctx.stroke();
+    for (let k = 1; k <= 5; k++) {
+      const a = Math.PI + (k * Math.PI) / 6;
+      const rx = cx + Math.cos(a) * (vaultR - 4);
+      const ry = springY + Math.sin(a) * (vaultR - 4);
+      ctx.fillStyle = '#fde68a'; ctx.beginPath(); ctx.arc(rx, ry, 2.2, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#3f3023'; ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(cx - 7, springY - vaultR - 11); ctx.lineTo(cx + 7, springY - vaultR - 11);
+    ctx.lineTo(cx + 5, springY - vaultR + 2); ctx.lineTo(cx - 5, springY - vaultR + 2);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    for (const side of [-1, 1]) {
+      const px0 = cx + side * (vaultR + 28);
+      ctx.fillStyle = '#d6c7b2'; ctx.strokeStyle = '#3f3023'; ctx.lineWidth = 1.4;
+      ctx.fillRect(px0 - 24, baseY - 22, 48, 22); ctx.strokeRect(px0 - 24, baseY - 22, 48, 22);
+      ctx.fillStyle = '#e7d8c5'; ctx.strokeStyle = '#6b5640'; ctx.lineWidth = 1.2;
+      ctx.fillRect(px0 - 17, topY + 66, 34, 24); ctx.strokeRect(px0 - 17, topY + 66, 34, 24);
+      ctx.fillStyle = '#f5ebe0'; ctx.strokeStyle = '#6b5640'; ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(px0 - 14, baseY - 24); ctx.quadraticCurveTo(px0 - 12, baseY - 62, px0, baseY - 82);
+      ctx.quadraticCurveTo(px0 + 12, baseY - 62, px0 + 14, baseY - 24);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(px0, baseY - 68); ctx.quadraticCurveTo(px0 - 16, baseY - 82, px0 - 12, baseY - 62);
+      ctx.moveTo(px0, baseY - 68); ctx.quadraticCurveTo(px0 + 16, baseY - 82, px0 + 12, baseY - 62);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#3f3023'; ctx.lineWidth = 1.2;
+      ctx.fillRect(px0 - 23, springY - 4, 46, 7); ctx.strokeRect(px0 - 23, springY - 4, 46, 7);
+    }
+
+    const flFlick = Math.sin(time * 11) * 3.0;
+    ctx.fillStyle = '#78350f'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.ellipse(cx, baseY - 4, 18, 4.8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = 'rgba(251, 146, 60, 0.88)';
+    ctx.beginPath(); ctx.moveTo(cx - 9, baseY - 6); ctx.quadraticCurveTo(cx, baseY - 32 - flFlick, cx + 9, baseY - 6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath(); ctx.moveTo(cx - 4.5, baseY - 6); ctx.quadraticCurveTo(cx, baseY - 23 - flFlick * 0.6, cx + 4.5, baseY - 6); ctx.closePath(); ctx.fill();
+    for (let e = 0; e < 4; e++) {
+      const rise = ((time * 28 + e * 14) % 44);
+      ctx.fillStyle = `rgba(254, 240, 138, ${(1 - rise / 44).toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(cx + Math.sin(time * 6 + e * 2) * 7, baseY - 22 - rise, 1.8, 0, Math.PI * 2); ctx.fill();
+    }
+
+    const bob = Math.sin(time * 3.0) * 3;
+    const isEn = window.Game.I18n && window.Game.I18n.isEn();
+    const labelText = isEn ? 'ARC DE TRIOMPHE • PARIS' : (goalLabel || 'قوس النصر • باريس');
+    ctx.font = 'bold 12px "Cairo", system-ui, sans-serif';
+    const tw = Math.max(164, ctx.measureText(labelText).width + 28);
+    ctx.fillStyle = 'rgba(20, 14, 34, 0.90)'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.roundRect(cx - tw * 0.5, topY - 46 + bob, tw, 26, 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fef3c7';
+    ctx.fillText(labelText, cx, topY - 28 + bob);
+    ctx.restore();
+  }
+
+  // =========================================================================
+  // 17. STAGE 23: MARRAKECH SOUK & KASBAH ROOFTOPS
+  //     (High Atlas Mountains, Koutoubia Minaret, Open-Courtyard Riads,
+  //      Authentic Berber Carpet / Spice & Tagine / Brass Lantern Souk Stalls,
+  //      and Imperial Bab Mansour Exit Gate — Zero Dr.MAX Branding!)
+  // =========================================================================
+  function drawMarrakechSkyAndHorizon(ctx, camX, w, h, time) {
+    ensureTextures(ctx);
+
+    // 1. Rich Moroccan Imperial Sunset-to-Twilight Sky
+    const sky = ctx.createLinearGradient(0, 0, 0, h * 0.80);
+    sky.addColorStop(0.00, '#130926');
+    sky.addColorStop(0.18, '#37123a');
+    sky.addColorStop(0.38, '#7c1d3c');
+    sky.addColorStop(0.58, '#bd3f2e');
+    sky.addColorStop(0.76, '#e6762b');
+    sky.addColorStop(0.90, '#f6b344');
+    sky.addColorStop(1.00, '#fef08a');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, h);
+
+    // Twinkling twilight stars & Moroccan evening crescent moon in upper violet sky
+    ctx.save();
+    for (let s = 0; s < 32; s++) {
+      const sx = ((s * 179 - camX * 0.01 + 43) % w + w) % w;
+      const sy = 12 + ((s * 61) % 128);
+      const tw = 0.35 + 0.65 * Math.abs(Math.sin(time * 2.1 + s * 1.37));
+      ctx.fillStyle = `rgba(255, 248, 220, ${(tw * 0.72).toFixed(2)})`;
+      ctx.beginPath();
+      ctx.arc(sx, sy, (s % 4 === 0) ? 1.7 : 1.05, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Slender silver-gold Maghrebi crescent moon & bright evening star
+    const moonX = w * 0.22 - ((camX * 0.01) % (w * 0.18));
+    const moonY = 74;
+    ctx.fillStyle = '#fef3c7';
+    ctx.beginPath(); ctx.arc(moonX, moonY, 19, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#260e31';
+    ctx.beginPath(); ctx.arc(moonX + 7.5, moonY - 4.5, 16.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fffbeb';
+    ctx.beginPath(); ctx.arc(moonX + 24, moonY - 12, 2.2, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    // 2. Glowing Marrakech Sunset Sun & Warm Atmospheric Halo
+    const sunX = w * 0.74 - ((camX * 0.012) % (w * 0.24));
+    const sunY = h * 0.33;
+    const sunHalo = ctx.createRadialGradient(sunX, sunY, 14, sunX, sunY, 250);
+    sunHalo.addColorStop(0.00, 'rgba(255, 251, 235, 0.92)');
+    sunHalo.addColorStop(0.22, 'rgba(253, 224, 71, 0.48)');
+    sunHalo.addColorStop(0.55, 'rgba(234, 88, 12, 0.20)');
+    sunHalo.addColorStop(1.00, 'rgba(234, 88, 12, 0)');
+    ctx.fillStyle = sunHalo;
+    ctx.beginPath(); ctx.arc(sunX, sunY, 250, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fffbeb';
+    ctx.beginPath(); ctx.arc(sunX, sunY, 35, 0, Math.PI * 2); ctx.fill();
+
+    // Layered backlit Moroccan sunset cloud ribbons rim-lit with molten gold
+    for (let c = 0; c < 6; c++) {
+      const cx = ((c * 290 - camX * 0.028 + time * 4.5) % (w + 360) + (w + 360)) % (w + 360) - 180;
+      const cy = 88 + (c % 3) * 38;
+      const cG = ctx.createLinearGradient(cx, cy - 16, cx, cy + 16);
+      cG.addColorStop(0, 'rgba(136, 34, 72, 0.34)');
+      cG.addColorStop(0.62, 'rgba(234, 88, 12, 0.28)');
+      cG.addColorStop(1, 'rgba(254, 240, 138, 0.42)');
+      ctx.fillStyle = cG;
+      ctx.beginPath();
+      ctx.moveTo(cx - 98, cy + 12);
+      ctx.quadraticCurveTo(cx - 52, cy - 10, cx - 14, cy - 4);
+      ctx.quadraticCurveTo(cx + 24, cy - 18, cx + 64, cy - 3);
+      ctx.quadraticCurveTo(cx + 92, cy - 8, cx + 108, cy + 12);
+      ctx.quadraticCurveTo(cx, cy + 16, cx - 98, cy + 12);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // 3. Far Hazy Rose-Violet Atlas Horizon Range (Depth Layer 1)
+    ctx.fillStyle = 'rgba(104, 38, 68, 0.62)';
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    for (let sx = 0; sx <= w + 28; sx += 28) {
+      const wx = sx + camX * 0.038;
+      const ridge = Math.sin(wx * 0.0027) * 46 + Math.sin(wx * 0.0069 + 1.8) * 26 + Math.cos(wx * 0.013 + 0.5) * 12;
+      ctx.lineTo(sx, h * 0.44 - ridge);
+    }
+    ctx.lineTo(w, h);
+    ctx.closePath();
+    ctx.fill();
+
+    // 4. Sculpted 3D Snow-Capped High Atlas Massif (Jbel Toubkal — Sunlit & Shaded Faces + Snow Couloirs!)
+    const mtnScroll = camX * 0.065;
+    const span = 1520;
+    const startOff = -((mtnScroll % span) + span) % span;
+    const peaks = [
+      { x: 0, y: 0.55 }, { x: 135, y: 0.41 }, { x: 255, y: 0.49 },
+      { x: 405, y: 0.33 }, { x: 555, y: 0.47 }, { x: 715, y: 0.36 },
+      { x: 875, y: 0.48 }, { x: 1045, y: 0.32 }, { x: 1205, y: 0.45 },
+      { x: 1375, y: 0.38 }, { x: 1520, y: 0.55 }
+    ];
+
+    const mtnG = ctx.createLinearGradient(0, h * 0.31, 0, h * 0.72);
+    mtnG.addColorStop(0.00, '#8f3950');
+    mtnG.addColorStop(0.48, '#61233b');
+    mtnG.addColorStop(1.00, '#3a1426');
+    ctx.fillStyle = mtnG;
+    ctx.beginPath();
+    ctx.moveTo(-120, h);
+    for (let rep = -1; rep <= 2; rep++) {
+      for (let pIdx = 0; pIdx < peaks.length; pIdx++) {
+        if (rep > -1 && pIdx === 0) continue;
+        const pk = peaks[pIdx];
+        const px = startOff + rep * span + pk.x;
+        const py = h * pk.y;
+        if (rep === -1 && pIdx === 0) ctx.lineTo(px, py);
+        else {
+          const prev = peaks[pIdx === 0 ? peaks.length - 2 : pIdx - 1];
+          const prevX = startOff + (pIdx === 0 ? rep - 1 : rep) * span + prev.x;
+          const prevY = h * prev.y;
+          const midX = (prevX + px) * 0.5;
+          const midY = (prevY + py) * 0.5 + ((pIdx % 2 === 0) ? 7 : -5);
+          ctx.quadraticCurveTo(midX, midY, px, py);
+        }
+      }
+    }
+    ctx.lineTo(w + 240, h);
+    ctx.closePath();
+    ctx.fill();
+
+    // 3D Sunlit Western Facets, Shaded Eastern Ridges & Organic Snow Couloirs on High Atlas Summits
+    for (let rep = -1; rep <= 2; rep++) {
+      for (const idx of [1, 3, 5, 7, 9]) {
+        const prev = peaks[idx - 1];
+        const pk = peaks[idx];
+        const next = peaks[idx + 1];
+        const lx = startOff + rep * span + prev.x;
+        const ly = h * prev.y;
+        const px = startOff + rep * span + pk.x;
+        const py = h * pk.y;
+        const rx = startOff + rep * span + next.x;
+        const ry = h * next.y;
+        if (rx < -140 || lx > w + 140) continue;
+
+        // Warm sunlit right/western slope facing the setting sun
+        const litSlope = ctx.createLinearGradient(px, py, rx, ry);
+        litSlope.addColorStop(0, 'rgba(251, 146, 60, 0.34)');
+        litSlope.addColorStop(1, 'rgba(154, 52, 18, 0.05)');
+        ctx.fillStyle = litSlope;
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(rx, ry);
+        ctx.lineTo(px + (rx - px) * 0.16, h * 0.68);
+        ctx.lineTo(px - 8, h * 0.68);
+        ctx.closePath();
+        ctx.fill();
+
+        // Deep cool shadow facet on left/eastern slope
+        ctx.fillStyle = 'rgba(34, 10, 28, 0.34)';
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(lx, ly);
+        ctx.lineTo(px - 10, h * 0.66);
+        ctx.closePath();
+        ctx.fill();
+
+        // Sculpted High Atlas glacier snow cap & branching couloir gullies
+        const snowH = (ly - py) * 0.52;
+        const sSpanL = (px - lx) * 0.44;
+        const sSpanR = (rx - px) * 0.46;
+        // Shaded lavender-rose snow on left side of ridge
+        ctx.fillStyle = 'rgba(226, 188, 212, 0.58)';
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(px - sSpanL, py + snowH * 0.88);
+        ctx.lineTo(px - sSpanL * 0.62, py + snowH * 0.66);
+        ctx.lineTo(px - sSpanL * 0.35, py + snowH * 1.12);
+        ctx.lineTo(px - 3, py + snowH * 0.78);
+        ctx.closePath();
+        ctx.fill();
+        // Warm sunlit golden-ivory snow on sun-facing side + long couloir vein
+        const snowLit = ctx.createLinearGradient(px, py, px + sSpanR, py + snowH * 1.15);
+        snowLit.addColorStop(0, 'rgba(255, 251, 235, 0.86)');
+        snowLit.addColorStop(0.65, 'rgba(254, 215, 170, 0.62)');
+        snowLit.addColorStop(1, 'rgba(251, 146, 60, 0.18)');
+        ctx.fillStyle = snowLit;
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(px + sSpanR, py + snowH * 0.90);
+        ctx.lineTo(px + sSpanR * 0.65, py + snowH * 0.68);
+        ctx.lineTo(px + sSpanR * 0.42, py + snowH * 1.24);
+        ctx.lineTo(px + sSpanR * 0.18, py + snowH * 0.76);
+        ctx.lineTo(px - 3, py + snowH * 0.96);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    // Distant Silhouetted Flock of Moroccan Storks Gliding Across the Sunset Sky
+    ctx.strokeStyle = 'rgba(58, 18, 32, 0.68)';
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    for (let b = 0; b < 5; b++) {
+      const bx = ((time * 16 + b * 26 - camX * 0.045 + 320) % (w + 260) + (w + 260)) % (w + 260) - 130;
+      const by = h * 0.25 + Math.abs(b - 2) * 9 + Math.sin(time * 2.2 + b) * 3;
+      const wf = Math.sin(time * 5.6 + b * 0.9) * 4.2;
+      ctx.beginPath();
+      ctx.moveTo(bx - 7, by - wf);
+      ctx.quadraticCurveTo(bx - 3, by - 3, bx, by);
+      ctx.quadraticCurveTo(bx + 3, by - 3, bx + 7, by - wf);
+      ctx.stroke();
+    }
+
+    // Golden Sahara-Atlas Valley Mist Veil before the Red-City Horizon
+    const valleyMist = ctx.createLinearGradient(0, h * 0.48, 0, h * 0.73);
+    valleyMist.addColorStop(0, 'rgba(251, 146, 60, 0)');
+    valleyMist.addColorStop(0.65, 'rgba(249, 115, 22, 0.18)');
+    valleyMist.addColorStop(1, 'rgba(253, 186, 116, 0.38)');
+    ctx.fillStyle = valleyMist;
+    ctx.fillRect(0, h * 0.48, w, h * 0.25);
+
+    // 5. Mid-Far Layer: Marrakech "Red City" Almohad Ramparts, Green Qubbas, Palmeraie & Monumental 3D Koutoubia Minaret!
+    const kScroll = camX * 0.12;
+    const kPeriod = 1280;
+    const kBaseY = h * 0.72;
+    const kFirst = Math.floor(kScroll / kPeriod) - 1;
+
+    // Continuous silhouetted Palmeraie & Red-City Medina Ramparts along the horizon
+    const rampSpan = 320;
+    const rFirst = Math.floor(kScroll / rampSpan) - 1;
+    const rLast = Math.ceil((kScroll + w) / rampSpan) + 1;
+    for (let ri = rFirst; ri <= rLast; ri++) {
+      const rx = ri * rampSpan - kScroll;
+      // Distant Palmeraie date-palm silhouettes peeking behind the ramparts
+      for (const [poff, ph] of [[48, 42], [186, 48], [268, 36]]) {
+        const px0 = rx + poff;
+        const py0 = kBaseY - 26 - ph;
+        ctx.strokeStyle = '#4a1d1a';
+        ctx.lineWidth = 2.6;
+        ctx.beginPath();
+        ctx.moveTo(px0, kBaseY - 18);
+        ctx.quadraticCurveTo(px0 + (poff % 2 === 0 ? 4 : -4), kBaseY - 22 - ph * 0.5, px0 + (poff % 2 === 0 ? 6 : -5), py0);
+        ctx.stroke();
+        const cxP = px0 + (poff % 2 === 0 ? 6 : -5);
+        for (let f = 0; f < 6; f++) {
+          const a = -Math.PI * 0.95 + (f / 5) * Math.PI * 0.90;
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(cxP, py0);
+          ctx.quadraticCurveTo(cxP + Math.cos(a) * 10, py0 + Math.sin(a) * 8 - 3, cxP + Math.cos(a) * 18, py0 + Math.sin(a) * 12 + 5);
+          ctx.stroke();
+        }
+      }
+
+      // Red-Ochre Medina Rampart Curtain Wall + Bastion Tower (Borj)
+      const rwG = ctx.createLinearGradient(rx, kBaseY - 46, rx, kBaseY + 24);
+      rwG.addColorStop(0, '#a64429');
+      rwG.addColorStop(0.6, '#7c2d1b');
+      rwG.addColorStop(1, '#4c1910');
+      ctx.fillStyle = rwG;
+      ctx.fillRect(rx, kBaseY - 28, rampSpan + 2, 56);
+      // Crenellations along curtain wall
+      for (let mx = rx + 4; mx < rx + rampSpan - 6; mx += 12) {
+        ctx.fillRect(mx, kBaseY - 33, 7, 5);
+      }
+      // Projecting square Borj bastion + Emerald-Glazed Moroccan Qubba Pyramid Roof
+      const borjX = rx + 112;
+      ctx.fillStyle = '#b64d2f';
+      ctx.fillRect(borjX, kBaseY - 44, 42, 68);
+      ctx.fillStyle = 'rgba(253, 224, 150, 0.18)';
+      ctx.fillRect(borjX + 32, kBaseY - 44, 10, 44);
+      for (let mx = borjX; mx < borjX + 40; mx += 10) {
+        ctx.fillStyle = '#b64d2f';
+        ctx.fillRect(mx, kBaseY - 49, 6, 5);
+      }
+      // Emerald-glazed pyramidal Qubba sanctuary roof beside bastion
+      if (Math.abs(ri) % 2 === 0) {
+        const qx = rx + 224;
+        ctx.fillStyle = '#8d3520';
+        ctx.fillRect(qx - 22, kBaseY - 38, 44, 38);
+        const qG = ctx.createLinearGradient(qx - 24, kBaseY - 58, qx + 24, kBaseY - 38);
+        qG.addColorStop(0, '#10b981');
+        qG.addColorStop(0.55, '#047857');
+        qG.addColorStop(1, '#064e3b');
+        ctx.fillStyle = qG;
+        ctx.beginPath();
+        ctx.moveTo(qx - 25, kBaseY - 38);
+        ctx.lineTo(qx, kBaseY - 58);
+        ctx.lineTo(qx + 25, kBaseY - 38);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath(); ctx.arc(qx, kBaseY - 60, 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+      // Twinkling warm Medina window lights
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.65)';
+      ctx.fillRect(borjX + 12, kBaseY - 34, 3.5, 5);
+      ctx.fillRect(borjX + 24, kBaseY - 34, 3.5, 5);
+      ctx.fillRect(rx + 42, kBaseY - 19, 3, 4);
+    }
+
+    // Monumental Museum-Grade 3D Koutoubia Minaret!
+    for (let ki = kFirst; ki <= kFirst + 2; ki++) {
+      const kx = ki * kPeriod - kScroll + 540;
+      if (kx < -240 || kx > w + 240) continue;
+
+      const mainW = 54;
+      const sideW = 20; // 3D sunlit side face facing the setting sun!
+      const th = 286;
+      const topY = kBaseY - th;
+      const leftX = kx - (mainW + sideW) * 0.5;
+      const midX = leftX + mainW;
+      const rightX = midX + sideW;
+
+      // Accompanying Koutoubia Prayer Hall Aisles & Whitewashed Koubba Domes at Base
+      ctx.fillStyle = '#7c2d1d';
+      ctx.strokeStyle = '#3b130b';
+      ctx.lineWidth = 1.2;
+      ctx.fillRect(kx - 118, kBaseY - 36, 226, 42);
+      ctx.strokeRect(kx - 118, kBaseY - 36, 226, 42);
+      // Green-tiled pitched prayer hall roof ridges
+      for (let ax = kx - 112; ax <= kx + 68; ax += 36) {
+        ctx.fillStyle = '#065f46';
+        ctx.beginPath();
+        ctx.moveTo(ax, kBaseY - 36);
+        ctx.lineTo(ax + 18, kBaseY - 47);
+        ctx.lineTo(ax + 36, kBaseY - 36);
+        ctx.closePath();
+        ctx.fill();
+      }
+      // Flanking fluted white/ochre Koubba domes
+      for (const [dx, dr] of [[kx - 84, 20], [kx + 78, 17]]) {
+        const dG = ctx.createRadialGradient(dx + 4, kBaseY - 44, 2, dx, kBaseY - 38, dr);
+        dG.addColorStop(0, '#fde68a');
+        dG.addColorStop(0.55, '#d97745');
+        dG.addColorStop(1, '#7c2d1d');
+        ctx.fillStyle = dG;
+        ctx.beginPath(); ctx.arc(dx, kBaseY - 36, dr, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath(); ctx.arc(dx, kBaseY - 36 - dr - 2.5, 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // A) Main Front Face of Koutoubia Minaret (Warm Almohad Sandstone)
+      const fG = ctx.createLinearGradient(leftX, topY, midX, kBaseY);
+      fG.addColorStop(0.00, '#dc7b49');
+      fG.addColorStop(0.50, '#b85333');
+      fG.addColorStop(1.00, '#782919');
+      ctx.fillStyle = fG;
+      ctx.strokeStyle = '#3b130b';
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(leftX, topY, mainW, th);
+      ctx.strokeRect(leftX, topY, mainW, th);
+
+      // B) Sunlit 3D Right Side Face (Golden-Ochre Rim Light from Setting Sun!)
+      const sG = ctx.createLinearGradient(midX, topY, rightX, kBaseY);
+      sG.addColorStop(0.00, '#f7b267');
+      sG.addColorStop(0.50, '#df7e46');
+      sG.addColorStop(1.00, '#9c3d23');
+      ctx.fillStyle = sG;
+      ctx.beginPath();
+      ctx.moveTo(midX, topY);
+      ctx.lineTo(rightX, topY + 6);
+      ctx.lineTo(rightX, kBaseY);
+      ctx.lineTo(midX, kBaseY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Subtle Almohad dressed sandstone horizontal masonry courses
+      ctx.strokeStyle = 'rgba(59, 19, 11, 0.22)';
+      ctx.lineWidth = 0.9;
+      for (let cy = topY + 42; cy < kBaseY - 12; cy += 16) {
+        ctx.beginPath();
+        ctx.moveTo(leftX + 1, cy);
+        ctx.lineTo(midX - 1, cy);
+        ctx.lineTo(rightX - 1, cy + 4);
+        ctx.stroke();
+      }
+
+      // C) Famous Turquoise, Cobalt & White Glazed Zellij Ceramic Frieze Band near Crown!
+      ctx.fillStyle = '#0f766e';
+      ctx.fillRect(leftX + 1, topY + 14, mainW - 2, 18);
+      ctx.fillStyle = '#14b8a6';
+      ctx.beginPath();
+      ctx.moveTo(midX, topY + 14);
+      ctx.lineTo(rightX - 1, topY + 19);
+      ctx.lineTo(rightX - 1, topY + 36);
+      ctx.lineTo(midX, topY + 32);
+      ctx.closePath();
+      ctx.fill();
+      // Interlocking 8-pointed star & cobalt Zellij mosaic pattern on frieze
+      for (let zx = leftX + 7; zx <= midX - 7; zx += 10) {
+        ctx.fillStyle = '#fef3c7';
+        ctx.fillRect(zx - 2.5, topY + 20.5, 5, 5);
+        ctx.save();
+        ctx.translate(zx, topY + 23);
+        ctx.rotate(Math.PI * 0.25);
+        ctx.fillRect(-2.5, -2.5, 5, 5);
+        ctx.restore();
+        ctx.fillStyle = '#1d4ed8';
+        ctx.beginPath(); ctx.arc(zx, topY + 23, 1.5, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.strokeStyle = '#fde68a';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(leftX + 1, topY + 14); ctx.lineTo(midX, topY + 14); ctx.lineTo(rightX - 1, topY + 19);
+      ctx.moveTo(leftX + 1, topY + 32); ctx.lineTo(midX, topY + 32); ctx.lineTo(rightX - 1, topY + 36);
+      ctx.stroke();
+
+      // D) 3 Authentic Almohad Recessed Blind-Arch & Carved Sebka Registers on Main Shaft
+      const panelX = leftX + 7;
+      const panelW = mainW - 14;
+      for (let reg = 0; reg < 3; reg++) {
+        const py0 = topY + 44 + reg * 68;
+        const ph0 = 54;
+        // Recessed carved stucco panel background
+        ctx.fillStyle = 'rgba(72, 24, 14, 0.36)';
+        ctx.strokeStyle = 'rgba(254, 243, 199, 0.34)';
+        ctx.lineWidth = 1.0;
+        ctx.fillRect(panelX, py0, panelW, ph0);
+        ctx.strokeRect(panelX, py0, panelW, ph0);
+
+        // Carved Sebka interlacing diamond relief above twin horseshoe windows
+        ctx.strokeStyle = 'rgba(254, 215, 170, 0.48)';
+        ctx.lineWidth = 0.95;
+        for (let sx2 = panelX + 4; sx2 < panelX + panelW - 6; sx2 += 10) {
+          ctx.beginPath();
+          ctx.moveTo(sx2, py0 + 14);
+          ctx.lineTo(sx2 + 5, py0 + 5);
+          ctx.lineTo(sx2 + 10, py0 + 14);
+          ctx.lineTo(sx2 + 5, py0 + 23);
+          ctx.closePath();
+          ctx.stroke();
+        }
+        // Twin dark horseshoe arched openings
+        for (const ox of [panelX + 10, panelX + panelW - 10]) {
+          ctx.fillStyle = '#2b0d07';
+          ctx.beginPath();
+          ctx.arc(ox, py0 + 31, 5.5, Math.PI * 0.85, Math.PI * 0.15, false);
+          ctx.lineTo(ox + 4.8, py0 + ph0 - 4);
+          ctx.lineTo(ox - 4.8, py0 + ph0 - 4);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = '#fde68a';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+
+        // Matching foreshortened blind arch on sunlit 3D side face
+        const sideCx = midX + sideW * 0.5;
+        ctx.fillStyle = 'rgba(92, 34, 16, 0.45)';
+        ctx.beginPath();
+        ctx.arc(sideCx, py0 + 33, 3.6, Math.PI, 0);
+        ctx.lineTo(sideCx + 3.6, py0 + 50);
+        ctx.lineTo(sideCx - 3.6, py0 + 50);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // E) Stepped Moorish Shurfa Crenellations (Merlons) along Minaret Gallery Parapet
+      ctx.fillStyle = '#d97745';
+      ctx.strokeStyle = '#3b130b';
+      ctx.lineWidth = 1.0;
+      for (let mx = leftX; mx <= midX - 8; mx += 9) {
+        ctx.beginPath();
+        ctx.moveTo(mx, topY);
+        ctx.lineTo(mx, topY - 5);
+        ctx.lineTo(mx + 2.5, topY - 5);
+        ctx.lineTo(mx + 4.5, topY - 10);
+        ctx.lineTo(mx + 6.5, topY - 5);
+        ctx.lineTo(mx + 9, topY - 5);
+        ctx.lineTo(mx + 9, topY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      for (let mx = midX; mx <= rightX - 6; mx += 6.5) {
+        ctx.fillStyle = '#f59e4b';
+        ctx.beginPath();
+        ctx.moveTo(mx, topY + ((mx - midX) / sideW) * 6);
+        ctx.lineTo(mx + 3.2, topY - 7 + ((mx - midX) / sideW) * 6);
+        ctx.lineTo(mx + 6.5, topY + ((mx + 6.5 - midX) / sideW) * 6);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // F) Upper Ribbed Lantern Pavilion (Jamour Turret), Fluted Dome, 4 Golden Jamour Orbs & Alam Flag-Arm!
+      const lanCx = leftX + mainW * 0.56;
+      const lw = 30;
+      const lh = 48;
+      const lTop = topY - lh;
+      const lG = ctx.createLinearGradient(lanCx - lw * 0.5, lTop, lanCx + lw * 0.5 + 8, topY);
+      lG.addColorStop(0, '#c86442');
+      lG.addColorStop(0.65, '#e88c52');
+      lG.addColorStop(1, '#f7b267');
+      ctx.fillStyle = lG;
+      ctx.strokeStyle = '#3b130b';
+      ctx.lineWidth = 1.3;
+      ctx.fillRect(lanCx - lw * 0.5, lTop, lw + 7, lh);
+      ctx.strokeRect(lanCx - lw * 0.5, lTop, lw + 7, lh);
+      // Turquoise zellij collar on turret
+      ctx.fillStyle = '#14b8a6';
+      ctx.fillRect(lanCx - lw * 0.5 + 1, lTop + 5, lw + 5, 5);
+      // Warm glowing multifoil lantern window
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(lanCx + 1, lTop + 23, 5.5, Math.PI, 0);
+      ctx.lineTo(lanCx + 6.5, lTop + 38);
+      ctx.lineTo(lanCx - 4.5, lTop + 38);
+      ctx.closePath();
+      ctx.fill();
+
+      // Fluted melon-ribbed Koutoubia Cupola Dome
+      const domeCx = lanCx + 3.5;
+      const domeR = (lw + 5) * 0.48;
+      const domeG = ctx.createRadialGradient(domeCx + 5, lTop - 8, 2, domeCx, lTop, domeR);
+      domeG.addColorStop(0, '#fde68a');
+      domeG.addColorStop(0.5, '#df7844');
+      domeG.addColorStop(1, '#8c351e');
+      ctx.fillStyle = domeG;
+      ctx.beginPath();
+      ctx.arc(domeCx, lTop, domeR, Math.PI, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(69, 26, 15, 0.35)';
+      ctx.lineWidth = 0.9;
+      for (const off of [-6, 0, 6]) {
+        ctx.beginPath();
+        ctx.moveTo(domeCx + off, lTop);
+        ctx.quadraticCurveTo(domeCx + off * 0.4, lTop - domeR * 0.85, domeCx, lTop - domeR);
+        ctx.stroke();
+      }
+
+      // Finial Mast, Traditional Wooden Flag-Arm (Alam) & 4 Graduated Gleaming Golden Jamour Orbs!
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(lanCx + lw * 0.5 + 7, lTop + 6);
+      ctx.lineTo(lanCx + lw * 0.5 + 21, lTop - 6);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(domeCx, lTop - domeR);
+      ctx.lineTo(domeCx, lTop - domeR - 36);
+      ctx.stroke();
+      for (const [oy, orad] of [[6, 5.8], [15, 4.4], [22.5, 3.1], [28.5, 2.0]]) {
+        const orbY = lTop - domeR - oy;
+        const orbG = ctx.createRadialGradient(domeCx + orad * 0.3, orbY - orad * 0.3, 0.5, domeCx, orbY, orad);
+        orbG.addColorStop(0, '#fffbeb');
+        orbG.addColorStop(0.5, '#fbbf24');
+        orbG.addColorStop(1, '#92400e');
+        ctx.fillStyle = orbG;
+        ctx.strokeStyle = '#78350f';
+        ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.arc(domeCx, orbY, orad, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+
+    // Warm Golden Moroccan Sunset Haze Band blending horizon smoothly into Midground Riads
+    const haze = ctx.createLinearGradient(0, h * 0.58, 0, h * 0.80);
+    haze.addColorStop(0, 'rgba(251, 146, 60, 0)');
+    haze.addColorStop(1, 'rgba(253, 186, 116, 0.30)');
+    ctx.fillStyle = haze;
+    ctx.fillRect(0, h * 0.58, w, h * 0.22);
+  }
+
+  function drawMarrakechMidground(ctx, camX, w, h, time) {
+    ensureTextures(ctx);
+    // Authentic Marrakech Medina Riads, Carved Mashrabiya & Zellij Architecture,
+    // 1-in-4 Lush Riad Fountain & Citrus Courtyard Vistas, Overhead Reed Souk Pergolas,
+    // and 3 Museum-Grade Souk Storefronts (Souk Zarbia Carpets, Souk Attarine Spices & Safi Pottery, Souk Haddadine Brass Lanterns & Atay)!
+    const scroll = camX * 0.42;
+    const slotW = 360;
+    const baseY = 615;
+    const first = Math.floor(scroll / slotW) - 1;
+    const last = Math.ceil((scroll + w) / slotW) + 1;
+
+    // Continuous Shaded Lower Kasbah Foundation Chasm below baseY (so alley gaps between terraces look like deep stone Medina alleys!)
+    const chasmG = ctx.createLinearGradient(0, baseY - 2, 0, h);
+    chasmG.addColorStop(0, '#5a2112');
+    chasmG.addColorStop(0.35, '#36130a');
+    chasmG.addColorStop(1, '#180805');
+    ctx.fillStyle = chasmG;
+    ctx.fillRect(0, baseY - 2, w, h - baseY + 2);
+    ctx.strokeStyle = 'rgba(254, 215, 170, 0.10)';
+    ctx.lineWidth = 1.0;
+    for (let ry = baseY + 18; ry < h; ry += 20) {
+      ctx.beginPath(); ctx.moveTo(0, ry); ctx.lineTo(w, ry); ctx.stroke();
+    }
+
+    // Helper 1: Polychrome Moroccan 8-Pointed Star (Khatam) Zellij Tilework Frieze
+    const drawZellijBand = (zx, zy, zw, zh, seed = 0) => {
+      ctx.fillStyle = '#0b3b42';
+      ctx.fillRect(zx, zy, zw, zh);
+      const starCols = ['#14b8a6', '#f59e0b', '#2563eb', '#10b981'];
+      const step = Math.max(12, Math.round(zh * 1.25));
+      const cy = zy + zh * 0.5;
+      const r = Math.min(zh * 0.34, 4.8);
+      for (let x = zx + step * 0.5, k = 0; x <= zx + zw - step * 0.4; x += step, k++) {
+        // Ivory 8-pointed Khatam star backing
+        ctx.fillStyle = '#fef3c7';
+        ctx.fillRect(x - r, cy - r, r * 2, r * 2);
+        ctx.save();
+        ctx.translate(x, cy);
+        ctx.rotate(Math.PI * 0.25);
+        ctx.fillRect(-r, -r, r * 2, r * 2);
+        ctx.restore();
+        // Jewel-glazed center rosette
+        ctx.fillStyle = starCols[(k + seed) % starCols.length];
+        ctx.beginPath();
+        ctx.arc(x, cy, r * 0.56, 0, Math.PI * 2);
+        ctx.fill();
+        // Interlocking cobalt cross-tile dot between stars
+        if (x + step * 0.5 < zx + zw - 2) {
+          ctx.fillStyle = (k % 2 === 0) ? '#38bdf8' : '#fbbf24';
+          ctx.beginPath();
+          ctx.moveTo(x + step * 0.5, cy - r * 0.55);
+          ctx.lineTo(x + step * 0.5 + r * 0.55, cy);
+          ctx.lineTo(x + step * 0.5, cy + r * 0.55);
+          ctx.lineTo(x + step * 0.5 - r * 0.55, cy);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.0;
+      ctx.strokeRect(zx, zy, zw, zh);
+    };
+
+    // Helper 2: Sculpted Moroccan Date Palm (Imbricated Diamond Bark + Pinnate Leaflet Fronds + Ripe Date Clusters!)
+    const drawMoroccanPalm = (px, py, trunkH, lean, sc, sway) => {
+      const topX = px + lean + sway;
+      const topY = py - trunkH;
+      const ctrlX = px + lean * 0.38;
+      const ctrlY = py - trunkH * 0.52;
+
+      // Segmented imbricated date-palm trunk
+      const segs = 13;
+      for (let s = 0; s < segs; s++) {
+        const u0 = s / segs;
+        const u1 = (s + 1) / segs;
+        const x0 = (1 - u0) * (1 - u0) * px + 2 * (1 - u0) * u0 * ctrlX + u0 * u0 * topX;
+        const y0 = (1 - u0) * (1 - u0) * py + 2 * (1 - u0) * u0 * ctrlY + u0 * u0 * topY;
+        const x1 = (1 - u1) * (1 - u1) * px + 2 * (1 - u1) * u1 * ctrlX + u1 * u1 * topX;
+        const y1 = (1 - u1) * (1 - u1) * py + 2 * (1 - u1) * u1 * ctrlY + u1 * u1 * topY;
+        const wSeg = (12.5 - u0 * 4.8) * sc;
+        ctx.strokeStyle = (s % 2 === 0) ? '#6e3d21' : '#4f2a15';
+        ctx.lineWidth = wSeg;
+        ctx.lineCap = 'butt';
+        ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+        // Sunlit warm golden bark edge
+        ctx.strokeStyle = 'rgba(245, 179, 98, 0.35)';
+        ctx.lineWidth = 2.0 * sc;
+        ctx.beginPath(); ctx.moveTo(x0 + wSeg * 0.28, y0); ctx.lineTo(x1 + wSeg * 0.28, y1); ctx.stroke();
+      }
+
+      // Hanging golden-amber clusters of Medjool dates
+      ctx.strokeStyle = '#b45309';
+      ctx.lineWidth = 1.4 * sc;
+      ctx.beginPath();
+      ctx.moveTo(topX, topY + 2); ctx.quadraticCurveTo(topX - 9 * sc, topY + 8 * sc, topX - 10 * sc, topY + 16 * sc);
+      ctx.moveTo(topX, topY + 2); ctx.quadraticCurveTo(topX + 9 * sc, topY + 8 * sc, topX + 10 * sc, topY + 16 * sc);
+      ctx.stroke();
+      ctx.fillStyle = '#f59e0b';
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 0.8;
+      for (const [dx, dy] of [[-11, 14], [-7, 17], [-12, 20], [8, 14], [12, 17], [9, 20]]) {
+        ctx.beginPath(); ctx.arc(topX + dx * sc, topY + dy * sc, 3.2 * sc, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+
+      // 9 Arching Pinnate Fronds with Individual Drooping Leaflets
+      for (let f = 0; f < 9; f++) {
+        const ang = -Math.PI * 1.02 + (f / 8) * Math.PI * 1.04 + sway * 0.008;
+        const fLen = (62 + (f % 2) * 14) * sc;
+        const ex = topX + Math.cos(ang) * fLen;
+        const ey = topY + Math.sin(ang) * (fLen * 0.62) + 22 * sc;
+        const mx = (topX + ex) * 0.5;
+        const my = topY - (18 + (f === 4 ? 8 : 0)) * sc;
+        const isLit = f >= 4;
+        ctx.strokeStyle = isLit ? '#22c55e' : '#15803d';
+        ctx.lineWidth = 2.2 * sc;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(topX, topY);
+        ctx.quadraticCurveTo(mx, my, ex, ey);
+        ctx.stroke();
+
+        ctx.fillStyle = isLit ? '#16a34a' : '#14532d';
+        for (let l = 2; l <= 9; l++) {
+          const lu = l / 10;
+          const lx = (1 - lu) * (1 - lu) * topX + 2 * (1 - lu) * lu * mx + lu * lu * ex;
+          const ly = (1 - lu) * (1 - lu) * topY + 2 * (1 - lu) * lu * my + lu * lu * ey;
+          const leafL = (9 + Math.sin(lu * Math.PI) * 11) * sc;
+          const dirX = ex >= topX ? 1 : -1;
+          ctx.beginPath();
+          ctx.moveTo(lx, ly);
+          ctx.lineTo(lx + dirX * 3.5 * sc, ly + leafL);
+          ctx.lineTo(lx - dirX * 1.8 * sc, ly + leafL * 0.68);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+    };
+
+    // Helper 3: Intricate Pierced-Brass Moroccan Fanous Lantern
+    const drawBrassFanous = (lx, ly, sc, sway, glassCol = '#fde047') => {
+      ctx.save();
+      ctx.translate(lx + sway, ly);
+      ctx.scale(sc, sc);
+      const lg = ctx.createRadialGradient(0, 0, 2, 0, 0, 28);
+      lg.addColorStop(0, 'rgba(254, 240, 138, 0.52)');
+      lg.addColorStop(0.55, 'rgba(245, 158, 11, 0.18)');
+      lg.addColorStop(1, 'rgba(245, 158, 11, 0)');
+      ctx.fillStyle = lg;
+      ctx.beginPath(); ctx.arc(0, 0, 28, 0, Math.PI * 2); ctx.fill();
+
+      // Pierced brass dome cap & ring
+      ctx.fillStyle = '#b45309';
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(0, -14, 2.4, 0, Math.PI * 2);
+      ctx.moveTo(0, -12);
+      ctx.quadraticCurveTo(9, -8, 10, -3);
+      ctx.lineTo(-10, -3);
+      ctx.quadraticCurveTo(-9, -8, 0, -12);
+      ctx.fill(); ctx.stroke();
+
+      // Hexagonal stained-glass body + brass ribs
+      ctx.fillStyle = glassCol;
+      ctx.beginPath();
+      ctx.moveTo(-9, -3); ctx.lineTo(9, -3);
+      ctx.lineTo(7, 9); ctx.lineTo(0, 15); ctx.lineTo(-7, 9);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(-3.5, -3); ctx.lineTo(-2.5, 11);
+      ctx.moveTo(3.5, -3); ctx.lineTo(2.5, 11);
+      ctx.moveTo(-8, 3); ctx.lineTo(8, 3);
+      ctx.stroke();
+      ctx.fillStyle = '#fffbeb';
+      ctx.beginPath(); ctx.arc(0, 2, 2.3, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    };
+
+    // Helper 4: Vibrant Cascading Magenta Bougainvillea Cluster
+    const drawBougainvillea = (vx, vy, dir = 1) => {
+      const cols = ['#db2777', '#e11d48', '#f43f5e', '#be185d'];
+      ctx.fillStyle = '#14532d';
+      for (let k = 0; k < 5; k++) {
+        ctx.beginPath();
+        ctx.arc(vx + dir * k * 5.5, vy + k * 3.8, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      for (let k = 0; k < 7; k++) {
+        ctx.fillStyle = cols[k % cols.length];
+        const ox = vx + dir * (k * 4.2 - 3) + Math.sin(k * 2.1) * 3;
+        const oy = vy + k * 3.4 + Math.cos(k * 1.7) * 2;
+        ctx.beginPath();
+        ctx.arc(ox, oy, 4.2 - (k % 2) * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(vx + dir * 4, vy + 4, 1.1, 0, Math.PI * 2);
+      ctx.arc(vx + dir * 12, vy + 11, 1.1, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    for (let i = first; i <= last; i++) {
+      const bx = i * slotW - scroll;
+      const idx = ((i % 4) + 4) % 4;
+
+      // =======================================================================
+      // 1-IN-4 OPEN RIAD COURTYARD GARDEN VISTA (Reveals Koutoubia & High Atlas!)
+      // =======================================================================
+      if (idx === 2) {
+        const wallH = 82;
+        const wallY = baseY - wallH;
+
+        // Two tall graceful Moroccan Date Palms rising behind the Riad garden wall
+        drawMoroccanPalm(bx + 76, wallY + 16, 206, -15, 0.96, Math.sin(time * 1.4 + i) * 5);
+        drawMoroccanPalm(bx + 284, wallY + 16, 228, 16, 1.04, Math.sin(time * 1.35 + i + 2) * 5.5);
+
+        // Lush Moroccan Courtyard Bitter-Orange (Laranj) Trees studded with glowing oranges!
+        for (const ox of [bx + 132, bx + 228]) {
+          ctx.fillStyle = '#5c3317';
+          ctx.fillRect(ox - 3.5, wallY - 32, 7, 36);
+          for (const [cx0, cy0, cr, cCol] of [[-14, -44, 17, '#14532d'], [14, -42, 16, '#15803d'], [0, -54, 20, '#166534']]) {
+            ctx.fillStyle = cCol;
+            ctx.beginPath(); ctx.arc(ox + cx0, wallY + cy0, cr, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.fillStyle = '#fb923c';
+          ctx.strokeStyle = '#9a3412';
+          ctx.lineWidth = 0.8;
+          for (const [fx, fy] of [[-12, -44], [2, -56], [13, -43], [-4, -36], [8, -50]]) {
+            ctx.beginPath(); ctx.arc(ox + fx, wallY + fy, 3.1, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          }
+        }
+
+        // Low Tadelakt Courtyard Parapet Wall with White-Trimmed Stepped Shurfa Merlons
+        const wG = ctx.createLinearGradient(bx, wallY, bx, baseY);
+        wG.addColorStop(0, '#d46c46');
+        wG.addColorStop(0.55, '#ae4b2e');
+        wG.addColorStop(1, '#782b18');
+        ctx.fillStyle = wG;
+        ctx.strokeStyle = '#451a0f';
+        ctx.lineWidth = 1.6;
+        ctx.fillRect(bx + 6, wallY, slotW - 12, wallH);
+        ctx.strokeRect(bx + 6, wallY, slotW - 12, wallH);
+
+        // Stepped Shurfa battlements with crisp white limewash trim
+        for (let mx = bx + 10; mx < bx + slotW - 22; mx += 22) {
+          ctx.fillStyle = '#d97745';
+          ctx.strokeStyle = '#fef3c7';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.moveTo(mx, wallY);
+          ctx.lineTo(mx, wallY - 5);
+          ctx.lineTo(mx + 4, wallY - 5);
+          ctx.lineTo(mx + 8, wallY - 11);
+          ctx.lineTo(mx + 12, wallY - 5);
+          ctx.lineTo(mx + 16, wallY - 5);
+          ctx.lineTo(mx + 16, wallY);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        // Polychrome Zellij Mosaic Dado along courtyard wall
+        drawZellijBand(bx + 10, wallY + 8, slotW - 20, 12, Math.abs(i));
+
+        // Twin Andalusian Wrought-Iron Horseshoe Grille Windows in Garden Wall
+        for (const gx of [bx + 76, bx + slotW - 76]) {
+          ctx.fillStyle = '#1e293b';
+          ctx.strokeStyle = '#fef3c7';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(gx, wallY + 42, 16, Math.PI, 0);
+          ctx.lineTo(gx + 16, wallY + 66);
+          ctx.lineTo(gx - 16, wallY + 66);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          // Andalusian iron latticework bars
+          ctx.strokeStyle = '#94a3b8';
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.moveTo(gx, wallY + 26); ctx.lineTo(gx, wallY + 66);
+          ctx.moveTo(gx - 8, wallY + 29); ctx.lineTo(gx - 8, wallY + 66);
+          ctx.moveTo(gx + 8, wallY + 29); ctx.lineTo(gx + 8, wallY + 66);
+          ctx.moveTo(gx - 16, wallY + 44); ctx.lineTo(gx + 16, wallY + 44);
+          ctx.moveTo(gx - 16, wallY + 55); ctx.lineTo(gx + 16, wallY + 55);
+          ctx.stroke();
+        }
+
+        // Central Carved White-Marble & Turquoise-Zellij Riad Courtyard Fountain!
+        const fCx = bx + slotW * 0.5;
+        ctx.fillStyle = '#0f766e';
+        ctx.strokeStyle = '#fef3c7';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(fCx - 30, baseY - 16); ctx.lineTo(fCx + 30, baseY - 16);
+        ctx.lineTo(fCx + 26, baseY); ctx.lineTo(fCx - 26, baseY);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        drawZellijBand(fCx - 25, baseY - 13, 50, 10, 2);
+        // Carved tiered marble pedestal & lotus bowl
+        ctx.fillStyle = '#fffbeb';
+        ctx.strokeStyle = '#92400e';
+        ctx.lineWidth = 1.1;
+        ctx.fillRect(fCx - 5, baseY - 32, 10, 16);
+        ctx.strokeRect(fCx - 5, baseY - 32, 10, 16);
+        ctx.beginPath();
+        ctx.ellipse(fCx, baseY - 33, 17, 5, 0, 0, Math.PI);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        // Animated sparkling fountain water arc
+        const jetH = 14 + Math.sin(time * 8 + i) * 2.5;
+        ctx.strokeStyle = '#67e8f9';
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        ctx.moveTo(fCx, baseY - 34); ctx.lineTo(fCx, baseY - 34 - jetH);
+        ctx.moveTo(fCx, baseY - 33 - jetH); ctx.quadraticCurveTo(fCx - 10, baseY - 36 - jetH * 0.4, fCx - 13, baseY - 32);
+        ctx.moveTo(fCx, baseY - 33 - jetH); ctx.quadraticCurveTo(fCx + 10, baseY - 36 - jetH * 0.4, fCx + 13, baseY - 32);
+        ctx.stroke();
+
+        // Cascading magenta Bougainvillea spilling over left & right corners of the courtyard wall
+        drawBougainvillea(bx + 16, wallY + 4, 1);
+        drawBougainvillea(bx + slotW - 18, wallY + 4, -1);
+        continue;
+      }
+
+      // =======================================================================
+      // MULTI-STORY MARRAKECH RED-OCHRE KASBAH & RIAD FACADES
+      // =======================================================================
+      const bType = idx === 0 ? 0 : (idx === 1 ? 1 : 2);
+      const bH = bType === 0 ? 324 : (bType === 1 ? 294 : 340);
+      const bW = slotW - 12;
+      const bX = bx + 6;
+      const bY = baseY - bH;
+
+      // Overhead Woven-Reed Souk Pergola Slats & Draped Brass Lanterns across narrow alley gap!
+      ctx.save();
+      ctx.strokeStyle = '#5c2d12';
+      ctx.lineWidth = 3.2;
+      ctx.beginPath();
+      ctx.moveTo(bX + bW - 2, bY + 128);
+      ctx.lineTo(bX + bW + 16, bY + 128);
+      ctx.stroke();
+      if (idx !== 1) {
+        const gapMidX = bX + bW + 6;
+        ctx.strokeStyle = '#451a03';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(bX + bW - 10, bY + 72);
+        ctx.quadraticCurveTo(gapMidX, bY + 92, bX + bW + 22, bY + 72);
+        ctx.stroke();
+        drawBrassFanous(gapMidX, bY + 95, 0.78, Math.sin(time * 2.4 + i) * 2.2, '#fde047');
+      }
+      ctx.restore();
+
+      // Main Tadelakt Lime-Plaster Terracotta Facade
+      const fG = ctx.createLinearGradient(bX, bY, bX + bW * 0.25, baseY);
+      if (bType === 0) {
+        fG.addColorStop(0, '#d87049'); fG.addColorStop(0.55, '#b64f31'); fG.addColorStop(1, '#7a2d19');
+      } else if (bType === 1) {
+        fG.addColorStop(0, '#cf6440'); fG.addColorStop(0.55, '#a84629'); fG.addColorStop(1, '#6f2715');
+      } else {
+        fG.addColorStop(0, '#de7e4f'); fG.addColorStop(0.55, '#bc5935'); fG.addColorStop(1, '#7f311b');
+      }
+      ctx.fillStyle = fG;
+      ctx.strokeStyle = '#451a0f';
+      ctx.lineWidth = 1.7;
+      ctx.fillRect(bX, bY, bW, bH);
+      ctx.strokeRect(bX, bY, bW, bH);
+
+      // Subtle weathered Tadelakt plaster blotches & cream corner quoins
+      ctx.fillStyle = 'rgba(254, 243, 199, 0.10)';
+      ctx.fillRect(bX + 24, bY + 38, 42, 6);
+      ctx.fillRect(bX + bW - 78, bY + 96, 52, 5);
+      ctx.fillStyle = 'rgba(254, 243, 199, 0.24)';
+      for (let qy = bY + 34; qy < baseY - 24; qy += 28) {
+        ctx.fillRect(bX + 1, qy, 7, 12);
+        ctx.fillRect(bX + bW - 8, qy + 14, 7, 12);
+      }
+
+      // Roofline Crown: Stepped Moorish Shurfa Battlements (bType 0 & 2) OR Green-Glazed Tile & Carved Cedar Auvent Eave (bType 1)!
+      if (bType === 1) {
+        // Overhanging Emerald-Glazed Moroccan Roof Tile Eave + Painted Cedarwood Corbels
+        const rG = ctx.createLinearGradient(bX, bY - 18, bX, bY + 6);
+        rG.addColorStop(0, '#10b981'); rG.addColorStop(0.55, '#047857'); rG.addColorStop(1, '#064e3b');
+        ctx.fillStyle = rG;
+        ctx.strokeStyle = '#022c22';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(bX - 10, bY + 6);
+        ctx.lineTo(bX + 8, bY - 15);
+        ctx.lineTo(bX + bW - 8, bY - 15);
+        ctx.lineTo(bX + bW + 10, bY + 6);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        // Scalloped green barrel-tile lip + cedarwood bracket corbels underneath
+        ctx.strokeStyle = '#6ee7b7';
+        ctx.lineWidth = 1.0;
+        for (let tx = bX - 4; tx < bX + bW + 4; tx += 12) {
+          ctx.beginPath(); ctx.arc(tx + 6, bY + 5, 5, Math.PI, 0); ctx.stroke();
+        }
+        ctx.fillStyle = '#5c2810';
+        for (let cx0 = bX + 8; cx0 <= bX + bW - 14; cx0 += 22) {
+          ctx.fillRect(cx0, bY + 6, 6, 8);
+          ctx.fillStyle = '#fbbf24'; ctx.fillRect(cx0 + 1.5, bY + 8, 3, 3);
+          ctx.fillStyle = '#5c2810';
+        }
+      } else {
+        // Authentic 3-Step Moroccan Shurfa Merlons with White Limewash Trim
+        for (let mx = bX + 4; mx < bX + bW - 18; mx += 24) {
+          ctx.fillStyle = '#cf6842';
+          ctx.strokeStyle = '#fef3c7';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.moveTo(mx, bY);
+          ctx.lineTo(mx, bY - 6);
+          ctx.lineTo(mx + 5, bY - 6);
+          ctx.lineTo(mx + 9.5, bY - 14);
+          ctx.lineTo(mx + 14, bY - 6);
+          ctx.lineTo(mx + 19, bY - 6);
+          ctx.lineTo(mx + 19, bY);
+          ctx.closePath();
+          ctx.fill(); ctx.stroke();
+        }
+      }
+
+      // Polychrome 8-Pointed Star Zellij Crown Frieze + Carved White Gebs Stucco Band
+      drawZellijBand(bX + 2, bY + 15, bW - 4, 14, bType + Math.abs(i));
+      ctx.fillStyle = 'rgba(255, 251, 235, 0.82)';
+      ctx.fillRect(bX + 2, bY + 30, bW - 4, 5);
+      ctx.fillStyle = '#8c3721';
+      for (let gx = bX + 8; gx < bX + bW - 8; gx += 10) {
+        ctx.beginPath(); ctx.arc(gx, bY + 35, 2.2, Math.PI, 0); ctx.fill();
+      }
+
+      // =======================================================================
+      // UPPER-STORY CARVED MASHRABIYA ORIELS, STAINED-GLASS CHEMMASSIA & JULIET BALCONIES
+      // =======================================================================
+      const winY = bY + 50;
+      for (let col = 0; col < 3; col++) {
+        const wx = bX + 26 + col * 106;
+        const wCx = wx + 28;
+
+        // Carved Cream Gebs (Gypsum Stucco) Alfiz Rectangular Frame & Spandrels around Horseshoe Arch
+        ctx.fillStyle = '#fae8cf';
+        ctx.strokeStyle = '#6b2e1a';
+        ctx.lineWidth = 1.2;
+        ctx.fillRect(wx, winY - 4, 56, 66);
+        ctx.strokeRect(wx, winY - 4, 56, 66);
+        // Emerald/cobalt spandrel arabesque dots in upper corners of Alfiz
+        ctx.fillStyle = (col % 2 === 0) ? '#0d9488' : '#1d4ed8';
+        ctx.beginPath();
+        ctx.arc(wx + 7, winY + 3, 2.6, 0, Math.PI * 2);
+        ctx.arc(wx + 49, winY + 3, 2.6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Warm Amber Interior Glow + Stained-Glass Chemmassia Fanlight inside Horseshoe Arch!
+        const wGlow = ctx.createRadialGradient(wCx, winY + 26, 4, wCx, winY + 26, 36);
+        wGlow.addColorStop(0, '#fffbeb');
+        wGlow.addColorStop(0.55, '#fbbf24');
+        wGlow.addColorStop(1, '#92400e');
+        ctx.fillStyle = wGlow;
+        ctx.beginPath();
+        ctx.arc(wCx, winY + 19, 20, Math.PI * 0.86, Math.PI * 0.14, false);
+        ctx.lineTo(wCx + 18, winY + 60);
+        ctx.lineTo(wCx - 18, winY + 60);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#5c2810';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+
+        // Jewel-toned Chemmassia stained-glass rosette segments in upper arch
+        const chemCols = ['#e11d48', '#10b981', '#2563eb', '#f59e0b', '#e11d48'];
+        for (let s = 0; s < 5; s++) {
+          const a0 = Math.PI + (s / 5) * Math.PI;
+          const a1 = Math.PI + ((s + 1) / 5) * Math.PI;
+          ctx.fillStyle = chemCols[s];
+          ctx.beginPath();
+          ctx.moveTo(wCx, winY + 19);
+          ctx.arc(wCx, winY + 19, 17.5, a0, a1);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath(); ctx.arc(wCx, winY + 19, 5.5, 0, Math.PI * 2); ctx.fill();
+
+        // Turned Atlas Cedarwood Mashrabiya Diagonal & Vertical Latticework Screen
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(wCx - 18, winY + 20, 36, 40);
+        ctx.clip();
+        ctx.strokeStyle = 'rgba(69, 26, 3, 0.78)';
+        ctx.lineWidth = 1.15;
+        for (let d = -36; d <= 36; d += 9) {
+          ctx.beginPath();
+          ctx.moveTo(wCx + d, winY + 20); ctx.lineTo(wCx + d + 26, winY + 60);
+          ctx.moveTo(wCx + d + 26, winY + 20); ctx.lineTo(wCx + d, winY + 60);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // Projecting Carved Cedarwood Mashrabiya Balcony Box (center) OR Wrought-Iron Scrollwork Balcony (sides)
+        if (col === 1) {
+          const balG = ctx.createLinearGradient(wx - 4, winY + 46, wx + 60, winY + 66);
+          balG.addColorStop(0, '#92400e'); balG.addColorStop(0.5, '#78350f'); balG.addColorStop(1, '#451a03');
+          ctx.fillStyle = balG;
+          ctx.strokeStyle = '#291003';
+          ctx.lineWidth = 1.4;
+          ctx.fillRect(wx - 4, winY + 46, 64, 18);
+          ctx.strokeRect(wx - 4, winY + 46, 64, 18);
+          ctx.strokeStyle = '#fbbf24';
+          ctx.lineWidth = 1.0;
+          for (let bx2 = wx + 3; bx2 <= wx + 53; bx2 += 10) {
+            ctx.strokeRect(bx2, winY + 49, 6, 12);
+          }
+          // Terracotta pot with lush cascading Bougainvillea on center balcony!
+          ctx.fillStyle = '#c2410c';
+          ctx.fillRect(wCx + 10, winY + 40, 12, 7);
+          drawBougainvillea(wCx + 14, winY + 42, 1);
+        } else {
+          ctx.strokeStyle = '#1c1917';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(wx - 2, winY + 48, 60, 15);
+          for (let rx = wx + 6; rx <= wx + 50; rx += 11) {
+            ctx.beginPath();
+            ctx.moveTo(rx, winY + 48); ctx.lineTo(rx, winY + 63);
+            ctx.arc(rx + 5.5, winY + 55.5, 3.2, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // =======================================================================
+      // GROUND-FLOOR MUSEUM-GRADE MARRAKECH SOUK BAZAAR STOREFRONTS
+      // =======================================================================
+      const shopY = baseY - 144;
+      const archCx = bX + bW * 0.5;
+
+      // Carved Cedarwood Lintel & Striped Scalloped Woven Souk Awning with Golden Fringe!
+      const awY = shopY - 10;
+      const awW = bW - 16;
+      const awX = bX + 8;
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(awX - 2, awY - 5, awW + 4, 6);
+      const stripeCount = 11;
+      const stW = awW / stripeCount;
+      const awAccent = bType === 0 ? '#be123c' : (bType === 1 ? '#047857' : '#1d4ed8');
+      for (let s = 0; s < stripeCount; s++) {
+        ctx.fillStyle = (s % 2 === 0) ? awAccent : '#fef3c7';
+        const sx0 = awX + s * stW;
+        ctx.beginPath();
+        ctx.moveTo(sx0, awY);
+        ctx.lineTo(sx0 + stW + 0.6, awY);
+        ctx.lineTo(sx0 + stW + 0.6, awY + 15);
+        ctx.arc(sx0 + stW * 0.5, awY + 15, stW * 0.5, 0, Math.PI);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(awX, awY + 15); ctx.lineTo(awX + awW, awY + 15); ctx.stroke();
+
+      // Zellij Spandrel Frame & Grand Multifoil Horseshoe Souk Shop Archway!
+      drawZellijBand(bX + 20, shopY + 10, bW - 40, 16, bType + 3);
+      const inG = ctx.createRadialGradient(archCx, shopY + 62, 12, archCx, shopY + 68, 96);
+      inG.addColorStop(0, '#5c2410');
+      inG.addColorStop(0.6, '#361307');
+      inG.addColorStop(1, '#1c0903');
+      ctx.fillStyle = inG;
+      ctx.beginPath();
+      ctx.arc(archCx, shopY + 58, 76, Math.PI * 0.92, Math.PI * 0.08, false);
+      ctx.lineTo(archCx + 74, baseY);
+      ctx.lineTo(archCx - 74, baseY);
+      ctx.closePath();
+      ctx.fill();
+
+      // Alternating Cream & Terracotta Voussoirs around the Horseshoe Arch Rim
+      for (let v = 0; v <= 12; v++) {
+        const a0 = Math.PI * 0.94 + (v / 13) * (Math.PI * 1.12);
+        const a1 = Math.PI * 0.94 + ((v + 1) / 13) * (Math.PI * 1.12);
+        ctx.strokeStyle = (v % 2 === 0) ? '#fef3c7' : '#c2410c';
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        ctx.arc(archCx, shopY + 58, 77, a0, a1);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(archCx, shopY + 58, 74.5, Math.PI * 0.92, Math.PI * 0.08, false);
+      ctx.stroke();
+
+      if (bType === 0) {
+        // -------------------------------------------------------------------
+        // (A) SOUK ZARBIA — ROYAL BERBER CARPET, KILIM & LEATHER POUF BAZAAR!
+        // -------------------------------------------------------------------
+        const drawDetailedRug = (rx, ry, rw, rh, bgCol, borderCol, medCol, styleIdx) => {
+          ctx.fillStyle = bgCol;
+          ctx.strokeStyle = '#291008';
+          ctx.lineWidth = 1.3;
+          ctx.fillRect(rx, ry, rw, rh);
+          ctx.strokeRect(rx, ry, rw, rh);
+          // Woven geometric inner border frame
+          ctx.strokeStyle = borderCol;
+          ctx.lineWidth = 1.8;
+          ctx.strokeRect(rx + 4, ry + 5, rw - 8, rh - 10);
+          ctx.strokeStyle = 'rgba(254, 243, 199, 0.55)';
+          ctx.lineWidth = 0.9;
+          ctx.setLineDash([2.5, 2.5]);
+          ctx.strokeRect(rx + 7, ry + 8, rw - 14, rh - 16);
+          ctx.setLineDash([]);
+
+          // Authentic Amazigh / Marrakech diamond medallions & tribal chevrons
+          const rcx = rx + rw * 0.5;
+          for (let my = ry + 22; my <= ry + rh - 22; my += 26) {
+            ctx.fillStyle = medCol;
+            ctx.beginPath();
+            ctx.moveTo(rcx, my - 9);
+            ctx.lineTo(rcx + rw * 0.24, my);
+            ctx.lineTo(rcx, my + 9);
+            ctx.lineTo(rcx - rw * 0.24, my);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = borderCol;
+            ctx.lineWidth = 1.1;
+            ctx.stroke();
+            ctx.fillStyle = (styleIdx % 2 === 0) ? '#fef3c7' : '#0f766e';
+            ctx.beginPath(); ctx.arc(rcx, my, 2.8, 0, Math.PI * 2); ctx.fill();
+          }
+          // Knotted wool fringe tassels at top/bottom
+          ctx.strokeStyle = '#fef3c7';
+          ctx.lineWidth = 1.2;
+          for (let fx = rx + 3; fx <= rx + rw - 3; fx += 5.5) {
+            ctx.beginPath();
+            ctx.moveTo(fx, ry + rh);
+            ctx.lineTo(fx + Math.sin(time * 2.5 + fx) * 1.2, ry + rh + 7);
+            ctx.stroke();
+          }
+        };
+
+        // Flanking outdoor display rugs (Beni Ourain Ivory-Diamond & Saffron-Amber Kilim) + Grand Center Royal Rugs
+        drawDetailedRug(bX + 16, shopY + 28, 54, 96, '#f8f0dc', '#1c1917', '#292524', 0);
+        drawDetailedRug(bX + bW - 70, shopY + 28, 54, 96, '#d97706', '#fef3c7', '#7f1d1d', 1);
+        drawDetailedRug(archCx - 54, shopY + 22, 50, 102, '#9f1239', '#fbbf24', '#1e3a8a', 2);
+        drawDetailedRug(archCx + 4, shopY + 22, 50, 102, '#1e3a8a', '#fde68a', '#be123c', 3);
+
+        // Rolled carpets standing in woven palm baskets + Embroidered Moroccan Leather Poufs (Ottomans)!
+        for (const [bx0, rCol1, rCol2] of [[bX + 26, '#be123c', '#0d9488'], [bX + bW - 50, '#1d4ed8', '#f59e0b']]) {
+          // Rolled vertical carpet cylinders
+          ctx.fillStyle = rCol1; ctx.strokeStyle = '#291008'; ctx.lineWidth = 1.1;
+          ctx.fillRect(bx0, baseY - 36, 9, 34); ctx.strokeRect(bx0, baseY - 36, 9, 34);
+          ctx.fillStyle = rCol2;
+          ctx.fillRect(bx0 + 8, baseY - 32, 9, 30); ctx.strokeRect(bx0 + 8, baseY - 32, 9, 30);
+          ctx.fillStyle = '#c2854c';
+          ctx.beginPath();
+          ctx.moveTo(bx0 - 3, baseY - 18); ctx.lineTo(bx0 + 20, baseY - 18);
+          ctx.lineTo(bx0 + 17, baseY); ctx.lineTo(bx0, baseY);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+        }
+        // Stitched Marrakech Leather Poufs with golden star embroidery on threshold
+        for (const [px0, pCol] of [[archCx - 24, '#b45309'], [archCx + 24, '#be123c']]) {
+          ctx.fillStyle = pCol; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.ellipse(px0, baseY - 8, 16, 8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 0.9;
+          for (let r = -2; r <= 2; r++) {
+            ctx.beginPath(); ctx.moveTo(px0, baseY - 12); ctx.lineTo(px0 + r * 6, baseY - 2); ctx.stroke();
+          }
+        }
+        drawBrassFanous(archCx, shopY + 14, 0.85, Math.sin(time * 2.1 + i) * 2, '#fde047');
+      } else if (bType === 1) {
+        // -------------------------------------------------------------------
+        // (B) SOUK ATTARINE & FEKHARINE — SPICE PYRAMIDS, SAFI CERAMICS & TAGINES!
+        // -------------------------------------------------------------------
+        // Hanging bundles of dried Damascus roses, lavender & Moroccan mint inside top of arch
+        for (const [hx, hCol] of [[archCx - 48, '#f43f5e'], [archCx - 24, '#16a34a'], [archCx + 24, '#a855f7'], [archCx + 48, '#15803d']]) {
+          ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.moveTo(hx, shopY + 14); ctx.lineTo(hx, shopY + 26); ctx.stroke();
+          ctx.fillStyle = hCol;
+          ctx.beginPath();
+          ctx.moveTo(hx, shopY + 24); ctx.lineTo(hx - 6, shopY + 38); ctx.lineTo(hx + 6, shopY + 38);
+          ctx.closePath(); ctx.fill();
+        }
+
+        // Upper Cedar Shelf with Hand-Painted Safi & Fes Mandala Ceramic Plates + Conical Glazed Tagines!
+        ctx.fillStyle = '#5c2810'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.0;
+        ctx.fillRect(archCx - 64, shopY + 62, 128, 5);
+        // Decorative Fes Blue & Safi Turquoise Ceramic Plates leaning against back wall
+        for (const [plX, plCol, rimCol] of [[archCx - 44, '#1d4ed8', '#fef3c7'], [archCx, '#0d9488', '#fde047'], [archCx + 44, '#b91c1c', '#fef3c7']]) {
+          ctx.fillStyle = plCol; ctx.strokeStyle = rimCol; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.arc(plX, shopY + 46, 13, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.arc(plX, shopY + 46, 7.5, 0, Math.PI * 2); ctx.stroke();
+          ctx.fillStyle = rimCol;
+          ctx.beginPath(); ctx.arc(plX, shopY + 46, 2.5, 0, Math.PI * 2); ctx.fill();
+        }
+        // Conical Glazed Moroccan Tagines with brass steam knobs in front of plates
+        for (const [tx, tCol] of [[archCx - 24, '#ea580c'], [archCx + 24, '#10b981']]) {
+          ctx.fillStyle = tCol; ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.ellipse(tx, shopY + 61, 12, 3.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(tx - 10, shopY + 60); ctx.lineTo(tx - 2.2, shopY + 43);
+          ctx.lineTo(tx + 2.2, shopY + 43); ctx.lineTo(tx + 10, shopY + 60);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath(); ctx.arc(tx, shopY + 41.5, 2.6, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Carved Cedar & Zellij-Inlaid Spice Counter
+        ctx.fillStyle = '#6b2e12'; ctx.strokeStyle = '#291003'; ctx.lineWidth = 1.5;
+        ctx.fillRect(bX + 20, baseY - 36, bW - 40, 36);
+        ctx.strokeRect(bX + 20, baseY - 36, bW - 40, 36);
+        drawZellijBand(bX + 28, baseY - 26, bW - 56, 14, 1);
+
+        // 6 Woven Palm-Leaf Baskets Overflowing with Textured Conical Spice Mounds & Wooden Scoops!
+        const spices = [
+          { x: bX + 48, col: '#b91c1c', hi: '#f87171' },   // Crimson Paprika
+          { x: bX + 96, col: '#ea580c', hi: '#fdba74' },   // Saffron & Cayenne
+          { x: bX + 144, col: '#ca8a04', hi: '#fde047' },  // Golden Turmeric
+          { x: bX + 192, col: '#92400e', hi: '#f59e0b' },  // Ras el Hanout
+          { x: bX + 240, col: '#15803d', hi: '#86efac' },  // Dried Nana Mint / Henna
+          { x: bX + 288, col: '#312e81', hi: '#818cf8' }   // Indigo Nora / Khol
+        ];
+        for (let sIdx = 0; sIdx < spices.length; sIdx++) {
+          const sp = spices[sIdx];
+          // Conical spice pyramid with sunlit & shaded facets
+          const sG = ctx.createLinearGradient(sp.x - 16, baseY - 72, sp.x + 16, baseY - 38);
+          sG.addColorStop(0, sp.hi); sG.addColorStop(0.55, sp.col); sG.addColorStop(1, '#291008');
+          ctx.fillStyle = sG;
+          ctx.beginPath();
+          ctx.moveTo(sp.x - 17, baseY - 38);
+          ctx.quadraticCurveTo(sp.x - 8, baseY - 56, sp.x, baseY - 71 - (sIdx % 2) * 4);
+          ctx.quadraticCurveTo(sp.x + 8, baseY - 56, sp.x + 17, baseY - 38);
+          ctx.closePath();
+          ctx.fill();
+          // Tiny wooden spice scoop & white hand-written spice label card!
+          ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.moveTo(sp.x + 5, baseY - 50); ctx.lineTo(sp.x + 13, baseY - 60); ctx.stroke();
+          ctx.fillStyle = '#fffbeb';
+          ctx.fillRect(sp.x - 4, baseY - 56, 7, 5);
+          // Woven straw basket base with cross-hatch rim
+          ctx.fillStyle = '#d49b54'; ctx.strokeStyle = '#5c2d12'; ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(sp.x - 19, baseY - 40); ctx.lineTo(sp.x + 19, baseY - 40);
+          ctx.lineTo(sp.x + 15, baseY - 33); ctx.lineTo(sp.x - 15, baseY - 33);
+          ctx.closePath();
+          ctx.fill(); ctx.stroke();
+        }
+      } else {
+        // -------------------------------------------------------------------
+        // (C) SOUK HADDADINE & BABOUCHE — PIERCED-BRASS CHANDELIERS, ATAY TEA & BABOUCHE!
+        // -------------------------------------------------------------------
+        // Warm golden filigree light-dots dappled inside the brass-worker's arch!
+        const lGlow = ctx.createRadialGradient(archCx, shopY + 56, 8, archCx, shopY + 56, 82);
+        lGlow.addColorStop(0, 'rgba(254, 240, 138, 0.58)');
+        lGlow.addColorStop(0.6, 'rgba(245, 158, 11, 0.22)');
+        lGlow.addColorStop(1, 'rgba(245, 158, 11, 0)');
+        ctx.fillStyle = lGlow;
+        ctx.beginPath(); ctx.arc(archCx, shopY + 56, 82, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(254, 249, 195, 0.42)';
+        for (let d = 0; d < 14; d++) {
+          const ang = d * 0.45 + time * 0.35;
+          const rad = 24 + (d % 3) * 18;
+          ctx.beginPath();
+          ctx.arc(archCx + Math.cos(ang) * rad, shopY + 58 + Math.sin(ang) * rad * 0.65, 1.3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 5 Hanging Pierced-Brass Moroccan Lamps & 8-Pointed Star Chandeliers!
+        const lamps = [
+          { x: archCx - 46, y: shopY + 42, sc: 0.85, col: '#38bdf8', star: false },
+          { x: archCx - 20, y: shopY + 54, sc: 0.98, col: '#fde047', star: true },
+          { x: archCx + 4, y: shopY + 36, sc: 1.05, col: '#fb7185', star: false },
+          { x: archCx + 28, y: shopY + 52, sc: 0.92, col: '#34d399', star: true },
+          { x: archCx + 50, y: shopY + 40, sc: 0.82, col: '#fde047', star: false }
+        ];
+        for (const ln of lamps) {
+          const sw = Math.sin(time * 2.2 + ln.x * 0.05) * 2.2;
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.3;
+          ctx.beginPath(); ctx.moveTo(ln.x, shopY + 8); ctx.lineTo(ln.x + sw, ln.y - 12); ctx.stroke();
+          if (ln.star) {
+            // 8-Pointed Moroccan Brass Star Lantern (Moravian/Fassi Star)
+            ctx.save();
+            ctx.translate(ln.x + sw, ln.y);
+            ctx.scale(ln.sc, ln.sc);
+            ctx.fillStyle = ln.col; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.2;
+            ctx.fillRect(-8, -8, 16, 16); ctx.strokeRect(-8, -8, 16, 16);
+            ctx.rotate(Math.PI * 0.25);
+            ctx.fillRect(-8, -8, 16, 16); ctx.strokeRect(-8, -8, 16, 16);
+            ctx.fillStyle = '#fffbeb';
+            ctx.beginPath(); ctx.arc(0, 0, 3.2, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+          } else {
+            drawBrassFanous(ln.x, ln.y, ln.sc, sw, ln.col);
+          }
+        }
+
+        // Left & Right Display Racks of Colorful Pointed Moroccan Leather Babouche Slippers!
+        for (const rx of [bX + 22, bX + bW - 54]) {
+          ctx.fillStyle = '#5c2810'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.0;
+          ctx.fillRect(rx, shopY + 44, 32, 86); ctx.strokeRect(rx, shopY + 44, 32, 86);
+          const babCols = ['#facc15', '#e11d48', '#14b8a6', '#2563eb'];
+          for (let row = 0; row < 4; row++) {
+            const by0 = shopY + 56 + row * 19;
+            ctx.fillStyle = babCols[row];
+            for (const bxOff of [6, 18]) {
+              ctx.beginPath();
+              ctx.ellipse(rx + bxOff, by0 + 4, 4.2, 7.2, 0, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = '#fef08a';
+              ctx.beginPath(); ctx.arc(rx + bxOff, by0 + 2, 1.3, 0, Math.PI * 2); ctx.fill();
+              ctx.fillStyle = babCols[row];
+            }
+          }
+        }
+
+        // Octagonal Carved Cedar Table + Chased-Brass Siniya Tray + Silver Berrad Teapot & Keesan Mint-Tea Glasses!
+        ctx.fillStyle = '#6b2e12'; ctx.strokeStyle = '#291003'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(archCx - 38, baseY - 28); ctx.lineTo(archCx + 38, baseY - 28);
+        ctx.lineTo(archCx + 32, baseY); ctx.lineTo(archCx - 32, baseY);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        // Scalloped Moorish keyhole arch cutout in cedar table legs
+        ctx.fillStyle = '#291008';
+        ctx.beginPath(); ctx.arc(archCx, baseY - 12, 10, Math.PI, 0); ctx.lineTo(archCx + 10, baseY); ctx.lineTo(archCx - 10, baseY); ctx.closePath(); ctx.fill();
+        // Gleaming chased-brass Siniya tea tray
+        ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#92400e'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.ellipse(archCx, baseY - 30, 38, 5.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Curved-spout Moroccan Berrad teapot with conical lid + handle
+        const tpX = archCx - 12, tpY = baseY - 40;
+        ctx.fillStyle = '#fef9c3'; ctx.strokeStyle = '#92400e'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.ellipse(tpX, tpY, 7.5, 8.8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(tpX - 5, tpY - 8); ctx.lineTo(tpX, tpY - 15); ctx.lineTo(tpX + 5, tpY - 8); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(tpX + 6, tpY + 1); ctx.quadraticCurveTo(tpX + 15, tpY - 3, tpX + 14, tpY - 11);
+        ctx.moveTo(tpX - 6, tpY - 5); ctx.quadraticCurveTo(tpX - 13, tpY, tpX - 6, tpY + 5);
+        ctx.stroke();
+        // 3 Jewel-toned gilded Keesan tea glasses with fresh green mint sprigs
+        for (const [gx, gCol] of [[archCx + 6, '#10b981'], [archCx + 16, '#e11d48'], [archCx + 26, '#0284c7']]) {
+          ctx.fillStyle = gCol; ctx.strokeStyle = '#fde047'; ctx.lineWidth = 0.9;
+          ctx.fillRect(gx, baseY - 39, 6, 8.5); ctx.strokeRect(gx, baseY - 39, 6, 8.5);
+          ctx.fillStyle = '#22c55e';
+          ctx.beginPath(); ctx.arc(gx + 3, baseY - 40.5, 2.2, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    }
+
+    // Warm Floating Marrakech Golden Saffron & Sunlight Motes drifting lazily through the Souk!
+    for (let m = 0; m < 22; m++) {
+      const mx = ((m * 167 - camX * 0.25 + time * 15) % (w + 60) + (w + 60)) % (w + 60) - 30;
+      const my = 120 + ((m * 83 + Math.sin(time * 1.9 + m) * 22) % (h - 160));
+      const a = 0.22 + 0.42 * Math.abs(Math.sin(time * 2.6 + m));
+      ctx.fillStyle = `rgba(254, 240, 138, ${a.toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(mx, my, (m % 3 === 0) ? 2.1 : 1.3, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  const origDrawCheckpoint = Art.drawCheckpoint;
+
+  const STAGE_TO_CP_THEME = {
+    16: 'snow',
+    17: 'circus',
+    18: 'desert',
+    19: 'japan',
+    20: 'steam_train',
+    21: 'venice',
+    22: 'paris',
+    23: 'marrakech',
+    24: 'maya',
+    25: 'greece',
+  };
+
+  const THEMED_CP_SET = new Set([
+    'snow', 'circus', 'desert', 'japan', 'steam_train', 'venice', 'paris', 'marrakech', 'maya', 'greece',
+  ]);
+
+  function drawSaveSanctuaryBase(ctx, midX, baseY, time, active) {
+    const pulse = 0.5 + 0.5 * Math.sin(time * 3.8);
+
+    // 1. Soft vertical beacon aura behind the checkpoint so it stands out unmistakably in every stage
+    const beamG = ctx.createRadialGradient(midX, baseY - 26, 6, midX, baseY - 26, 52);
+    if (active) {
+      beamG.addColorStop(0, `rgba(110, 231, 183, ${(0.34 + pulse * 0.10).toFixed(3)})`);
+      beamG.addColorStop(0.55, `rgba(253, 224, 71, ${(0.22 + pulse * 0.08).toFixed(3)})`);
+      beamG.addColorStop(1, 'rgba(253, 224, 71, 0)');
+    } else {
+      beamG.addColorStop(0, `rgba(56, 189, 248, ${(0.24 + pulse * 0.10).toFixed(3)})`);
+      beamG.addColorStop(0.6, `rgba(253, 224, 71, ${(0.14 + pulse * 0.06).toFixed(3)})`);
+      beamG.addColorStop(1, 'rgba(56, 189, 248, 0)');
+    }
+    ctx.fillStyle = beamG;
+    ctx.beginPath();
+    ctx.arc(midX, baseY - 26, 52, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. Ground contact shadow
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.42)';
+    ctx.beginPath();
+    ctx.ellipse(midX + 2, baseY + 1.5, 31, 5.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 3. Luminous Sanctuary Ground Ring (Cyan-Gold before save -> Emerald-Gold after save!)
+    const ringOuterR = 32 + pulse * 1.8;
+    const padG = ctx.createRadialGradient(midX, baseY + 1, 4, midX, baseY + 1, ringOuterR + 6);
+    if (active) {
+      padG.addColorStop(0, 'rgba(254, 240, 138, 0.48)');
+      padG.addColorStop(0.65, 'rgba(16, 185, 129, 0.34)');
+      padG.addColorStop(1, 'rgba(16, 185, 129, 0)');
+    } else {
+      padG.addColorStop(0, 'rgba(186, 230, 253, 0.34)');
+      padG.addColorStop(0.65, 'rgba(251, 191, 36, 0.24)');
+      padG.addColorStop(1, 'rgba(56, 189, 248, 0)');
+    }
+    ctx.fillStyle = padG;
+    ctx.beginPath();
+    ctx.ellipse(midX, baseY + 1, ringOuterR + 6, 8.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = active ? '#34d399' : '#38bdf8';
+    ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.ellipse(midX, baseY + 1, ringOuterR, 5.8, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = active ? '#fef08a' : 'rgba(254, 240, 138, 0.85)';
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.ellipse(midX, baseY + 1, ringOuterR - 4.5, 4.1, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  function drawSavePawBeacon(ctx, midX, topY, time, active) {
+    const bob = Math.sin(time * 3.5) * 2.5;
+    const py = topY + bob;
+    const pulse = 0.5 + 0.5 * Math.sin(time * 4.4);
+
+    ctx.save();
+    ctx.translate(midX, py);
+
+    // Outer radial halo (works with zero shadowBlur!)
+    const haloR = active ? 20 + pulse * 3 : 16 + pulse * 2;
+    const halo = ctx.createRadialGradient(0, 0, 2, 0, 0, haloR);
+    if (active) {
+      halo.addColorStop(0, 'rgba(254, 249, 195, 0.85)');
+      halo.addColorStop(0.5, 'rgba(52, 211, 153, 0.45)');
+      halo.addColorStop(1, 'rgba(52, 211, 153, 0)');
+    } else {
+      halo.addColorStop(0, 'rgba(224, 242, 254, 0.72)');
+      halo.addColorStop(0.55, 'rgba(251, 191, 36, 0.30)');
+      halo.addColorStop(1, 'rgba(56, 189, 248, 0)');
+    }
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(0, 0, haloR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Ringed Save Medallion Disc
+    const discG = ctx.createLinearGradient(-9, -9, 9, 9);
+    if (active) {
+      discG.addColorStop(0, '#10b981');
+      discG.addColorStop(1, '#047857');
+    } else {
+      discG.addColorStop(0, '#0284c7');
+      discG.addColorStop(1, '#1e3a8a');
+    }
+    ctx.fillStyle = discG;
+    ctx.strokeStyle = active ? '#fde047' : '#bae6fd';
+    ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.arc(0, 0, 10.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Crisp Cat-Paw Save Emblem inside Medallion
+    ctx.fillStyle = active ? '#fef9c3' : '#f8fafc';
+    ctx.strokeStyle = active ? '#78350f' : '#0f172a';
+    ctx.lineWidth = 0.85;
+    ctx.beginPath();
+    ctx.ellipse(0, 2.4, 4.1, 3.1, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    for (const [tx, ty, tr] of [[-4.1, -1.5, 1.45], [-1.5, -3.5, 1.55], [1.5, -3.5, 1.55], [4.1, -1.5, 1.45]]) {
+      ctx.beginPath();
+      ctx.arc(tx, ty, tr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    // Rising celebration sparkles when activated
+    if (active) {
+      ctx.fillStyle = '#fef08a';
+      for (let s = 0; s < 3; s++) {
+        const ang = time * 2.6 + s * 2.09;
+        const sx = Math.cos(ang) * 13.5;
+        const sy = Math.sin(ang) * 8.5;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawCatEarsCrest(ctx, midX, earY, spreadX, earH, fillCol, trimCol, innerCol) {
+    for (const side of [-1, 1]) {
+      const ex = midX + side * spreadX;
+      ctx.fillStyle = fillCol;
+      ctx.strokeStyle = trimCol;
+      ctx.lineWidth = 1.25;
+      ctx.beginPath();
+      ctx.moveTo(ex - side * 4.5, earY + 3.5);
+      ctx.lineTo(ex + side * 0.8, earY - earH);
+      ctx.lineTo(ex + side * 4.8, earY + 4.2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = innerCol;
+      ctx.beginPath();
+      ctx.moveTo(ex - side * 2.2, earY + 2.4);
+      ctx.lineTo(ex + side * 0.6, earY - earH * 0.62);
+      ctx.lineTo(ex + side * 2.6, earY + 2.8);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  function drawSanctuaryDoorAndCushion(ctx, midX, baseY, doorW, doorH, frameCol, cushionActiveCol, cushionIdleCol, active) {
+    const r = doorW * 0.5;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(midX, baseY - doorH + r, r, Math.PI, 0);
+    ctx.lineTo(midX + r, baseY);
+    ctx.lineTo(midX - r, baseY);
+    ctx.closePath();
+    if (active) {
+      const inG = ctx.createRadialGradient(midX, baseY - doorH * 0.48, 2, midX, baseY - doorH * 0.48, doorH);
+      inG.addColorStop(0, '#fffbeb');
+      inG.addColorStop(0.55, '#fbbf24');
+      inG.addColorStop(1, '#78350f');
+      ctx.fillStyle = inG;
+    } else {
+      ctx.fillStyle = '#1e1b2e';
+    }
+    ctx.fill();
+    ctx.strokeStyle = frameCol;
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+
+    // Plush interior cat cushion
+    ctx.fillStyle = active ? cushionActiveCol : cushionIdleCol;
+    ctx.strokeStyle = '#fde047';
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.ellipse(midX, baseY - 2.4, r * 0.78, 2.9, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawCheckpointExtended(ctx, cp, cx, cy, time, theme, stageNum) {
+    const resolvedTheme = (stageNum >= 16 && STAGE_TO_CP_THEME[stageNum])
+      ? STAGE_TO_CP_THEME[stageNum]
+      : theme;
+
+    if (!THEMED_CP_SET.has(resolvedTheme) || (typeof stageNum === 'number' && stageNum < 16)) {
+      origDrawCheckpoint(ctx, cp, cx, cy, time);
+      return;
+    }
+
+    ctx.save();
+    const active = !!(cp.activated || cp.reached);
+    const baseY = cy + 32;
+    const midX = cx + 20;
+
+    // Shared unmistakable Save Sanctuary Ground Pad & Vertical Aura
+    drawSaveSanctuaryBase(ctx, midX, baseY, time, active);
+
+    if (resolvedTheme === 'snow') {
+      // =====================================================================
+      // STAGE 16: ARCTIC GLACIAL ICE-IGLOO CAT SANCTUARY
+      // =====================================================================
+      const igG = ctx.createRadialGradient(midX - 6, baseY - 24, 4, midX, baseY - 12, 26);
+      igG.addColorStop(0, '#ffffff');
+      igG.addColorStop(0.55, '#e0f2fe');
+      igG.addColorStop(1, '#7dd3fc');
+      ctx.fillStyle = igG;
+      ctx.strokeStyle = '#0369a1';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(midX, baseY - 4, 22, Math.PI, 0);
+      ctx.lineTo(midX + 22, baseY);
+      ctx.lineTo(midX - 22, baseY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Carved glacial ice-block courses & vertical mortar seams
+      ctx.strokeStyle = 'rgba(2, 132, 199, 0.48)';
+      ctx.lineWidth = 1.05;
+      for (const ry of [baseY - 9, baseY - 17]) {
+        const halfSpan = ry < baseY - 13 ? 16 : 20.5;
+        ctx.beginPath();
+        ctx.moveTo(midX - halfSpan, ry);
+        ctx.quadraticCurveTo(midX, ry - 2.5, midX + halfSpan, ry);
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.moveTo(midX - 8, baseY - 9); ctx.lineTo(midX - 6, baseY - 17);
+      ctx.moveTo(midX + 8, baseY - 9); ctx.lineTo(midX + 6, baseY - 17);
+      ctx.moveTo(midX, baseY - 17); ctx.lineTo(midX, baseY - 25.5);
+      ctx.stroke();
+
+      // Frosted Crystal Cat Ears crowning the Igloo Dome
+      drawCatEarsCrest(ctx, midX, baseY - 24, 10.5, 8.5, '#bae6fd', '#0284c7', '#f0f9ff');
+
+      // Projecting arched ice-tunnel entrance + warm hearth cushion
+      ctx.fillStyle = '#e0f2fe';
+      ctx.strokeStyle = '#0369a1';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(midX, baseY - 9, 10.5, Math.PI, 0);
+      ctx.lineTo(midX + 10.5, baseY);
+      ctx.lineTo(midX - 10.5, baseY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      drawSanctuaryDoorAndCushion(ctx, midX, baseY, 15, 16, '#0284c7', '#e11d48', '#64748b', active);
+
+      // Ski-pole lantern post with glowing Aurora lamp on right
+      const sw = Math.sin(time * 2.8 + cx) * 1.4;
+      const lx = midX + 27;
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(lx, baseY); ctx.lineTo(lx, baseY - 28); ctx.lineTo(lx - 5, baseY - 28);
+      ctx.stroke();
+      ctx.fillStyle = active ? '#fde047' : '#bae6fd';
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.arc(lx - 5 + sw, baseY - 22, 4.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      drawSavePawBeacon(ctx, midX, baseY - 46, time, active);
+
+    } else if (resolvedTheme === 'circus') {
+      // =====================================================================
+      // STAGE 17: GRAND BIG-TOP STRIPED CIRCUS CAT PAVILION
+      // =====================================================================
+      // Striped crimson & cream tent walls
+      const wX = midX - 20;
+      const wW = 40;
+      const wH = 24;
+      ctx.fillStyle = '#fffbeb';
+      ctx.strokeStyle = '#7f1d1d';
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(wX, baseY - wH, wW, wH);
+      ctx.fillStyle = '#e11d48';
+      for (let sx = wX; sx < wX + wW; sx += 10) {
+        ctx.fillRect(sx, baseY - wH, 5, wH);
+      }
+      ctx.strokeRect(wX, baseY - wH, wW, wH);
+
+      // Conical Big-Top Tent Roof with Crimson/Gold/Cream wedges
+      const apexY = baseY - 46;
+      const roofCols = ['#dc2626', '#fef3c7', '#e11d48', '#fef3c7', '#dc2626'];
+      for (let k = 0; k < 5; k++) {
+        const x0 = midX - 24 + k * 9.6;
+        const x1 = x0 + 9.6;
+        ctx.fillStyle = roofCols[k];
+        ctx.beginPath();
+        ctx.moveTo(midX, apexY);
+        ctx.lineTo(x1, baseY - wH);
+        ctx.lineTo(x0, baseY - wH);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.strokeStyle = '#7f1d1d';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(midX, apexY); ctx.lineTo(midX + 24, baseY - wH); ctx.lineTo(midX - 24, baseY - wH);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Gilded Circus Cat Ears + Fluttering Pennant Flag
+      drawCatEarsCrest(ctx, midX, baseY - 34, 11, 8, '#fbbf24', '#78350f', '#e11d48');
+      const wave = Math.sin(time * 5 + cx) * 2.2;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.moveTo(midX, apexY); ctx.lineTo(midX, apexY - 10); ctx.stroke();
+      ctx.fillStyle = active ? '#10b981' : '#f59e0b';
+      ctx.beginPath();
+      ctx.moveTo(midX, apexY - 10);
+      ctx.lineTo(midX + 12, apexY - 7 + wave * 0.5);
+      ctx.lineTo(midX, apexY - 3);
+      ctx.closePath();
+      ctx.fill();
+
+      // Scalloped gold valance trim & marquee bulbs
+      for (let bx = midX - 20; bx <= midX + 20; bx += 8) {
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath(); ctx.arc(bx, baseY - wH + 1, 3.8, 0, Math.PI); ctx.fill();
+        ctx.fillStyle = active ? '#fef08a' : '#fda4af';
+        ctx.beginPath(); ctx.arc(bx, baseY - wH, 1.5, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Velvet curtain entrance & royal purple cushion
+      drawSanctuaryDoorAndCushion(ctx, midX, baseY, 16, 18, '#fbbf24', '#9333ea', '#4c1d95', active);
+
+      drawSavePawBeacon(ctx, midX, apexY - 22, time, active);
+
+    } else if (resolvedTheme === 'desert') {
+      // =====================================================================
+      // STAGE 18: PHARAONIC GOLDEN LIMESTONE & LAPIS BASTET CAT SHRINE
+      // =====================================================================
+      // Batter-walled Egyptian sandstone pylon
+      const pyG = ctx.createLinearGradient(midX - 22, baseY - 32, midX + 22, baseY);
+      pyG.addColorStop(0, '#fef3c7');
+      pyG.addColorStop(0.55, '#f59e0b');
+      pyG.addColorStop(1, '#b45309');
+      ctx.fillStyle = pyG;
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(midX - 22, baseY);
+      ctx.lineTo(midX - 18, baseY - 30);
+      ctx.lineTo(midX + 18, baseY - 30);
+      ctx.lineTo(midX + 22, baseY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Flaring Pharaonic Cavetto Cornice with Lapis, Turquoise & Carnelian stripes
+      ctx.fillStyle = '#1e3a8a';
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(midX - 19, baseY - 30);
+      ctx.lineTo(midX - 24, baseY - 37);
+      ctx.lineTo(midX + 24, baseY - 37);
+      ctx.lineTo(midX + 19, baseY - 30);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      const cols = ['#fde047', '#0d9488', '#dc2626', '#2563eb', '#fde047'];
+      for (let i = 0; i < cols.length; i++) {
+        ctx.fillStyle = cols[i];
+        ctx.fillRect(midX - 18 + i * 7.5, baseY - 35.5, 5.5, 4);
+      }
+
+      // Sculpted Golden Bastet Cat Ears + Solar Disc Crest
+      drawCatEarsCrest(ctx, midX, baseY - 38, 11, 9, '#fbbf24', '#78350f', '#1d4ed8');
+      ctx.fillStyle = active ? '#fde047' : '#f59e0b';
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.arc(midX, baseY - 40, 4.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      // Sanctuary portal + Royal Turquoise Cushion
+      drawSanctuaryDoorAndCushion(ctx, midX, baseY, 15, 19, '#1d4ed8', '#0d9488', '#475569', active);
+
+      // Flanking bronze desert fire brazier on right
+      const bx = midX + 28;
+      ctx.fillStyle = '#92400e';
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(bx - 4, baseY); ctx.lineTo(bx - 2, baseY - 12); ctx.lineTo(bx + 2, baseY - 12); ctx.lineTo(bx + 4, baseY);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(bx, baseY - 13, 5.5, 2.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      const flk = Math.sin(time * 10 + cx) * 1.5;
+      ctx.fillStyle = active ? '#fde047' : '#fb923c';
+      ctx.beginPath();
+      ctx.moveTo(bx - 3.5, baseY - 14);
+      ctx.quadraticCurveTo(bx + flk, baseY - 25, bx + 3.5, baseY - 14);
+      ctx.closePath();
+      ctx.fill();
+
+      drawSavePawBeacon(ctx, midX, baseY - 58, time, active);
+
+    } else if (resolvedTheme === 'japan') {
+      // =====================================================================
+      // STAGE 19: KYOTO VERMILION & KAWARA-TILE MANEKI-NEKO HOKORA SHRINE
+      // =====================================================================
+      // Wooden Engawa step base
+      ctx.fillStyle = '#78350f';
+      ctx.strokeStyle = '#291003';
+      ctx.lineWidth = 1.3;
+      ctx.fillRect(midX - 22, baseY - 5, 44, 5);
+      ctx.strokeRect(midX - 22, baseY - 5, 44, 5);
+
+      // Cream plaster shrine walls & Vermilion Torii-red corner pillars
+      ctx.fillStyle = '#fffbeb';
+      ctx.fillRect(midX - 18, baseY - 29, 36, 24);
+      ctx.strokeRect(midX - 18, baseY - 29, 36, 24);
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(midX - 19, baseY - 29, 4.5, 24);
+      ctx.fillRect(midX + 14.5, baseY - 29, 4.5, 24);
+      ctx.fillRect(midX - 20, baseY - 29, 40, 4);
+
+      // Sweeping Curved Dark-Slate Kawara Pagoda Roof
+      const rG = ctx.createLinearGradient(midX, baseY - 46, midX, baseY - 28);
+      rG.addColorStop(0, '#475569');
+      rG.addColorStop(0.5, '#1e293b');
+      rG.addColorStop(1, '#0f172a');
+      ctx.fillStyle = rG;
+      ctx.strokeStyle = '#020617';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(midX - 28, baseY - 27);
+      ctx.quadraticCurveTo(midX - 12, baseY - 33, midX, baseY - 45);
+      ctx.quadraticCurveTo(midX + 12, baseY - 33, midX + 28, baseY - 27);
+      ctx.quadraticCurveTo(midX, baseY - 30, midX - 28, baseY - 27);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Golden Maneki-Neko Cat-Ear Roof Crest + Ridge Bar
+      drawCatEarsCrest(ctx, midX, baseY - 40, 9.5, 7.5, '#fbbf24', '#78350f', '#dc2626');
+
+      // Braided Shimenawa rope & white Shide paper zigzags under eaves
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.moveTo(midX - 14, baseY - 24); ctx.quadraticCurveTo(midX, baseY - 21.5, midX + 14, baseY - 24); ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      for (const sx of [midX - 7, midX + 7]) {
+        ctx.fillRect(sx - 1.5, baseY - 23, 3, 5);
+      }
+
+      // Warm Shoji sanctuary doorway + Crimson Zabuton Cushion
+      drawSanctuaryDoorAndCushion(ctx, midX, baseY - 4, 15, 17, '#b91c1c', '#ef4444', '#7f1d1d', active);
+
+      // Swaying Red Chochin Paper Lantern under right eave
+      const sw = Math.sin(time * 2.7 + cx) * 1.6;
+      const lx = midX + 24 + sw;
+      const ly = baseY - 19;
+      ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(midX + 24, baseY - 27); ctx.lineTo(lx, ly - 5); ctx.stroke();
+      ctx.fillStyle = active ? '#fb7185' : '#dc2626';
+      ctx.strokeStyle = '#450a0a';
+      ctx.beginPath(); ctx.ellipse(lx, ly, 4.5, 5.8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fde047';
+      ctx.fillRect(lx - 2.5, ly - 6, 5, 1.6);
+      ctx.fillRect(lx - 2.5, ly + 4.5, 5, 1.6);
+
+      drawSavePawBeacon(ctx, midX, baseY - 58, time, active);
+
+    } else if (resolvedTheme === 'steam_train') {
+      // =====================================================================
+      // STAGE 20: VICTORIAN RIVETED MAHOGANY & BRASS WHISTLE-STOP KIOSK
+      // =====================================================================
+      // Polished Pullman mahogany cabin with riveted brass corner plates
+      const cabG = ctx.createLinearGradient(midX - 20, baseY - 30, midX + 20, baseY);
+      cabG.addColorStop(0, '#9a3412');
+      cabG.addColorStop(0.55, '#7c2d12');
+      cabG.addColorStop(1, '#431407');
+      ctx.fillStyle = cabG;
+      ctx.strokeStyle = '#1c1917';
+      ctx.lineWidth = 1.6;
+      ctx.fillRect(midX - 19, baseY - 30, 38, 30);
+      ctx.strokeRect(midX - 19, baseY - 30, 38, 30);
+
+      // Brass belt-rail & corner straps
+      ctx.fillStyle = '#d97706';
+      ctx.fillRect(midX - 19, baseY - 30, 4, 30);
+      ctx.fillRect(midX + 15, baseY - 30, 4, 30);
+      ctx.fillRect(midX - 19, baseY - 29, 38, 3.5);
+
+      // Arched Victorian Copper-and-Iron Clerestory Roof
+      const rfG = ctx.createLinearGradient(midX - 23, baseY - 42, midX + 23, baseY - 29);
+      rfG.addColorStop(0, '#475569');
+      rfG.addColorStop(0.5, '#1e293b');
+      rfG.addColorStop(1, '#0f172a');
+      ctx.fillStyle = rfG;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(midX - 23, baseY - 29);
+      ctx.quadraticCurveTo(midX, baseY - 45, midX + 23, baseY - 29);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Gleaming Brass Cat Ears + Illuminated Miniature Station Clock!
+      drawCatEarsCrest(ctx, midX, baseY - 38, 11.5, 8, '#fbbf24', '#78350f', '#fef3c7');
+      ctx.fillStyle = '#fef9c3';
+      ctx.strokeStyle = '#92400e';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.arc(midX, baseY - 35, 5.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(midX, baseY - 35); ctx.lineTo(midX, baseY - 38.5);
+      ctx.moveTo(midX, baseY - 35); ctx.lineTo(midX + 2.8, baseY - 35);
+      ctx.stroke();
+
+      // Brass-rimmed Pullman doorway + Burgundy velvet cushion
+      drawSanctuaryDoorAndCushion(ctx, midX, baseY, 15, 19, '#fbbf24', '#be123c', '#4c0519', active);
+
+      // Railway Semaphore Signal Lamp on Right (switches to glowing Emerald "CLEAR" when saved!)
+      const sx = midX + 25;
+      ctx.fillStyle = '#334155'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.2;
+      ctx.fillRect(sx - 2, baseY - 26, 4, 26);
+      ctx.beginPath(); ctx.arc(sx, baseY - 27, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = active ? '#34d399' : '#38bdf8';
+      ctx.beginPath(); ctx.arc(sx, baseY - 27, 2.8, 0, Math.PI * 2); ctx.fill();
+
+      drawSavePawBeacon(ctx, midX, baseY - 56, time, active);
+
+    } else if (resolvedTheme === 'venice') {
+      // =====================================================================
+      // STAGE 21: VENETIAN GOTHIC ISTRIAN-MARBLE & GONDOLA PALINA PAVILION
+      // =====================================================================
+      // Rose-and-Ivory Venetian Palazzo Pavilion Walls with Istrian Marble Quoins
+      const vG = ctx.createLinearGradient(midX - 19, baseY - 30, midX + 19, baseY);
+      vG.addColorStop(0, '#fff1f2');
+      vG.addColorStop(0.55, '#fecdd3');
+      vG.addColorStop(1, '#fda4af');
+      ctx.fillStyle = vG;
+      ctx.strokeStyle = '#881337';
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(midX - 19, baseY - 29, 38, 29);
+      ctx.strokeRect(midX - 19, baseY - 29, 38, 29);
+
+      // White Istrian marble corner pilasters
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(midX - 19, baseY - 29, 4.5, 29);
+      ctx.fillRect(midX + 14.5, baseY - 29, 4.5, 29);
+
+      // Royal Lagoon-Blue & Gold-Leaf Venetian Ogee Dome Roof
+      const dG = ctx.createLinearGradient(midX - 22, baseY - 46, midX + 22, baseY - 29);
+      dG.addColorStop(0, '#2563eb');
+      dG.addColorStop(0.5, '#1d4ed8');
+      dG.addColorStop(1, '#1e3a8a');
+      ctx.fillStyle = dG;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(midX - 22, baseY - 29);
+      ctx.bezierCurveTo(midX - 14, baseY - 33, midX - 6, baseY - 40, midX, baseY - 47);
+      ctx.bezierCurveTo(midX + 6, baseY - 40, midX + 14, baseY - 33, midX + 22, baseY - 29);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Gilded Venetian Masquerade Cat Ears + Finial Spire
+      drawCatEarsCrest(ctx, midX, baseY - 38, 10, 8, '#fde047', '#78350f', '#e11d48');
+
+      // Venetian Gothic arched doorway + Damask Gondola Cushion
+      drawSanctuaryDoorAndCushion(ctx, midX, baseY, 15, 19, '#fbbf24', '#e11d48', '#4c0519', active);
+
+      // Iconic Striped Blue-and-White Venetian Palina Mooring Post + Lagoon Lantern on Right!
+      const px = midX + 26;
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#1e3a8a';
+      ctx.lineWidth = 1.2;
+      ctx.fillRect(px - 2.5, baseY - 28, 5, 28);
+      ctx.fillStyle = '#1d4ed8';
+      for (let sy = baseY - 26; sy < baseY - 2; sy += 7) {
+        ctx.beginPath();
+        ctx.moveTo(px - 2.5, sy); ctx.lineTo(px + 2.5, sy + 2.5);
+        ctx.lineTo(px + 2.5, sy + 5); ctx.lineTo(px - 2.5, sy + 2.5);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.strokeRect(px - 2.5, baseY - 28, 5, 28);
+      ctx.fillStyle = active ? '#fde047' : '#bae6fd';
+      ctx.strokeStyle = '#78350f';
+      ctx.beginPath(); ctx.arc(px, baseY - 31, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      drawSavePawBeacon(ctx, midX, baseY - 58, time, active);
+
+    } else if (resolvedTheme === 'paris') {
+      // =====================================================================
+      // STAGE 22: PARISIAN HAUSSMANNIAN MANSARD & BISTRO AWNING CAT KIOSK
+      // =====================================================================
+      // Cream Lutetian limestone walls
+      const pG = ctx.createLinearGradient(midX - 19, baseY - 28, midX + 19, baseY);
+      pG.addColorStop(0, '#fefce8');
+      pG.addColorStop(0.6, '#f5f5f4');
+      pG.addColorStop(1, '#d6d3d1');
+      ctx.fillStyle = pG;
+      ctx.strokeStyle = '#44403c';
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(midX - 19, baseY - 28, 38, 28);
+      ctx.strokeRect(midX - 19, baseY - 28, 38, 28);
+
+      // Classic Parisian Slate-Zinc Mansard Roof with Gilded Trim
+      const mG = ctx.createLinearGradient(midX, baseY - 44, midX, baseY - 28);
+      mG.addColorStop(0, '#64748b');
+      mG.addColorStop(0.55, '#334155');
+      mG.addColorStop(1, '#1e293b');
+      ctx.fillStyle = mG;
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(midX - 22, baseY - 28);
+      ctx.lineTo(midX - 15, baseY - 43);
+      ctx.lineTo(midX + 15, baseY - 43);
+      ctx.lineTo(midX + 22, baseY - 28);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.moveTo(midX - 15, baseY - 43); ctx.lineTo(midX + 15, baseY - 43); ctx.stroke();
+
+      // Ornate Wrought-Iron & Gold Parisian Cat Ears on Mansard Crest + Dormer Bullseye
+      drawCatEarsCrest(ctx, midX, baseY - 44, 10, 7.5, '#1e293b', '#fbbf24', '#fb7185');
+      ctx.fillStyle = active ? '#fef08a' : '#cbd5e1';
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.arc(midX, baseY - 35.5, 4.0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      // Boutique Sanctuary Doorway + Rose-Velvet Parisian Cushion
+      drawSanctuaryDoorAndCushion(ctx, midX, baseY, 15, 18, '#be123c', '#f43f5e', '#881337', active);
+
+      // Striped Crimson & Ivory Parisian Café Awning above Doorway!
+      for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = (i % 2 === 0) ? '#e11d48' : '#fffbeb';
+        ctx.fillRect(midX - 15 + i * 6, baseY - 24, 6, 5.5);
+      }
+      ctx.strokeStyle = '#881337';
+      ctx.lineWidth = 1.0;
+      ctx.strokeRect(midX - 15, baseY - 24, 30, 5.5);
+
+      // Miniature Belle Époque Wrought-Iron Streetlamp on Right
+      const lx = midX + 26;
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(lx, baseY); ctx.lineTo(lx, baseY - 26);
+      ctx.quadraticCurveTo(lx, baseY - 32, lx - 5, baseY - 30);
+      ctx.stroke();
+      ctx.fillStyle = active ? '#fef08a' : '#e2e8f0';
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath(); ctx.arc(lx - 5, baseY - 27.5, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      drawSavePawBeacon(ctx, midX, baseY - 58, time, active);
+
+    } else if (theme === 'marrakech') {
+      // =====================================================================
+      // STAGE 23: MOROCCAN WHITEWASHED & EMERALD-ZELLIJ KOUBBA CAT SANCTUARY
+      // =====================================================================
+      // 3D Right Side Wall (Shaded Warm Marrakech Terracotta)
+      ctx.fillStyle = '#8c3721';
+      ctx.strokeStyle = '#3b130b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx + 38, baseY - 28);
+      ctx.lineTo(cx + 48, baseY - 32);
+      ctx.lineTo(cx + 48, baseY - 3);
+      ctx.lineTo(cx + 38, baseY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Front Whitewashed & Rose-Tadelakt Koubba Pavilion Wall
+      const wallG = ctx.createLinearGradient(cx + 2, baseY - 28, cx + 2, baseY);
+      wallG.addColorStop(0, '#fffbeb');
+      wallG.addColorStop(0.55, '#fde6cf');
+      wallG.addColorStop(1, '#e7b996');
+      ctx.fillStyle = wallG;
+      ctx.fillRect(cx + 2, baseY - 28, 36, 28);
+      ctx.strokeRect(cx + 2, baseY - 28, 36, 28);
+
+      // Turquoise & Gold Zellij Dado Band along Base & Frieze under Eaves
+      ctx.fillStyle = '#0f766e';
+      ctx.fillRect(cx + 3, baseY - 8, 34, 7);
+      ctx.fillRect(cx + 3, baseY - 27, 34, 4.5);
+      ctx.fillStyle = '#fbbf24';
+      for (let zx = cx + 7; zx <= cx + 33; zx += 8) {
+        ctx.beginPath(); ctx.arc(zx, baseY - 4.5, 1.3, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Moorish Horseshoe Cat Sanctuary Doorway + Plush Embroidered Moroccan Pouf Cushion!
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(midX, baseY - 13, 9, Math.PI * 0.85, Math.PI * 0.15, false);
+      ctx.lineTo(midX + 8, baseY);
+      ctx.lineTo(midX - 8, baseY);
+      ctx.closePath();
+      if (active) {
+        const inG = ctx.createRadialGradient(midX, baseY - 11, 2, midX, baseY - 11, 15);
+        inG.addColorStop(0, '#fef9c3');
+        inG.addColorStop(0.6, '#f59e0b');
+        inG.addColorStop(1, '#78350f');
+        ctx.fillStyle = inG;
+      } else {
+        ctx.fillStyle = '#241008';
+      }
+      ctx.fill();
+      ctx.strokeStyle = '#b45309';
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+
+      ctx.fillStyle = active ? '#e11d48' : '#6b2e3e';
+      ctx.beginPath();
+      ctx.ellipse(midX, baseY - 2.2, 6.8, 2.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(midX - 4, baseY - 2.2); ctx.lineTo(midX + 4, baseY - 2.2);
+      ctx.stroke();
+      ctx.restore();
+
+      // Emerald-Green Glazed Pyramidal Moroccan Qubba Roof + 3D Side Slope + Cat-Ear Eave Accents!
+      ctx.fillStyle = '#064e3b';
+      ctx.strokeStyle = '#022c22';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(midX, baseY - 46);
+      ctx.lineTo(midX + 8, baseY - 48);
+      ctx.lineTo(cx + 51, baseY - 31);
+      ctx.lineTo(cx + 41, baseY - 27);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      const roofG = ctx.createLinearGradient(cx, baseY - 46, cx + 40, baseY - 27);
+      roofG.addColorStop(0, '#34d399');
+      roofG.addColorStop(0.45, '#059669');
+      roofG.addColorStop(1, '#065f46');
+      ctx.fillStyle = roofG;
+      ctx.beginPath();
+      ctx.moveTo(cx - 2, baseY - 27);
+      ctx.lineTo(midX, baseY - 46);
+      ctx.lineTo(cx + 42, baseY - 27);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      drawCatEarsCrest(ctx, midX, baseY - 37, 9.5, 6.5, '#047857', '#fbbf24', '#fde047');
+
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(midX, baseY - 46); ctx.lineTo(midX, baseY - 56); ctx.stroke();
+      ctx.fillStyle = '#fde047';
+      ctx.strokeStyle = '#92400e';
+      ctx.lineWidth = 0.8;
+      for (const [oy, r] of [[48.5, 2.6], [52.5, 1.9], [55.5, 1.3]]) {
+        ctx.beginPath(); ctx.arc(midX, baseY - oy, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+
+      // Swinging Pierced-Brass Moroccan Fanous Lantern on Right Eave
+      const swing = Math.sin(time * 2.5 + cx) * 1.6;
+      const lx = cx + 52 + swing;
+      const ly = baseY - 19;
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(cx + 45, baseY - 29);
+      ctx.lineTo(cx + 52, baseY - 29);
+      ctx.lineTo(lx, ly - 5);
+      ctx.stroke();
+      ctx.fillStyle = active ? '#fde047' : '#bae6fd';
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(lx, ly - 5); ctx.lineTo(lx + 4, ly); ctx.lineTo(lx, ly + 6); ctx.lineTo(lx - 4, ly);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      drawSavePawBeacon(ctx, midX, baseY - 68, time, active);
+
+    } else if (resolvedTheme === 'maya') {
+      // =====================================================================
+      // STAGE 24: MAYAN STEPPED JADE & GOLD KUKULCÁN CAT TEMPLE SANCTUARY
+      // =====================================================================
+      // 1. Stepped Yucatán Limestone Pyramid Base (2 Beveled Steps + 3D Shaded Right Wall)
+      ctx.fillStyle = '#6e6856';
+      ctx.strokeStyle = '#332f24';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(cx + 40, baseY - 30);
+      ctx.lineTo(cx + 50, baseY - 34);
+      ctx.lineTo(cx + 50, baseY - 3);
+      ctx.lineTo(cx + 40, baseY);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      // Lower & middle stepped pyramid plinths
+      ctx.fillStyle = '#a89f87';
+      ctx.fillRect(cx - 2, baseY - 6, 44, 6);
+      ctx.strokeRect(cx - 2, baseY - 6, 44, 6);
+      ctx.fillStyle = '#bfb69e';
+      ctx.fillRect(cx, baseY - 12, 40, 6);
+      ctx.strokeRect(cx, baseY - 12, 40, 6);
+
+      // Main Carved Limestone Sanctuary Chamber
+      const wallG = ctx.createLinearGradient(cx + 2, baseY - 31, cx + 2, baseY - 10);
+      wallG.addColorStop(0, '#ebe3ce');
+      wallG.addColorStop(0.55, '#c7bfa8');
+      wallG.addColorStop(1, '#8a826e');
+      ctx.fillStyle = wallG;
+      ctx.fillRect(cx + 2, baseY - 31, 36, 20);
+      ctx.strokeRect(cx + 2, baseY - 31, 36, 20);
+
+      // Maya-Blue & Emerald-Jade Stepped-Fret Glyph Frieze Band under Eaves
+      ctx.fillStyle = '#064e3b';
+      ctx.fillRect(cx + 3, baseY - 30, 34, 6.5);
+      for (let gx = cx + 6; gx <= cx + 31; gx += 8) {
+        ctx.fillStyle = ((Math.floor(gx / 8) & 1) === 0) ? '#10b981' : '#0284c7';
+        ctx.fillRect(gx, baseY - 28.5, 5, 3.5);
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(gx + 1.5, baseY - 27.5, 2, 1.5);
+      }
+
+      // Authentic Mayan Corbel-Arched Cat Sanctuary Portal + Woven Crimson-Jade Cushion!
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(midX - 8.5, baseY);
+      ctx.lineTo(midX - 8.5, baseY - 14);
+      ctx.lineTo(midX - 4.2, baseY - 21);
+      ctx.lineTo(midX + 4.2, baseY - 21);
+      ctx.lineTo(midX + 8.5, baseY - 14);
+      ctx.lineTo(midX + 8.5, baseY);
+      ctx.closePath();
+      if (active) {
+        const inG = ctx.createRadialGradient(midX, baseY - 10, 2, midX, baseY - 10, 15);
+        inG.addColorStop(0, '#ecfdf5');
+        inG.addColorStop(0.5, '#34d399');
+        inG.addColorStop(1, '#065f46');
+        ctx.fillStyle = inG;
+      } else {
+        ctx.fillStyle = '#181410';
+      }
+      ctx.fill();
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+
+      // Woven Mayan crimson & gold sanctuary cushion
+      ctx.fillStyle = active ? '#e11d48' : '#6b2e3e';
+      ctx.beginPath();
+      ctx.ellipse(midX, baseY - 2.2, 6.8, 2.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#34d399';
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(midX - 4.5, baseY - 2.2); ctx.lineTo(midX + 4.5, baseY - 2.2);
+      ctx.stroke();
+      ctx.restore();
+
+      // Stepped Mayan Roof Comb (Crestería) + 3D Side Slope + Jaguar/Cat-Ear Crest + Golden Sun Disc!
+      ctx.fillStyle = '#575243';
+      ctx.strokeStyle = '#332f24';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(cx + 39, baseY - 31);
+      ctx.lineTo(cx + 49, baseY - 35);
+      ctx.lineTo(cx + 43, baseY - 44);
+      ctx.lineTo(cx + 33, baseY - 40);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      // Lower cornice slab
+      ctx.fillStyle = '#d6ccb4';
+      ctx.fillRect(cx - 1, baseY - 36, 42, 5.5);
+      ctx.strokeRect(cx - 1, baseY - 36, 42, 5.5);
+      // Lush emerald jungle moss along cornice
+      ctx.fillStyle = '#15803d';
+      ctx.beginPath();
+      ctx.ellipse(cx + 7, baseY - 36, 6, 2, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx + 33, baseY - 36, 5.5, 1.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Upper pierced Mayan Crestería roof comb
+      ctx.fillStyle = '#c7bfa8';
+      ctx.fillRect(cx + 6, baseY - 45, 28, 9);
+      ctx.strokeRect(cx + 6, baseY - 45, 28, 9);
+      drawCatEarsCrest(ctx, midX, baseY - 44, 10, 6.8, '#059669', '#fbbf24', '#fef08a');
+
+      // Radiant Golden Mayan Sun-Calendar Medallion Finial
+      ctx.fillStyle = '#fbbf24';
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(midX, baseY - 51, 5.2, 0, Math.PI * 2);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = active ? '#34d399' : '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(midX, baseY - 51, 2.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Carved Kukulcán Stone Torch Brazier on Right Side with Flickering Ceremonial Flame!
+      const bx2 = cx + 52;
+      ctx.fillStyle = '#8a826e';
+      ctx.strokeStyle = '#332f24';
+      ctx.lineWidth = 1.2;
+      ctx.fillRect(bx2 - 4, baseY - 18, 8, 18);
+      ctx.strokeRect(bx2 - 4, baseY - 18, 8, 18);
+      ctx.beginPath();
+      ctx.moveTo(bx2 - 7, baseY - 24);
+      ctx.lineTo(bx2 + 7, baseY - 24);
+      ctx.lineTo(bx2 + 4.5, baseY - 18);
+      ctx.lineTo(bx2 - 4.5, baseY - 18);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      const flH = 9 + Math.sin(time * 10.5 + cx) * 2.2;
+      const flGlow = ctx.createRadialGradient(bx2, baseY - 28, 1, bx2, baseY - 28, 13);
+      flGlow.addColorStop(0, active ? 'rgba(52, 211, 153, 0.55)' : 'rgba(251, 191, 36, 0.45)');
+      flGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = flGlow;
+      ctx.beginPath(); ctx.arc(bx2, baseY - 28, 13, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = active ? '#10b981' : '#f97316';
+      ctx.beginPath();
+      ctx.moveTo(bx2 - 4.5, baseY - 24);
+      ctx.quadraticCurveTo(bx2, baseY - 24 - flH * 1.3, bx2 + 4.5, baseY - 24);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#fef9c3';
+      ctx.beginPath();
+      ctx.moveTo(bx2 - 2.2, baseY - 24);
+      ctx.quadraticCurveTo(bx2, baseY - 24 - flH * 0.8, bx2 + 2.2, baseY - 24);
+      ctx.closePath();
+      ctx.fill();
+
+      drawSavePawBeacon(ctx, midX, baseY - 68, time, active);
+
+    } else if (resolvedTheme === 'greece') {
+      // =====================================================================
+      // STAGE 25: SANTORINI COBALT-DOMED CYCLADIC CHAPEL & AMPHORA CAT SANCTUARY
+      // =====================================================================
+      // Pentelic marble stepped plinth
+      ctx.fillStyle = '#f8fafc';
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1.2;
+      ctx.fillRect(midX - 23, baseY - 4, 46, 4);
+      ctx.strokeRect(midX - 23, baseY - 4, 46, 4);
+
+      // Sunlit Whitewashed Cycladic Vaulted Sanctuary Walls
+      const wG = ctx.createLinearGradient(midX - 20, baseY - 31, midX + 20, baseY - 4);
+      wG.addColorStop(0, '#ffffff');
+      wG.addColorStop(0.65, '#f1f5f9');
+      wG.addColorStop(1, '#cbd5e1');
+      ctx.fillStyle = wG;
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1.45;
+      ctx.beginPath();
+      ctx.roundRect(midX - 20, baseY - 30, 40, 26, [6, 6, 0, 0]);
+      ctx.fill();
+      ctx.stroke();
+
+      // Aegean Cobalt-Blue & Gold Greek-Key Cornice Band
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(midX - 19, baseY - 28, 38, 4.2);
+      ctx.fillStyle = '#fbbf24';
+      for (let kx = midX - 16; kx <= midX + 12; kx += 7) {
+        ctx.fillRect(kx, baseY - 27, 4, 2.2);
+      }
+
+      // 3D Cobalt-Sapphire Santorini Cupola Dome with Specular Sunlight Highlight
+      const dmG = ctx.createRadialGradient(midX - 6, baseY - 42, 2, midX, baseY - 31, 19);
+      dmG.addColorStop(0, '#bae6fd');
+      dmG.addColorStop(0.32, '#0284c7');
+      dmG.addColorStop(0.78, '#1d4ed8');
+      dmG.addColorStop(1, '#1e3a8a');
+      ctx.fillStyle = dmG;
+      ctx.strokeStyle = '#1e3a8a';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(midX, baseY - 30, 16.5, Math.PI, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Sculpted Marble & Gold Santorini Cat-Ears Crest + Golden Finial Orb on Dome!
+      drawCatEarsCrest(ctx, midX, baseY - 43, 9.5, 7.5, '#ffffff', '#0284c7', active ? '#34d399' : '#38bdf8');
+      ctx.fillStyle = '#fbbf24';
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.arc(midX, baseY - 49, 2.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Side Cycladic Arched Bell-Gable (Kampanario) on Left with Gently Swinging Golden Bell!
+      const bfx = midX - 21;
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(bfx - 5, baseY - 42, 10, 16, [5, 5, 0, 0]);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#0c4a6e';
+      ctx.beginPath();
+      ctx.arc(bfx, baseY - 35, 2.8, Math.PI, 0);
+      ctx.lineTo(bfx + 2.8, baseY - 29);
+      ctx.lineTo(bfx - 2.8, baseY - 29);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(bfx + Math.sin(time * 3.2) * 0.8, baseY - 32, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Arched Aegean Sanctuary Doorway + Royal Sapphire/Emerald Cushion
+      drawSanctuaryDoorAndCushion(ctx, midX, baseY - 3, 15, 19, '#0284c7', '#10b981', '#0369a1', active);
+
+      // Classical Terracotta Greek Amphora + Lush Magenta Bougainvillea Blooms on Right!
+      const ax = midX + 25;
+      ctx.fillStyle = '#c2410c';
+      ctx.strokeStyle = '#7c2d12';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.ellipse(ax, baseY - 7.5, 4.8, 6.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillRect(ax - 2.5, baseY - 16, 5, 3.5);
+      // Cascading magenta bougainvillea blossoms
+      for (const [bx0, by0, col] of [[-2, -18, '#db2777'], [2.5, -19, '#ec4899'], [0, -22, '#f472b6']]) {
+        ctx.fillStyle = col;
+        ctx.beginPath(); ctx.arc(ax + bx0, baseY + by0, 2.6, 0, Math.PI * 2); ctx.fill();
+      }
+
+      drawSavePawBeacon(ctx, midX, baseY - 64, time, active);
+    }
+
+    ctx.restore();
+  }
+
+  function drawMarrakechBabGate(ctx, g, sx, sy, time, goalLabel) {
+    // Imperial Bab Mansour Monumental Horseshoe-Arch Gateway (Museum-Grade Bastions, Marble Columns,
+    // Polychrome Khatam Zellij, Carved Sebka Reliefs & Royal Courtyard Vista — Zero Dr.MAX Branding!)
+    const cx = sx + g.w * 0.5;
+    const baseY = sy + g.h;
+    const mainW = 166;
+    const bastW = 38;
+    const totalW = mainW + bastW * 2;
+    const gateH = 236;
+    const topY = baseY - gateH;
+
+    ctx.save();
+    // 1. Warm Ceremonial Sunset Aura & Grounded Sandstone Plinth Steps
+    const aura = ctx.createRadialGradient(cx, baseY - 88, 18, cx, baseY - 88, 175);
+    aura.addColorStop(0.00, 'rgba(254, 240, 138, 0.50)');
+    aura.addColorStop(0.55, 'rgba(245, 158, 11, 0.18)');
+    aura.addColorStop(1.00, 'rgba(245, 158, 11, 0)');
+    ctx.fillStyle = aura;
+    ctx.beginPath(); ctx.arc(cx, baseY - 88, 175, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = 'rgba(42, 14, 8, 0.36)';
+    ctx.beginPath(); ctx.ellipse(cx, baseY + 2, totalW * 0.54, 8, 0, 0, Math.PI * 2); ctx.fill();
+
+    // 2. Central Imperial Gateway Facade + Twin Flanking Projecting Square Bastions (like real Bab Mansour!)
+    const stoneG = ctx.createLinearGradient(cx - mainW * 0.5, topY, cx + mainW * 0.5, baseY);
+    stoneG.addColorStop(0.00, '#e58e54');
+    stoneG.addColorStop(0.50, '#c25e36');
+    stoneG.addColorStop(1.00, '#85351b');
+    ctx.fillStyle = stoneG;
+    ctx.strokeStyle = '#3f170c';
+    ctx.lineWidth = 2.0;
+    ctx.fillRect(cx - mainW * 0.5, topY, mainW, gateH);
+    ctx.strokeRect(cx - mainW * 0.5, topY, mainW, gateH);
+
+    // Flanking Projecting Bastion Towers supported on Slender White-Marble Corinthian-Moorish Columns!
+    for (const side of [-1, 1]) {
+      const bx = side < 0 ? (cx - mainW * 0.5 - bastW + 4) : (cx + mainW * 0.5 - 4);
+      const bastTop = topY + 10;
+      const bastBot = baseY - 64;
+      const bG = ctx.createLinearGradient(bx, bastTop, bx + bastW, bastBot);
+      bG.addColorStop(0, '#ec9a5e'); bG.addColorStop(0.55, '#c9653b'); bG.addColorStop(1, '#8c391e');
+      ctx.fillStyle = bG;
+      ctx.strokeStyle = '#3f170c';
+      ctx.lineWidth = 1.8;
+      ctx.fillRect(bx, bastTop, bastW, bastBot - bastTop);
+      ctx.strokeRect(bx, bastTop, bastW, bastBot - bastTop);
+
+      // Emerald & Gold Zellij band + Carved Sebka Diamond Lattice on each Bastion Tower!
+      ctx.fillStyle = '#065f46';
+      ctx.fillRect(bx + 3, bastTop + 10, bastW - 6, 12);
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.arc(bx + bastW * 0.5, bastTop + 16, 3.0, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = '#0f766e';
+      ctx.strokeStyle = '#fde68a';
+      ctx.lineWidth = 1.1;
+      ctx.fillRect(bx + 5, bastTop + 30, bastW - 10, 74);
+      ctx.strokeRect(bx + 5, bastTop + 30, bastW - 10, 74);
+      ctx.strokeStyle = 'rgba(254, 243, 199, 0.62)';
+      ctx.lineWidth = 1.0;
+      for (let sy2 = bastTop + 42; sy2 <= bastTop + 92; sy2 += 16) {
+        const bcx = bx + bastW * 0.5;
+        ctx.beginPath();
+        ctx.moveTo(bcx, sy2 - 7); ctx.lineTo(bcx + 8, sy2);
+        ctx.lineTo(bcx, sy2 + 7); ctx.lineTo(bcx - 8, sy2);
+        ctx.closePath(); ctx.stroke();
+      }
+
+      // Twin Slender White-Marble Columns supporting the Bastion Loggia at Base!
+      ctx.fillStyle = '#2b0f07';
+      ctx.fillRect(bx + 4, bastBot, bastW - 8, 64);
+      for (const colX of [bx + 7, bx + bastW - 7]) {
+        const mG = ctx.createLinearGradient(colX - 3.5, bastBot, colX + 3.5, bastBot);
+        mG.addColorStop(0, '#cbd5e1'); mG.addColorStop(0.45, '#ffffff'); mG.addColorStop(1, '#94a3b8');
+        ctx.fillStyle = mG; ctx.strokeStyle = '#475569'; ctx.lineWidth = 0.9;
+        ctx.fillRect(colX - 3, bastBot + 8, 6, 50); ctx.strokeRect(colX - 3, bastBot + 8, 6, 50);
+        // Carved Moorish marble capital & base plinth
+        ctx.fillStyle = '#fef3c7'; ctx.strokeStyle = '#78350f';
+        ctx.fillRect(colX - 5, bastBot + 2, 10, 6); ctx.strokeRect(colX - 5, bastBot + 2, 10, 6);
+        ctx.fillRect(colX - 5, baseY - 6, 10, 6); ctx.strokeRect(colX - 5, baseY - 6, 10, 6);
+      }
+      // Small horseshoe arch between the marble columns
+      ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(bx + bastW * 0.5, bastBot + 16, 8, Math.PI, 0); ctx.stroke();
+
+      // Stepped Shurfa Merlons crowning each Bastion
+      ctx.fillStyle = '#df7c48'; ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 1.0;
+      for (let mx = bx + 2; mx <= bx + bastW - 16; mx += 17) {
+        ctx.beginPath();
+        ctx.moveTo(mx, bastTop); ctx.lineTo(mx, bastTop - 5); ctx.lineTo(mx + 4, bastTop - 5);
+        ctx.lineTo(mx + 7.5, bastTop - 11); ctx.lineTo(mx + 11, bastTop - 5); ctx.lineTo(mx + 15, bastTop - 5);
+        ctx.lineTo(mx + 15, bastTop); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+    }
+
+    // 3. Stepped Moorish Shurfa Crenellations Crowning the Central Gateway
+    ctx.fillStyle = '#df7c48'; ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 1.1;
+    for (let mx = cx - mainW * 0.5 + 4; mx <= cx + mainW * 0.5 - 18; mx += 18) {
+      ctx.beginPath();
+      ctx.moveTo(mx, topY);
+      ctx.lineTo(mx, topY - 6); ctx.lineTo(mx + 4, topY - 6);
+      ctx.lineTo(mx + 8, topY - 14);
+      ctx.lineTo(mx + 12, topY - 6); ctx.lineTo(mx + 16, topY - 6);
+      ctx.lineTo(mx + 16, topY);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+    }
+
+    // 4. Imperial Emerald, Turquoise & Gold 8-Pointed Khatam Star Zellij Attic Frieze (Zero Dr.MAX!)
+    const fX = cx - mainW * 0.5 + 8;
+    const fW = mainW - 16;
+    ctx.fillStyle = '#064e3b'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+    ctx.fillRect(fX, topY + 12, fW, 28);
+    ctx.strokeRect(fX, topY + 12, fW, 28);
+    for (let zx = fX + 15, k = 0; zx <= fX + fW - 14; zx += 20, k++) {
+      const zy = topY + 26;
+      ctx.fillStyle = '#fef3c7';
+      ctx.fillRect(zx - 5, zy - 5, 10, 10);
+      ctx.save(); ctx.translate(zx, zy); ctx.rotate(Math.PI * 0.25); ctx.fillRect(-5, -5, 10, 10); ctx.restore();
+      ctx.fillStyle = (k % 2 === 0) ? '#14b8a6' : '#2563eb';
+      ctx.beginPath(); ctx.arc(zx, zy, 3.0, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // 5. Carved Darj-wa-Ktaf / Sebka Interlacing Relief & Emerald Zellij Alfiz Spandrels above Portal!
+    ctx.fillStyle = '#0f766e'; ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 1.6;
+    ctx.fillRect(cx - 72, topY + 48, 144, 52);
+    ctx.strokeRect(cx - 72, topY + 48, 144, 52);
+    ctx.strokeStyle = 'rgba(254, 243, 199, 0.65)'; ctx.lineWidth = 1.2;
+    for (let sx2 = cx - 64; sx2 <= cx + 48; sx2 += 16) {
+      ctx.beginPath();
+      ctx.moveTo(sx2, topY + 74); ctx.lineTo(sx2 + 8, topY + 54);
+      ctx.lineTo(sx2 + 16, topY + 74); ctx.lineTo(sx2 + 8, topY + 94);
+      ctx.closePath(); ctx.stroke();
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.arc(sx2 + 8, topY + 74, 1.8, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Emerald & Gold Arabesque Alfiz Frame surrounding the Grand Horseshoe Arch
+    ctx.fillStyle = '#065f46'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+    ctx.fillRect(cx - 66, baseY - 130, 132, 130);
+    ctx.strokeRect(cx - 66, baseY - 130, 132, 130);
+    for (const sx0 of [cx - 52, cx + 52]) {
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 1.0;
+      ctx.beginPath(); ctx.arc(sx0, baseY - 114, 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#0d9488';
+      ctx.beginPath(); ctx.arc(sx0, baseY - 114, 3.5, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // 6. Grand Multifoil Horseshoe Portal Arch + Sunlit Royal Riad Courtyard Vista Inside!
+    const archSpringY = baseY - 74;
+    const archR = 50;
+    const archGlow = ctx.createRadialGradient(cx, baseY - 58, 8, cx, baseY - 58, 82);
+    archGlow.addColorStop(0.00, '#fffbeb');
+    archGlow.addColorStop(0.42, '#fde047');
+    archGlow.addColorStop(0.78, '#d97706');
+    archGlow.addColorStop(1.00, '#5c2410');
+    ctx.fillStyle = archGlow;
+    ctx.beginPath();
+    ctx.arc(cx, archSpringY, archR, Math.PI * 0.85, Math.PI * 0.15, false);
+    ctx.lineTo(cx + 44, baseY);
+    ctx.lineTo(cx - 44, baseY);
+    ctx.closePath();
+    ctx.fill();
+
+    // Subtle silhouetted date-palm fronds & palace courtyard fountain visible inside the golden portal!
+    ctx.save();
+    ctx.clip();
+    ctx.strokeStyle = 'rgba(146, 64, 14, 0.32)';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.moveTo(cx + 12, baseY); ctx.quadraticCurveTo(cx + 10, baseY - 48, cx + 4, baseY - 86); ctx.stroke();
+    for (let f = 0; f < 5; f++) {
+      const a = -Math.PI * 0.9 + f * 0.45;
+      ctx.beginPath(); ctx.moveTo(cx + 4, baseY - 86); ctx.quadraticCurveTo(cx + 4 + Math.cos(a) * 14, baseY - 92, cx + 4 + Math.cos(a) * 24, baseY - 80 + Math.sin(a) * 12); ctx.stroke();
+    }
+    ctx.restore();
+
+    // Alternating Cream & Crimson-Terracotta Voussoirs + Scalloped Multifoil Lobes around Portal Rim
+    for (let v = 0; v <= 14; v++) {
+      const a0 = Math.PI * 0.86 + (v / 15) * (Math.PI * 1.28);
+      const a1 = Math.PI * 0.86 + ((v + 1) / 15) * (Math.PI * 1.28);
+      ctx.strokeStyle = (v % 2 === 0) ? '#fef3c7' : '#b91c1c';
+      ctx.lineWidth = 5.2;
+      ctx.beginPath(); ctx.arc(cx, archSpringY, archR + 2.5, a0, a1); ctx.stroke();
+    }
+    ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.arc(cx, archSpringY, archR - 0.5, Math.PI * 0.85, Math.PI * 0.15, false);
+    ctx.stroke();
+
+    // 7. Ajar Carved Atlas Cedarwood Palace Doors with Brass Bosses & Circular Moroccan Ring Knockers!
+    for (const [dx, dw, kSide] of [[cx - 44, 18, 1], [cx + 26, 18, -1]]) {
+      const dG = ctx.createLinearGradient(dx, baseY - 76, dx + dw, baseY);
+      dG.addColorStop(0, '#78350f'); dG.addColorStop(0.5, '#5c2410'); dG.addColorStop(1, '#361307');
+      ctx.fillStyle = dG; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.4;
+      ctx.fillRect(dx, baseY - 76, dw, 76); ctx.strokeRect(dx, baseY - 76, dw, 76);
+      // Brass dome studs
+      ctx.fillStyle = '#fde047';
+      for (let dy = baseY - 66; dy <= baseY - 12; dy += 14) {
+        ctx.beginPath();
+        ctx.arc(dx + 5, dy, 1.5, 0, Math.PI * 2);
+        ctx.arc(dx + dw - 5, dy, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Circular brass door knocker (Khamsa ring)
+      const kx0 = dx + (kSide > 0 ? dw - 5 : 5);
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(kx0, baseY - 38, 3.6, 0, Math.PI * 2); ctx.stroke();
+    }
+
+    // 8. Twin Flanking Pierced-Brass Palace Fanous Chandeliers swaying gently
+    for (const lx of [cx - 88, cx + 88]) {
+      const sw = Math.sin(time * 2.6 + lx) * 2.4;
+      ctx.strokeStyle = '#451a03'; ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(lx + (lx < cx ? 6 : -6), topY + 114);
+      ctx.lineTo(lx, topY + 114);
+      ctx.lineTo(lx + sw, topY + 130);
+      ctx.stroke();
+      const lGlow = ctx.createRadialGradient(lx + sw, topY + 140, 2, lx + sw, topY + 140, 24);
+      lGlow.addColorStop(0, 'rgba(254, 240, 138, 0.65)');
+      lGlow.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      ctx.fillStyle = lGlow;
+      ctx.beginPath(); ctx.arc(lx + sw, topY + 140, 24, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = '#fde047'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(lx + sw, topY + 128);
+      ctx.lineTo(lx + sw + 9, topY + 138);
+      ctx.lineTo(lx + sw + 6, topY + 150);
+      ctx.lineTo(lx + sw, topY + 156);
+      ctx.lineTo(lx + sw - 6, topY + 150);
+      ctx.lineTo(lx + sw - 9, topY + 138);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+    }
+
+    // Floating golden ceremonial dust motes rising through Bab Mansour
+    ctx.fillStyle = '#fef08a';
+    for (let e = 0; e < 7; e++) {
+      const rise = ((time * 34 + e * 21) % 94);
+      ctx.beginPath();
+      ctx.arc(cx + Math.sin(time * 4.5 + e * 1.9) * 20, baseY - 12 - rise, 2.0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 9. Royal Moroccan Emerald & Gold Ceremonial Banner Sign (Zero Dr.MAX text!)
+    const bob = Math.sin(time * 3.0) * 3;
+    const isEn = window.Game.I18n && window.Game.I18n.isEn();
+    const labelText = isEn ? 'BAB MANSOUR • MARRAKECH' : (goalLabel || 'باب منصور • مراكش');
+    ctx.font = 'bold 12.5px "Cairo", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    const tw = Math.max(178, ctx.measureText(labelText).width + 34);
+    ctx.fillStyle = 'rgba(6, 59, 44, 0.94)';
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 2.0;
+    ctx.beginPath(); ctx.roundRect(cx - tw * 0.5, topY - 48 + bob, tw, 27, 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fef3c7';
+    ctx.fillText(labelText, cx, topY - 30 + bob);
+    ctx.restore();
+  }
+
+  // =========================================================================
+  // 18. STAGE 24: MAYAN JUNGLE TEMPLES & CHICHÉN ITZÁ (معابد المايا)
+  //     (Organic Tropical Sunset Clouds, Monumental 9-Tier El Castillo Pyramid,
+  //      El Caracol Observatory, 1-in-4 Open Jungle Cenote & Waterfall Vistas,
+  //      Moss-Draped Carved Limestone Temples & Kukulcán Sanctuary Gate!)
+  // =========================================================================
+  function drawMayaSkyAndHorizon(ctx, camX, w, h, time) {
+    ensureTextures(ctx);
+
+    // 1. Rich Tropical Yucatán Golden-Amber, Cinnabar & Emerald-Teal Sunset Sky
+    const sky = ctx.createLinearGradient(0, 0, 0, h * 0.80);
+    sky.addColorStop(0.0, '#091b24');
+    sky.addColorStop(0.22, '#163c3e');
+    sky.addColorStop(0.46, '#6e3b2e');
+    sky.addColorStop(0.70, '#c86428');
+    sky.addColorStop(0.88, '#f09f32');
+    sky.addColorStop(1.0, '#fde68a');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, h);
+
+    // 2. Warm Tropical Sunset Disc, Atmospheric Corona & Diagonal Sunbeams (God-Rays)
+    const sunX = w * 0.70 - ((camX * 0.012) % 240);
+    const sunY = h * 0.35;
+    const sunGlow = ctx.createRadialGradient(sunX, sunY, 14, sunX, sunY, 265);
+    sunGlow.addColorStop(0, 'rgba(255, 252, 230, 0.96)');
+    sunGlow.addColorStop(0.24, 'rgba(253, 224, 71, 0.52)');
+    sunGlow.addColorStop(0.58, 'rgba(234, 88, 12, 0.18)');
+    sunGlow.addColorStop(1, 'rgba(234, 88, 12, 0)');
+    ctx.fillStyle = sunGlow;
+    ctx.beginPath(); ctx.arc(sunX, sunY, 265, 0, Math.PI * 2); ctx.fill();
+
+    // Soft diagonal golden crepuscular rays fanning across the rainforest mist
+    ctx.save();
+    for (const [ang, spread, alpha] of [[-0.58, 36, 0.085], [-0.26, 44, 0.105], [0.10, 40, 0.095], [0.44, 34, 0.080]]) {
+      const rxEnd = sunX + Math.sin(ang) * 420;
+      const ryEnd = h * 0.76;
+      const rayG = ctx.createLinearGradient(sunX, sunY, rxEnd, ryEnd);
+      rayG.addColorStop(0, `rgba(254, 249, 195, ${alpha})`);
+      rayG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      ctx.fillStyle = rayG;
+      ctx.beginPath();
+      ctx.moveTo(sunX - 10, sunY);
+      ctx.lineTo(sunX + 10, sunY);
+      ctx.lineTo(rxEnd + spread, ryEnd);
+      ctx.lineTo(rxEnd - spread, ryEnd);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+
+    ctx.fillStyle = '#fffbeb';
+    ctx.beginPath(); ctx.arc(sunX, sunY, 35, 0, Math.PI * 2); ctx.fill();
+
+    // 3. Organic Tropical Cumulus Sunset Clouds with Lit Golden Underbellies
+    const cSpan = 1920;
+    const cDefs = [
+      { ox: 80,   y: 74,  sc: 1.15, sp: 4.0, puffs: [[-66, 8, 42, 13], [-18, -7, 54, 21], [38, -10, 58, 24], [92, 4, 44, 15]] },
+      { ox: 420,  y: 138, sc: 0.90, sp: 5.6, puffs: [[-50, 6, 36, 11], [2, -6, 48, 18], [52, 2, 40, 14]] },
+      { ox: 760,  y: 66,  sc: 1.28, sp: 3.4, puffs: [[-78, 9, 44, 13], [-24, -6, 56, 21], [28, -13, 62, 25], [84, -4, 52, 19], [134, 7, 36, 12]] },
+      { ox: 1140, y: 122, sc: 0.96, sp: 5.2, puffs: [[-54, 7, 38, 12], [-4, -8, 48, 18], [48, -2, 42, 15], [88, 6, 30, 10]] },
+      { ox: 1520, y: 84,  sc: 1.18, sp: 4.5, puffs: [[-68, 8, 44, 14], [-14, -9, 56, 22], [40, -5, 50, 18], [90, 5, 40, 13]] },
+    ];
+    for (const cl of cDefs) {
+      const cx = ((cl.ox - camX * 0.022 - time * cl.sp) % cSpan + cSpan) % cSpan - 240;
+      if (cx < -260 || cx > w + 260) continue;
+      const sc = cl.sc;
+      const sunProx = Math.max(0, 1 - Math.hypot(cx - sunX, cl.y - sunY) / 520);
+      ctx.fillStyle = `rgba(255, 224, 150, ${(0.34 + sunProx * 0.42).toFixed(3)})`;
+      ctx.beginPath();
+      for (const [px2, py2, rx, ry] of cl.puffs) {
+        ctx.moveTo(cx + px2 * sc + rx * sc * 1.03, cl.y + (py2 + 5) * sc);
+        ctx.ellipse(cx + px2 * sc, cl.y + (py2 + 5) * sc, rx * sc * 1.03, ry * sc * 0.80, 0, 0, Math.PI * 2);
+      }
+      ctx.fill();
+      const bG = ctx.createLinearGradient(cx, cl.y - 30 * sc, cx, cl.y + 18 * sc);
+      bG.addColorStop(0, 'rgba(24, 52, 58, 0.46)');
+      bG.addColorStop(0.55, 'rgba(156, 78, 66, 0.40)');
+      bG.addColorStop(1, `rgba(254, 215, 140, ${(0.45 + sunProx * 0.28).toFixed(3)})`);
+      ctx.fillStyle = bG;
+      ctx.beginPath();
+      for (const [px2, py2, rx, ry] of cl.puffs) {
+        ctx.moveTo(cx + px2 * sc + rx * sc, cl.y + py2 * sc);
+        ctx.ellipse(cx + px2 * sc, cl.y + py2 * sc, rx * sc, ry * sc, 0, 0, Math.PI * 2);
+      }
+      ctx.fill();
+    }
+
+    // Distant Soaring Tropical Bird Silhouettes (Macaws / Quetzals high in the sunset sky)
+    ctx.strokeStyle = 'rgba(28, 42, 38, 0.55)';
+    ctx.lineWidth = 1.6;
+    for (let bi = 0; bi < 5; bi++) {
+      const bx2 = ((310 + bi * 270 - camX * 0.03 - time * (15 + bi * 2)) % (w + 240) + (w + 240)) % (w + 240) - 120;
+      const by2 = 112 + (bi % 3) * 28 + Math.sin(time * 2.4 + bi) * 5;
+      const fl = Math.sin(time * 7 + bi * 1.4) * 3.5;
+      ctx.beginPath();
+      ctx.moveTo(bx2 - 8, by2 - fl);
+      ctx.quadraticCurveTo(bx2 - 3, by2 - 4, bx2, by2);
+      ctx.quadraticCurveTo(bx2 + 3, by2 - 4, bx2 + 8, by2 - fl);
+      ctx.stroke();
+    }
+
+    // 4. Two Smooth Organic Mist-Veiled Yucatán Rainforest Mountain Ranges (Zero jagged triangles!)
+    for (let layer = 0; layer < 2; layer++) {
+      const mScroll = camX * (layer === 0 ? 0.042 : 0.075);
+      const mSpan = 1440;
+      const mOff = -((mScroll % mSpan) + mSpan) % mSpan;
+      const mG = ctx.createLinearGradient(0, h * (layer === 0 ? 0.38 : 0.48), 0, h * 0.76);
+      if (layer === 0) {
+        mG.addColorStop(0, 'rgba(46, 84, 74, 0.85)');
+        mG.addColorStop(1, 'rgba(24, 52, 46, 0.92)');
+      } else {
+        mG.addColorStop(0, '#1e4038');
+        mG.addColorStop(0.6, '#142f2a');
+        mG.addColorStop(1, '#0b1e1b');
+      }
+      ctx.fillStyle = mG;
+      const pts = layer === 0
+        ? [[0, 0.55], [180, 0.43], [360, 0.50], [580, 0.39], [820, 0.49], [1060, 0.41], [1260, 0.51], [1440, 0.55]]
+        : [[0, 0.63], [210, 0.53], [430, 0.59], [680, 0.50], [920, 0.58], [1180, 0.52], [1440, 0.63]];
+      ctx.beginPath();
+      ctx.moveTo(-200, h);
+      let prevX = null, prevY = null;
+      for (let rep = -1; rep <= 2; rep++) {
+        for (let k = 0; k < pts.length; k++) {
+          if (rep > -1 && k === 0) continue;
+          const nx = mOff + rep * mSpan + pts[k][0];
+          const ny = h * pts[k][1];
+          if (prevX === null) ctx.lineTo(nx, ny);
+          else ctx.quadraticCurveTo((prevX + nx) * 0.5, prevY, (prevX + nx) * 0.5, (prevY + ny) * 0.5);
+          prevX = nx; prevY = ny;
+        }
+      }
+      ctx.lineTo(w + 240, h);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Atmospheric golden mist between mountain layers and the Chichén Itzá skyline
+    const farMist = ctx.createLinearGradient(0, h * 0.50, 0, h * 0.74);
+    farMist.addColorStop(0, 'rgba(253, 224, 140, 0)');
+    farMist.addColorStop(1, 'rgba(253, 224, 140, 0.24)');
+    ctx.fillStyle = farMist;
+    ctx.fillRect(0, h * 0.50, w, h * 0.24);
+
+    // 5. Monumental 3D Two-Point Perspective EL CASTILLO (Pyramid of Kukulcán), TIKAL TEMPLE I & EL CARACOL Observatory!
+    const pScroll = camX * 0.12;
+    const pPeriod = 1320;
+    const baseY = h * 0.73;
+    const pFirst = Math.floor(pScroll / pPeriod) - 1;
+    for (let pi = pFirst; pi <= pFirst + 2; pi++) {
+      const px = pi * pPeriod - pScroll + 560;
+      if (px < -460 || px > w + 460) continue;
+
+      // Helper: Monumental 3D Sun-Drenched Mayan Limestone & Atmospheric Rainforest-Shadow Shader (Smooth Architectural Realism — Zero Noisy Block Patchwork!)
+      const paintWeatheredStone = (x0, y0, w0, h0, shaded, seed0) => {
+        const baseG = ctx.createLinearGradient(x0, y0, x0 + w0 * 0.35, y0 + h0);
+        if (shaded) {
+          baseG.addColorStop(0.0, '#6a7267');
+          baseG.addColorStop(0.52, '#505951');
+          baseG.addColorStop(1.0, '#39423c');
+        } else {
+          baseG.addColorStop(0.0, '#ece1c6');
+          baseG.addColorStop(0.48, '#d4c7aa');
+          baseG.addColorStop(1.0, '#afa286');
+        }
+        ctx.fillStyle = baseG;
+        ctx.fillRect(x0, y0, w0, h0);
+
+        // Subtle low-contrast ashlar horizontal courses & fine vertical stone joints
+        const rowH = Math.max(5.5, h0 / 3);
+        const blockW = 15;
+        let rIdx = 0;
+        for (let yy = y0 + rowH; yy < y0 + h0 - 1.2; yy += rowH) {
+          ctx.fillStyle = shaded ? 'rgba(20, 26, 22, 0.22)' : 'rgba(68, 58, 42, 0.16)';
+          ctx.fillRect(x0, yy - 0.8, w0, 0.85);
+          ctx.fillStyle = shaded ? 'rgba(186, 198, 184, 0.08)' : 'rgba(255, 250, 236, 0.24)';
+          ctx.fillRect(x0, yy, w0, 0.75);
+          const off = (rIdx % 2) * (blockW * 0.5);
+          ctx.fillStyle = shaded ? 'rgba(20, 26, 22, 0.14)' : 'rgba(68, 58, 42, 0.11)';
+          for (let xx = x0 + blockW - off; xx < x0 + w0 - 2; xx += blockW) {
+            ctx.fillRect(xx, yy - rowH + 0.8, 0.75, rowH - 1.2);
+          }
+          rIdx++;
+        }
+
+        // Soft organic tropical rainwater & lichen patina washes (smooth vertical gradients, not hard bars)
+        for (let sx = x0 + 9; sx < x0 + w0 - 7; sx += 23) {
+          const sh = Math.abs((Math.floor(sx) * 29 + seed0 * 11) % 7);
+          if (sh < 3) {
+            const stH = h0 * (0.48 + sh * 0.16);
+            const stG = ctx.createLinearGradient(sx, y0, sx, y0 + stH);
+            stG.addColorStop(0, shaded ? 'rgba(22, 32, 26, 0.24)' : 'rgba(64, 68, 50, 0.18)');
+            stG.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = stG;
+            ctx.fillRect(sx - 2, y0, 5 + (sh % 2) * 3, stH);
+          }
+        }
+      };
+
+      // A. MONUMENTAL 3D TIKAL TEMPLE I (Temple of the Great Jaguar — Steep 9-Tier Petén Limestone Pyramid, Inset Apron Moldings, Projecting Stairway & Carved Royal Crestería!)
+      const tkX = px - 390;
+      if (tkX > -380 && tkX < w + 380) {
+        ctx.save();
+        // Soft warm golden-hour atmospheric halo behind Temple I silhouette
+        const tkGlow = ctx.createRadialGradient(tkX - 28, baseY - 170, 20, tkX - 28, baseY - 150, 210);
+        tkGlow.addColorStop(0, 'rgba(254, 235, 175, 0.22)');
+        tkGlow.addColorStop(1, 'rgba(254, 235, 175, 0)');
+        ctx.fillStyle = tkGlow;
+        ctx.beginPath(); ctx.arc(tkX - 28, baseY - 150, 210, 0, Math.PI * 2); ctx.fill();
+
+        const tkTiers = 9;
+        const tkTierH = 25;
+        const tkTopY = baseY - tkTiers * tkTierH;
+
+        for (let tt = 0; tt < tkTiers; tt++) {
+          const tu = tt / (tkTiers - 1);
+          const tFrontW = 168 - (168 - 64) * tu;
+          const tSideW = 80 - (80 - 31) * tu;
+          const tty = baseY - (tt + 1) * tkTierH;
+          const pDrop = (1 - tu) * 4.5 + 1.5;
+
+          // 1. Sunlit Front-Left Petén Limestone Facet with Classic Petén Overhanging Apron Molding
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(tkX - tFrontW - 4, tty + tkTierH);
+          ctx.lineTo(tkX - tFrontW + 4.5, tty);
+          ctx.lineTo(tkX, tty - 1.5);
+          ctx.lineTo(tkX, tty + tkTierH);
+          ctx.closePath();
+          ctx.clip();
+          paintWeatheredStone(tkX - tFrontW - 4, tty - 2, tFrontW + 5, tkTierH + 3, false, tt * 7 + pi);
+          // Overhanging Petén apron molding shadow band across middle of each terrace
+          ctx.fillStyle = 'rgba(38, 33, 24, 0.28)';
+          ctx.fillRect(tkX - tFrontW, tty + tkTierH * 0.56, tFrontW, 3.2);
+          ctx.fillStyle = 'rgba(255, 248, 228, 0.30)';
+          ctx.fillRect(tkX - tFrontW + 3, tty + 1.5, tFrontW - 4, 2.2);
+          // Inset corner vertical shadow recess (signature Tikal architecture!)
+          ctx.fillStyle = 'rgba(42, 38, 28, 0.24)';
+          ctx.fillRect(tkX - 9, tty, 5, tkTierH);
+          ctx.restore();
+
+          ctx.strokeStyle = 'rgba(48, 42, 32, 0.62)'; ctx.lineWidth = 1.05;
+          ctx.beginPath();
+          ctx.moveTo(tkX - tFrontW - 4, tty + tkTierH);
+          ctx.lineTo(tkX - tFrontW + 4.5, tty);
+          ctx.lineTo(tkX, tty - 1.5);
+          ctx.lineTo(tkX, tty + tkTierH);
+          ctx.closePath(); ctx.stroke();
+
+          // Golden-hour sunlit terrace top rim
+          ctx.fillStyle = 'rgba(255, 249, 230, 0.58)';
+          ctx.fillRect(tkX - tFrontW + 5, tty, tFrontW - 5, 1.8);
+
+          // 2. Deeply Shaded 3D Right Rainforest-Facing Facet
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(tkX, tty + tkTierH);
+          ctx.lineTo(tkX, tty - 1.5);
+          ctx.lineTo(tkX + tSideW - 3.5, tty + pDrop);
+          ctx.lineTo(tkX + tSideW + 3, tty + tkTierH);
+          ctx.closePath();
+          ctx.clip();
+          paintWeatheredStone(tkX, tty - 2, tSideW + 4, tkTierH + 4, true, tt * 11 + pi + 3);
+          ctx.fillStyle = 'rgba(16, 24, 20, 0.30)';
+          ctx.fillRect(tkX, tty + tkTierH * 0.58, tSideW + 2, 3.0);
+          ctx.restore();
+
+          ctx.strokeStyle = 'rgba(30, 34, 28, 0.68)'; ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.moveTo(tkX, tty + tkTierH);
+          ctx.lineTo(tkX, tty - 1.5);
+          ctx.lineTo(tkX + tSideW - 3.5, tty + pDrop);
+          ctx.lineTo(tkX + tSideW + 3, tty + tkTierH);
+          ctx.closePath(); ctx.stroke();
+
+          // Creeping jungle moss tufts along lower pyramid terraces
+          if (tt < 5) {
+            ctx.fillStyle = 'rgba(34, 84, 46, 0.68)';
+            ctx.beginPath();
+            ctx.ellipse(tkX - tFrontW + 14, tty + 2, 11, 2.6, 0.08, 0, Math.PI * 2);
+            ctx.ellipse(tkX + tSideW - 10, tty + pDrop + 2, 9, 2.3, -0.08, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        // 3. Steep Projecting Tikal Ceremonial Stairway (3D Side Wall + Cast Diagonal Shadow + Fine Sunlit Treads)
+        const tkStTopCx = tkX - 64 * 0.50;
+        const tkStBotCx = tkX - 168 * 0.50;
+        const tkStTopW = 28, tkStBotW = 64;
+        ctx.fillStyle = 'rgba(26, 24, 18, 0.42)';
+        ctx.beginPath();
+        ctx.moveTo(tkStTopCx + tkStTopW * 0.5, tkTopY);
+        ctx.lineTo(tkStTopCx + tkStTopW * 0.5 + 10, tkTopY + 7);
+        ctx.lineTo(tkStBotCx + tkStBotW * 0.5 + 20, baseY);
+        ctx.lineTo(tkStBotCx + tkStBotW * 0.5, baseY);
+        ctx.closePath(); ctx.fill();
+
+        ctx.fillStyle = '#6c695c'; ctx.strokeStyle = '#2d2a22'; ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(tkStTopCx + tkStTopW * 0.5, tkTopY);
+        ctx.lineTo(tkStTopCx + tkStTopW * 0.5 + 5.5, tkTopY + 3.5);
+        ctx.lineTo(tkStBotCx + tkStBotW * 0.5 + 9, baseY);
+        ctx.lineTo(tkStBotCx + tkStBotW * 0.5, baseY);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        const tkStG = ctx.createLinearGradient(tkStBotCx - 28, tkTopY, tkStBotCx + 28, baseY);
+        tkStG.addColorStop(0, '#ded5bc'); tkStG.addColorStop(0.55, '#c9be9f'); tkStG.addColorStop(1, '#afa487');
+        ctx.fillStyle = tkStG; ctx.strokeStyle = '#38342a'; ctx.lineWidth = 1.15;
+        ctx.beginPath();
+        ctx.moveTo(tkStTopCx - tkStTopW * 0.5, tkTopY);
+        ctx.lineTo(tkStTopCx + tkStTopW * 0.5, tkTopY);
+        ctx.lineTo(tkStBotCx + tkStBotW * 0.5, baseY);
+        ctx.lineTo(tkStBotCx - tkStBotW * 0.5, baseY);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        for (let sy = tkTopY + 3.2; sy < baseY - 1.5; sy += 3.4) {
+          const su = (sy - tkTopY) / (baseY - tkTopY);
+          const scx = tkStTopCx + (tkStBotCx - tkStTopCx) * su;
+          const shw = (tkStTopW + (tkStBotW - tkStTopW) * su) * 0.5;
+          ctx.strokeStyle = 'rgba(46, 40, 30, 0.46)'; ctx.lineWidth = 0.85;
+          ctx.beginPath(); ctx.moveTo(scx - shw + 1.5, sy); ctx.lineTo(scx + shw - 1.5, sy); ctx.stroke();
+          ctx.strokeStyle = 'rgba(255, 250, 236, 0.36)'; ctx.lineWidth = 0.6;
+          ctx.beginPath(); ctx.moveTo(scx - shw + 2, sy + 0.9); ctx.lineTo(scx + shw - 2, sy + 0.9); ctx.stroke();
+        }
+        // Sunlit stair Alfarda side-curbs
+        for (const s of [-1, 1]) {
+          ctx.strokeStyle = s < 0 ? '#f3ead2' : '#d8ceb2'; ctx.lineWidth = 2.4;
+          ctx.beginPath();
+          ctx.moveTo(tkStTopCx + s * tkStTopW * 0.5, tkTopY);
+          ctx.lineTo(tkStBotCx + s * tkStBotW * 0.5, baseY);
+          ctx.stroke();
+        }
+
+        // 4. Summit Temple Sanctuary + Towering Sculpted 3D Royal Crestería (Roof Comb)
+        const sFW = 58, sSW = 29, sH = 42, sY = tkTopY - sH;
+        ctx.save();
+        ctx.beginPath(); ctx.rect(tkX - sFW, sY, sFW, sH); ctx.clip();
+        paintWeatheredStone(tkX - sFW, sY, sFW, sH, false, 71 + pi);
+        ctx.restore();
+        ctx.strokeStyle = '#332f25'; ctx.lineWidth = 1.2;
+        ctx.strokeRect(tkX - sFW, sY, sFW, sH);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(tkX, sY); ctx.lineTo(tkX + sSW, sY + 4);
+        ctx.lineTo(tkX + sSW, tkTopY + 1); ctx.lineTo(tkX, tkTopY);
+        ctx.closePath(); ctx.clip();
+        paintWeatheredStone(tkX, sY, sSW + 2, sH + 6, true, 73 + pi);
+        ctx.restore();
+        ctx.beginPath();
+        ctx.moveTo(tkX, sY); ctx.lineTo(tkX + sSW, sY + 4);
+        ctx.lineTo(tkX + sSW, tkTopY + 1); ctx.lineTo(tkX, tkTopY);
+        ctx.closePath(); ctx.stroke();
+
+        // Carved entablature frieze above Sapodilla-lintel doorway
+        ctx.fillStyle = '#e5dcc2'; ctx.strokeStyle = '#332f25'; ctx.lineWidth = 1.05;
+        ctx.fillRect(tkX - sFW - 3, sY + 2, sFW + 5, 8); ctx.strokeRect(tkX - sFW - 3, sY + 2, sFW + 5, 8);
+        ctx.fillStyle = 'rgba(30, 26, 18, 0.42)'; ctx.fillRect(tkX - sFW, sY + 10, sFW, 3.2);
+        const dCx = tkX - sFW * 0.5;
+        ctx.fillStyle = '#151714';
+        ctx.fillRect(dCx - 8.5, sY + 18, 17, sH - 18);
+        ctx.fillStyle = '#5c4632'; // Ancient carved Sapodilla wood beam lintel
+        ctx.fillRect(dCx - 12, sY + 15, 24, 3.5);
+
+        const cTiers = [
+          { w: 48, sw: 20, h: 18, y: sY - 18 },
+          { w: 40, sw: 17, h: 16, y: sY - 34 },
+          { w: 30, sw: 13, h: 15, y: sY - 49 },
+          { w: 20, sw: 9,  h: 13, y: sY - 62 },
+        ];
+        for (let ci = 0; ci < cTiers.length; ci++) {
+          const ct = cTiers[ci];
+          const xL = tkX - sFW * 0.5 - ct.w * 0.5;
+          const xR = xL + ct.w;
+          ctx.save();
+          ctx.beginPath(); ctx.rect(xL, ct.y, ct.w, ct.h); ctx.clip();
+          paintWeatheredStone(xL, ct.y, ct.w, ct.h, false, 90 + ci * 7);
+          ctx.restore();
+          ctx.strokeStyle = '#332f25'; ctx.lineWidth = 1.05;
+          ctx.strokeRect(xL, ct.y, ct.w, ct.h);
+          // Golden rim highlight on left edge of towering roof comb
+          ctx.fillStyle = 'rgba(255, 248, 224, 0.62)';
+          ctx.fillRect(xL + 0.8, ct.y + 1, 2.0, ct.h - 2);
+
+          ctx.fillStyle = '#4c544d';
+          ctx.beginPath();
+          ctx.moveTo(xR, ct.y); ctx.lineTo(xR + ct.sw, ct.y + 3);
+          ctx.lineTo(xR + ct.sw, ct.y + ct.h + 2); ctx.lineTo(xR, ct.y + ct.h);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+
+          // Sculpted seated King Jasaw Chan K'awiil niche & openwork sky fenestrations
+          if (ci === 0) {
+            ctx.fillStyle = 'rgba(36, 32, 24, 0.55)';
+            ctx.beginPath(); ctx.roundRect(xL + ct.w * 0.5 - 8, ct.y + 3, 16, ct.h - 5, 3); ctx.fill();
+            ctx.fillStyle = '#dfd6bc';
+            ctx.beginPath(); ctx.arc(xL + ct.w * 0.5, ct.y + 7.5, 3.2, 0, Math.PI * 2); ctx.fill();
+            ctx.fillRect(xL + ct.w * 0.5 - 4.5, ct.y + 10.5, 9, 5);
+          } else if (ci < 3) {
+            ctx.fillStyle = 'rgba(253, 226, 162, 0.48)'; // Sky light shining through openwork comb slots!
+            ctx.fillRect(xL + ct.w * 0.30 - 1.4, ct.y + 3.5, 2.8, ct.h - 7);
+            ctx.fillRect(xL + ct.w * 0.70 - 1.4, ct.y + 3.5, 2.8, ct.h - 7);
+          }
+        }
+        // Lush Petén rainforest tree crowns hugging the base of Tikal Temple I
+        for (const [tx0, tr] of [[tkX - 180, 24], [tkX - 152, 19], [tkX + 76, 22], [tkX + 98, 17]]) {
+          ctx.fillStyle = '#193526';
+          ctx.beginPath(); ctx.arc(tx0, baseY - tr * 0.42, tr, Math.PI, 0); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#2b543a';
+          ctx.beginPath(); ctx.arc(tx0 - tr * 0.25, baseY - tr * 0.52, tr * 0.65, Math.PI, 0); ctx.closePath(); ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // B. MONUMENTAL 3D CHICHÉN ITZÁ EL CASTILLO (Pyramid of Kukulcán — Sun-Drenched 9-Tier Symmetry, Beveled Tablero Panels, Equinox Serpent Balustrades & Sculpted Serpent Heads!)
+      const tiers = 9;
+      const tierH = 22.5;
+      const cornerX = px + 44;
+
+      // Soft warm golden sunlight bloom behind El Castillo
+      const casGlow = ctx.createRadialGradient(cornerX - 55, baseY - 140, 24, cornerX - 55, baseY - 120, 250);
+      casGlow.addColorStop(0, 'rgba(255, 238, 182, 0.25)');
+      casGlow.addColorStop(1, 'rgba(255, 238, 182, 0)');
+      ctx.fillStyle = casGlow;
+      ctx.beginPath(); ctx.arc(cornerX - 55, baseY - 120, 250, 0, Math.PI * 2); ctx.fill();
+
+      for (let t = 0; t < tiers; t++) {
+        const u = t / (tiers - 1);
+        const frontW = 254 - (254 - 86) * u;
+        const sideW = 136 - (136 - 48) * u;
+        const ty = baseY - (t + 1) * tierH;
+        const perspDrop = (1 - u) * 5 + 2;
+
+        // 1. Sunlit Northwest Yucatán Limestone Terrace Facet (Battered Talud Slope)
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(cornerX - frontW - 4.5, ty + tierH);
+        ctx.lineTo(cornerX - frontW + 4.0, ty);
+        ctx.lineTo(cornerX, ty - 2);
+        ctx.lineTo(cornerX, ty + tierH);
+        ctx.closePath();
+        ctx.clip();
+        paintWeatheredStone(cornerX - frontW - 4.5, ty - 2, frontW + 5.5, tierH + 3, false, t * 13 + pi + 5);
+        // Subtle terrace overhang shadow under cornice
+        ctx.fillStyle = 'rgba(34, 30, 22, 0.24)';
+        ctx.fillRect(cornerX - frontW - 4, ty - 1, frontW + 5, 3.2);
+        ctx.restore();
+
+        ctx.strokeStyle = 'rgba(46, 40, 30, 0.65)'; ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(cornerX - frontW - 4.5, ty + tierH);
+        ctx.lineTo(cornerX - frontW + 4.0, ty);
+        ctx.lineTo(cornerX, ty - 2);
+        ctx.lineTo(cornerX, ty + tierH);
+        ctx.closePath(); ctx.stroke();
+
+        // Crisp golden sunlit top ledge of each stepped terrace
+        ctx.fillStyle = 'rgba(255, 250, 232, 0.62)';
+        ctx.fillRect(cornerX - frontW + 4.5, ty - 0.5, frontW - 5, 2.0);
+
+        // Authentic Recessed Chichén Itzá Tablero Rectangular Panels flanking the central stairway!
+        const stCenter = cornerX - frontW * 0.51;
+        const stHalf = (17 + 19 * (1 - u)) + 5;
+        const leftPanelW = (stCenter - stHalf) - (cornerX - frontW + 9);
+        const rightPanelW = (cornerX - 8) - (stCenter + stHalf);
+        for (const [rx0, rw0] of [[cornerX - frontW + 9, leftPanelW], [stCenter + stHalf, rightPanelW]]) {
+          if (rw0 > 14) {
+            ctx.fillStyle = 'rgba(62, 54, 42, 0.28)';
+            ctx.fillRect(rx0, ty + 4.5, rw0, tierH - 8.5);
+            // Deep top/left inner shadow + sunlit bottom/right stone molding bevel
+            ctx.fillStyle = 'rgba(28, 24, 16, 0.42)';
+            ctx.fillRect(rx0, ty + 4.5, rw0, 1.5);
+            ctx.fillRect(rx0, ty + 4.5, 1.5, tierH - 8.5);
+            ctx.fillStyle = 'rgba(255, 248, 226, 0.48)';
+            ctx.fillRect(rx0 + 1, ty + tierH - 5.2, rw0 - 1, 1.3);
+            ctx.fillRect(rx0 + rw0 - 1.3, ty + 5.5, 1.3, tierH - 9.5);
+          }
+        }
+
+        // 2. Deeply Shaded 3D Northeast Terrace Facet with Recessed Shadow Panels
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(cornerX, ty + tierH);
+        ctx.lineTo(cornerX, ty - 2);
+        ctx.lineTo(cornerX + sideW - 3.5, ty + perspDrop);
+        ctx.lineTo(cornerX + sideW + 3.5, ty + tierH);
+        ctx.closePath();
+        ctx.clip();
+        paintWeatheredStone(cornerX, ty - 2, sideW + 5, tierH + 4, true, t * 17 + pi + 9);
+        ctx.fillStyle = 'rgba(18, 24, 22, 0.28)';
+        ctx.fillRect(cornerX, ty - 2, sideW + 5, 3.8);
+        ctx.restore();
+
+        ctx.strokeStyle = 'rgba(32, 34, 28, 0.72)'; ctx.lineWidth = 1.05;
+        ctx.beginPath();
+        ctx.moveTo(cornerX, ty + tierH);
+        ctx.lineTo(cornerX, ty - 2);
+        ctx.lineTo(cornerX + sideW - 3.5, ty + perspDrop);
+        ctx.lineTo(cornerX + sideW + 3.5, ty + tierH);
+        ctx.closePath(); ctx.stroke();
+
+        if (sideW > 30) {
+          ctx.fillStyle = 'rgba(20, 28, 24, 0.34)';
+          ctx.fillRect(cornerX + 7, ty + 5, sideW * 0.34, tierH - 9);
+          ctx.fillStyle = 'rgba(165, 182, 168, 0.14)';
+          ctx.fillRect(cornerX + 7, ty + tierH - 5, sideW * 0.34, 1.1);
+        }
+      }
+
+      // Secondary Shaded Staircase descending the 3D Right Facet (with subtle step treads!)
+      const stTopY = baseY - tiers * tierH;
+      const rStG = ctx.createLinearGradient(cornerX + 20, stTopY, cornerX + 84, baseY);
+      rStG.addColorStop(0, '#6c7368'); rStG.addColorStop(1, '#4c544c');
+      ctx.fillStyle = rStG; ctx.strokeStyle = '#2b302a'; ctx.lineWidth = 1.05;
+      ctx.beginPath();
+      ctx.moveTo(cornerX + 20, stTopY + 1); ctx.lineTo(cornerX + 35, stTopY + 3);
+      ctx.lineTo(cornerX + 96, baseY); ctx.lineTo(cornerX + 64, baseY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(24, 30, 26, 0.38)'; ctx.lineWidth = 0.8;
+      for (let rsy = stTopY + 6; rsy < baseY - 2; rsy += 4.5) {
+        const ru = (rsy - stTopY) / (baseY - stTopY);
+        ctx.beginPath();
+        ctx.moveTo(cornerX + 20 + 44 * ru, rsy);
+        ctx.lineTo(cornerX + 35 + 61 * ru, rsy + 1.5);
+        ctx.stroke();
+      }
+
+      // Primary 3D Projecting Grand 91-Step Staircase + Iconic Chichén Itzá Equinox Diamond Light-Wave!
+      const stTopCx = cornerX - 86 * 0.51;
+      const stBotCx = cornerX - 254 * 0.51;
+      const stTopW = 33, stBotW = 72;
+      ctx.fillStyle = 'rgba(28, 24, 18, 0.42)';
+      ctx.beginPath();
+      ctx.moveTo(stTopCx + stTopW * 0.5, stTopY);
+      ctx.lineTo(stTopCx + stTopW * 0.5 + 11, stTopY + 6);
+      ctx.lineTo(stBotCx + stBotW * 0.5 + 20, baseY);
+      ctx.lineTo(stBotCx + stBotW * 0.5, baseY);
+      ctx.closePath(); ctx.fill();
+
+      // 3D Right Alfarda Cheek Wall with subtle Golden Equinox Serpent Triangles!
+      ctx.fillStyle = '#736d5e'; ctx.strokeStyle = '#302c24'; ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(stTopCx + stTopW * 0.5, stTopY);
+      ctx.lineTo(stTopCx + stTopW * 0.5 + 6, stTopY + 3);
+      ctx.lineTo(stBotCx + stBotW * 0.5 + 10, baseY);
+      ctx.lineTo(stBotCx + stBotW * 0.5, baseY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = 'rgba(255, 236, 170, 0.48)';
+      for (let eq = 0; eq < 7; eq++) {
+        const eu0 = eq / 7, eu1 = (eq + 0.65) / 7;
+        const ex0 = (stTopCx + stTopW * 0.5) + ((stBotCx + stBotW * 0.5) - (stTopCx + stTopW * 0.5)) * eu0;
+        const ey0 = stTopY + (baseY - stTopY) * eu0;
+        const ex1 = (stTopCx + stTopW * 0.5) + ((stBotCx + stBotW * 0.5) - (stTopCx + stTopW * 0.5)) * eu1;
+        const ey1 = stTopY + (baseY - stTopY) * eu1;
+        ctx.beginPath();
+        ctx.moveTo(ex0, ey0);
+        ctx.lineTo((ex0 + ex1) * 0.5 + 6.5, (ey0 + ey1) * 0.5 + 2);
+        ctx.lineTo(ex1, ey1);
+        ctx.closePath(); ctx.fill();
+      }
+
+      const stG = ctx.createLinearGradient(stBotCx - 34, stTopY, stBotCx + 34, baseY);
+      stG.addColorStop(0, '#e6ddc4'); stG.addColorStop(0.52, '#cfc4a8'); stG.addColorStop(1, '#b5aa8e');
+      ctx.fillStyle = stG; ctx.strokeStyle = '#332f25'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(stTopCx - stTopW * 0.5, stTopY);
+      ctx.lineTo(stTopCx + stTopW * 0.5, stTopY);
+      ctx.lineTo(stBotCx + stBotW * 0.5, baseY);
+      ctx.lineTo(stBotCx - stBotW * 0.5, baseY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      for (let sy = stTopY + 3.2; sy < baseY - 1.5; sy += 3.4) {
+        const u = (sy - stTopY) / (baseY - stTopY);
+        const cxS = stTopCx + (stBotCx - stTopCx) * u;
+        const hw = (stTopW + (stBotW - stTopW) * u) * 0.5;
+        ctx.strokeStyle = 'rgba(46, 40, 30, 0.45)'; ctx.lineWidth = 0.82;
+        ctx.beginPath(); ctx.moveTo(cxS - hw + 2, sy); ctx.lineTo(cxS + hw - 2, sy); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255, 250, 236, 0.36)'; ctx.lineWidth = 0.6;
+        ctx.beginPath(); ctx.moveTo(cxS - hw + 2.5, sy + 0.9); ctx.lineTo(cxS + hw - 2.5, sy + 0.9); ctx.stroke();
+      }
+
+      // Gleaming Sunlit Alfarda Balustrades & 3D Sculpted Kukulcán Serpent Heads at Stairway Base!
+      for (const side of [-1, 1]) {
+        ctx.strokeStyle = '#f2ead2'; ctx.lineWidth = 3.8;
+        ctx.beginPath();
+        ctx.moveTo(stTopCx + side * stTopW * 0.5, stTopY);
+        ctx.lineTo(stBotCx + side * stBotW * 0.5, baseY);
+        ctx.stroke();
+        ctx.strokeStyle = '#4a4334'; ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(stTopCx + side * (stTopW * 0.5 + 1.9), stTopY);
+        ctx.lineTo(stBotCx + side * (stBotW * 0.5 + 1.9), baseY);
+        ctx.stroke();
+
+        // Sculpted 3D Feathered Serpent Head monument at foot of each balustrade
+        const shX = stBotCx + side * stBotW * 0.5 - 2;
+        const shG = ctx.createLinearGradient(shX - 12, baseY - 18, shX + 12, baseY);
+        shG.addColorStop(0, '#efe7ce'); shG.addColorStop(0.55, '#c8bea2'); shG.addColorStop(1, '#7c755f');
+        ctx.fillStyle = shG; ctx.strokeStyle = '#2d281e'; ctx.lineWidth = 1.15;
+        ctx.beginPath();
+        ctx.moveTo(shX + 10, baseY);
+        ctx.lineTo(shX + 9, baseY - 15);
+        ctx.quadraticCurveTo(shX + 1, baseY - 19, shX - 9, baseY - 13); // Plumed brow
+        ctx.lineTo(shX - 14, baseY - 7); // Snout
+        ctx.lineTo(shX - 5, baseY - 6);
+        ctx.lineTo(shX - 13, baseY - 1); // Open lower jaw
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#221e16';
+        ctx.beginPath(); ctx.arc(shX - 4, baseY - 11, 1.8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fffbeb';
+        ctx.fillRect(shX - 11, baseY - 7, 1.6, 2.5);
+      }
+
+      // Authentic Flat-Roofed Upper Temple of Kukulcán (3-Member Cornice, Serpent Columns & Roof Almenas!)
+      const sFrontW = 76, sSideW = 38, sH = 40, sY = stTopY - sH;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(cornerX - sFrontW, sY, sFrontW, sH); ctx.clip();
+      paintWeatheredStone(cornerX - sFrontW, sY, sFrontW, sH, false, 41 + pi);
+      ctx.restore();
+      ctx.strokeStyle = '#332f25'; ctx.lineWidth = 1.2;
+      ctx.strokeRect(cornerX - sFrontW, sY, sFrontW, sH);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cornerX, sY); ctx.lineTo(cornerX + sSideW, sY + 4);
+      ctx.lineTo(cornerX + sSideW, stTopY + 1); ctx.lineTo(cornerX, stTopY);
+      ctx.closePath(); ctx.clip();
+      paintWeatheredStone(cornerX, sY, sSideW + 2, sH + 6, true, 43 + pi);
+      ctx.restore();
+      ctx.beginPath();
+      ctx.moveTo(cornerX, sY); ctx.lineTo(cornerX + sSideW, sY + 4);
+      ctx.lineTo(cornerX + sSideW, stTopY + 1); ctx.lineTo(cornerX, stTopY);
+      ctx.closePath(); ctx.stroke();
+
+      // Projecting 3-band Puuc/Toltec upper entablature cornice
+      ctx.fillStyle = '#ebe2c8';
+      ctx.fillRect(cornerX - sFrontW - 3, sY + 2, sFrontW + 5, 4.5); ctx.strokeRect(cornerX - sFrontW - 3, sY + 2, sFrontW + 5, 4.5);
+      ctx.fillStyle = 'rgba(38, 34, 24, 0.38)';
+      ctx.fillRect(cornerX - sFrontW, sY + 6.5, sFrontW, 7.5);
+      ctx.fillStyle = '#dfd6bc';
+      ctx.fillRect(cornerX - sFrontW - 2, sY + 14, sFrontW + 4, 4); ctx.strokeRect(cornerX - sFrontW - 2, sY + 14, sFrontW + 4, 4);
+
+      // Stepped Chichén Itzá stone roof merlons (Almenas) catching golden rim light
+      for (let mx = cornerX - sFrontW + 5; mx <= cornerX - 9; mx += 11) {
+        ctx.fillStyle = '#ede4ca';
+        ctx.beginPath();
+        ctx.moveTo(mx, sY); ctx.lineTo(mx, sY - 3.5); ctx.lineTo(mx + 2, sY - 3.5);
+        ctx.lineTo(mx + 2, sY - 6); ctx.lineTo(mx + 5, sY - 6);
+        ctx.lineTo(mx + 5, sY - 3.5); ctx.lineTo(mx + 7, sY - 3.5); ctx.lineTo(mx + 7, sY);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      // Deep shaded triple-bay sanctuary portal with twin carved serpent columns & warm torchlight glow
+      const pCx = cornerX - sFrontW * 0.5;
+      ctx.fillStyle = '#171612'; ctx.fillRect(pCx - 18, sY + 20, 36, 20);
+      const inG = ctx.createRadialGradient(pCx, sY + 32, 2, pCx, sY + 32, 18);
+      inG.addColorStop(0, 'rgba(251, 191, 36, 0.42)');
+      inG.addColorStop(1, 'rgba(217, 119, 6, 0)');
+      ctx.fillStyle = inG; ctx.fillRect(pCx - 17, sY + 21, 34, 19);
+      ctx.fillStyle = '#dfd6bc';
+      ctx.fillRect(pCx - 7.5, sY + 20, 4.4, 20);
+      ctx.fillRect(pCx + 3.1, sY + 20, 4.4, 20);
+      ctx.strokeRect(pCx - 7.5, sY + 20, 4.4, 20);
+      ctx.strokeRect(pCx + 3.1, sY + 20, 4.4, 20);
+
+      // C. 3D EL CARACOL ASTRONOMICAL OBSERVATORY (Double Battered Terrace, Chiaroscuro Drum & Authentic Weathered Corbelled Dome!)
+      const ox = px + 360;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(ox - 68, baseY); ctx.lineTo(ox - 61, baseY - 23);
+      ctx.lineTo(ox + 42, baseY - 23); ctx.lineTo(ox + 47, baseY);
+      ctx.closePath(); ctx.clip();
+      paintWeatheredStone(ox - 68, baseY - 23, 116, 24, false, 51 + pi);
+      ctx.restore();
+      ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.15;
+      ctx.beginPath();
+      ctx.moveTo(ox - 68, baseY); ctx.lineTo(ox - 61, baseY - 23);
+      ctx.lineTo(ox + 42, baseY - 23); ctx.lineTo(ox + 47, baseY);
+      ctx.closePath(); ctx.stroke();
+
+      ctx.fillStyle = '#4c544d';
+      ctx.beginPath();
+      ctx.moveTo(ox + 42, baseY - 23); ctx.lineTo(ox + 69, baseY - 19);
+      ctx.lineTo(ox + 74, baseY); ctx.lineTo(ox + 47, baseY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      ctx.fillStyle = '#d4c9ad';
+      ctx.fillRect(ox - 49, baseY - 41, 84, 18); ctx.strokeRect(ox - 49, baseY - 41, 84, 18);
+      ctx.fillStyle = '#434b45';
+      ctx.fillRect(ox + 35, baseY - 39, 21, 16); ctx.strokeRect(ox + 35, baseY - 39, 21, 16);
+      // Central observatory staircase with sunlit balustrades
+      ctx.fillStyle = '#e8dfc6';
+      ctx.fillRect(ox - 16, baseY - 41, 24, 41); ctx.strokeRect(ox - 16, baseY - 41, 24, 41);
+      ctx.strokeStyle = '#f8f2de'; ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(ox - 16, baseY - 41); ctx.lineTo(ox - 18, baseY);
+      ctx.moveTo(ox + 8, baseY - 41); ctx.lineTo(ox + 10, baseY);
+      ctx.stroke();
+
+      // True 3D Cylindrical Chiaroscuro Drum + Subtle Limestone Courses
+      const obG = ctx.createLinearGradient(ox - 37, baseY - 104, ox + 37, baseY - 41);
+      obG.addColorStop(0.0, '#d8ceb4');
+      obG.addColorStop(0.24, '#f7eed6');
+      obG.addColorStop(0.64, '#9c947d');
+      obG.addColorStop(1.0, '#444b44');
+      ctx.fillStyle = obG;
+      ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.2;
+      ctx.fillRect(ox - 37, baseY - 97, 74, 56); ctx.strokeRect(ox - 37, baseY - 97, 74, 56);
+      ctx.strokeStyle = 'rgba(48, 44, 34, 0.22)'; ctx.lineWidth = 0.8;
+      for (let ry = baseY - 87; ry < baseY - 45; ry += 9.5) {
+        ctx.beginPath(); ctx.moveTo(ox - 37, ry); ctx.lineTo(ox + 37, ry); ctx.stroke();
+      }
+      // Projecting 5-band Mayan cornice ring + Authentic Partially Ruined Stone Observatory Dome!
+      ctx.fillStyle = '#ece3ca';
+      ctx.fillRect(ox - 42, baseY - 103, 84, 6.5); ctx.strokeRect(ox - 42, baseY - 103, 84, 6.5);
+      ctx.fillStyle = obG;
+      ctx.beginPath();
+      ctx.moveTo(ox - 34, baseY - 103);
+      ctx.quadraticCurveTo(ox - 32, baseY - 134, ox - 4, baseY - 136);
+      ctx.lineTo(ox + 10, baseY - 131);
+      ctx.lineTo(ox + 16, baseY - 122);
+      ctx.lineTo(ox + 25, baseY - 117);
+      ctx.lineTo(ox + 32, baseY - 103);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Venus/Equinox alignment observation windows & creeping emerald moss
+      for (const wx2 of [-18, -2, 15]) {
+        ctx.fillStyle = '#1b1812'; ctx.fillRect(ox + wx2 - 3.5, baseY - 86, 7, 14);
+        ctx.fillStyle = 'rgba(254, 240, 138, 0.78)'; ctx.fillRect(ox + wx2 - 2, baseY - 84, 4, 10);
+      }
+      ctx.fillStyle = '#166534';
+      ctx.beginPath(); ctx.ellipse(ox - 25, baseY - 103, 10, 2.8, 0, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // 6. Continuous Lush Tropical Rainforest Canopy Silhouette along baseY + Golden Jungle Mist!
+    const cScroll = camX * 0.18;
+    const cStep = 68;
+    const cFirst = Math.floor(cScroll / cStep) - 2;
+    const cLast = Math.ceil((cScroll + w) / cStep) + 2;
+    ctx.fillStyle = '#112e24';
+    ctx.beginPath();
+    ctx.moveTo(-80, h);
+    ctx.lineTo(-80, baseY + 12);
+    for (let ci = cFirst; ci <= cLast; ci++) {
+      const tx = ci * cStep - cScroll;
+      const rad = 26 + ((Math.abs(ci * 37) % 5) * 5);
+      ctx.arc(tx, baseY + 6, rad, Math.PI * 1.05, Math.PI * 1.95, false);
+    }
+    ctx.lineTo(w + 80, h);
+    ctx.closePath();
+    ctx.fill();
+
+    const mist = ctx.createLinearGradient(0, h * 0.60, 0, h * 0.86);
+    mist.addColorStop(0, 'rgba(253, 224, 140, 0)');
+    mist.addColorStop(0.65, 'rgba(253, 224, 140, 0.24)');
+    mist.addColorStop(1, 'rgba(16, 68, 56, 0.45)');
+    ctx.fillStyle = mist;
+    ctx.fillRect(0, h * 0.60, w, h * 0.26);
+  }
+
+  function drawMayaMidground(ctx, camX, w, h, time) {
+    // Ancient Moss-Draped Mayan Carved Limestone Temple Ruins + 1-in-4 Open Cenote Waterfall Vistas
+    // + Continuous Deep Sacred Cenote Water Gorge below baseY = 615 (Zero raw sky in gaps!)
+    const scroll = camX * 0.40;
+    const slotW = 360;
+    const baseY = 615;
+
+    // 0. CONTINUOUS DEEP YUCATÁN SACRED CENOTE & MOSSY LIMESTONE GORGE (y = 612 .. h)
+    ctx.save();
+    // Sunken mossy Mayan cavern stone wall rim just below terrace level
+    const rimG = ctx.createLinearGradient(0, baseY - 3, 0, baseY + 34);
+    rimG.addColorStop(0, '#3b372b');
+    rimG.addColorStop(0.45, '#232c24');
+    rimG.addColorStop(1, '#0c2422');
+    ctx.fillStyle = rimG;
+    ctx.fillRect(0, baseY - 3, w, 37);
+
+    // Bioluminescent Emerald-Turquoise Sacred Cenote Water Pool (y = baseY + 26 .. h)
+    const waterY = baseY + 26;
+    const cenG = ctx.createLinearGradient(0, waterY, 0, h);
+    cenG.addColorStop(0.0, '#14b8a6');
+    cenG.addColorStop(0.28, '#0d9488');
+    cenG.addColorStop(0.68, '#0f524c');
+    cenG.addColorStop(1.0, '#042322');
+    ctx.fillStyle = cenG;
+    ctx.fillRect(0, waterY, w, h - waterY);
+
+    // Shimmering water-surface highlight line, gentle cenote ripples & floating tropical lotus lily pads!
+    ctx.fillStyle = 'rgba(153, 246, 228, 0.55)';
+    ctx.fillRect(0, waterY, w, 2.5);
+    const wScroll = camX * 0.62;
+    const wStep = 150;
+    const wFirst = Math.floor(wScroll / wStep) - 1;
+    const wLast = Math.ceil((wScroll + w) / wStep) + 1;
+    for (let wi = wFirst; wi <= wLast; wi++) {
+      const wx = wi * wStep - wScroll;
+      const rShift = Math.sin(time * 2.2 + wi * 1.3) * 8;
+      ctx.strokeStyle = 'rgba(204, 251, 241, 0.34)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(wx + 14 + rShift, waterY + 14 + (Math.abs(wi) % 3) * 14);
+      ctx.lineTo(wx + 66 + rShift, waterY + 14 + (Math.abs(wi) % 3) * 14);
+      ctx.stroke();
+
+      // Floating emerald cenote lily pad + sacred lotus blossom
+      if (Math.abs(wi) % 2 === 0) {
+        const lx = wx + 95 + rShift * 0.5;
+        const ly = waterY + 28 + (Math.abs(wi * 7) % 26);
+        ctx.fillStyle = '#15803d';
+        ctx.beginPath();
+        ctx.arc(lx, ly, 10, 0.25, Math.PI * 1.92);
+        ctx.lineTo(lx, ly);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = (Math.abs(wi) % 4 === 0) ? '#f472b6' : '#fef08a';
+        ctx.beginPath(); ctx.arc(lx - 1, ly - 2.5, 3.2, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    // Realistic 3D Morelet's Crocodiles (Crocodylus moreletii) patrolling the Sacred Cenote River!
+    const crocSpan = 760;
+    const cScroll = camX * 0.62;
+    const cFirst = Math.floor(cScroll / crocSpan) - 1;
+    const cLast = Math.ceil((cScroll + w) / crocSpan) + 1;
+    for (let ci = cFirst; ci <= cLast; ci++) {
+      const patrol = Math.sin(time * 0.40 + ci * 1.9);
+      const dir = Math.cos(time * 0.40 + ci * 1.9) >= 0 ? 1 : -1;
+      const cx0 = ci * crocSpan - cScroll + 340 + patrol * 128;
+      if (cx0 < -160 || cx0 > w + 160) continue;
+      const cy0 = waterY + 26 + (Math.abs(ci * 13) % 26);
+      const swimPh = time * 3.3 + ci * 2.1;
+      const bodyBob = Math.sin(swimPh * 0.5) * 0.8;
+
+      ctx.save();
+      ctx.translate(cx0, cy0 + bodyBob);
+      ctx.scale(dir, 1);
+
+      // 1. Refracted Underwater Anatomy visible beneath the crystal-clear turquoise cenote surface!
+      // Submerged dark-emerald trunk belly & undulating tail keel shadow
+      ctx.fillStyle = 'rgba(4, 38, 34, 0.52)';
+      ctx.beginPath();
+      ctx.moveTo(-68, 5 + Math.sin(swimPh - 2.2) * 5.5);
+      ctx.quadraticCurveTo(-36, 12 + Math.sin(swimPh - 1.0) * 3, -4, 13);
+      ctx.quadraticCurveTo(24, 12, 52, 6);
+      ctx.quadraticCurveTo(22, 2, -68, 3 + Math.sin(swimPh - 2.2) * 5.5);
+      ctx.closePath();
+      ctx.fill();
+
+      // Refracted submerged front & hind webbed crocodilian legs paddling slowly through the water!
+      const fPaddle = Math.sin(swimPh) * 4.5;
+      const hPaddle = -Math.sin(swimPh) * 5.0;
+      ctx.fillStyle = 'rgba(13, 62, 52, 0.62)';
+      ctx.strokeStyle = 'rgba(6, 36, 30, 0.68)';
+      ctx.lineWidth = 1.1;
+      // Hind leg + webbed foot
+      ctx.beginPath();
+      ctx.moveTo(-18, 4);
+      ctx.lineTo(-26 + hPaddle * 0.5, 13);
+      ctx.lineTo(-34 + hPaddle, 16);
+      ctx.lineTo(-29 + hPaddle, 19);
+      ctx.lineTo(-21 + hPaddle * 0.4, 14);
+      ctx.lineTo(-12, 5);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      // Foreleg + webbed claws
+      ctx.beginPath();
+      ctx.moveTo(10, 4);
+      ctx.lineTo(4 + fPaddle * 0.5, 12.5);
+      ctx.lineTo(-3 + fPaddle, 15.5);
+      ctx.lineTo(2 + fPaddle, 18);
+      ctx.lineTo(9 + fPaddle * 0.4, 13);
+      ctx.lineTo(15, 4.5);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      // 2. Multi-Layered Shimmering V-Wake Ripples & Breathing Nostril Ring
+      ctx.strokeStyle = 'rgba(204, 251, 241, 0.44)';
+      ctx.lineWidth = 1.35;
+      ctx.beginPath();
+      ctx.moveTo(58, 1.5);
+      ctx.quadraticCurveTo(18, -8.5, -72, -12 + Math.sin(swimPh - 2.0) * 3);
+      ctx.moveTo(58, 3.5);
+      ctx.quadraticCurveTo(18, 11.5, -72, 15 + Math.sin(swimPh - 2.0) * 3);
+      ctx.stroke();
+      const ringPulse = (time * 0.9 + ci) % 1;
+      ctx.strokeStyle = `rgba(204, 251, 241, ${((1 - ringPulse) * 0.42).toFixed(2)})`;
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.ellipse(54, -0.5, 3 + ringPulse * 9, 1.1 + ringPulse * 2.8, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 3. Segmented S-Wave Muscular Armored Tail (Travelling Lateral Undulation + Tall Serrated Tail Crest Scutes!)
+      const tailSegs = 7;
+      for (let ts = tailSegs - 1; ts >= 0; ts--) {
+        const u0 = ts / tailSegs;
+        const u1 = (ts + 1) / tailSegs;
+        const tx0 = -20 - u0 * 52;
+        const tx1 = -20 - u1 * 52;
+        const wy0 = Math.sin(swimPh - u0 * 2.6) * (1.5 + u0 * 5.2);
+        const wy1 = Math.sin(swimPh - u1 * 2.6) * (1.5 + u1 * 5.2);
+        const th0 = (1 - u0 * 0.78) * 5.2;
+        const th1 = (1 - u1 * 0.82) * 5.2;
+
+        const tSegG = ctx.createLinearGradient(0, -th0 - 2, 0, th0 + 3);
+        tSegG.addColorStop(0, '#6c7d4d');
+        tSegG.addColorStop(0.5, '#3f5133');
+        tSegG.addColorStop(1, '#1e2b19');
+        ctx.fillStyle = tSegG;
+        ctx.strokeStyle = '#182314';
+        ctx.lineWidth = 0.95;
+        ctx.beginPath();
+        ctx.moveTo(tx0 + 1, wy0 - th0 * 0.7 + 1);
+        ctx.lineTo(tx1, wy1 - th1 * 0.7 + 1.5);
+        ctx.lineTo(tx1, wy1 + th1 * 0.65 + 2.2);
+        ctx.lineTo(tx0 + 1, wy0 + th0 * 0.65 + 2.2);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // Upright serrated single/double caudal osteoderm scute blade on each tail segment
+        const scX = (tx0 + tx1) * 0.5;
+        const scY = (wy0 + wy1) * 0.5 - (th0 + th1) * 0.35 + 1.2;
+        const scH = 3.2 + (1 - u0) * 2.0;
+        ctx.fillStyle = ts % 2 === 0 ? '#55673d' : '#3a4a2c';
+        ctx.beginPath();
+        ctx.moveTo(tx1 + 0.8, scY + 1.8);
+        ctx.lineTo(scX - 0.5, scY - scH);
+        ctx.lineTo(tx0 - 0.5, scY + 1.8);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+      }
+
+      // 4. Broad 3D Sculpted Armored Dorsal Trunk & Muscular Nuchal Neck Shield
+      const backG = ctx.createLinearGradient(0, -10, 0, 6);
+      backG.addColorStop(0.0, '#788956');
+      backG.addColorStop(0.38, '#4c5f3b');
+      backG.addColorStop(0.78, '#2d3c24');
+      backG.addColorStop(1.0, '#192415');
+      ctx.fillStyle = backG;
+      ctx.strokeStyle = '#182314';
+      ctx.lineWidth = 1.15;
+      ctx.beginPath();
+      ctx.moveTo(-23, 3.5);
+      ctx.bezierCurveTo(-18, -8.5, 2, -9.5, 16, -4.8);
+      ctx.lineTo(18, 4.2);
+      ctx.lineTo(-23, 4.2);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      // Dark Morelet's crocodile cross-bands & individual 3D keeled osteoderm armor plates!
+      for (let row = 0; row < 2; row++) {
+        for (let sx = -19 + row * 3; sx <= 11; sx += 6.2) {
+          const archY = -6.8 + Math.pow((sx + 3) / 19, 2) * 2.8 + row * 2.7;
+          ctx.fillStyle = ((Math.abs(Math.floor(sx)) + row) % 3 === 0) ? '#25331e' : '#657748';
+          ctx.beginPath();
+          ctx.ellipse(sx, archY + 1.2, 2.7, 1.35, 0, 0, Math.PI * 2);
+          ctx.fill();
+          // Raised bony longitudinal keel ridge with wet sunlit glint
+          ctx.strokeStyle = 'rgba(226, 236, 188, 0.48)';
+          ctx.lineWidth = 0.85;
+          ctx.beginPath();
+          ctx.moveTo(sx - 1.8, archY + 0.6);
+          ctx.lineTo(sx + 1.8, archY + 0.6);
+          ctx.stroke();
+        }
+      }
+
+      // 5. Anatomically Sculpted Crocodilian Skull, Bony Brow Orbit, Dermal-Bumped Snout, Nostril Boss & Interlocking Jaws!
+      const headG = ctx.createLinearGradient(14, -10, 58, 5);
+      headG.addColorStop(0.0, '#6e804e');
+      headG.addColorStop(0.45, '#495c39');
+      headG.addColorStop(0.85, '#334328');
+      headG.addColorStop(1.0, '#222e1a');
+      ctx.fillStyle = headG;
+      ctx.strokeStyle = '#172213';
+      ctx.lineWidth = 1.15;
+      ctx.beginPath();
+      ctx.moveTo(14, 3.8);
+      ctx.lineTo(15.5, -5.8); // Post-occipital neck scutes
+      ctx.quadraticCurveTo(19, -9.8, 24.5, -9.6); // High bony supraorbital eye turret
+      ctx.quadraticCurveTo(28.5, -9.2, 31, -5.6); // Steep pre-orbital slope
+      ctx.quadraticCurveTo(38, -4.6, 45.5, -4.2); // Long bumpy maxilla snout bridge
+      ctx.lineTo(48.5, -3.4); // Premaxillary notch
+      ctx.quadraticCurveTo(53.5, -6.4, 57.5, -3.0); // Bulbous upturned nostril boss!
+      ctx.quadraticCurveTo(59.2, -0.5, 56.8, 2.2);
+      ctx.lineTo(14, 4.0);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      //Partially emergent heavy muscular mandible (lower jaw) hugging waterline
+      ctx.fillStyle = '#5f6f46';
+      ctx.beginPath();
+      ctx.moveTo(15, 2.2);
+      ctx.quadraticCurveTo(24, 5.2, 55.5, 3.6);
+      ctx.lineTo(56.2, 1.6);
+      ctx.quadraticCurveTo(36, 2.4, 15, 0.8);
+      ctx.closePath();
+      ctx.fill();
+
+      // Sinuous crocodilian jaw cleft ("smile" line) + varied interlocking conical ivory teeth!
+      ctx.strokeStyle = '#141d10';
+      ctx.lineWidth = 1.15;
+      ctx.beginPath();
+      ctx.moveTo(17, 1.0);
+      ctx.bezierCurveTo(25, 3.0, 34, -0.2, 43, 1.8);
+      ctx.quadraticCurveTo(50, 2.4, 56.8, 1.0);
+      ctx.stroke();
+
+      ctx.fillStyle = '#f8f3e3';
+      for (const [tx, ty, tw, th, dirT] of [
+        [30.5, 1.1, 1.6, 2.5, 1],
+        [35.0, 0.7, 1.4, 2.0, 1],
+        [39.2, 1.0, 1.9, 3.0, 1],
+        [43.8, 1.6, 1.4, 2.1, 1],
+        [48.2, 1.8, 2.0, -3.2, -1], // Prominent lower 4th canine fitting into upper jaw notch!
+        [52.5, 1.5, 1.5, 2.3, 1],
+      ]) {
+        ctx.beginPath();
+        ctx.moveTo(tx, ty);
+        ctx.lineTo(tx + tw * 0.5, ty + th);
+        ctx.lineTo(tx + tw, ty);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Wet specular sunlight highlights along the bumpy snout ridge, brow & nostril dome
+      ctx.strokeStyle = 'rgba(240, 246, 210, 0.46)';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(19.5, -8.5); ctx.quadraticCurveTo(23.5, -9.2, 27.5, -7.8);
+      ctx.moveTo(32.5, -4.6); ctx.lineTo(44.5, -3.7);
+      ctx.stroke();
+      // Slit nostril opening on raised tip
+      ctx.fillStyle = '#11180e';
+      ctx.beginPath(); ctx.ellipse(54.8, -3.8, 1.4, 0.85, -0.2, 0, Math.PI * 2); ctx.fill();
+
+      // Deep-set 3D Reptilian Golden-Amber Eye with Heavy Scaly Lid, Vertical Cat-Slit Pupil & Wet Glint!
+      ctx.fillStyle = '#1c2716';
+      ctx.beginPath(); ctx.ellipse(23.5, -5.8, 3.4, 2.6, 0, 0, Math.PI * 2); ctx.fill();
+      const eyeG = ctx.createRadialGradient(23.2, -6.2, 0.4, 23.5, -5.8, 2.7);
+      eyeG.addColorStop(0, '#fef08a');
+      eyeG.addColorStop(0.65, '#eab308');
+      eyeG.addColorStop(1, '#854d0e');
+      ctx.fillStyle = eyeG;
+      ctx.beginPath(); ctx.ellipse(23.5, -5.8, 2.6, 2.0, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#070a06';
+      ctx.beginPath(); ctx.ellipse(23.7, -5.8, 0.55, 1.8, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(22.8, -6.5, 0.65, 0, Math.PI * 2); ctx.fill();
+
+      // Crisp turquoise water-surface meniscus lapping dynamically along the crocodile's flanks & jaw
+      ctx.strokeStyle = 'rgba(153, 246, 228, 0.68)';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(-72, 3.2 + Math.sin(swimPh - 2.0) * 2.5);
+      ctx.quadraticCurveTo(-24, 4.6, 16, 3.8);
+      ctx.quadraticCurveTo(38, 4.4, 58, 2.6);
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.restore();
+
+    // Helper: Museum-Grade Yucatán Tropical Palm Tree (Ringed Tapered Trunk, Crownshaft, Coconuts & 9 Pinnate Fronds with Individual Drooping Leaflets!)
+    const drawMayaPalmTree = (baseX, baseY0, topX, topY, lean, seed0) => {
+      const ctrlX = (baseX + topX) * 0.5 - lean * 0.45;
+      const ctrlY = (baseY0 + topY) * 0.5;
+      const segs = 16;
+      for (let s = 0; s < segs; s++) {
+        const t0 = s / segs, t1 = (s + 1) / segs;
+        const x0 = (1 - t0) * (1 - t0) * baseX + 2 * (1 - t0) * t0 * ctrlX + t0 * t0 * topX;
+        const y0 = (1 - t0) * (1 - t0) * baseY0 + 2 * (1 - t0) * t0 * ctrlY + t0 * t0 * topY;
+        const x1 = (1 - t1) * (1 - t1) * baseX + 2 * (1 - t1) * t1 * ctrlX + t1 * t1 * topX;
+        const y1 = (1 - t1) * (1 - t1) * baseY0 + 2 * (1 - t1) * t1 * ctrlY + t1 * t1 * topY;
+        const w0 = 10.5 - t0 * 5.0;
+        const w1 = 10.5 - t1 * 5.0;
+        const trG = ctx.createLinearGradient(x0 - w0, y0, x0 + w0, y0);
+        trG.addColorStop(0, '#2a1b10'); trG.addColorStop(0.38, '#6b4c32'); trG.addColorStop(0.72, '#866242'); trG.addColorStop(1, '#312014');
+        ctx.fillStyle = trG;
+        ctx.beginPath();
+        ctx.moveTo(x0 - w0, y0 + 1); ctx.lineTo(x1 - w1, y1 - 1);
+        ctx.lineTo(x1 + w1, y1 - 1); ctx.lineTo(x0 + w0, y0 + 1);
+        ctx.closePath(); ctx.fill();
+        // Annular bark growth ring
+        ctx.strokeStyle = 'rgba(222, 202, 174, 0.28)'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.moveTo(x1 - w1 * 0.9, y1); ctx.quadraticCurveTo(x1, y1 + 1.8, x1 + w1 * 0.9, y1); ctx.stroke();
+      }
+      // Green crownshaft & coconut cluster beneath fronds
+      ctx.fillStyle = '#15803d';
+      ctx.beginPath();
+      ctx.moveTo(topX - 6.5, topY + 18); ctx.lineTo(topX - 4.5, topY - 3);
+      ctx.lineTo(topX + 4.5, topY - 3); ctx.lineTo(topX + 6.5, topY + 18);
+      ctx.closePath(); ctx.fill();
+      for (const [cx1, cy1] of [[-5, 3], [0, 5], [5, 2.5], [-2, 8]]) {
+        ctx.fillStyle = '#5c3317'; ctx.strokeStyle = '#291509'; ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.arc(topX + cx1, topY + cy1, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      // 9 Arching Pinnate Fronds (Back shadowed + Front sunlit) with 12 Individual Drooping Leaflets each!
+      const fronds = [
+        { dir: -1, ang: -0.18, len: 74, drop: 28, dark: true },
+        { dir: -1, ang: -0.72, len: 66, drop: 18, dark: true },
+        { dir:  1, ang: -0.20, len: 74, drop: 28, dark: true },
+        { dir:  1, ang: -0.74, len: 66, drop: 18, dark: true },
+        { dir: -1, ang:  0.14, len: 80, drop: 38, dark: false },
+        { dir: -1, ang: -0.45, len: 76, drop: 24, dark: false },
+        { dir:  1, ang:  0.14, len: 80, drop: 38, dark: false },
+        { dir:  1, ang: -0.46, len: 76, drop: 24, dark: false },
+        { dir:  1, ang: -1.10, len: 56, drop: 10, dark: false },
+      ];
+      for (let f = 0; f < fronds.length; f++) {
+        const fd = fronds[f];
+        const fSw = Math.sin(time * 1.55 + seed0 + f * 0.8) * 3.8;
+        const ex = topX + fd.dir * Math.cos(fd.ang) * fd.len;
+        const ey = topY + Math.sin(fd.ang) * fd.len * 0.6 + fd.drop + fSw;
+        const mx = topX + fd.dir * Math.cos(fd.ang - 0.25) * (fd.len * 0.56);
+        const my = topY + Math.sin(fd.ang - 0.35) * (fd.len * 0.54) - 12 + fSw * 0.5;
+        const nL = 12;
+        for (let l = 2; l <= nL; l++) {
+          const u = l / nL;
+          const rx = (1 - u) * (1 - u) * topX + 2 * (1 - u) * u * mx + u * u * ex;
+          const ry = (1 - u) * (1 - u) * topY + 2 * (1 - u) * u * my + u * u * ey;
+          const env = Math.sin(u * Math.PI);
+          const lLen = 8 + 20 * env;
+          ctx.fillStyle = fd.dark ? (l % 2 ? '#064e3b' : '#053b2c') : (l % 2 ? '#16a34a' : '#22c55e');
+          ctx.beginPath();
+          ctx.moveTo(rx - 1.5, ry);
+          ctx.quadraticCurveTo(rx + fd.dir * 4, ry + lLen * 0.45, rx + fd.dir * 2.5, ry + lLen);
+          ctx.quadraticCurveTo(rx - fd.dir * 1.5, ry + lLen * 0.45, rx + 1.5, ry);
+          ctx.closePath(); ctx.fill();
+        }
+        ctx.strokeStyle = fd.dark ? '#065f46' : '#86efac'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(topX, topY); ctx.quadraticCurveTo(mx, my, ex, ey); ctx.stroke();
+      }
+    };
+
+    const first = Math.floor(scroll / slotW) - 1;
+    const last = Math.ceil((scroll + w) / slotW) + 1;
+
+    for (let i = first; i <= last; i++) {
+      const bx = i * slotW - scroll;
+      const idx = ((i % 4) + 4) % 4;
+
+      // 1-IN-4 OPEN RAINFOREST CENOTE & WATERFALL VISTA (Frames El Castillo / Tikal Pyramids + Realistic Palms + Swinging Spider Monkey!)
+      if (idx === 2) {
+        ctx.save();
+        const swayL = Math.sin(time * 1.35 + i) * 3.5;
+        const swayR = Math.sin(time * 1.35 + i + 1.4) * 3.5;
+        const topLX = bx + 36 - 11 + swayL, topLY = baseY - 238;
+        const topRX = bx + slotW - 36 + 12 + swayR, topRY = baseY - 252;
+
+        // 1. Draped Braided Canopy Liana Vine + True Biomechanical Hand-Over-Hand Brachiating Yucatán Spider Monkey (Ateles geoffroyi)!
+        const vX0 = topLX + 6, vY0 = topLY + 16;
+        const vX2 = topRX - 6, vY2 = topRY + 16;
+        const mPhase = time * 0.42 + i * 1.7;
+        const mPos = 0.5 + Math.sin(mPhase) * 0.33; // Smoothly traverses 0.17 .. 0.83 between palms
+        const mVel = Math.cos(mPhase);
+        const mDir = mVel >= 0 ? 1 : -1;
+        const speedEnv = Math.min(1, Math.abs(mVel) * 2.3);
+
+        // Dynamic vine sag directly under the monkey's weight!
+        const vineMidX = (vX0 + vX2) * 0.5 + (mPos - 0.5) * 14;
+        const vineMidY = Math.max(topLY, topRY) + 72 + (1 - Math.abs(mPos - 0.5) * 1.6) * 8;
+        const vinePt = (uu) => {
+          const om = 1 - uu;
+          return {
+            x: om * om * vX0 + 2 * om * uu * vineMidX + uu * uu * vX2,
+            y: om * om * vY0 + 2 * om * uu * vineMidY + uu * uu * vY2,
+          };
+        };
+
+        // Shaded woody liana vine + sunlit mossy upper bark highlight
+        ctx.strokeStyle = '#1b2e1b'; ctx.lineWidth = 3.8; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(vX0, vY0); ctx.quadraticCurveTo(vineMidX, vineMidY, vX2, vY2); ctx.stroke();
+        ctx.strokeStyle = '#3f6b32'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(vX0, vY0 - 0.8); ctx.quadraticCurveTo(vineMidX, vineMidY - 0.8, vX2, vY2 - 0.8); ctx.stroke();
+
+        // Heart-shaped rainforest philodendron / liana leaves sprouting along the vine
+        for (let lv = 1; lv <= 7; lv++) {
+          const vp = vinePt(lv / 8);
+          const lAng = (lv % 2 ? 0.45 : -0.45) + Math.sin(time * 2.1 + lv) * 0.08;
+          ctx.fillStyle = lv % 2 === 0 ? '#15803d' : '#22c55e';
+          ctx.beginPath(); ctx.ellipse(vp.x, vp.y + 4.5, 4.8, 2.2, lAng, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // True Discrete Hand-Over-Hand Brachiation Kinematics (Supporting Hand Stays Anchored on Vine While Reaching Hand Arcs Overhead!)
+        const stepU = 0.082;
+        const travel = mDir > 0 ? mPos : (1 - mPos);
+        const uFromTravel = (tr) => Math.max(0.07, Math.min(0.93, mDir > 0 ? tr : (1 - tr)));
+        const fStride = travel / stepU;
+        const kStride = Math.floor(fStride);
+        const sRaw = fStride - kStride;
+        const sEase = sRaw * sRaw * (3 - 2 * sRaw); // C1 smoothstep stride progression
+
+        const supU = uFromTravel(kStride * stepU);
+        const prevU = uFromTravel((kStride - 1) * stepU);
+        const nextU = uFromTravel((kStride + 1) * stepU);
+        const supPt = vinePt(supU);
+        const prevPt = vinePt(prevU);
+        const nextPt = vinePt(nextU);
+
+        // Reaching hand releases prevPt, arcs naturally over/along the vine, and grasps nextPt seamlessly at sRaw -> 1!
+        const reachBase = vinePt(prevU + (nextU - prevU) * sEase);
+        const reachLift = Math.sin(sRaw * Math.PI) * 13.5 * speedEnv;
+        const reachPt = {
+          x: reachBase.x + mDir * Math.sin(sRaw * Math.PI) * 2.5 * speedEnv,
+          y: reachBase.y - reachLift * 0.55 + (1 - speedEnv) * 1.2,
+        };
+
+        // Alternating Left/Right arm identity (Zero popping at stride boundaries!)
+        const farSupports = (kStride % 2 === 0);
+        const farHand = farSupports ? supPt : reachPt;
+        const nearHand = farSupports ? reachPt : supPt;
+
+        // Pendular shoulder center swinging smoothly beneath the handholds (1.24x anatomical presence + warm golden-hour rim light!)
+        const midStartX = 0.5 * (prevPt.x + supPt.x), midStartY = 0.5 * (prevPt.y + supPt.y);
+        const midEndX = 0.5 * (supPt.x + nextPt.x), midEndY = 0.5 * (supPt.y + nextPt.y);
+        const hangDip = Math.sin(sRaw * Math.PI) * 4.2 * speedEnv;
+        const swingLag = -mDir * Math.sin(sRaw * Math.PI * 2) * 3.2 * speedEnv;
+        const shX = midStartX + (midEndX - midStartX) * sEase + swingLag;
+        const shY = midStartY + (midEndY - midStartY) * sEase + 24.5 + hangDip;
+
+        // Dynamic pendular torso tilt & pelvis coordinates
+        const torsoTilt = mDir * (0.18 + Math.sin(sRaw * Math.PI) * 0.24 * speedEnv);
+        const hipX = shX - Math.sin(torsoTilt) * 20.0;
+        const hipY = shY + Math.cos(torsoTilt) * 20.0;
+
+        // Helper: Exact 2-Bone Inverse Kinematics Solver + Tapered Furry Anatomical Limb Renderer (Zero Stick Lines!)
+        const solveIK = (x0, y0, x1, y1, L1, L2, bendSign) => {
+          const dx = x1 - x0, dy = y1 - y0;
+          const rawD = Math.hypot(dx, dy) || 0.001;
+          const d = Math.max(Math.abs(L1 - L2) + 0.4, Math.min(L1 + L2 - 0.4, rawD));
+          const cosA = (L1 * L1 + d * d - L2 * L2) / (2 * L1 * d);
+          const baseA = Math.atan2(dy, dx);
+          const jA = baseA + bendSign * Math.acos(Math.max(-1, Math.min(1, cosA)));
+          return { x: x0 + Math.cos(jA) * L1, y: y0 + Math.sin(jA) * L1 };
+        };
+
+        const drawFurryBone = (ax, ay, bx, by, rA, rB, furCol, rimCol) => {
+          const ang = Math.atan2(by - ay, bx - ax);
+          const nx = -Math.sin(ang), ny = Math.cos(ang);
+          ctx.fillStyle = furCol;
+          ctx.strokeStyle = '#0d0805';
+          ctx.lineWidth = 0.85;
+          ctx.beginPath();
+          ctx.moveTo(ax + nx * rA, ay + ny * rA);
+          ctx.quadraticCurveTo((ax + bx) * 0.5 + nx * ((rA + rB) * 0.60), (ay + by) * 0.5 + ny * ((rA + rB) * 0.60), bx + nx * rB, by + ny * rB);
+          ctx.arc(bx, by, rB, ang + Math.PI * 0.5, ang - Math.PI * 0.5, true);
+          ctx.quadraticCurveTo((ax + bx) * 0.5 - nx * ((rA + rB) * 0.54), (ay + by) * 0.5 - ny * ((rA + rB) * 0.54), ax - nx * rA, ay - ny * rA);
+          ctx.arc(ax, ay, rA, ang - Math.PI * 0.5, ang + Math.PI * 0.5, true);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          if (rimCol) {
+            ctx.strokeStyle = rimCol; ctx.lineWidth = 1.15;
+            ctx.beginPath();
+            ctx.moveTo(ax + nx * (rA * 0.82), ay + ny * (rA * 0.82));
+            ctx.lineTo(bx + nx * (rB * 0.82), by + ny * (rB * 0.82));
+            ctx.stroke();
+          }
+        };
+
+        // A. FAR (SHADED) ARM & FAR HIND LEG (Behind Torso for True 3D Depth!)
+        const farElbow = solveIK(shX - mDir * 2.0, shY + 1, farHand.x, farHand.y, 17.5, 18.0, -mDir);
+        drawFurryBone(shX - mDir * 2.0, shY + 1, farElbow.x, farElbow.y, 3.4, 2.5, '#261810', 'rgba(217, 154, 82, 0.35)');
+        drawFurryBone(farElbow.x, farElbow.y, farHand.x, farHand.y, 2.4, 1.7, '#180f0a', 'rgba(217, 154, 82, 0.28)');
+        ctx.fillStyle = '#120b07';
+        ctx.beginPath(); ctx.arc(farHand.x + mDir * 0.8, farHand.y + 0.5, 2.6, 0, Math.PI * 2); ctx.fill();
+
+        const legSwing = Math.sin(sRaw * Math.PI * 2) * 6.5 * speedEnv;
+        const farFootX = hipX - mDir * (6.8 - legSwing * 0.75);
+        const farFootY = hipY + 18.5 - Math.abs(legSwing) * 0.28;
+        const farKnee = solveIK(hipX - mDir * 1.8, hipY, farFootX, farFootY, 12.8, 12.8, mDir);
+        drawFurryBone(hipX - mDir * 1.8, hipY, farKnee.x, farKnee.y, 3.5, 2.4, '#2d1c12', null);
+        drawFurryBone(farKnee.x, farKnee.y, farFootX, farFootY, 2.3, 1.6, '#170f0a', null);
+        ctx.fillStyle = '#140d09';
+        ctx.beginPath(); ctx.ellipse(farFootX + mDir * 2.2, farFootY + 0.9, 3.4, 1.5, mDir * 0.25, 0, Math.PI * 2); ctx.fill();
+
+        // B. LONG MUSCULAR PREHENSILE SPIDER-MONKEY TAIL (Actively Anchoring & Curling Around the Vine Behind!)
+        const tailVineU = uFromTravel(Math.max(0.06, travel - stepU * 1.65));
+        const tailGrip = vinePt(tailVineU);
+        const tailWave = Math.sin(time * 3.8 + i) * 4.2;
+        ctx.strokeStyle = '#1c120c'; ctx.lineWidth = 4.2; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(hipX - mDir * 3.8, hipY - 1.5);
+        ctx.bezierCurveTo(
+          hipX - mDir * 22, hipY + 4 + tailWave,
+          tailGrip.x - mDir * 12, tailGrip.y + 18,
+          tailGrip.x - mDir * 1.5, tailGrip.y + 1.5
+        );
+        ctx.stroke();
+        // Warm sunlit golden-amber fur rim along upper prehensile tail + curled grasping tip!
+        ctx.strokeStyle = 'rgba(245, 184, 98, 0.68)'; ctx.lineWidth = 1.45;
+        ctx.beginPath();
+        ctx.moveTo(hipX - mDir * 3.8, hipY - 2.5);
+        ctx.quadraticCurveTo(hipX - mDir * 16, hipY + 1 + tailWave * 0.6, tailGrip.x - mDir * 8, tailGrip.y + 11);
+        ctx.stroke();
+        ctx.strokeStyle = '#140d09'; ctx.lineWidth = 3.0;
+        ctx.beginPath();
+        ctx.arc(tailGrip.x, tailGrip.y + 0.5, 3.8, Math.PI * 0.15, Math.PI * 1.65);
+        ctx.stroke();
+
+        // C. SUPPLE GOLDEN-BUFF & ESPRESSO YUCATÁN SPIDER MONKEY TORSO (Ateles geoffroyi Pelage!)
+        ctx.save();
+        ctx.translate((shX + hipX) * 0.5, (shY + hipY) * 0.5);
+        ctx.rotate(torsoTilt);
+        ctx.scale(mDir * 1.22, 1.22);
+        const coatG = ctx.createLinearGradient(-6, -10, 7, 10);
+        coatG.addColorStop(0.0, '#2b1b12');
+        coatG.addColorStop(0.32, '#b46f30');
+        coatG.addColorStop(0.75, '#eab065');
+        coatG.addColorStop(1.0, '#855022');
+        ctx.fillStyle = coatG;
+        ctx.strokeStyle = '#170e09'; ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(-4.8, -8.8);
+        ctx.bezierCurveTo(5.0, -9.8, 7.5, -1.5, 6.0, 7.0);
+        ctx.quadraticCurveTo(0.5, 11.5, -5.0, 8.0);
+        ctx.bezierCurveTo(-7.5, 2.0, -6.8, -5.5, -4.8, -8.8);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(254, 235, 185, 0.48)';
+        ctx.beginPath(); ctx.ellipse(2.5, 1.5, 2.7, 5.8, 0.08, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        // D. EXPRESSIVE SPIDER MONKEY HEAD (Gazing Up/Forward Toward Next Vine Grip, Pale Peach Mask & Glossy Eye!)
+        const hdX = shX + mDir * 4.5;
+        const hdY = shY - 5.0;
+        ctx.save();
+        ctx.translate(hdX, hdY);
+        ctx.scale(mDir * 1.22, 1.22);
+        ctx.rotate(-0.14 - Math.sin(sRaw * Math.PI) * 0.10);
+        const hdG = ctx.createRadialGradient(-1, -2, 1, 0, 0, 6.8);
+        hdG.addColorStop(0, '#4a2f1e'); hdG.addColorStop(1, '#1a110b');
+        ctx.fillStyle = hdG;
+        ctx.beginPath(); ctx.arc(0, 0, 5.7, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#9a6b49';
+        ctx.beginPath(); ctx.arc(-2.6, 0.4, 1.8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#e8bfa0';
+        ctx.beginPath(); ctx.ellipse(2.9, -0.6, 2.6, 2.3, -0.1, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#d8ab88';
+        ctx.beginPath(); ctx.ellipse(4.7, 1.3, 2.5, 2.0, 0.12, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#291a12';
+        ctx.beginPath(); ctx.arc(5.9, 0.9, 0.58, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#3b2418'; ctx.lineWidth = 0.75;
+        ctx.beginPath(); ctx.moveTo(3.8, 2.3); ctx.quadraticCurveTo(5.2, 2.6, 6.2, 2.0); ctx.stroke();
+        ctx.fillStyle = '#090604';
+        ctx.beginPath(); ctx.arc(3.3, -0.8, 1.3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(3.7, -1.2, 0.52, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        // E. NEAR (SUNLIT) HIND LEG & NEAR BRACHIATING ARM (Rendered in Front of Chest!)
+        const nearFootX = hipX + mDir * (4.2 - legSwing * 0.78);
+        const nearFootY = hipY + 18.0 - Math.max(0, legSwing) * 0.35;
+        const nearKnee = solveIK(hipX + mDir * 1.8, hipY + 0.6, nearFootX, nearFootY, 13.0, 13.0, mDir);
+        drawFurryBone(hipX + mDir * 1.8, hipY + 0.6, nearKnee.x, nearKnee.y, 3.7, 2.5, '#965c29', 'rgba(253, 214, 146, 0.62)');
+        drawFurryBone(nearKnee.x, nearKnee.y, nearFootX, nearFootY, 2.4, 1.65, '#281911', 'rgba(217, 154, 82, 0.35)');
+        ctx.fillStyle = '#180f0a';
+        ctx.beginPath(); ctx.ellipse(nearFootX + mDir * 2.3, nearFootY + 0.9, 3.6, 1.6, mDir * 0.25, 0, Math.PI * 2); ctx.fill();
+
+        const nearElbow = solveIK(shX + mDir * 2.0, shY + 1.4, nearHand.x, nearHand.y, 17.8, 18.2, -mDir);
+        drawFurryBone(shX + mDir * 2.0, shY + 1.4, nearElbow.x, nearElbow.y, 3.6, 2.6, '#613c20', 'rgba(253, 214, 146, 0.65)');
+        drawFurryBone(nearElbow.x, nearElbow.y, nearHand.x, nearHand.y, 2.5, 1.75, '#241710', 'rgba(235, 178, 108, 0.45)');
+        ctx.fillStyle = '#140d09';
+        ctx.beginPath();
+        ctx.arc(nearHand.x + mDir * 0.6, nearHand.y - 0.6, 2.8, Math.PI * 0.8, Math.PI * 2.2);
+        ctx.fill();
+
+        // 2. Twin Museum-Grade Yucatán Royal Palm Trees framing the open cenote vista!
+        drawMayaPalmTree(bx + 36, baseY + 8, topLX, topLY, -11, i * 3 + 1);
+        drawMayaPalmTree(bx + slotW - 36, baseY + 8, topRX, topRY, 12, i * 3 + 2);
+
+        // Low moss-draped Mayan carved aqueduct balustrade + multi-tier foaming waterfall plunging into the Sacred Cenote!
+        drawBrickMasonry(ctx, bx + 48, baseY - 62, slotW - 96, 68, ['#948b76', '#7d7562', '#a89f87', '#696252'], '#3b372c', i + 7);
+        ctx.fillStyle = 'rgba(21, 128, 61, 0.82)';
+        ctx.fillRect(bx + 46, baseY - 66, slotW - 92, 8);
+
+        const wfCx = bx + slotW * 0.5;
+        // Carved stone Chaac/Serpent aqueduct spout rims flanking waterfall
+        ctx.fillStyle = '#c7bfa8'; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.3;
+        ctx.fillRect(wfCx - 34, baseY - 68, 12, 22); ctx.strokeRect(wfCx - 34, baseY - 68, 12, 22);
+        ctx.fillRect(wfCx + 22, baseY - 68, 12, 22); ctx.strokeRect(wfCx + 22, baseY - 68, 12, 22);
+
+        // Cascading turquoise waterfall plunging all the way down into waterY (baseY + 26)!
+        const wfG = ctx.createLinearGradient(wfCx, baseY - 62, wfCx, baseY + 30);
+        wfG.addColorStop(0, 'rgba(153, 246, 228, 0.92)');
+        wfG.addColorStop(0.5, 'rgba(45, 212, 191, 0.88)');
+        wfG.addColorStop(1, 'rgba(13, 148, 136, 0.92)');
+        ctx.fillStyle = wfG;
+        ctx.fillRect(wfCx - 22, baseY - 62, 44, 92);
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.75)'; ctx.lineWidth = 2.2;
+        for (let s = -1; s <= 1; s++) {
+          const off = ((time * 105 + (s + 2) * 24) % 76);
+          ctx.beginPath(); ctx.moveTo(wfCx + s * 10, baseY - 60 + off); ctx.lineTo(wfCx + s * 10, baseY - 44 + off); ctx.stroke();
+        }
+        // Foaming white splash & turquoise mist at waterfall impact in the cenote!
+        const spPulse = Math.sin(time * 9 + i) * 3;
+        ctx.fillStyle = 'rgba(240, 253, 250, 0.85)';
+        for (let f = -2; f <= 2; f++) {
+          ctx.beginPath(); ctx.arc(wfCx + f * 9, baseY + 26, 6.5 - Math.abs(f) * 0.8 + spPulse * 0.2, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Drifting golden rainforest fireflies
+        for (let ff = 0; ff < 5; ff++) {
+          const fx = bx + 74 + ff * 54 + Math.sin(time * 2.1 + ff * 1.8) * 16;
+          const fy = baseY - 126 - (ff % 3) * 42 + Math.cos(time * 1.7 + ff) * 14;
+          ctx.fillStyle = `rgba(254, 240, 138, ${(0.48 + 0.45 * Math.sin(time * 4 + ff)).toFixed(2)})`;
+          ctx.beginPath(); ctx.arc(fx, fy, 2.5, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+        continue;
+      }
+
+      // 3 DISTINCT MUSEUM-GRADE 3D PUUC, UXMAL & BONAMPAK MAYAN TEMPLE MONUMENTS (bType = 0, 1, 2)
+      const bType = idx === 0 ? 0 : (idx === 1 ? 1 : 2);
+      const bH = bType === 0 ? 298 : (bType === 1 ? 276 : 316);
+      const bW = slotW - 34;
+      const bX = bx + 12;
+      const bY = baseY - bH;
+      const archCx = bX + bW * 0.5;
+
+      ctx.save();
+      // 1. 3D Shaded Right Side Depth Return Wall (Gives every temple true solid 3D mass!)
+      ctx.fillStyle = '#4c483b'; ctx.strokeStyle = '#29251c'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(bX + bW, bY + 8);
+      ctx.lineTo(bX + bW + 14, bY + 18);
+      ctx.lineTo(bX + bW + 14, baseY);
+      ctx.lineTo(bX + bW, baseY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // 2. Main Weathered Yucatán Cut-Limestone Ashlar Facade + Sloped Battered Talud Plinth
+      drawBrickMasonry(ctx, bX, bY + 42, bW, bH - 42, ['#aba28c', '#918974', '#bdb49d', '#7c7563', '#c6bda6'], '#433e31', i * 11 + bType);
+      const shG = ctx.createLinearGradient(bX, bY, bX + bW, baseY);
+      shG.addColorStop(0, 'rgba(255, 248, 220, 0.22)');
+      shG.addColorStop(0.55, 'rgba(0, 0, 0, 0)');
+      shG.addColorStop(1, 'rgba(12, 24, 16, 0.42)');
+      ctx.fillStyle = shG; ctx.fillRect(bX, bY + 42, bW, bH - 42);
+      ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.6;
+      ctx.strokeRect(bX, bY + 42, bW, bH - 42);
+
+      // Sloped Battered Stone Plinth Base (Talud) along bottom of temple
+      const plG = ctx.createLinearGradient(bX, baseY - 22, bX, baseY);
+      plG.addColorStop(0, '#cfc6b0'); plG.addColorStop(1, '#78715f');
+      ctx.fillStyle = plG;
+      ctx.beginPath();
+      ctx.moveTo(bX - 5, baseY); ctx.lineTo(bX + 2, baseY - 20);
+      ctx.lineTo(bX + bW - 2, baseY - 20); ctx.lineTo(bX + bW + 5, baseY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // 3. Flanking 3D Carved Cylindrical Engaged Corner Pilasters with Molded Stone Capitals!
+      for (const pxCol of [bX + 8, bX + bW - 22]) {
+        const colG = ctx.createLinearGradient(pxCol, 0, pxCol + 14, 0);
+        colG.addColorStop(0, '#78715f'); colG.addColorStop(0.4, '#e5dec8'); colG.addColorStop(1, '#5c5646');
+        ctx.fillStyle = colG;
+        ctx.fillRect(pxCol, bY + 46, 14, bH - 66);
+        ctx.strokeRect(pxCol, bY + 46, 14, bH - 66);
+        ctx.fillStyle = '#dfd7c2';
+        ctx.fillRect(pxCol - 2, bY + 46, 18, 7); ctx.strokeRect(pxCol - 2, bY + 46, 18, 7);
+        ctx.fillRect(pxCol - 2, baseY - 26, 18, 7); ctx.strokeRect(pxCol - 2, baseY - 26, 18, 7);
+      }
+
+      // 4. Projecting 3D Mayan Angled Entablature Cornice (Atadura) + Puuc Colonnette (Junquillo) Frieze!
+      // Deep architectural cast shadow beneath lower cornice overhang
+      ctx.fillStyle = 'rgba(18, 22, 16, 0.55)';
+      ctx.fillRect(bX + 1, bY + 44, bW - 2, 8);
+
+      // Upper entablature frieze recessed band filled with 3D Puuc vertical stone colonnettes!
+      ctx.fillStyle = '#2b281f';
+      ctx.fillRect(bX + 2, bY + 12, bW - 4, 24);
+      for (let jx = bX + 8; jx < bX + bW - 12; jx += 12) {
+        const jG = ctx.createLinearGradient(jx, 0, jx + 8, 0);
+        jG.addColorStop(0, '#78715f'); jG.addColorStop(0.45, '#e8e0ca'); jG.addColorStop(1, '#575243');
+        ctx.fillStyle = jG;
+        ctx.fillRect(jx, bY + 13, 8, 22);
+      }
+      // Jade & gold frieze medallions spaced across the colonnette entablature
+      for (let mx = bX + 34; mx < bX + bW - 30; mx += 64) {
+        ctx.fillStyle = '#059669'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.arc(mx, bY + 24, 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath(); ctx.arc(mx, bY + 24, 2.8, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Flaring 45-degree 3D Upper & Lower Mayan Atadura Cornice Moldings!
+      const cornG = ctx.createLinearGradient(bX, bY, bX, bY + 14);
+      cornG.addColorStop(0, '#f3ebd4'); cornG.addColorStop(0.6, '#c7bfa8'); cornG.addColorStop(1, '#78715f');
+      ctx.fillStyle = cornG; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 1.5;
+      // Upper cornice flare
+      ctx.beginPath();
+      ctx.moveTo(bX - 7, bY); ctx.lineTo(bX + bW + 7, bY);
+      ctx.lineTo(bX + bW + 2, bY + 12); ctx.lineTo(bX - 2, bY + 12);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Lower Atadura flare
+      ctx.beginPath();
+      ctx.moveTo(bX - 2, bY + 35); ctx.lineTo(bX + bW + 2, bY + 35);
+      ctx.lineTo(bX + bW + 7, bY + 45); ctx.lineTo(bX - 7, bY + 45);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // 5. Sculpted Stepped Pierced Stone Roof Comb (Crestería) & Lush Hanging Rainforest Vines!
+      ctx.fillStyle = '#c2b9a1';
+      ctx.beginPath();
+      ctx.moveTo(bX + 34, bY); ctx.lineTo(bX + 44, bY - 26);
+      ctx.lineTo(bX + bW - 44, bY - 26); ctx.lineTo(bX + bW - 34, bY);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#d2c9b2';
+      ctx.beginPath();
+      ctx.moveTo(bX + 74, bY - 26); ctx.lineTo(bX + 84, bY - 46);
+      ctx.lineTo(bX + bW - 84, bY - 46); ctx.lineTo(bX + bW - 74, bY - 26);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Pierced lattice sky-slots in the Crestería
+      ctx.fillStyle = '#1f2822';
+      for (let rx = bX + 56; rx < bX + bW - 64; rx += 22) ctx.fillRect(rx, bY - 20, 9, 13);
+      for (let rx = bX + 96; rx < bX + bW - 102; rx += 22) ctx.fillRect(rx, bY - 40, 8, 10);
+
+      // Moss cushions, Monstera fronds & scarlet bromeliads draping from the cornice
+      ctx.fillStyle = 'rgba(21, 128, 61, 0.88)';
+      ctx.beginPath();
+      ctx.ellipse(bX + 26, bY, 22, 4.5, 0, 0, Math.PI * 2);
+      ctx.ellipse(bX + bW - 28, bY, 24, 4.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      for (const vxOff of [26, bW - 30]) {
+        const vSw = Math.sin(time * 1.8 + i + vxOff) * 3;
+        ctx.strokeStyle = '#14532d'; ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(bX + vxOff, bY + 3);
+        ctx.quadraticCurveTo(bX + vxOff + vSw * 0.5, bY + 52, bX + vxOff + vSw, bY + 98);
+        ctx.stroke();
+        for (let lf = 1; lf <= 5; lf++) {
+          const ly = bY + 14 + lf * 16;
+          ctx.fillStyle = (lf % 2 === 0) ? '#15803d' : '#22c55e';
+          ctx.beginPath(); ctx.ellipse(bX + vxOff + vSw * (lf / 5) + (lf % 2 ? 5.5 : -5.5), ly, 6.5, 2.8, (lf % 2 ? 0.5 : -0.5), 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      // 6. MUSEUM-GRADE ARCHITECTURAL WALL BAS-RELIEFS & BONAMPAK STUCCO FRESCOES (Zero Cartoon Shapes!)
+      const muralCy = bY + 98;
+      if (bType === 0) {
+        // Variant 0: Recessed Chiseled 16-Ray Kinich Ahau Limestone Sun-Stone + Flanking Hieroglyphic Stelae!
+        // Recessed stone shadow niche
+        ctx.fillStyle = '#332f24'; ctx.strokeStyle = '#dfd7c2'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(archCx, muralCy, 38, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        // 16 Chiseled Triangular Solar Pointer Rays
+        for (let r = 0; r < 16; r++) {
+          const a = r * (Math.PI / 8);
+          ctx.fillStyle = (r % 2 === 0) ? '#e8dec6' : '#fbbf24';
+          ctx.beginPath();
+          ctx.moveTo(archCx + Math.cos(a - 0.12) * 26, muralCy + Math.sin(a - 0.12) * 26);
+          ctx.lineTo(archCx + Math.cos(a) * 36, muralCy + Math.sin(a) * 36);
+          ctx.lineTo(archCx + Math.cos(a + 0.12) * 26, muralCy + Math.sin(a + 0.12) * 26);
+          ctx.closePath(); ctx.fill();
+        }
+        // Concentric Carved Calendar Glyph Ring (Maya Blue, Jade & Chiseled Limestone)
+        const sunG = ctx.createRadialGradient(archCx - 8, muralCy - 8, 4, archCx, muralCy, 27);
+        sunG.addColorStop(0, '#f5ecd4'); sunG.addColorStop(0.65, '#bfb69e'); sunG.addColorStop(1, '#78715f');
+        ctx.fillStyle = sunG; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(archCx, muralCy, 27, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        ctx.strokeStyle = '#0284c7'; ctx.lineWidth = 3.2;
+        ctx.beginPath(); ctx.arc(archCx, muralCy, 20, 0, Math.PI * 2); ctx.stroke();
+        for (let g = 0; g < 12; g++) {
+          const a = g * (Math.PI / 6);
+          ctx.fillStyle = (g % 3 === 0) ? '#10b981' : '#332f24';
+          ctx.beginPath(); ctx.arc(archCx + Math.cos(a) * 20, muralCy + Math.sin(a) * 20, 2.0, 0, Math.PI * 2); ctx.fill();
+        }
+        // Central Chiseled Solar Medallion Core
+        ctx.fillStyle = '#d97706'; ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(archCx, muralCy, 10.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath(); ctx.arc(archCx, muralCy, 4.5, 0, Math.PI * 2); ctx.fill();
+
+        // Flanking Vertical Carved Mayan Hieroglyphic Cartouche Columns!
+        for (const s of [-1, 1]) {
+          const gx = archCx + s * 78 - 18;
+          ctx.fillStyle = 'rgba(44, 40, 30, 0.45)';
+          ctx.fillRect(gx - 2, muralCy - 32, 40, 64);
+          for (let row = 0; row < 3; row++) {
+            const gy = muralCy - 29 + row * 20;
+            ctx.fillStyle = '#d6ccb4'; ctx.strokeStyle = '#332f24'; ctx.lineWidth = 1.1;
+            ctx.beginPath(); ctx.roundRect(gx, gy, 36, 17, 4); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = (row === 1) ? '#059669' : '#78715f'; ctx.lineWidth = 1.2;
+            ctx.strokeRect(gx + 5, gy + 4, 14, 9);
+            ctx.fillStyle = '#0284c7';
+            ctx.beginPath(); ctx.arc(gx + 27, gy + 8.5, 3.2, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+      } else if (bType === 1) {
+        // Variant 1: Authentic Uxmal Governor's Palace 3D Crisscross Stone Lattice (Celosía) & Twin Serpent Relief!
+        const pX = archCx - 112, pY = muralCy - 28, pW = 224, pH = 54;
+        // Deep dark recessed stone cavity behind the latticework
+        ctx.fillStyle = '#1e1c16'; ctx.strokeStyle = '#e5dec8'; ctx.lineWidth = 1.6;
+        ctx.fillRect(pX, pY, pW, pH); ctx.strokeRect(pX, pY, pW, pH);
+
+        // 3D Chiseled Diagonal Limestone Lattice Strips (Uxmal Celosía Diamond Fretwork!)
+        ctx.save();
+        ctx.beginPath(); ctx.rect(pX + 2, pY + 2, pW - 4, pH - 4); ctx.clip();
+        ctx.strokeStyle = '#cfc6b0'; ctx.lineWidth = 4.2;
+        for (let dx = -pH; dx < pW + pH; dx += 22) {
+          ctx.beginPath();
+          ctx.moveTo(pX + dx, pY); ctx.lineTo(pX + dx + pH, pY + pH);
+          ctx.moveTo(pX + dx + pH, pY); ctx.lineTo(pX + dx, pY + pH);
+          ctx.stroke();
+        }
+        // Sunlit top bevels & jade florets at diamond intersections
+        ctx.fillStyle = '#10b981';
+        for (let dx = 18; dx < pW - 14; dx += 22) {
+          ctx.beginPath(); ctx.arc(pX + dx, pY + pH * 0.5, 2.5, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+
+        // Central Sculpted Limestone & Jade Intertwined Feathered-Serpent Plaque
+        ctx.fillStyle = '#dfd7c2'; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.roundRect(archCx - 34, pY - 4, 68, pH + 8, 6); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#059669'; ctx.lineWidth = 3.0;
+        ctx.beginPath();
+        ctx.arc(archCx - 10, muralCy, 12, Math.PI * 0.2, Math.PI * 1.8);
+        ctx.arc(archCx + 10, muralCy, 12, Math.PI * 1.2, Math.PI * 0.8);
+        ctx.stroke();
+        ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(archCx, muralCy, 6.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      } else {
+        // Variant 2: Deeply Chiseled 3D Limestone Vision-Serpent Bas-Relief Alcoves (Matching Museum-Grade Stone Chiaroscuro!)
+        for (const s of [-1, 1]) {
+          const fx = archCx + s * 62 - 44;
+          const fy = muralCy - 32;
+          const fw = 88, fh = 60;
+          // Deep recessed dark stone niche + overhang shadow + sunlit bottom/right stone lip
+          const cavG2 = ctx.createLinearGradient(fx, fy, fx + fw, fy + fh);
+          cavG2.addColorStop(0, '#332e22'); cavG2.addColorStop(0.55, '#4a4334'); cavG2.addColorStop(1, '#5d5543');
+          ctx.fillStyle = cavG2;
+          ctx.fillRect(fx, fy, fw, fh);
+          ctx.fillStyle = 'rgba(46, 125, 132, 0.14)';
+          ctx.fillRect(fx + 4, fy + 4, fw - 8, fh - 8);
+          ctx.fillStyle = 'rgba(14, 12, 8, 0.55)';
+          ctx.fillRect(fx, fy, fw, 4.5); ctx.fillRect(fx, fy, 4.5, fh);
+          ctx.fillStyle = 'rgba(248, 240, 218, 0.48)';
+          ctx.fillRect(fx + 2, fy + fh - 2.5, fw - 2, 2.5); ctx.fillRect(fx + fw - 2.5, fy + 2, 2.5, fh - 2);
+          ctx.strokeStyle = '#242017'; ctx.lineWidth = 1.4;
+          ctx.strokeRect(fx, fy, fw, fh);
+
+          // Sculpted 3D Limestone Kukulcán Vision Serpent Relief inside Alcove!
+          ctx.save();
+          ctx.translate(fx + fw * 0.5, fy + fh * 0.52);
+          ctx.scale(s, 1);
+          const relG = ctx.createLinearGradient(-32, -22, 32, 22);
+          relG.addColorStop(0, '#e5dcc4'); relG.addColorStop(0.5, '#b5ab92'); relG.addColorStop(1, '#7a725d');
+          const drawSerp = () => {
+            // Sweeping carved plume fan + S-coiled serpent body + roaring fanged head
+            for (let pf = 0; pf < 4; pf++) {
+              const px0 = -18 + pf * 8;
+              ctx.moveTo(px0, -2);
+              ctx.quadraticCurveTo(px0 - 8, -17, px0 - 13, -19);
+              ctx.quadraticCurveTo(px0 - 3, -18, px0 + 3, -4);
+              ctx.closePath();
+            }
+            ctx.moveTo(-30, 14);
+            ctx.bezierCurveTo(-18, -16, 4, 18, 14, -4);
+            ctx.lineTo(18, 4);
+            ctx.bezierCurveTo(4, 26, -16, -5, -26, 20);
+            ctx.closePath();
+            ctx.moveTo(10, -15);
+            ctx.quadraticCurveTo(21, -20, 31, -12);
+            ctx.lineTo(31, -4); ctx.lineTo(19, -3); ctx.lineTo(29, 5); ctx.lineTo(23, 10); ctx.lineTo(10, 5);
+            ctx.closePath();
+          };
+          // Undercut shadow
+          ctx.save(); ctx.translate(2.2 * s, 2.5); ctx.beginPath(); drawSerp(); ctx.fillStyle = 'rgba(15, 13, 9, 0.72)'; ctx.fill(); ctx.restore();
+          // Sunlit bevel
+          ctx.save(); ctx.translate(-0.9 * s, -1.0); ctx.beginPath(); drawSerp(); ctx.fillStyle = 'rgba(253, 247, 228, 0.72)'; ctx.fill(); ctx.restore();
+          // Main 3D stone body
+          ctx.beginPath(); drawSerp(); ctx.fillStyle = relG; ctx.fill();
+          ctx.strokeStyle = 'rgba(32, 27, 19, 0.75)'; ctx.lineWidth = 0.95; ctx.stroke();
+          ctx.fillStyle = '#1c1811';
+          ctx.beginPath(); ctx.arc(19, -9.5, 2.0, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // 7. DEEP 3D MULTI-STEP MAYAN CORBELLED SANCTUARY PORTAL ("البوابات" — Jambs, Sapodilla Lintel, 3 Receding Corbel Arches & Lit Inner Stairs!)
+      const doorY = baseY - 122;
+      // Twin 3D Carved Hieroglyphic Stone Doorjamb Pillars flanking the sanctuary portal!
+      for (const jSide of [-1, 1]) {
+        const jx = archCx + jSide * 50 - 9;
+        const jG = ctx.createLinearGradient(jx, 0, jx + 18, 0);
+        jG.addColorStop(0, '#cfc6b0'); jG.addColorStop(0.5, '#ebe3cc'); jG.addColorStop(1, '#78715f');
+        ctx.fillStyle = jG; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 1.4;
+        ctx.fillRect(jx, doorY, 18, baseY - doorY);
+        ctx.strokeRect(jx, doorY, 18, baseY - doorY);
+        // Stacked chiseled Mayan glyph blocks down each doorjamb!
+        ctx.strokeStyle = 'rgba(51, 47, 36, 0.55)'; ctx.lineWidth = 1.0;
+        for (let gy = doorY + 10; gy < baseY - 14; gy += 18) {
+          ctx.strokeRect(jx + 3, gy, 12, 13);
+          ctx.fillStyle = ((Math.floor(gy / 18) & 1) === 0) ? '#059669' : '#0284c7';
+          ctx.fillRect(jx + 6, gy + 4, 6, 5);
+        }
+      }
+
+      // Heavy Carved Sapodilla Hardwood & Jade Temple Lintel Beam spanning both jambs!
+      const linG = ctx.createLinearGradient(archCx - 64, doorY - 14, archCx + 64, doorY + 2);
+      linG.addColorStop(0, '#5c2d16'); linG.addColorStop(0.5, '#7c3f1d'); linG.addColorStop(1, '#3e1d0d');
+      ctx.fillStyle = linG; ctx.strokeStyle = '#241107'; ctx.lineWidth = 1.6;
+      ctx.fillRect(archCx - 64, doorY - 14, 128, 15);
+      ctx.strokeRect(archCx - 64, doorY - 14, 128, 15);
+      for (let lx = archCx - 50; lx <= archCx + 50; lx += 20) {
+        ctx.fillStyle = '#10b981'; ctx.fillRect(lx - 5, doorY - 10, 10, 7);
+        ctx.fillStyle = '#fbbf24'; ctx.fillRect(lx - 2, doorY - 8, 4, 3);
+      }
+
+      // 3 Concentric Receding 3D Mayan Corbelled Vault Arch Layers (Creating real architectural depth!)
+      const corbelCols = ['#6e6856', '#3d392e', '#14110d'];
+      for (let cl = 0; cl < 3; cl++) {
+        const inset = cl * 6;
+        const topInset = cl * 5;
+        ctx.fillStyle = corbelCols[cl];
+        ctx.strokeStyle = cl === 0 ? '#e5dec8' : '#29251c';
+        ctx.lineWidth = cl === 0 ? 1.8 : 1.1;
+        ctx.beginPath();
+        ctx.moveTo(archCx - 41 + inset, baseY);
+        ctx.lineTo(archCx - 41 + inset, doorY + 34 + topInset * 0.5);
+        ctx.lineTo(archCx - 15 + inset * 0.4, doorY + 2 + topInset);
+        ctx.lineTo(archCx + 15 - inset * 0.4, doorY + 2 + topInset);
+        ctx.lineTo(archCx + 41 - inset, doorY + 34 + topInset * 0.5);
+        ctx.lineTo(archCx + 41 - inset, baseY);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+      }
+
+      // Illuminated Receding Stone Sanctuary Steps & Glowing Inner Mayan Altar inside Portal!
+      const fPulse = 0.88 + Math.sin(time * 7.5 + i * 2) * 0.12;
+      const inGlow = ctx.createRadialGradient(archCx, baseY - 46, 4, archCx, baseY - 46, 58 * fPulse);
+      inGlow.addColorStop(0, 'rgba(254, 243, 199, 0.72)');
+      inGlow.addColorStop(0.5, 'rgba(245, 158, 11, 0.32)');
+      inGlow.addColorStop(1, 'rgba(234, 88, 12, 0)');
+      ctx.fillStyle = inGlow;
+      ctx.beginPath(); ctx.arc(archCx, baseY - 46, 58, 0, Math.PI * 2); ctx.fill();
+
+      // Inner receding stone steps lit by sanctuary firelight
+      for (let st = 0; st < 4; st++) {
+        const sw = 54 - st * 8;
+        const sy = baseY - 5 - st * 6;
+        ctx.fillStyle = `rgba(214, 200, 170, ${(0.38 - st * 0.06).toFixed(2)})`;
+        ctx.fillRect(archCx - sw * 0.5, sy, sw, 4.5);
+      }
+
+      // 8. Twin Sculpted Stone Ceremonial Fire Braziers flanking the Doorjambs!
+      for (const fx of [archCx - 76, archCx + 76]) {
+        const bGlow = ctx.createRadialGradient(fx, baseY - 56, 2, fx, baseY - 56, 28);
+        bGlow.addColorStop(0, 'rgba(251, 191, 36, 0.46)');
+        bGlow.addColorStop(1, 'rgba(234, 88, 12, 0)');
+        ctx.fillStyle = bGlow; ctx.beginPath(); ctx.arc(fx, baseY - 56, 28, 0, Math.PI * 2); ctx.fill();
+
+        ctx.fillStyle = '#9e9581'; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 1.3;
+        ctx.fillRect(fx - 10, baseY - 10, 20, 10); ctx.strokeRect(fx - 10, baseY - 10, 20, 10);
+        ctx.fillRect(fx - 7, baseY - 35, 14, 25); ctx.strokeRect(fx - 7, baseY - 35, 14, 25);
+        ctx.fillStyle = '#10b981'; ctx.fillRect(fx - 5, baseY - 25, 10, 5);
+        ctx.fillStyle = '#cfc6b0';
+        ctx.beginPath();
+        ctx.moveTo(fx - 15, baseY - 47); ctx.lineTo(fx + 15, baseY - 47);
+        ctx.lineTo(fx + 10, baseY - 35); ctx.lineTo(fx - 10, baseY - 35);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        const flH = 15 + Math.sin(time * 11 + fx) * 3.5;
+        ctx.fillStyle = '#ea580c';
+        ctx.beginPath(); ctx.moveTo(fx - 9, baseY - 47); ctx.quadraticCurveTo(fx, baseY - 47 - flH * 1.4, fx + 9, baseY - 47); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath(); ctx.moveTo(fx - 6, baseY - 47); ctx.quadraticCurveTo(fx, baseY - 47 - flH * 1.05, fx + 6, baseY - 47); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#fef9c3';
+        ctx.beginPath(); ctx.moveTo(fx - 3, baseY - 47); ctx.quadraticCurveTo(fx, baseY - 47 - flH * 0.65, fx + 3, baseY - 47); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawMayaTempleGate(ctx, g, sx, sy, time, goalLabel) {
+    // Grand Finale Monumental 3D Temple of Kukulcán Sanctuary Exit Gateway:
+    // Sloped Talud-Tablero Bastions, 3D Side Return, Atadura Cornices, Overlapping-Scale Feathered-Serpent Columns,
+    // 3-Step Corbelled Portal Arch, 16-Ray Kinich Ahau Sun-Stone Roof Comb & Sculpted Braziers!
+    const cx = sx + g.w * 0.5;
+    const baseY = sy + g.h;
+    const gateW = 238;
+    const gateH = 242;
+    const topY = baseY - gateH;
+
+    ctx.save();
+    // 1. Emerald & Gold Ceremonial Temple Beacon Aura
+    const aura = ctx.createRadialGradient(cx, baseY - 96, 18, cx, baseY - 96, 182);
+    aura.addColorStop(0, 'rgba(52, 211, 153, 0.50)');
+    aura.addColorStop(0.52, 'rgba(251, 191, 36, 0.22)');
+    aura.addColorStop(1, 'rgba(251, 191, 36, 0)');
+    ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(cx, baseY - 96, 182, 0, Math.PI * 2); ctx.fill();
+
+    // 2. 3D Shaded Right Flank Wall + Sloped Battered Talud-Tablero Temple Monument!
+    ctx.fillStyle = '#4c483b'; ctx.strokeStyle = '#29251c'; ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(cx + gateW * 0.5, topY + 32);
+    ctx.lineTo(cx + gateW * 0.5 + 18, topY + 44);
+    ctx.lineTo(cx + gateW * 0.54 + 18, baseY);
+    ctx.lineTo(cx + gateW * 0.54, baseY);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    // Main Battered Cut-Limestone Temple Body
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cx - gateW * 0.54, baseY);
+    ctx.lineTo(cx - gateW * 0.5, topY + 32);
+    ctx.lineTo(cx + gateW * 0.5, topY + 32);
+    ctx.lineTo(cx + gateW * 0.54, baseY);
+    ctx.closePath();
+    ctx.clip();
+    drawBrickMasonry(ctx, cx - gateW * 0.55, topY + 30, gateW * 1.10, gateH - 30, ['#b8af98', '#9c937c', '#cbc2ab', '#827a66'], '#433e31', 24);
+    const faceShade = ctx.createLinearGradient(cx - gateW * 0.5, topY + 30, cx + gateW * 0.5, baseY);
+    faceShade.addColorStop(0, 'rgba(255, 251, 235, 0.26)');
+    faceShade.addColorStop(0.55, 'rgba(0, 0, 0, 0)');
+    faceShade.addColorStop(1, 'rgba(14, 26, 18, 0.38)');
+    ctx.fillStyle = faceShade;
+    ctx.fillRect(cx - gateW * 0.55, topY + 30, gateW * 1.10, gateH - 30);
+    ctx.restore();
+
+    ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.moveTo(cx - gateW * 0.54, baseY);
+    ctx.lineTo(cx - gateW * 0.5, topY + 32);
+    ctx.lineTo(cx + gateW * 0.5, topY + 32);
+    ctx.lineTo(cx + gateW * 0.54, baseY);
+    ctx.closePath(); ctx.stroke();
+
+    // 3-Step Ceremonial Limestone Grand Altar Dais at Base
+    for (let st = 0; st < 2; st++) {
+      const sw = gateW * (1.12 - st * 0.08);
+      ctx.fillStyle = st === 0 ? '#cfc6b0' : '#dfd7c2';
+      ctx.fillRect(cx - sw * 0.5, baseY - (st + 1) * 7, sw, 7);
+      ctx.strokeRect(cx - sw * 0.5, baseY - (st + 1) * 7, sw, 7);
+    }
+
+
+    // Recessed Carved Mayan Codex & Jade Relief Panels on Left & Right Pylons!
+    for (const s of [-1, 1]) {
+      const px0 = cx + s * 86 - 16;
+      ctx.fillStyle = '#26231b'; ctx.strokeStyle = '#dfd7c2'; ctx.lineWidth = 1.3;
+      ctx.fillRect(px0, baseY - 134, 32, 74); ctx.strokeRect(px0, baseY - 134, 32, 74);
+      for (let ry = baseY - 126; ry <= baseY - 76; ry += 22) {
+        ctx.fillStyle = '#d6ccb4'; ctx.fillRect(px0 + 4, ry, 24, 16);
+        ctx.fillStyle = ((Math.floor(ry / 22) & 1) === 0) ? '#059669' : '#0284c7';
+        ctx.fillRect(px0 + 9, ry + 4, 14, 8);
+      }
+    }
+
+    // 3. Projecting 3D Angled Atadura Entablature Cornice + Puuc Colonnette & Jade Frieze!
+    ctx.fillStyle = 'rgba(16, 20, 14, 0.55)';
+    ctx.fillRect(cx - gateW * 0.5, topY + 66, gateW, 8);
+
+    ctx.fillStyle = '#064e3b'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+    ctx.fillRect(cx - gateW * 0.49, topY + 38, gateW * 0.98, 26);
+    ctx.strokeRect(cx - gateW * 0.49, topY + 38, gateW * 0.98, 26);
+    for (let zx = cx - gateW * 0.43; zx <= cx + gateW * 0.43; zx += 20) {
+      const odd = (Math.round((zx - cx) / 20) & 1) !== 0;
+      ctx.fillStyle = odd ? '#0284c7' : '#10b981';
+      ctx.fillRect(zx - 6.5, topY + 43, 13, 16);
+      ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.0;
+      ctx.strokeRect(zx - 6.5, topY + 43, 13, 16);
+      ctx.fillStyle = '#fef9c3';
+      ctx.beginPath(); ctx.arc(zx, topY + 51, 2.5, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Flaring Upper & Lower Atadura Stone Cornices
+    ctx.fillStyle = '#ebe3cc'; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(cx - gateW * 0.54, topY + 28); ctx.lineTo(cx + gateW * 0.54, topY + 28);
+    ctx.lineTo(cx + gateW * 0.50, topY + 38); ctx.lineTo(cx - gateW * 0.50, topY + 38);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx - gateW * 0.50, topY + 63); ctx.lineTo(cx + gateW * 0.50, topY + 63);
+    ctx.lineTo(cx + gateW * 0.53, topY + 71); ctx.lineTo(cx - gateW * 0.53, topY + 71);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    // 4. Pierced Stone Roof Comb (Crestería) + 16-Ray Chiseled Kinich Ahau Sun-Stone & Quetzal Plume Fan!
+    ctx.fillStyle = '#cfc6b0';
+    ctx.beginPath();
+    ctx.moveTo(cx - gateW * 0.42, topY + 28); ctx.lineTo(cx - gateW * 0.36, topY + 6);
+    ctx.lineTo(cx + gateW * 0.36, topY + 6); ctx.lineTo(cx + gateW * 0.42, topY + 28);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#dfd7c2';
+    ctx.beginPath();
+    ctx.moveTo(cx - gateW * 0.28, topY + 6); ctx.lineTo(cx - gateW * 0.22, topY - 14);
+    ctx.lineTo(cx + gateW * 0.22, topY - 14); ctx.lineTo(cx + gateW * 0.28, topY + 6);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#1f2822';
+    for (const sxOff of [-68, -44, 34, 58]) ctx.fillRect(cx + sxOff, topY + 11, 10, 12);
+
+    // Lush Quetzal feather fan & 16-ray chiseled golden Sun-Stone crowning the crest!
+    for (let f = -4; f <= 4; f++) {
+      const ang = -Math.PI * 0.5 + f * 0.20;
+      ctx.strokeStyle = (Math.abs(f) % 2 === 0) ? '#10b981' : '#0d9488';
+      ctx.lineWidth = 4.4; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx, topY - 4);
+      ctx.quadraticCurveTo(cx + Math.cos(ang) * 20, topY - 8 + Math.sin(ang) * 18, cx + Math.cos(ang) * 34, topY - 2 + Math.sin(ang) * 30);
+      ctx.stroke();
+    }
+    for (let r = 0; r < 12; r++) {
+      const a = r * (Math.PI / 6);
+      ctx.fillStyle = (r % 2 === 0) ? '#fde047' : '#d97706';
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a - 0.14) * 14, topY - 4 + Math.sin(a - 0.14) * 14);
+      ctx.lineTo(cx + Math.cos(a) * 21, topY - 4 + Math.sin(a) * 21);
+      ctx.lineTo(cx + Math.cos(a + 0.14) * 14, topY - 4 + Math.sin(a + 0.14) * 14);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.arc(cx, topY - 4, 15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#059669'; ctx.beginPath(); ctx.arc(cx, topY - 4, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fef9c3'; ctx.beginPath(); ctx.arc(cx, topY - 4, 3.2, 0, Math.PI * 2); ctx.fill();
+
+    // 5. Multi-Layer 3D Mayan Corbel-Arch Sanctuary Portal + Sapodilla Lintel + Radiant Inner Stairs!
+    ctx.fillStyle = '#5c2d16'; ctx.strokeStyle = '#241107'; ctx.lineWidth = 1.6;
+    ctx.fillRect(cx - 68, baseY - 148, 136, 12); ctx.strokeRect(cx - 68, baseY - 148, 136, 12);
+    // Secret Chiseled Mayan Lintel Inscription (Dr.MAX07) — completely unobstructed directly above the portal arch!
+    ctx.save();
+    ctx.strokeStyle = 'rgba(28, 12, 5, 0.58)'; ctx.lineWidth = 0.9;
+    ctx.strokeRect(cx - 29, baseY - 146.5, 58, 9);
+    ctx.strokeStyle = 'rgba(196, 146, 98, 0.24)';
+    ctx.beginPath(); ctx.moveTo(cx - 28.5, baseY - 137); ctx.lineTo(cx + 29, baseY - 137); ctx.stroke();
+    ctx.font = 'bold 7.2px Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(204, 154, 106, 0.30)';
+    ctx.fillText('Dr.MAX07', cx + 0.5, baseY - 139.0);
+    ctx.fillStyle = 'rgba(24, 10, 4, 0.76)';
+    ctx.fillText('Dr.MAX07', cx, baseY - 139.6);
+    ctx.restore();
+
+    // Outer beveled stone corbel arch molding
+    ctx.fillStyle = '#78715f'; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.moveTo(cx - 52, baseY - 14); ctx.lineTo(cx - 52, baseY - 94);
+    ctx.lineTo(cx - 22, baseY - 138); ctx.lineTo(cx + 22, baseY - 138);
+    ctx.lineTo(cx + 52, baseY - 94); ctx.lineTo(cx + 52, baseY - 14);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    // Glowing Inner Celestial Emerald-Gold Sanctuary Portal
+    const pGlow = ctx.createRadialGradient(cx, baseY - 68, 8, cx, baseY - 68, 82);
+    pGlow.addColorStop(0, '#ffffff');
+    pGlow.addColorStop(0.28, '#fef9c3');
+    pGlow.addColorStop(0.62, '#34d399');
+    pGlow.addColorStop(1, '#065f46');
+    ctx.fillStyle = pGlow; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(cx - 44, baseY - 14); ctx.lineTo(cx - 44, baseY - 90);
+    ctx.lineTo(cx - 16, baseY - 131); ctx.lineTo(cx + 16, baseY - 131);
+    ctx.lineTo(cx + 44, baseY - 90); ctx.lineTo(cx + 44, baseY - 14);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    // Golden ascending inner sanctuary stairway silhouette inside portal
+    for (let st = 0; st < 4; st++) {
+      const sw = 68 - st * 12;
+      ctx.fillStyle = `rgba(254, 243, 199, ${(0.55 - st * 0.08).toFixed(2)})`;
+      ctx.fillRect(cx - sw * 0.5, baseY - 19 - st * 7, sw, 5);
+    }
+
+    // 6. Twin Sculpted Coiled Kukulcán Feathered-Serpent Columns Flanking the Portal!
+    for (const side of [-1, 1]) {
+      const colX = cx + side * 59;
+      // Cylindrical 3D feathered-scale column shaft
+      const cG = ctx.createLinearGradient(colX - 9, 0, colX + 9, 0);
+      cG.addColorStop(0, '#78715f'); cG.addColorStop(0.4, '#efe7d2'); cG.addColorStop(1, '#575243');
+      ctx.fillStyle = cG; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 1.5;
+      ctx.fillRect(colX - 8.5, baseY - 136, 17, 108);
+      ctx.strokeRect(colX - 8.5, baseY - 136, 17, 108);
+
+      // Overlapping carved stone feather scales & jade bands down shaft
+      ctx.strokeStyle = 'rgba(44, 40, 30, 0.55)'; ctx.lineWidth = 1.1;
+      for (let sy2 = baseY - 128; sy2 < baseY - 34; sy2 += 12) {
+        ctx.beginPath(); ctx.arc(colX, sy2, 7.5, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+        if (((sy2 / 12) | 0) % 2 === 0) {
+          ctx.fillStyle = '#10b981';
+          ctx.fillRect(colX - 5, sy2 - 2, 10, 3.5);
+        }
+      }
+      // Plumed tail rattle capital at top of column
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(colX - 10, baseY - 140, 20, 6); ctx.strokeRect(colX - 10, baseY - 140, 20, 6);
+
+      // Fierce Sculpted Kukulcán Serpent Head at Base (Open jaws, white fangs, crimson Bifid tongue & emerald eye!)
+      ctx.fillStyle = '#e5dec8';
+      ctx.beginPath();
+      ctx.moveTo(colX - 12, baseY - 14); ctx.lineTo(colX - 12, baseY - 31);
+      ctx.lineTo(colX + side * 14, baseY - 28); ctx.lineTo(colX + side * 15, baseY - 14);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#991b1b';
+      ctx.fillRect(colX - 8, baseY - 20, 16, 5);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(colX - 6, baseY - 20, 2.5, 3.5);
+      ctx.fillRect(colX + 3.5, baseY - 20, 2.5, 3.5);
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath(); ctx.arc(colX + side * 3.5, baseY - 25, 2.6, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // 7. Twin Sculpted Ceremonial Jaguar-Bowl Fire Braziers flanking the Outer Pylons
+    for (const fx of [cx - 94, cx + 94]) {
+      const flH = 18 + Math.sin(time * 10 + fx) * 4;
+      const bGlow = ctx.createRadialGradient(fx, baseY - 70, 2, fx, baseY - 70, 32);
+      bGlow.addColorStop(0, 'rgba(251, 191, 36, 0.55)');
+      bGlow.addColorStop(1, 'rgba(234, 88, 12, 0)');
+      ctx.fillStyle = bGlow; ctx.beginPath(); ctx.arc(fx, baseY - 70, 32, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = '#968d76'; ctx.strokeStyle = '#2c281e'; ctx.lineWidth = 1.5;
+      ctx.fillRect(fx - 10, baseY - 46, 20, 46); ctx.strokeRect(fx - 10, baseY - 46, 20, 46);
+      ctx.fillStyle = '#10b981'; ctx.fillRect(fx - 7, baseY - 30, 14, 6);
+      ctx.fillStyle = '#cfc6b0';
+      ctx.beginPath(); ctx.moveTo(fx - 16, baseY - 60); ctx.lineTo(fx + 16, baseY - 60); ctx.lineTo(fx + 11, baseY - 46); ctx.lineTo(fx - 11, baseY - 46); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      ctx.fillStyle = '#ea580c';
+      ctx.beginPath(); ctx.moveTo(fx - 9.5, baseY - 60); ctx.quadraticCurveTo(fx, baseY - 60 - flH * 1.4, fx + 9.5, baseY - 60); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.moveTo(fx - 6, baseY - 60); ctx.quadraticCurveTo(fx, baseY - 60 - flH * 1.05, fx + 6, baseY - 60); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#fef9c3';
+      ctx.beginPath(); ctx.moveTo(fx - 3, baseY - 60); ctx.quadraticCurveTo(fx, baseY - 60 - flH * 0.65, fx + 3, baseY - 60); ctx.closePath(); ctx.fill();
+    }
+
+    // 8. Floating Golden Fireflies rising through the Sanctuary
+    ctx.fillStyle = '#fef08a';
+    for (let e = 0; e < 8; e++) {
+      const rise = ((time * 36 + e * 19) % 112);
+      ctx.beginPath(); ctx.arc(cx + Math.sin(time * 4.5 + e * 1.8) * 24, baseY - 16 - rise, 2.3, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // 9. Floating Ceremonial Banner Sign (Zero Dr.MAX text!)
+    const bob = Math.sin(time * 3.0) * 3;
+    const isEn = window.Game.I18n && window.Game.I18n.isEn();
+    const labelText = isEn ? 'EL CASTILLO • MAYA' : (goalLabel || 'هرم كوكولكان • المايا');
+    ctx.font = 'bold 12px "Cairo", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    const tw = Math.max(174, ctx.measureText(labelText).width + 30);
+    ctx.fillStyle = 'rgba(10, 32, 26, 0.94)'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.9;
+    ctx.beginPath(); ctx.roundRect(cx - tw * 0.5, topY - 54 + bob, tw, 26, 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fef3c7';
+    ctx.fillText(labelText, cx, topY - 36 + bob);
+    ctx.restore();
+  }
+
+  // =========================================================================
+  // STAGE 25: SANTORINI & ACROPOLIS, GREECE (SKY, HORIZON, MIDGROUND & GATE)
+  // =========================================================================
+  function drawGreeceSkyAndHorizon(ctx, camX, W, H, time) {
+    ensureTextures(ctx);
+    // 1. Luminous Mediterranean Aegean Golden-Hour Sky (Deep Cobalt Zenith -> Cerulean -> Apricot-Rose Horizon)
+    const sky = ctx.createLinearGradient(0, 0, 0, H * 0.85);
+    sky.addColorStop(0.00, '#072f66');
+    sky.addColorStop(0.24, '#1562a8');
+    sky.addColorStop(0.54, '#4ea6dc');
+    sky.addColorStop(0.78, '#bae2f5');
+    sky.addColorStop(0.90, '#fde0b4');
+    sky.addColorStop(1.00, '#f9ad6a');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, H);
+
+    // 2. Radiant Aegean Sun + Volumetric Diagonal Mediterranean Sunbeams
+    const sunX = W * 0.76 - (camX * 0.015) % 180;
+    const sunY = H * 0.21;
+    ctx.save();
+    ctx.translate(sunX, sunY);
+    for (let r = 0; r < 8; r++) {
+      const ang = 0.22 + r * 0.38 + Math.sin(time * 0.28 + r) * 0.03;
+      ctx.save();
+      ctx.rotate(ang);
+      const rayG = ctx.createLinearGradient(0, 0, 560, 0);
+      rayG.addColorStop(0, 'rgba(255, 252, 235, 0.18)');
+      rayG.addColorStop(0.55, 'rgba(254, 240, 138, 0.06)');
+      rayG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      ctx.fillStyle = rayG;
+      ctx.beginPath(); ctx.moveTo(0, -7); ctx.lineTo(560, -46); ctx.lineTo(560, 46); ctx.lineTo(0, 7); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
+
+    const sunHalo = ctx.createRadialGradient(sunX, sunY, 14, sunX, sunY, 245);
+    sunHalo.addColorStop(0.00, 'rgba(255, 254, 240, 0.98)');
+    sunHalo.addColorStop(0.18, 'rgba(254, 240, 138, 0.64)');
+    sunHalo.addColorStop(0.52, 'rgba(251, 191, 36, 0.18)');
+    sunHalo.addColorStop(1.00, 'rgba(251, 191, 36, 0)');
+    ctx.fillStyle = sunHalo;
+    ctx.beginPath(); ctx.arc(sunX, sunY, 245, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fffef2';
+    ctx.beginPath(); ctx.arc(sunX, sunY, 32, 0, Math.PI * 2); ctx.fill();
+
+    // Painterly Multi-Layered Aegean Cumulus Clouds (Sunlit Cream Billows, Cool Lavender-Blue Core & Apricot-Gold Underlit Base!)
+    const cloudOff = (camX * 0.04 + time * 5.2) % (W + 420);
+    for (let i = 0; i < 6; i++) {
+      const cx = ((i * 305 - cloudOff) % (W + 420) + (W + 420)) % (W + 420) - 180;
+      const cy = 68 + (i % 3) * 44;
+      const s = 0.85 + (i % 3) * 0.22;
+
+      // Soft atmospheric cloud base shadow
+      ctx.fillStyle = 'rgba(125, 158, 198, 0.34)';
+      ctx.beginPath();
+      ctx.moveTo(cx - 26 * s, cy + 15 * s);
+      ctx.bezierCurveTo(cx - 32 * s, cy + 2 * s, cx - 8 * s, cy - 12 * s, cx + 18 * s, cy - 10 * s);
+      ctx.bezierCurveTo(cx + 38 * s, cy - 22 * s, cx + 68 * s, cy - 16 * s, cx + 82 * s, cy + 2 * s);
+      ctx.quadraticCurveTo(cx + 104 * s, cy + 6 * s, cx + 96 * s, cy + 16 * s);
+      ctx.closePath();
+      ctx.fill();
+
+      // Luminous sunlit upper cloud billows
+      const clG = ctx.createLinearGradient(cx, cy - 28 * s, cx, cy + 16 * s);
+      clG.addColorStop(0.0, 'rgba(255, 254, 248, 0.90)');
+      clG.addColorStop(0.62, 'rgba(248, 245, 240, 0.72)');
+      clG.addColorStop(1.0, 'rgba(253, 206, 158, 0.42)');
+      ctx.fillStyle = clG;
+      ctx.beginPath();
+      ctx.moveTo(cx - 24 * s, cy + 14 * s);
+      ctx.bezierCurveTo(cx - 28 * s, cy - 2 * s, cx - 12 * s, cy - 16 * s, cx + 6 * s, cy - 12 * s);
+      ctx.bezierCurveTo(cx + 16 * s, cy - 30 * s, cx + 46 * s, cy - 30 * s, cx + 56 * s, cy - 13 * s);
+      ctx.bezierCurveTo(cx + 72 * s, cy - 18 * s, cx + 88 * s, cy - 6 * s, cx + 92 * s, cy + 14 * s);
+      ctx.closePath();
+      ctx.fill();
+
+      // Warm golden-hour rim glow along sun-facing cloud belly
+      ctx.strokeStyle = 'rgba(254, 240, 178, 0.55)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(cx - 18 * s, cy + 13.5 * s);
+      ctx.quadraticCurveTo(cx + 36 * s, cy + 16 * s, cx + 88 * s, cy + 13.5 * s);
+      ctx.stroke();
+    }
+
+    // Graceful White Aegean Seagulls with Dark Wingtips Soaring Across the Caldera Sky
+    for (let g = 0; g < 6; g++) {
+      const gx = ((g * 240 + time * (24 + g * 3) - camX * 0.05) % (W + 160) + (W + 160)) % (W + 160) - 80;
+      const gy = 118 + (g % 3) * 44 + Math.sin(time * 2.1 + g) * 8;
+      const flap = Math.sin(time * 6.2 + g * 1.5) * 5.2;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.88)';
+      ctx.lineWidth = 2.0; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(gx - 11, gy + flap); ctx.quadraticCurveTo(gx - 4.5, gy - 4.5, gx, gy);
+      ctx.quadraticCurveTo(gx + 4.5, gy - 4.5, gx + 11, gy + flap);
+      ctx.stroke();
+      ctx.fillStyle = '#334155';
+      ctx.beginPath();
+      ctx.arc(gx - 11, gy + flap, 1.1, 0, Math.PI * 2);
+      ctx.arc(gx + 11, gy + flap, 1.1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 3. Stratified Cycladic Volcanic Caldera Headlands & Monumental 3D Acropolis of Athens!
+    const farOff = -(camX * 0.08) % 1600;
+    for (let rep = -1; rep <= 1; rep++) {
+      const bx = farOff + rep * 1600;
+
+      // Distant misty Cycladic island silhouettes
+      const islG = ctx.createLinearGradient(0, 310, 0, 488);
+      islG.addColorStop(0.0, '#4674a2');
+      islG.addColorStop(0.48, '#658cb0');
+      islG.addColorStop(1.0, '#9dbbd4');
+      ctx.fillStyle = islG;
+      ctx.beginPath();
+      ctx.moveTo(bx, 488);
+      ctx.lineTo(bx + 110, 422);
+      ctx.bezierCurveTo(bx + 210, 378, bx + 330, 388, bx + 450, 434);
+      ctx.lineTo(bx + 560, 466);
+      ctx.lineTo(bx + 690, 382);
+      ctx.quadraticCurveTo(bx + 860, 326, bx + 1045, 366);
+      ctx.lineTo(bx + 1190, 458);
+      ctx.lineTo(bx + 1345, 404);
+      ctx.bezierCurveTo(bx + 1445, 382, bx + 1530, 405, bx + 1600, 446);
+      ctx.lineTo(bx + 1600, 488);
+      ctx.closePath();
+      ctx.fill();
+
+      // Stratified volcanic red-scoria & ochre bands on the distant Santorini Oia cliff headlands!
+      ctx.strokeStyle = 'rgba(154, 98, 92, 0.34)'; ctx.lineWidth = 3.2;
+      ctx.beginPath();
+      ctx.moveTo(bx + 140, 434); ctx.quadraticCurveTo(bx + 265, 408, bx + 395, 438);
+      ctx.moveTo(bx + 1355, 420); ctx.quadraticCurveTo(bx + 1445, 404, bx + 1540, 432);
+      ctx.stroke();
+
+      // Cascading whitewashed Oia cliffside village clusters & cobalt church domes spilling down the volcanic ridge!
+      for (const [vx0, vy0] of [[255, 396], [1425, 399]]) {
+        for (const [dx, dy, dw, dh] of [[-32, 8, 12, 7], [-18, 3, 15, 8], [-2, 0, 18, 9], [14, 5, 14, 7], [26, 11, 12, 6], [-8, 9, 13, 6]]) {
+          ctx.fillStyle = 'rgba(255, 253, 246, 0.85)';
+          ctx.fillRect(bx + vx0 + dx, vy0 + dy, dw, dh);
+          ctx.fillStyle = 'rgba(148, 163, 184, 0.55)';
+          ctx.fillRect(bx + vx0 + dx + dw - 3, vy0 + dy, 3, dh);
+        }
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath(); ctx.arc(bx + vx0 + 7, vy0, 5.2, Math.PI, 0); ctx.fill();
+        ctx.beginPath(); ctx.arc(bx + vx0 - 11, vy0 + 3, 3.8, Math.PI, 0); ctx.fill();
+      }
+
+      // === MONUMENTAL 3D ACROPOLIS OF ATHENS (Stratified Sacred Rock, Cimon's Walls, Propylaea, Athena Nike & Sunlit Parthenon!) ===
+      const ax = bx + 855;
+      const ay = 344;
+
+      // Multi-faceted limestone Acropolis crag with sunlit western cliff & cool eastern shadow facets
+      const cragG = ctx.createLinearGradient(ax - 155, ay, ax + 160, ay + 144);
+      cragG.addColorStop(0.0, '#c7b093');
+      cragG.addColorStop(0.42, '#96826b');
+      cragG.addColorStop(0.78, '#665d54');
+      cragG.addColorStop(1.0, '#475569');
+      ctx.fillStyle = cragG;
+      ctx.beginPath();
+      ctx.moveTo(ax - 172, 488);
+      ctx.lineTo(ax - 138, ay + 42);
+      ctx.lineTo(ax - 114, ay + 14);
+      ctx.lineTo(ax - 96, ay + 4);
+      ctx.lineTo(ax + 104, ay + 4);
+      ctx.lineTo(ax + 132, ay + 28);
+      ctx.lineTo(ax + 178, 488);
+      ctx.closePath();
+      ctx.fill();
+
+      // Sunlit limestone crag facets & Mediterranean cypress/olive scrub along lower Acropolis slopes
+      ctx.fillStyle = 'rgba(254, 240, 195, 0.26)';
+      ctx.beginPath();
+      ctx.moveTo(ax - 138, ay + 42); ctx.lineTo(ax - 96, ay + 4); ctx.lineTo(ax - 44, ay + 52); ctx.lineTo(ax - 98, ay + 88);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = 'rgba(45, 78, 52, 0.55)';
+      for (const [tx, ty, tr] of [[-126, 98, 18], [-92, 108, 22], [-48, 114, 20], [52, 112, 24], [108, 104, 19]]) {
+        ctx.beginPath(); ctx.arc(ax + tx, ay + ty, tr, Math.PI, 0); ctx.fill();
+      }
+
+      // Fortified Ashlar Retaining Wall of Cimon (Buttressed Classical Masonry)
+      const wallG = ctx.createLinearGradient(ax - 102, ay + 3, ax + 104, ay + 22);
+      wallG.addColorStop(0, '#dfd0b8'); wallG.addColorStop(0.65, '#bba88e'); wallG.addColorStop(1, '#857561');
+      ctx.fillStyle = wallG;
+      ctx.fillRect(ax - 100, ay + 3, 202, 17);
+      ctx.fillStyle = 'rgba(68, 56, 42, 0.34)';
+      for (let mx = ax - 90; mx < ax + 96; mx += 16) {
+        ctx.fillRect(mx, ay + 4, 2.5, 15);
+      }
+
+      // Western Propylaea Colonnade & Tiny Temple of Athena Nike perched on left bastion!
+      ctx.fillStyle = '#f5ebd9';
+      ctx.fillRect(ax - 118, ay - 10, 26, 16);
+      ctx.fillStyle = '#cbb89f';
+      for (let pc = 0; pc < 4; pc++) ctx.fillRect(ax - 115 + pc * 6, ay - 8, 2.5, 12);
+      ctx.beginPath();
+      ctx.moveTo(ax - 120, ay - 10); ctx.lineTo(ax - 105, ay - 18); ctx.lineTo(ax - 90, ay - 10);
+      ctx.closePath(); ctx.fillStyle = '#faf3e6'; ctx.fill();
+
+      // Monumental 3D Perspective Parthenon on the Summit!
+      // Deep shaded interior cella backdrop so sunlit Doric columns pop in high relief!
+      ctx.fillStyle = '#5c4d3e';
+      ctx.fillRect(ax - 68, ay - 44, 134, 38);
+      // Shaded 3D East/North Colonnade Flank
+      ctx.fillStyle = '#baa78e';
+      ctx.fillRect(ax + 66, ay - 45, 26, 42);
+      for (let sc = 0; sc < 4; sc++) {
+        ctx.fillStyle = '#8c7a64';
+        ctx.fillRect(ax + 69 + sc * 6, ay - 42, 2.8, 36);
+      }
+      // Three-step Pentelic marble stylobate platform
+      ctx.fillStyle = '#fffcf5';
+      ctx.fillRect(ax - 79, ay - 2, 174, 5.5);
+      ctx.fillStyle = '#ede0cc';
+      ctx.fillRect(ax - 75, ay - 6, 166, 4);
+
+      // 8 Sunlit Front Doric Columns with 3D Cylindrical Shading & Capitals
+      for (let c = 0; c < 8; c++) {
+        const colX = ax - 66 + c * 18.8;
+        ctx.fillStyle = '#d9c7ae';
+        ctx.fillRect(colX - 3.4, ay - 43, 6.8, 37);
+        ctx.fillStyle = '#fffef9';
+        ctx.fillRect(colX - 3.4, ay - 43, 2.8, 37);
+        ctx.fillStyle = '#efe3d0';
+        ctx.fillRect(colX - 4.6, ay - 45.5, 9.2, 2.8);
+      }
+      // Doric Architrave, Triglyph-Metope Frieze & Sculpted Pediment with Golden Acroterion!
+      ctx.fillStyle = '#f5ead8';
+      ctx.fillRect(ax - 74, ay - 53, 148, 8);
+      ctx.fillStyle = 'rgba(92, 76, 58, 0.42)';
+      for (let tx = ax - 68; tx < ax + 68; tx += 12) ctx.fillRect(tx, ay - 51.5, 3.5, 4.5);
+
+      // 3D side roof slope + sunlit triangular front pediment
+      ctx.fillStyle = '#cbb89e';
+      ctx.beginPath();
+      ctx.moveTo(ax, ay - 76); ctx.lineTo(ax + 26, ay - 72); ctx.lineTo(ax + 93, ay - 51); ctx.lineTo(ax + 78, ay - 53);
+      ctx.closePath(); ctx.fill();
+
+      ctx.fillStyle = '#fffdf7'; ctx.strokeStyle = '#9c8870'; ctx.lineWidth = 1.15;
+      ctx.beginPath();
+      ctx.moveTo(ax - 79, ay - 53); ctx.lineTo(ax, ay - 76); ctx.lineTo(ax + 79, ay - 53);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#c4ae92';
+      ctx.beginPath();
+      ctx.moveTo(ax - 62, ay - 55); ctx.lineTo(ax, ay - 70); ctx.lineTo(ax + 62, ay - 55);
+      ctx.closePath(); ctx.fill();
+      // Tiny classical pediment marble sculptures & golden apex acroterion
+      ctx.fillStyle = '#fffbeb';
+      for (const sx0 of [-18, -9, 0, 9, 18]) {
+        const sh = 9 - Math.abs(sx0) * 0.32;
+        ctx.fillRect(ax + sx0 - 1.5, ay - 55 - sh, 3, sh);
+      }
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.arc(ax, ay - 78, 2.6, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // 4. Shimmering Distant Aegean Sea Horizon + Distant White Sailboats + Detailed Classical Greek Trireme!
+    const horizonY = 478;
+    const seaG = ctx.createLinearGradient(0, horizonY, 0, H);
+    seaG.addColorStop(0.00, '#189ad6');
+    seaG.addColorStop(0.22, '#0284c7');
+    seaG.addColorStop(0.65, '#0369a1');
+    seaG.addColorStop(1.00, '#082f49');
+    ctx.fillStyle = seaG;
+    ctx.fillRect(0, horizonY, W, H - horizonY);
+
+    // Sparkling golden-hour sun-path reflections dancing on the Aegean Sea
+    for (let r = 0; r < 18; r++) {
+      const ry = horizonY + 3 + r * 5.2;
+      const rw = 54 + r * 14 + Math.sin(time * 3.2 + r * 1.4) * 14;
+      const rx = sunX - rw * 0.5 + Math.cos(time * 2.1 + r) * 5;
+      ctx.fillStyle = `rgba(254, 243, 162, ${(0.44 - r * 0.022).toFixed(2)})`;
+      ctx.fillRect(rx, ry, rw, 2.1);
+    }
+
+    // Distant white Cycladic lateen sailboats on the horizon
+    for (let sb = 0; sb < 3; sb++) {
+      const sbx = ((sb * 490 + 180 - camX * 0.04 + time * 4) % (W + 160) + (W + 160)) % (W + 160) - 80;
+      const sby = horizonY + 6 + (sb % 2) * 5;
+      ctx.fillStyle = 'rgba(255, 253, 245, 0.85)';
+      ctx.beginPath(); ctx.moveTo(sbx, sby); ctx.lineTo(sbx + 4, sby - 13); ctx.lineTo(sbx + 10, sby); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#1e3a8a';
+      ctx.fillRect(sbx - 2, sby, 13, 2.2);
+    }
+
+    // Classical Greek Trireme Warship (Bronze Ram, Painted Prow Eye, Synchronized Rowing Oars & Billowing Greek-Key Sail!)
+    const shipX = ((W * 0.35 - camX * 0.06 + time * 11.5) % (W + 260) + (W + 260)) % (W + 260) - 130;
+    const shipY = horizonY + 15 + Math.sin(time * 2.2) * 1.4;
+    ctx.save();
+    ctx.translate(shipX, shipY);
+    ctx.rotate(Math.sin(time * 2.2) * 0.025);
+    // Foaming wake & bow spray
+    ctx.strokeStyle = 'rgba(224, 242, 254, 0.65)'; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(-30, 2.5); ctx.quadraticCurveTo(-55, 4 + Math.sin(time * 4) * 1.5, -82, 1.5);
+    ctx.moveTo(32, 1.5); ctx.quadraticCurveTo(40, -1, 44, 2.5);
+    ctx.stroke();
+    // Bronze battering ram (Embolon) at bow waterline
+    ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 0.9;
+    ctx.beginPath(); ctx.moveTo(29, -1); ctx.lineTo(41, 1); ctx.lineTo(29, 2.5); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Sleek cedar hull + crimson gunwale + curved aphlaston sternpost
+    ctx.fillStyle = '#78350f'; ctx.strokeStyle = '#3b1806'; ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(-30, 0); ctx.quadraticCurveTo(0, 7.5, 31, 0);
+    ctx.lineTo(35, -6.5); ctx.lineTo(25, -4.5); ctx.lineTo(-24, -4.5);
+    ctx.quadraticCurveTo(-33, -11, -36, -16);
+    ctx.quadraticCurveTo(-31, -8, -30, 0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#b91c1c';
+    ctx.fillRect(-22, -4.5, 46, 2.0);
+    // Painted apotropaic Greek Prow Eye (Ophthalmos)
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.ellipse(27, -2.5, 2.4, 1.3, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.arc(27.4, -2.5, 0.8, 0, Math.PI * 2); ctx.fill();
+    // Bank of 8 synchronized animated wooden oars dipping into the Aegean!
+    const oarSwing = Math.sin(time * 5.4) * 3.2;
+    ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 0.95;
+    for (let o = -18; o <= 17; o += 5) {
+      ctx.beginPath(); ctx.moveTo(o, -2.2); ctx.lineTo(o - 3 + oarSwing, 4.8); ctx.stroke();
+    }
+    // Mast, rigging stays & billowing linen square sail with cobalt meander band & golden sun emblem
+    ctx.strokeStyle = '#5c3317'; ctx.lineWidth = 2.1;
+    ctx.beginPath(); ctx.moveTo(2, -4.5); ctx.lineTo(2, -38); ctx.stroke();
+    ctx.strokeStyle = 'rgba(254, 243, 199, 0.52)'; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(2, -37); ctx.lineTo(-26, -5); ctx.moveTo(2, -37); ctx.lineTo(28, -5); ctx.stroke();
+
+    const sailG = ctx.createLinearGradient(-16, -34, 22, -9);
+    sailG.addColorStop(0, '#fffef7'); sailG.addColorStop(0.65, '#fef3c7'); sailG.addColorStop(1, '#e2e8f0');
+    ctx.fillStyle = sailG; ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.moveTo(-16, -33); ctx.quadraticCurveTo(4, -37, 21, -33);
+    ctx.quadraticCurveTo(26, -20, 19, -9.5); ctx.quadraticCurveTo(2, -13.5, -17, -9.5);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#0284c7';
+    ctx.fillRect(-15, -23.5, 35, 4.5);
+    ctx.fillStyle = '#f59e0b';
+    ctx.beginPath(); ctx.arc(3, -21.2, 3.2, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawGreeceMidground(ctx, camX, W, H, time) {
+    ensureTextures(ctx);
+    // Helper: Lush Cascading Santorini Magenta/Crimson Bougainvillea Blossom Cluster!
+    const drawBougainvilleaCluster = (cx0, cy0, rad, seedB) => {
+      const sway = Math.sin(time * 2.0 + seedB) * 1.4;
+      ctx.fillStyle = '#14532d';
+      ctx.beginPath(); ctx.arc(cx0 + sway * 0.4, cy0 + 1, rad * 0.92, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#15803d';
+      ctx.beginPath(); ctx.arc(cx0 - rad * 0.25 + sway * 0.4, cy0 - 1, rad * 0.68, 0, Math.PI * 2); ctx.fill();
+      const cols = ['#be185d', '#db2777', '#ec4899', '#f43f5e'];
+      for (let p = 0; p < 5; p++) {
+        const a = p * 1.25 + seedB;
+        const pr = rad * (0.35 + (p % 2) * 0.25);
+        const px0 = cx0 + Math.cos(a) * pr + sway;
+        const py0 = cy0 + Math.sin(a) * pr * 0.8;
+        ctx.fillStyle = cols[(p + seedB) % cols.length];
+        ctx.beginPath(); ctx.arc(px0, py0, rad * 0.42, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = '#fce7f3';
+      ctx.beginPath(); ctx.arc(cx0 + sway, cy0 - rad * 0.18, rad * 0.18, 0, Math.PI * 2); ctx.fill();
+    };
+
+    // 1. Santorini Cliffside Oia Village Architecture (Twin Blue-Domed Cathedrals, Stone Windmills, Cave-Houses & Olive Vistas!)
+    const bayW = 460;
+    const scrollX = camX * 0.28;
+    const startIdx = Math.floor((scrollX - 240) / bayW);
+    const endIdx = Math.ceil((scrollX + W + 240) / bayW);
+    const cliffY = 596;
+
+    for (let idx = startIdx; idx <= endIdx; idx++) {
+      const bx = idx * bayW - scrollX;
+      const variant = ((idx % 4) + 4) % 4;
+
+      if (variant === 3) {
+        // === OPEN AEGEAN CALDERA BELVEDERE: Turned Marble Balustrade, Classical Red-Figure Amphorae & Gnarled Silver-Leaf Olive Tree! ===
+        const baseY = cliffY - 26;
+        // Volcanic cliff lip beneath belvedere
+        const vLipG = ctx.createLinearGradient(0, baseY + 12, 0, cliffY + 26);
+        vLipG.addColorStop(0, '#6b5349'); vLipG.addColorStop(1, '#292524');
+        ctx.fillStyle = vLipG;
+        ctx.fillRect(bx + 14, baseY + 14, bayW - 28, 38);
+
+        // Pentelic marble plinth & balustrade railing
+        ctx.fillStyle = '#e2e8f0'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.2;
+        ctx.fillRect(bx + 18, baseY + 14, bayW - 36, 12); ctx.strokeRect(bx + 18, baseY + 14, bayW - 36, 12);
+        // Sculpted classical balusters with open sea visible between them!
+        for (let colX = bx + 34; colX < bx + bayW - 32; colX += 22) {
+          const balG = ctx.createLinearGradient(colX - 4, baseY - 6, colX + 4, baseY - 6);
+          balG.addColorStop(0, '#ffffff'); balG.addColorStop(0.6, '#e2e8f0'); balG.addColorStop(1, '#94a3b8');
+          ctx.fillStyle = balG; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.moveTo(colX - 3, baseY + 14);
+          ctx.quadraticCurveTo(colX - 5.5, baseY + 6, colX - 2.5, baseY - 4);
+          ctx.lineTo(colX + 2.5, baseY - 4);
+          ctx.quadraticCurveTo(colX + 5.5, baseY + 6, colX + 3, baseY + 14);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+        }
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.2;
+        ctx.fillRect(bx + 14, baseY - 10, bayW - 28, 7); ctx.strokeRect(bx + 14, baseY - 10, bayW - 28, 7);
+        ctx.fillStyle = '#0284c7';
+        ctx.fillRect(bx + 16, baseY + 15, bayW - 32, 3.2);
+
+        // Pair of Authentic Classical Greek Terracotta Amphorae (Twin Curved Handles + Black-Figure Band!)
+        const ax = bx + 78;
+        const ampG = ctx.createLinearGradient(ax - 14, baseY - 48, ax + 14, baseY - 10);
+        ampG.addColorStop(0, '#ea580c'); ampG.addColorStop(0.55, '#c2410c'); ampG.addColorStop(1, '#7c2d12');
+        ctx.strokeStyle = '#7c2d12'; ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.arc(ax - 8, baseY - 35, 6, Math.PI * 0.5, Math.PI * 1.6);
+        ctx.moveTo(ax + 8, baseY - 41);
+        ctx.arc(ax + 8, baseY - 35, 6, -Math.PI * 0.6, Math.PI * 0.5);
+        ctx.stroke();
+        ctx.fillStyle = ampG; ctx.strokeStyle = '#431407'; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(ax - 7, baseY - 10);
+        ctx.bezierCurveTo(ax - 16, baseY - 21, ax - 14, baseY - 37, ax - 5, baseY - 42);
+        ctx.lineTo(ax - 7.5, baseY - 49); ctx.lineTo(ax + 7.5, baseY - 49); ctx.lineTo(ax + 5, baseY - 42);
+        ctx.bezierCurveTo(ax + 14, baseY - 37, ax + 16, baseY - 21, ax + 7, baseY - 10);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#1c1917';
+        ctx.fillRect(ax - 11.5, baseY - 29, 23, 5.5);
+        ctx.fillStyle = '#fbbf24';
+        for (let kx = ax - 9; kx <= ax + 7; kx += 4) ctx.fillRect(kx, baseY - 27.5, 2.2, 2.5);
+
+        // Ancient Gnarled Mediterranean Silver-Leaf Olive Tree swaying gently in the sea breeze!
+        const ox = bx + bayW - 96;
+        const treeSway = Math.sin(time * 1.5 + idx) * 2.2;
+        ctx.strokeStyle = '#44403c'; ctx.lineWidth = 9.5; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(ox - 2, baseY - 10);
+        ctx.bezierCurveTo(ox - 12, baseY - 34, ox + 8, baseY - 54, ox + 2 + treeSway * 0.4, baseY - 76);
+        ctx.stroke();
+        ctx.strokeStyle = '#78716c'; ctx.lineWidth = 4.8;
+        ctx.beginPath();
+        ctx.moveTo(ox - 1, baseY - 52); ctx.quadraticCurveTo(ox - 24, baseY - 68, ox - 34 + treeSway, baseY - 82);
+        ctx.moveTo(ox + 2, baseY - 58); ctx.quadraticCurveTo(ox + 24, baseY - 72, ox + 32 + treeSway, baseY - 88);
+        ctx.moveTo(ox + 1, baseY - 68); ctx.quadraticCurveTo(ox - 4, baseY - 86, ox + 3 + treeSway, baseY - 98);
+        ctx.stroke();
+        // Multi-layered silvery-sage Mediterranean olive canopy + tiny dark olives
+        for (const [lx, ly, lr, col] of [
+          [-28, -84, 23, '#3f6212'], [26, -90, 25, '#365314'], [0, -100, 27, '#4d7c0f'],
+          [-16, -92, 20, '#65a30d'], [16, -96, 19, '#84cc16'], [-2, -105, 17, '#bef264'],
+        ]) {
+          ctx.fillStyle = col;
+          ctx.beginPath(); ctx.ellipse(ox + lx + treeSway, baseY + ly, lr, lr * 0.62, 0, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = '#1e1b4b';
+        for (const [vx1, vy1] of [[-22, -80], [18, -86], [-4, -92], [8, -98]]) {
+          ctx.beginPath(); ctx.ellipse(ox + vx1 + treeSway, baseY + vy1, 1.5, 2.1, 0.2, 0, Math.PI * 2); ctx.fill();
+        }
+        drawBougainvilleaCluster(bx + 36, baseY - 12, 11, idx * 3);
+        continue;
+      }
+
+      // Sculpted Multi-Faceted Volcanic Red-Scoria & Basalt Caldera Cliff Foundation beneath each Santorini village terrace!
+      const rockG = ctx.createLinearGradient(0, cliffY - 65, 0, cliffY + 26);
+      rockG.addColorStop(0.0, '#9a6b56');
+      rockG.addColorStop(0.38, '#6e4e42');
+      rockG.addColorStop(0.75, '#3f3430');
+      rockG.addColorStop(1.0, '#1c1917');
+      ctx.fillStyle = rockG;
+      ctx.beginPath();
+      ctx.moveTo(bx + 6, cliffY + 26);
+      ctx.lineTo(bx + 22, cliffY - 20);
+      ctx.lineTo(bx + 38, cliffY - 44);
+      ctx.lineTo(bx + bayW - 36, cliffY - 44);
+      ctx.lineTo(bx + bayW - 18, cliffY - 18);
+      ctx.lineTo(bx + bayW - 4, cliffY + 26);
+      ctx.closePath();
+      ctx.fill();
+      // Sunlit volcanic cliff facets & stratified pumice bands
+      ctx.fillStyle = 'rgba(253, 218, 168, 0.16)';
+      ctx.beginPath();
+      ctx.moveTo(bx + 38, cliffY - 44); ctx.lineTo(bx + 145, cliffY - 44); ctx.lineTo(bx + 106, cliffY - 6); ctx.lineTo(bx + 22, cliffY - 20);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(28, 25, 23, 0.45)'; ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(bx + 26, cliffY - 16); ctx.lineTo(bx + 110, cliffY - 22); ctx.lineTo(bx + 240, cliffY - 14); ctx.lineTo(bx + bayW - 22, cliffY - 19);
+      ctx.stroke();
+
+      if (variant === 0) {
+        // === ICONIC OIA TWIN COBALT-BLUE DOMED CATHEDRAL & 3-BELL KAMPANARIO BELFRY ===
+        const cx = bx + 228;
+        const baseY = cliffY - 38;
+        // 3D Shaded East Wall Return
+        ctx.fillStyle = '#cbd5e1'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.2;
+        ctx.fillRect(cx + 96, baseY - 128, 30, 130); ctx.strokeRect(cx + 96, baseY - 128, 30, 130);
+
+        // Secondary Side Cobalt-Blue Dome & Whitewashed Barrel Chapel on Right!
+        ctx.fillStyle = '#f1f5f9'; ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.2;
+        ctx.fillRect(cx + 68, baseY - 158, 52, 34); ctx.strokeRect(cx + 68, baseY - 158, 52, 34);
+        const sDomeG = ctx.createRadialGradient(cx + 86, baseY - 176, 3, cx + 94, baseY - 158, 32);
+        sDomeG.addColorStop(0, '#7dd3fc'); sDomeG.addColorStop(0.38, '#0284c7'); sDomeG.addColorStop(1, '#1e3a8a');
+        ctx.fillStyle = sDomeG; ctx.strokeStyle = '#1e3a8a'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.arc(cx + 94, baseY - 158, 26, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Sculpted golden architectural orb & bronze collar finial on side dome
+        ctx.fillStyle = '#d97706'; ctx.fillRect(cx + 91, baseY - 186, 6, 3);
+        ctx.fillStyle = '#fde047'; ctx.strokeStyle = '#92400e'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.arc(cx + 94, baseY - 190, 3.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fffbeb'; ctx.beginPath(); ctx.arc(cx + 93, baseY - 191, 1.3, 0, Math.PI * 2); ctx.fill();
+
+        // Main Sunlit Whitewashed Lime-Plaster Cathedral Facade with Soft Cycladic Curves
+        const wallG = ctx.createLinearGradient(cx - 110, baseY - 136, cx + 100, baseY);
+        wallG.addColorStop(0, '#ffffff'); wallG.addColorStop(0.72, '#f8fafc'); wallG.addColorStop(1, '#dbe4ef');
+        ctx.fillStyle = wallG; ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.roundRect(cx - 106, baseY - 134, 204, 136, [10, 10, 0, 0]); ctx.fill(); ctx.stroke();
+        // Overhanging whitewashed cornice + soft sunlight cast shadow
+        ctx.fillStyle = 'rgba(30, 41, 59, 0.16)';
+        ctx.fillRect(cx - 106, baseY - 131, 204, 6);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(cx - 110, baseY - 138, 212, 7); ctx.strokeRect(cx - 110, baseY - 138, 212, 7);
+
+        // Octagonal Whitewashed Tambour Drum with Arched Clerestory Windows
+        const drG = ctx.createLinearGradient(cx - 64, baseY - 180, cx + 64, baseY - 180);
+        drG.addColorStop(0, '#ffffff'); drG.addColorStop(0.68, '#f8fafc'); drG.addColorStop(1, '#cbd5e1');
+        ctx.fillStyle = drG; ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.3;
+        ctx.fillRect(cx - 64, baseY - 180, 128, 44); ctx.strokeRect(cx - 64, baseY - 180, 128, 44);
+        for (const cw of [-40, -14, 14, 40]) {
+          ctx.fillStyle = '#0c4a6e';
+          ctx.beginPath(); ctx.arc(cx + cw, baseY - 163, 6, Math.PI, 0); ctx.lineTo(cx + cw + 6, baseY - 146); ctx.lineTo(cx + cw - 6, baseY - 146); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = 'rgba(254, 240, 138, 0.38)';
+          ctx.fillRect(cx + cw - 3, baseY - 160, 6, 11);
+        }
+
+        // Gleaming 3D Ribbed Cobalt-Sapphire Main Santorini Dome + Classical Golden Orb & Weathervane Finial!
+        const domeG = ctx.createRadialGradient(cx - 24, baseY - 220, 6, cx, baseY - 180, 74);
+        domeG.addColorStop(0.00, '#bae6fd');
+        domeG.addColorStop(0.26, '#0284c7');
+        domeG.addColorStop(0.72, '#1d4ed8');
+        domeG.addColorStop(1.00, '#172554');
+        ctx.fillStyle = domeG; ctx.strokeStyle = '#1e3a8a'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(cx, baseY - 180, 65, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = 'rgba(224, 242, 254, 0.36)'; ctx.lineWidth = 1.25;
+        for (const rOff of [-42, -21, 0, 21, 42]) {
+          ctx.beginPath(); ctx.moveTo(cx + rOff * 0.18, baseY - 244); ctx.quadraticCurveTo(cx + rOff, baseY - 212, cx + rOff * 1.08, baseY - 180); ctx.stroke();
+        }
+        // Whitewashed Cycladic cupola base + sculpted golden architectural sun-orb & tapered spire finial
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.1;
+        ctx.fillRect(cx - 8, baseY - 252, 16, 9); ctx.strokeRect(cx - 8, baseY - 252, 16, 9);
+        ctx.fillStyle = '#d97706'; ctx.fillRect(cx - 5, baseY - 255, 10, 3.5);
+        const orbG = ctx.createRadialGradient(cx - 2, baseY - 262, 1, cx, baseY - 260, 6.5);
+        orbG.addColorStop(0, '#fffbeb'); orbG.addColorStop(0.5, '#fbbf24'); orbG.addColorStop(1, '#92400e');
+        ctx.fillStyle = orbG; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.arc(cx, baseY - 260, 6.0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fde047';
+        ctx.beginPath(); ctx.moveTo(cx - 2.2, baseY - 265); ctx.lineTo(cx, baseY - 273); ctx.lineTo(cx + 2.2, baseY - 265); ctx.closePath(); ctx.fill();
+
+        // Authentic Two-Tiered 3-Bell Whitewashed Kampanario Belfry on Left Wing!
+        const bfx = cx - 146;
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.roundRect(bfx - 36, baseY - 158, 72, 160, [18, 18, 0, 0]); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.roundRect(bfx - 20, baseY - 192, 40, 38, [16, 16, 0, 0]); ctx.fill(); ctx.stroke();
+        for (const [bo, byOff, sc] of [[-16, -132, 1], [16, -132, 1], [0, -174, 0.82]]) {
+          ctx.fillStyle = '#0c4a6e';
+          ctx.beginPath();
+          ctx.arc(bfx + bo, baseY + byOff, 10 * sc, Math.PI, 0);
+          ctx.lineTo(bfx + bo + 10 * sc, baseY + byOff + 20 * sc);
+          ctx.lineTo(bfx + bo - 10 * sc, baseY + byOff + 20 * sc);
+          ctx.closePath(); ctx.fill();
+          ctx.save();
+          ctx.translate(bfx + bo, baseY + byOff + 3 * sc);
+          ctx.scale(sc, sc);
+          ctx.rotate(Math.sin(time * 2.1 + bo + byOff) * 0.14);
+          ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.arc(0, 5, 4.8, Math.PI, 0); ctx.lineTo(6.5, 12); ctx.lineTo(-6.5, 12); ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.restore();
+        }
+
+        // Arched Aegean-Blue Doors & Louvered Shutters + Lush Cascading Bougainvillea!
+        for (const wx of [cx - 62, cx, cx + 62]) {
+          const isDoor = wx === cx;
+          const wy = isDoor ? baseY - 62 : baseY - 96;
+          const wh = isDoor ? 62 : 34;
+          const ww = isDoor ? 22 : 14;
+          ctx.fillStyle = '#0284c7'; ctx.strokeStyle = '#1e3a8a'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.arc(wx, wy, ww, Math.PI, 0); ctx.lineTo(wx + ww, wy + wh); ctx.lineTo(wx - ww, wy + wh); ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#bae6fd'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(wx, wy - ww + 2); ctx.lineTo(wx, wy + wh); ctx.stroke();
+          if (!isDoor) {
+            ctx.fillStyle = '#c2410c'; ctx.fillRect(wx - 11, wy + wh, 22, 6.5);
+            drawBougainvilleaCluster(wx, wy + wh - 2, 8.5, idx + wx);
+          }
+        }
+        drawBougainvilleaCluster(cx - 104, baseY - 128, 13, idx * 5 + 1);
+        drawBougainvilleaCluster(cx - 96, baseY - 114, 11, idx * 5 + 2);
+
+      } else if (variant === 1) {
+        // === AUTHENTIC OIA CYLINDRICAL STONE WINDMILL, THATCHED CONE & 12-SPOKE RIGGED CANVAS SAILS ===
+        const wx = bx + 230;
+        const baseY = cliffY - 38;
+        // Whitewashed stone terrace courtyard & arched storage cellar
+        ctx.fillStyle = '#e2e8f0'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.3;
+        ctx.fillRect(wx - 88, baseY - 24, 176, 26); ctx.strokeRect(wx - 88, baseY - 24, 176, 26);
+
+        // 3D Cylindrical Whitewashed Tower with Subtle Curved Masonry Courses
+        const twG = ctx.createLinearGradient(wx - 58, baseY - 200, wx + 58, baseY - 200);
+        twG.addColorStop(0.00, '#ffffff');
+        twG.addColorStop(0.28, '#fffdf9');
+        twG.addColorStop(0.65, '#e2e8f0');
+        twG.addColorStop(1.00, '#94a3b8');
+        ctx.fillStyle = twG; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(wx - 56, baseY - 22); ctx.lineTo(wx - 43, baseY - 198);
+        ctx.lineTo(wx + 43, baseY - 198); ctx.lineTo(wx + 56, baseY - 22);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = 'rgba(100, 116, 139, 0.18)'; ctx.lineWidth = 0.9;
+        for (let cy2 = baseY - 176; cy2 < baseY - 34; cy2 += 24) {
+          const cw2 = 43 + ((cy2 - (baseY - 198)) / 176) * 13;
+          ctx.beginPath(); ctx.moveTo(wx - cw2 + 2, cy2); ctx.quadraticCurveTo(wx, cy2 + 3.5, wx + cw2 - 2, cy2); ctx.stroke();
+        }
+
+        // Layered Golden-Reed Conical Thatched Windmill Cap + Tailpole
+        const rfG = ctx.createLinearGradient(wx - 50, baseY - 260, wx + 50, baseY - 196);
+        rfG.addColorStop(0.0, '#fcd34d'); rfG.addColorStop(0.45, '#b45309'); rfG.addColorStop(1.0, '#451a03');
+        ctx.fillStyle = rfG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(wx - 52, baseY - 196); ctx.lineTo(wx, baseY - 262); ctx.lineTo(wx + 52, baseY - 196); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = 'rgba(254, 243, 199, 0.30)'; ctx.lineWidth = 1.0;
+        for (const tx of [-34, -20, -7, 7, 20, 34]) {
+          ctx.beginPath(); ctx.moveTo(wx, baseY - 260); ctx.lineTo(wx + tx, baseY - 197); ctx.stroke();
+        }
+
+        // Deeply Recessed Arched Aegean-Blue Door, Shutter Window & Stacked Grain Amphorae
+        ctx.fillStyle = '#0284c7'; ctx.strokeStyle = '#1e3a8a'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.roundRect(wx - 13, baseY - 132, 26, 32, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(wx - 16, baseY - 100, 32, 4);
+        ctx.fillStyle = '#0369a1';
+        ctx.beginPath(); ctx.arc(wx, baseY - 58, 17, Math.PI, 0); ctx.lineTo(wx + 17, baseY - 22); ctx.lineTo(wx - 17, baseY - 22); ctx.closePath(); ctx.fill(); ctx.stroke();
+        drawBougainvilleaCluster(wx - 68, baseY - 28, 13, idx * 7);
+
+        // Rotating 12-Spoke Wooden Windwheel with Billowing Triangular Canvas Jib Sails!
+        ctx.save();
+        ctx.translate(wx + 24, baseY - 188);
+        ctx.rotate(time * 0.48 + idx);
+        ctx.strokeStyle = 'rgba(120, 53, 15, 0.52)'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.arc(0, 0, 78, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, 0, 42, 0, Math.PI * 2); ctx.stroke();
+        for (let sp = 0; sp < 12; sp++) {
+          ctx.save();
+          ctx.rotate((sp * Math.PI * 2) / 12);
+          ctx.strokeStyle = '#78350f'; ctx.lineWidth = 2.1;
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -86); ctx.stroke();
+          const sG = ctx.createLinearGradient(0, -84, 18, -32);
+          sG.addColorStop(0, 'rgba(255, 254, 248, 0.96)'); sG.addColorStop(1, 'rgba(226, 232, 240, 0.88)');
+          ctx.fillStyle = sG; ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.moveTo(0, -20); ctx.lineTo(0, -84);
+          ctx.quadraticCurveTo(13, -74, 18, -56);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.restore();
+        }
+        ctx.fillStyle = '#78350f'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(0, 0, 3.2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+      } else {
+        // === TIERED CYCLADIC BARREL-VAULTED CAVE-HOUSES (YPOSKAFA), COBBLESTONE STAIRS & LUSH BOUGAINVILLEA PERGOLA ===
+        const vx = bx + 225;
+        const baseY = cliffY - 38;
+        // 3D Shaded Side Walls
+        ctx.fillStyle = '#cbd5e1'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.2;
+        ctx.fillRect(vx + 132, baseY - 106, 26, 108); ctx.strokeRect(vx + 132, baseY - 106, 26, 108);
+        ctx.fillRect(vx + 82, baseY - 178, 22, 72); ctx.strokeRect(vx + 82, baseY - 178, 22, 72);
+
+        // Lower Whitewashed Cycladic Cave-House Terrace
+        const vLowG = ctx.createLinearGradient(vx - 144, baseY - 110, vx + 134, baseY);
+        vLowG.addColorStop(0, '#ffffff'); vLowG.addColorStop(0.75, '#f8fafc'); vLowG.addColorStop(1, '#e2e8f0');
+        ctx.fillStyle = vLowG; ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.roundRect(vx - 144, baseY - 108, 278, 110, [10, 10, 0, 0]); ctx.fill(); ctx.stroke();
+
+        // Upper Barrel-Vaulted Santorini Residence (Authentic Curved Cycladic Tholos Roof!)
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(vx - 88, baseY - 108);
+        ctx.lineTo(vx - 88, baseY - 168);
+        ctx.quadraticCurveTo(vx - 44, baseY - 196, vx, baseY - 168);
+        ctx.quadraticCurveTo(vx + 42, baseY - 192, vx + 84, baseY - 168);
+        ctx.lineTo(vx + 84, baseY - 108);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Winding Whitewashed Caldera Staircase with Cobalt Parapet Wall
+        for (let st = 0; st < 6; st++) {
+          ctx.fillStyle = st % 2 === 0 ? '#ffffff' : '#e2e8f0';
+          ctx.fillRect(vx + 86 + st * 8, baseY - 106 + st * 12, 11, 106 - st * 12);
+        }
+        ctx.strokeStyle = '#0284c7'; ctx.lineWidth = 2.6;
+        ctx.beginPath(); ctx.moveTo(vx + 86, baseY - 115); ctx.lineTo(vx + 136, baseY - 42); ctx.stroke();
+
+        // Recessed Cave-House Veranda Alcove & Louvered Shutters + Warm Brass Lanterns!
+        ctx.fillStyle = 'rgba(30, 41, 59, 0.22)';
+        ctx.beginPath(); ctx.arc(vx - 106, baseY - 56, 22, Math.PI, 0); ctx.lineTo(vx - 84, baseY - 2); ctx.lineTo(vx - 128, baseY - 2); ctx.closePath(); ctx.fill();
+
+        for (const [sx, sy] of [[vx - 106, baseY - 72], [vx - 38, baseY - 82], [vx + 38, baseY - 82], [vx - 42, baseY - 156], [vx + 38, baseY - 156]]) {
+          ctx.fillStyle = '#0284c7'; ctx.strokeStyle = '#1e3a8a'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.roundRect(sx - 13, sy, 26, 35, [8, 8, 2, 2]); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#bae6fd'; ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.moveTo(sx, sy + 2); ctx.lineTo(sx, sy + 35); ctx.stroke();
+          // Warm golden interior lamp glow
+          ctx.fillStyle = 'rgba(254, 240, 138, 0.35)';
+          ctx.fillRect(sx - 9, sy + 7, 7, 12); ctx.fillRect(sx + 2, sy + 7, 7, 12);
+        }
+
+        // Shaded Cedar Pergola Draped in Cascading Magenta & Crimson Bougainvillea Vines!
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(vx - 94, baseY - 113, 180, 5.5);
+        for (let ra = vx - 88; ra <= vx + 80; ra += 16) {
+          ctx.fillStyle = '#92400e';
+          ctx.fillRect(ra, baseY - 116, 4, 8);
+        }
+        for (let b = 0; b < 9; b++) {
+          const bx2 = vx - 82 + b * 20;
+          const by2 = baseY - 108 + Math.sin(b * 1.5) * 6;
+          drawBougainvilleaCluster(bx2, by2, 11.5 + (b % 2) * 2, idx * 11 + b);
+        }
+      }
+    }
+
+    // 2. Continuous Translucent Turquoise-to-Sapphire Aegean Cove Sea (y = 612 .. H) + Underwater Caustics, Fishing Kaiki & Leaping Dolphins!
+    const seaTopY = 612;
+    const fgSea = ctx.createLinearGradient(0, seaTopY, 0, H);
+    fgSea.addColorStop(0.00, '#22d3ee');
+    fgSea.addColorStop(0.18, '#0ea5e9');
+    fgSea.addColorStop(0.58, '#0284c7');
+    fgSea.addColorStop(1.00, '#082f49');
+    ctx.fillStyle = fgSea;
+    ctx.fillRect(0, seaTopY, W, H - seaTopY);
+
+    // Shimmering turquoise surface meniscus + undulating underwater sunlight caustic ribbons!
+    ctx.fillStyle = 'rgba(224, 249, 255, 0.68)';
+    ctx.fillRect(0, seaTopY, W, 2.4);
+    for (let row = 0; row < 4; row++) {
+      const ry = seaTopY + 11 + row * 23;
+      ctx.strokeStyle = row === 0 ? 'rgba(255, 255, 255, 0.58)' : 'rgba(186, 230, 253, 0.32)';
+      ctx.lineWidth = row === 0 ? 2.2 : 1.5;
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 32) {
+        const y = ry + Math.sin(x * 0.026 + time * 2.4 + row * 1.4) * 2.6;
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    // Traditional Painted Greek Wooden Fishing Boat (Kaiki) Gently Bobbing in the Cove!
+    const boatSpan = 980;
+    const bScroll = camX * 0.48;
+    const bFirst = Math.floor(bScroll / boatSpan) - 1;
+    for (let bi = bFirst; bi <= bFirst + 2; bi++) {
+      const kx = bi * boatSpan - bScroll + 440 + Math.sin(time * 0.7 + bi) * 14;
+      if (kx < -90 || kx > W + 90) continue;
+      const ky = seaTopY + 18 + Math.sin(time * 2.3 + bi) * 2.2;
+      ctx.save();
+      ctx.translate(kx, ky);
+      ctx.rotate(Math.sin(time * 2.0 + bi) * 0.05);
+      ctx.strokeStyle = 'rgba(224, 242, 254, 0.55)'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.ellipse(0, 5, 32, 3.5, 0, 0, Math.PI * 2); ctx.stroke();
+      // White-and-cobalt Greek Kaiki hull with bright orange-red sheer stripe
+      ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#1e3a8a'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(-26, -2); ctx.quadraticCurveTo(0, 9, 26, -2);
+      ctx.lineTo(29, -8); ctx.quadraticCurveTo(0, -4, -29, -8);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ea580c';
+      ctx.fillRect(-25, -5.5, 50, 2.2);
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(-9, -15, 16, 8); ctx.strokeRect(-9, -15, 16, 8);
+      ctx.fillStyle = '#bae6fd';
+      ctx.fillRect(-6, -13, 5, 4); ctx.fillRect(1, -13, 4, 4);
+      ctx.restore();
+    }
+
+    // Anatomically Sculpted Bottlenose Aegean Dolphins Leaping in Graceful Arcs!
+    for (let d = 0; d < 2; d++) {
+      const cyc = (time * 0.40 + d * 0.5) % 1;
+      if (cyc < 0.58) {
+        const u = cyc / 0.58;
+        const baseDx = ((d * 640 + 320 - camX * 0.35) % (W + 260) + (W + 260)) % (W + 260) - 130;
+        const dx = baseDx + (u - 0.5) * 148;
+        const dy = seaTopY + 10 - Math.sin(u * Math.PI) * 62;
+        const ang = (u - 0.5) * 1.48;
+
+        // Concentric water entry/exit rings & sparkling spray droplets
+        if (u < 0.24 || u > 0.76) {
+          ctx.strokeStyle = 'rgba(224, 242, 254, 0.72)'; ctx.lineWidth = 1.3;
+          ctx.beginPath(); ctx.ellipse(dx, seaTopY + 5, 18, 3.5, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+          for (let sp = -2; sp <= 2; sp++) {
+            ctx.beginPath(); ctx.arc(dx + sp * 7.5, seaTopY + 1 - Math.abs(sp) * 3.2, 2.2, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+
+        ctx.save();
+        ctx.translate(dx, dy);
+        ctx.rotate(ang);
+        const dG = ctx.createLinearGradient(0, -12, 0, 9);
+        dG.addColorStop(0.0, '#1e3a5f');
+        dG.addColorStop(0.52, '#64748b');
+        dG.addColorStop(0.78, '#cbd5e1');
+        dG.addColorStop(1.0, '#f8fafc');
+        ctx.fillStyle = dG; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.1;
+        // Sleek arched dolphin body + melon forehead + bottlenose rostrum beak
+        ctx.beginPath();
+        ctx.moveTo(-26, 2);
+        ctx.bezierCurveTo(-12, -12, 8, -11, 20, -4); // Melon head curve
+        ctx.quadraticCurveTo(26, -3.5, 28, -1.2); // Bottlenose rostrum!
+        ctx.quadraticCurveTo(25, 1.2, 19, 1.5);
+        ctx.bezierCurveTo(6, 7.5, -10, 6.5, -26, 3.5);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Falcate dorsal fin, pectoral flipper & crescent tail flukes
+        ctx.fillStyle = '#28456c';
+        ctx.beginPath(); ctx.moveTo(-1, -8); ctx.quadraticCurveTo(-5, -18, -12, -15); ctx.quadraticCurveTo(-8, -10, -8, -7); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(8, 3); ctx.quadraticCurveTo(4, 11, -1, 9); ctx.quadraticCurveTo(2, 5, 4, 2.5); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(-25, 2.5); ctx.lineTo(-34, -4); ctx.quadraticCurveTo(-30, 2.5, -33, 9); ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Wet specular sunlight sheen along dorsal ridge + friendly dark eye
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.moveTo(-10, -6.5); ctx.quadraticCurveTo(4, -8.5, 16, -4.2); ctx.stroke();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); ctx.arc(17.5, -2.2, 1.1, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
+
+  function drawGreeceAcropolisGate(ctx, g, sx, sy, time, goalLabel) {
+    ensureTextures(ctx);
+    // Monumental 3D Classical Doric Parthenon Sanctuary Exit Gate (Entasis Fluted Columns, Golden Acroteria & Sculpted Tympanum!)
+    const cx = sx + g.w * 0.5;
+    const baseY = sy + g.h;
+    const topY = sy - 44;
+    ctx.save();
+
+    // Warm golden sanctuary aura behind the Parthenon gate
+    const gAura = ctx.createRadialGradient(cx, baseY - 82, 18, cx, baseY - 82, 155);
+    gAura.addColorStop(0, 'rgba(254, 240, 138, 0.42)');
+    gAura.addColorStop(0.6, 'rgba(56, 189, 248, 0.14)');
+    gAura.addColorStop(1, 'rgba(56, 189, 248, 0)');
+    ctx.fillStyle = gAura;
+    ctx.beginPath(); ctx.arc(cx, baseY - 82, 155, 0, Math.PI * 2); ctx.fill();
+
+    // 1. 3-Step Veined Pentelic Marble Crepidoma (Temple Platform Steps with Gold Meander Inlay)
+    for (let s = 0; s < 3; s++) {
+      const sw = g.w + 48 - s * 14;
+      const sh = 9.5;
+      const sy2 = baseY - (s + 1) * sh + 3;
+      const mG = ctx.createLinearGradient(cx - sw * 0.5, sy2, cx + sw * 0.5, sy2);
+      mG.addColorStop(0, '#ffffff'); mG.addColorStop(0.62, '#e7e5e4'); mG.addColorStop(1, '#a8a29e');
+      ctx.fillStyle = mG; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.3;
+      ctx.fillRect(cx - sw * 0.5, sy2, sw, sh);
+      ctx.strokeRect(cx - sw * 0.5, sy2, sw, sh);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.fillRect(cx - sw * 0.5 + 1, sy2 + 1, sw - 2, 1.6);
+    }
+
+    // 2. Radiant Swirling Golden-Aegean Sanctuary Portal Interior + Celestial Rays
+    const portW = g.w - 34;
+    const portH = baseY - 25 - (topY + 46);
+    const pGlow = ctx.createRadialGradient(cx, baseY - 72, 6, cx, baseY - 72, 82);
+    pGlow.addColorStop(0.00, 'rgba(255, 254, 240, 0.98)');
+    pGlow.addColorStop(0.38, 'rgba(254, 240, 138, 0.82)');
+    pGlow.addColorStop(0.75, 'rgba(56, 189, 248, 0.48)');
+    pGlow.addColorStop(1.00, 'rgba(3, 105, 161, 0.16)');
+    ctx.fillStyle = pGlow;
+    ctx.fillRect(cx - portW * 0.5, topY + 46, portW, portH);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.38)';
+    for (let r = -1; r <= 1; r++) {
+      const rx = cx + r * 16 + Math.sin(time * 2.2 + r) * 3;
+      ctx.fillRect(rx - 2.2, topY + 48, 4.4, portH - 4);
+    }
+
+    // 3. Four Tapered Fluted Doric Pentelic Marble Columns (True Classical Entasis + Echinus & Abacus Capitals!)
+    const colOffsets = [-g.w * 0.5 - 5, -g.w * 0.5 + 16, g.w * 0.5 - 16, g.w * 0.5 + 5];
+    for (const off of colOffsets) {
+      const colX = cx + off;
+      const colTop = topY + 45;
+      const colBot = baseY - 25;
+      const cG = ctx.createLinearGradient(colX - 8.5, colTop, colX + 8.5, colTop);
+      cG.addColorStop(0.0, '#ffffff');
+      cG.addColorStop(0.38, '#f5f5f4');
+      cG.addColorStop(0.78, '#d6d3d1');
+      cG.addColorStop(1.0, '#9ca3af');
+      ctx.fillStyle = cG; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.3;
+      // Subtle Doric taper (wider at stylobate, narrower at necking)
+      ctx.beginPath();
+      ctx.moveTo(colX - 6.4, colTop); ctx.lineTo(colX + 6.4, colTop);
+      ctx.lineTo(colX + 7.8, colBot); ctx.lineTo(colX - 7.8, colBot);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Concave vertical Doric fluting channels
+      ctx.strokeStyle = 'rgba(100, 116, 139, 0.38)'; ctx.lineWidth = 1.0;
+      for (const fl of [-3.6, -1.2, 1.2, 3.6]) {
+        ctx.beginPath(); ctx.moveTo(colX + fl * 0.86, colTop + 4); ctx.lineTo(colX + fl, colBot - 3); ctx.stroke();
+      }
+      // Necking rings (annulets), flared Doric echinus cushion & square abacus slab
+      ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(colX - 9.5, colTop - 4); ctx.lineTo(colX + 9.5, colTop - 4);
+      ctx.quadraticCurveTo(colX + 8.5, colTop + 1, colX + 6.5, colTop + 2);
+      ctx.lineTo(colX - 6.5, colTop + 2);
+      ctx.quadraticCurveTo(colX - 8.5, colTop + 1, colX - 9.5, colTop - 4);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillRect(colX - 10.5, colTop - 8, 21, 4); ctx.strokeRect(colX - 10.5, colTop - 8, 21, 4);
+    }
+
+    // Draped Olive-Laurel Festoon Garland across upper portal lintel
+    ctx.strokeStyle = '#15803d'; ctx.lineWidth = 3.2;
+    ctx.beginPath(); ctx.moveTo(cx - portW * 0.5, topY + 47); ctx.quadraticCurveTo(cx, topY + 59, cx + portW * 0.5, topY + 47); ctx.stroke();
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath(); ctx.arc(cx, topY + 53, 3.0, 0, Math.PI * 2); ctx.fill();
+
+    // 4. Classical Doric Entablature (Architrave + Sapphire Triglyphs + Gilded Metope Reliefs) & Sculpted Pediment with Golden Acroteria!
+    const entW = g.w + 42;
+    const entG = ctx.createLinearGradient(0, topY + 21, 0, topY + 41);
+    entG.addColorStop(0, '#ffffff'); entG.addColorStop(1, '#e2e8f0');
+    ctx.fillStyle = entG; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.5;
+    ctx.fillRect(cx - entW * 0.5, topY + 21, entW, 19);
+    ctx.strokeRect(cx - entW * 0.5, topY + 21, entW, 19);
+    ctx.beginPath(); ctx.moveTo(cx - entW * 0.5, topY + 34); ctx.lineTo(cx + entW * 0.5, topY + 34); ctx.stroke();
+    for (let tx = cx - entW * 0.5 + 8; tx < cx + entW * 0.5 - 12; tx += 22) {
+      ctx.fillStyle = '#0369a1';
+      ctx.fillRect(tx, topY + 23, 9.5, 10);
+      ctx.strokeStyle = '#bae6fd'; ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.moveTo(tx + 3.2, topY + 24); ctx.lineTo(tx + 3.2, topY + 32); ctx.moveTo(tx + 6.4, topY + 24); ctx.lineTo(tx + 6.4, topY + 32); ctx.stroke();
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.arc(tx + 15.5, topY + 28, 3.4, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Triangular Marble Raking Cornice & Recessed Lapis-Blue Tympanum
+    ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#57534e'; ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(cx - entW * 0.5 - 10, topY + 21);
+    ctx.lineTo(cx, topY - 24);
+    ctx.lineTo(cx + entW * 0.5 + 10, topY + 21);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    const tymG = ctx.createLinearGradient(cx, topY - 15, cx, topY + 18);
+    tymG.addColorStop(0, '#0c4a6e'); tymG.addColorStop(1, '#1e3a8a');
+    ctx.fillStyle = tymG;
+    ctx.beginPath();
+    ctx.moveTo(cx - entW * 0.5 + 12, topY + 17);
+    ctx.lineTo(cx, topY - 15);
+    ctx.lineTo(cx + entW * 0.5 - 12, topY + 17);
+    ctx.closePath(); ctx.fill();
+
+    // Sculpted Golden Sunburst & Laurel Pediment Relief + 3 Golden Palmette Acroteria!
+    ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.arc(cx, topY + 8, 12, 0.25, Math.PI - 0.25); ctx.stroke();
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath(); ctx.arc(cx, topY + 6.5, 6.8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fffbeb';
+    ctx.beginPath(); ctx.arc(cx, topY + 6.5, 3.4, 0, Math.PI * 2); ctx.fill();
+    // Flanking miniature marble pediment relief figures
+    ctx.fillStyle = '#f8fafc';
+    for (const [fx, fh] of [[-24, 9], [-16, 12], [16, 12], [24, 9]]) {
+      ctx.beginPath(); ctx.roundRect(cx + fx - 2.2, topY + 16 - fh, 4.4, fh, 1.5); ctx.fill();
+    }
+    // 3 Golden Palmette Acroteria crowning apex & corners of pediment!
+    for (const [ax0, ay0, sc] of [[cx, topY - 24, 1.15], [cx - entW * 0.5 - 8, topY + 20, 0.78], [cx + entW * 0.5 + 8, topY + 20, 0.78]]) {
+      ctx.save();
+      ctx.translate(ax0, ay0);
+      ctx.scale(sc, sc);
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#92400e'; ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(-5, 0); ctx.quadraticCurveTo(-7, -7, 0, -11); ctx.quadraticCurveTo(7, -7, 5, 0);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
+
+    // 5. Twin Sculpted Bronze Olympic Tripod Braziers with Roaring Flames & Rising Embers!
+    for (const side of [-1, 1]) {
+      const bx = cx + side * (g.w * 0.5 + 28);
+      const by = baseY - 12;
+      const fHalo = ctx.createRadialGradient(bx, by - 32, 4, bx, by - 32, 34);
+      fHalo.addColorStop(0, 'rgba(254, 240, 138, 0.52)');
+      fHalo.addColorStop(1, 'rgba(249, 115, 22, 0)');
+      ctx.fillStyle = fHalo; ctx.beginPath(); ctx.arc(bx, by - 32, 34, 0, Math.PI * 2); ctx.fill();
+
+      // Bronze tripod legs & embossed cauldron bowl
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 2.1;
+      ctx.beginPath();
+      ctx.moveTo(bx - 5, by - 14); ctx.lineTo(bx - 8, by + 10);
+      ctx.moveTo(bx, by - 14); ctx.lineTo(bx, by + 11);
+      ctx.moveTo(bx + 5, by - 14); ctx.lineTo(bx + 8, by + 10);
+      ctx.stroke();
+      const bzG = ctx.createLinearGradient(bx - 13, by - 23, bx + 13, by - 13);
+      bzG.addColorStop(0, '#fbbf24'); bzG.addColorStop(0.5, '#b45309'); bzG.addColorStop(1, '#451a03');
+      ctx.fillStyle = bzG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.moveTo(bx - 13.5, by - 23); ctx.lineTo(bx + 13.5, by - 23); ctx.lineTo(bx + 7.5, by - 13); ctx.lineTo(bx - 7.5, by - 13); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      const flick = Math.sin(time * 14 + side * 2) * 3.4;
+      ctx.fillStyle = '#ea580c';
+      ctx.beginPath(); ctx.moveTo(bx - 9.5, by - 23); ctx.quadraticCurveTo(bx - flick * 0.4, by - 48 + flick, bx + 9.5, by - 23); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath(); ctx.moveTo(bx - 6, by - 23); ctx.quadraticCurveTo(bx, by - 40 + flick * 0.7, bx + 6, by - 23); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#fffbeb';
+      ctx.beginPath(); ctx.moveTo(bx - 3, by - 23); ctx.quadraticCurveTo(bx, by - 33 + flick * 0.4, bx + 3, by - 23); ctx.closePath(); ctx.fill();
+      for (let e = 0; e < 3; e++) {
+        const ey = by - 32 - ((time * 38 + e * 11 + (side > 0 ? 7 : 0)) % 30);
+        const ex = bx + Math.sin(time * 6 + e + side) * 4.5;
+        ctx.beginPath(); ctx.arc(ex, ey, 1.4, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    // 6. Floating Bilingual Sanctuary Plaque
+    const rawLbl = goalLabel || 'معبد الأكروبوليس • اليونان';
+    const labelText = (window.Game && window.Game.I18n) ? window.Game.I18n.translateDynamic(rawLbl) : rawLbl;
+    const bob = Math.sin(time * 3.1) * 3;
+    ctx.font = 'bold 13.5px sans-serif';
+    ctx.textAlign = 'center';
+    const tw = Math.max(186, ctx.measureText(labelText).width + 32);
+    ctx.fillStyle = 'rgba(12, 74, 110, 0.94)'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.9;
+    ctx.beginPath(); ctx.roundRect(cx - tw * 0.5, topY - 62 + bob, tw, 26, 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fef9c3';
+    ctx.fillText(labelText, cx, topY - 44 + bob);
+    ctx.restore();
+  }
+
+  Art.drawVeniceSkyAndHorizon = drawVeniceSkyAndHorizon;
+  Art.drawVeniceMidground = drawVeniceMidground;
+  Art.drawVenicePiazzaGate = drawVenicePiazzaGate;
+  Art.drawParisSkyAndHorizon = drawParisSkyAndHorizon;
+  Art.drawParisMidground = drawParisMidground;
+  Art.drawParisArcGate = drawParisArcGate;
+  Art.drawMarrakechSkyAndHorizon = drawMarrakechSkyAndHorizon;
+  Art.drawMarrakechMidground = drawMarrakechMidground;
+  Art.drawMarrakechBabGate = drawMarrakechBabGate;
+  Art.drawMayaSkyAndHorizon = drawMayaSkyAndHorizon;
+  Art.drawMayaMidground = drawMayaMidground;
+  Art.drawMayaTempleGate = drawMayaTempleGate;
+  // =========================================================================
+  // =========================================================================
+  // 21. STAGE 26: BATTIR, PALESTINE — MUSEUM-GRADE GOLDEN-HOUR VALLEY & HERITAGE
+  // =========================================================================
+  function drawBattirSkyAndHorizon(ctx, camX, w, h, time) {
+    // 1. Rich Golden-Hour Palestinian Sky over the Bethlehem–Jerusalem Highlands
+    const skyG = ctx.createLinearGradient(0, 0, 0, h * 0.88);
+    skyG.addColorStop(0.0, '#1d4ed8');
+    skyG.addColorStop(0.28, '#3b82f6');
+    skyG.addColorStop(0.56, '#93c5fd');
+    skyG.addColorStop(0.76, '#fde68a');
+    skyG.addColorStop(1.0, '#fed7aa');
+    ctx.fillStyle = skyG;
+    ctx.fillRect(0, 0, w, h);
+
+    // 2. Radiant Golden-Hour Sun & Volumetric Sunbeams Slanting Across Wadi al-Makhrour
+    const sunX = w * 0.77 - ((camX * 0.006) % (w * 0.28));
+    const sunY = h * 0.21;
+    const haloG = ctx.createRadialGradient(sunX, sunY, 10, sunX, sunY, 210);
+    haloG.addColorStop(0.0, 'rgba(255, 251, 235, 0.96)');
+    haloG.addColorStop(0.25, 'rgba(253, 224, 71, 0.45)');
+    haloG.addColorStop(0.65, 'rgba(251, 146, 60, 0.14)');
+    haloG.addColorStop(1.0, 'rgba(251, 146, 60, 0)');
+    ctx.fillStyle = haloG;
+    ctx.beginPath(); ctx.arc(sunX, sunY, 210, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fffbeb';
+    ctx.beginPath(); ctx.arc(sunX, sunY, 32, 0, Math.PI * 2); ctx.fill();
+
+    // Diagonal atmospheric golden sun shafts
+    ctx.save();
+    for (let r = 0; r < 4; r++) {
+      const ang = 0.48 + r * 0.17;
+      const alpha = 0.045 + Math.sin(time * 0.8 + r * 1.4) * 0.015;
+      const rayG = ctx.createLinearGradient(sunX, sunY, sunX - Math.cos(ang) * 560, sunY + Math.sin(ang) * 560);
+      rayG.addColorStop(0, `rgba(254, 240, 138, ${(alpha * 1.8).toFixed(3)})`);
+      rayG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+      ctx.fillStyle = rayG;
+      ctx.beginPath();
+      ctx.moveTo(sunX - 10, sunY);
+      ctx.lineTo(sunX - Math.cos(ang - 0.05) * 640, sunY + Math.sin(ang - 0.05) * 640);
+      ctx.lineTo(sunX - Math.cos(ang + 0.07) * 640, sunY + Math.sin(ang + 0.07) * 640);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // 3. Sculpted Multi-Lobe Bezier Cumulus Clouds with Golden-Hour Under-Rim Glow
+    for (let i = 0; i < 6; i++) {
+      const s = 0.78 + (i % 3) * 0.24;
+      const cx = ((i * 275 - camX * 0.025 + time * (4.5 + (i % 2) * 1.8)) % (w + 340) + (w + 340)) % (w + 340) - 160;
+      const cy = 62 + (i % 3) * 34;
+      const clG = ctx.createLinearGradient(cx, cy - 28 * s, cx, cy + 16 * s);
+      clG.addColorStop(0.0, 'rgba(255, 255, 255, 0.92)');
+      clG.addColorStop(0.62, 'rgba(254, 249, 235, 0.78)');
+      clG.addColorStop(1.0, 'rgba(253, 186, 116, 0.45)');
+      ctx.fillStyle = clG;
+      ctx.beginPath();
+      ctx.moveTo(cx - 24 * s, cy + 14 * s);
+      ctx.bezierCurveTo(cx - 30 * s, cy - 2 * s, cx - 12 * s, cy - 16 * s, cx + 6 * s, cy - 12 * s);
+      ctx.bezierCurveTo(cx + 16 * s, cy - 30 * s, cx + 48 * s, cy - 30 * s, cx + 58 * s, cy - 13 * s);
+      ctx.bezierCurveTo(cx + 74 * s, cy - 18 * s, cx + 90 * s, cy - 6 * s, cx + 94 * s, cy + 14 * s);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(254, 240, 178, 0.52)'; ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(cx - 18 * s, cy + 13.5 * s);
+      ctx.quadraticCurveTo(cx + 36 * s, cy + 16 * s, cx + 88 * s, cy + 13.5 * s);
+      ctx.stroke();
+    }
+
+    // 4. Three Stratified Bethlehem–Jerusalem Limestone Mountain Ranges with Distant Hilltop Villages!
+    const drawMountainLayer = (parallax, baseY, amp, topCol, botCol, terraceCol, seed, withVillage) => {
+      const span = 1400;
+      const off = -((camX * parallax) % span);
+      const hG = ctx.createLinearGradient(0, baseY - amp - 20, 0, h);
+      hG.addColorStop(0, topCol); hG.addColorStop(1, botCol);
+      for (let rep = -1; rep <= 1; rep++) {
+        const bx = off + rep * span;
+        ctx.fillStyle = hG;
+        ctx.beginPath();
+        ctx.moveTo(bx, h);
+        for (let x = 0; x <= span; x += 35) {
+          const y = baseY - Math.sin(x * 0.0045 + seed) * amp - Math.cos(x * 0.011 + seed * 1.6) * (amp * 0.36);
+          ctx.lineTo(bx + x, y);
+        }
+        ctx.lineTo(bx + span, h); ctx.closePath(); ctx.fill();
+
+        // Stepped dry-stone terrace contour lines catching golden afternoon sun
+        ctx.strokeStyle = terraceCol; ctx.lineWidth = 1.7;
+        for (let t = 1; t <= 4; t++) {
+          ctx.beginPath();
+          for (let x = 0; x <= span; x += 35) {
+            const y = baseY + t * 20 - Math.sin(x * 0.0045 + seed) * (amp * 0.84) - Math.cos(x * 0.011 + seed * 1.6) * (amp * 0.3);
+            if (x === 0) ctx.moveTo(bx + x, y); else ctx.lineTo(bx + x, y);
+          }
+          ctx.stroke();
+        }
+
+        // Distant cascading Bethlehem/Jerusalem hilltop stone village clusters & cypress spires
+        if (withVillage) {
+          for (const vx0 of [330, 1020]) {
+            const vy0 = baseY - Math.sin(vx0 * 0.0045 + seed) * amp - Math.cos(vx0 * 0.011 + seed * 1.6) * (amp * 0.36) + 2;
+            const houses = [[-44, 10, 16, 10], [-26, 4, 20, 12], [-4, 0, 22, 14], [20, 5, 18, 11], [40, 12, 15, 9], [-14, 13, 18, 9], [10, 14, 17, 9]];
+            for (const [dx, dy, dw, dh] of houses) {
+              ctx.fillStyle = 'rgba(247, 238, 220, 0.88)';
+              ctx.fillRect(bx + vx0 + dx, vy0 + dy, dw, dh);
+              ctx.fillStyle = 'rgba(156, 134, 106, 0.62)';
+              ctx.fillRect(bx + vx0 + dx + dw - 4, vy0 + dy, 4, dh);
+            }
+            // Subtle stone dome & cypress spires
+            ctx.fillStyle = 'rgba(235, 223, 200, 0.9)';
+            ctx.beginPath(); ctx.arc(bx + vx0 + 7, vy0, 7, Math.PI, 0); ctx.fill();
+            ctx.fillStyle = 'rgba(42, 68, 40, 0.72)';
+            for (const cx2 of [-52, -16, 36, 56]) {
+              ctx.beginPath(); ctx.moveTo(bx + vx0 + cx2 - 3, vy0 + 18); ctx.lineTo(bx + vx0 + cx2, vy0 - 4); ctx.lineTo(bx + vx0 + cx2 + 3, vy0 + 18); ctx.closePath(); ctx.fill();
+            }
+          }
+        }
+      }
+    };
+
+    drawMountainLayer(0.05, 365, 70, '#7c96b2', '#bfd0dc', 'rgba(245, 240, 225, 0.22)', 0.5, true);
+    drawMountainLayer(0.11, 428, 56, '#6e8759', '#99ab7c', 'rgba(235, 222, 196, 0.38)', 2.1, false);
+    drawMountainLayer(0.19, 484, 42, '#526e3c', '#7c945c', 'rgba(220, 202, 170, 0.52)', 3.6, false);
+
+    // Subtle warm golden atmospheric haze separating distant hills from midground landmarks
+    const hazeG = ctx.createLinearGradient(0, 440, 0, 565);
+    hazeG.addColorStop(0, 'rgba(254, 243, 199, 0)');
+    hazeG.addColorStop(1, 'rgba(254, 243, 199, 0.28)');
+    ctx.fillStyle = hazeG;
+    ctx.fillRect(0, 440, w, 125);
+  }
+
+  // --- Museum-Grade 2.5D Jerusalem Limestone & Mediterranean Flora Helpers ---
+  function drawBattirAshlarBlock(ctx, x, y, w, h, sideW, lightTop, lightBot) {
+    // Sunlit front facade with staggered hand-dressed Jerusalem limestone courses (حجر قدسي)
+    const fG = ctx.createLinearGradient(x, y, x, y + h);
+    fG.addColorStop(0, lightTop || '#f5ead6'); fG.addColorStop(1, lightBot || '#cbb692');
+    ctx.fillStyle = fG;
+    ctx.fillRect(x, y, w, h);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+    const rowH = 14;
+    const tones = ['#f7efe0', '#ebe0cb', '#dfd0b4', '#d1bd9c', '#f2e5ce'];
+    let rIdx = 0;
+    for (let ry = y; ry < y + h; ry += rowH) {
+      let rx = x - ((rIdx % 2) * 14);
+      let cIdx = rIdx * 5;
+      while (rx < x + w) {
+        const bw = 24 + ((cIdx * 13) % 16);
+        ctx.fillStyle = tones[cIdx % tones.length];
+        ctx.fillRect(rx + 0.7, ry + 0.7, bw - 1.4, rowH - 1.4);
+        ctx.strokeStyle = 'rgba(92, 74, 48, 0.34)'; ctx.lineWidth = 0.85;
+        ctx.strokeRect(rx + 0.5, ry + 0.5, bw - 1, rowH - 1);
+        // Sunlit top bevel on stone block
+        ctx.strokeStyle = 'rgba(255, 253, 245, 0.42)'; ctx.lineWidth = 0.7;
+        ctx.beginPath(); ctx.moveTo(rx + 2, ry + 1.5); ctx.lineTo(rx + bw - 2, ry + 1.5); ctx.stroke();
+        rx += bw; cIdx++;
+      }
+      rIdx++;
+    }
+    ctx.restore();
+    // Shaded 3D right side return wall for true architectural volume
+    if (sideW > 0) {
+      const sG = ctx.createLinearGradient(x + w, y, x + w + sideW, y + h);
+      sG.addColorStop(0, '#ab9472'); sG.addColorStop(1, '#786244');
+      ctx.fillStyle = sG;
+      ctx.beginPath();
+      ctx.moveTo(x + w, y); ctx.lineTo(x + w + sideW, y + 7);
+      ctx.lineTo(x + w + sideW, y + h); ctx.lineTo(x + w, y + h);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = 'rgba(63, 46, 29, 0.45)'; ctx.lineWidth = 1.0;
+      for (let ry = y + 14; ry < y + h; ry += 14) {
+        ctx.beginPath(); ctx.moveTo(x + w, ry); ctx.lineTo(x + w + sideW, ry + 4); ctx.stroke();
+      }
+    }
+    ctx.strokeStyle = '#5c462e'; ctx.lineWidth = 1.4;
+    ctx.strokeRect(x, y, w, h);
+  }
+
+  function drawBattirPointedArch(ctx, cx, botY, halfW, h, fillCol) {
+    const springY = botY - h * 0.58;
+    // Carved radial voussoir arch surround
+    ctx.fillStyle = '#efe4cf'; ctx.strokeStyle = '#5c462e'; ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(cx - halfW - 6, botY); ctx.lineTo(cx - halfW - 6, springY);
+    ctx.quadraticCurveTo(cx - halfW - 4, botY - h - 6, cx, botY - h - 8);
+    ctx.quadraticCurveTo(cx + halfW + 4, botY - h - 6, cx + halfW + 6, springY);
+    ctx.lineTo(cx + halfW + 6, botY); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Shadowed recessed arched opening
+    ctx.fillStyle = fillCol || '#291e14';
+    ctx.beginPath();
+    ctx.moveTo(cx - halfW, botY); ctx.lineTo(cx - halfW, springY);
+    ctx.quadraticCurveTo(cx - halfW + 2, botY - h + 2, cx, botY - h);
+    ctx.quadraticCurveTo(cx + halfW - 2, botY - h + 2, cx + halfW, springY);
+    ctx.lineTo(cx + halfW, botY); ctx.closePath(); ctx.fill();
+  }
+
+  function drawBattirStoneDome(ctx, cx, baseY, r) {
+    const dG = ctx.createRadialGradient(cx - r * 0.32, baseY - r * 0.55, r * 0.1, cx, baseY - r * 0.2, r * 1.1);
+    dG.addColorStop(0.0, '#fbf5e8'); dG.addColorStop(0.55, '#d8c5a3'); dG.addColorStop(1.0, '#8d7553');
+    ctx.fillStyle = dG; ctx.strokeStyle = '#5c462e'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - r, baseY);
+    ctx.bezierCurveTo(cx - r, baseY - r * 0.95, cx - r * 0.35, baseY - r * 1.08, cx, baseY - r * 1.08);
+    ctx.bezierCurveTo(cx + r * 0.35, baseY - r * 1.08, cx + r, baseY - r * 0.95, cx + r, baseY);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Subtle concentric masonry rib & carved stone finial
+    ctx.strokeStyle = 'rgba(92, 74, 48, 0.28)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx, baseY - r * 0.12, r * 0.72, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
+    ctx.fillStyle = '#c8b28e'; ctx.strokeStyle = '#5c462e'; ctx.lineWidth = 1.1;
+    ctx.beginPath(); ctx.arc(cx, baseY - r * 1.12, 3.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  }
+
+  function drawBattirCypress(ctx, x, groundY, h) {
+    ctx.save();
+    ctx.translate(x, groundY);
+    ctx.fillStyle = '#4a3525';
+    ctx.fillRect(-3.5, -14, 7, 14);
+    const cG = ctx.createLinearGradient(-16, -h, 16, -10);
+    cG.addColorStop(0.0, '#4d7c3f'); cG.addColorStop(0.48, '#2d5228'); cG.addColorStop(1.0, '#183016');
+    ctx.fillStyle = cG;
+    ctx.beginPath();
+    ctx.moveTo(0, -h);
+    ctx.bezierCurveTo(-9, -h * 0.72, -16, -h * 0.32, -11, -12);
+    ctx.quadraticCurveTo(0, -7, 11, -12);
+    ctx.bezierCurveTo(16, -h * 0.32, 9, -h * 0.72, 0, -h);
+    ctx.closePath(); ctx.fill();
+    // Sunlit western foliage highlight edge
+    ctx.strokeStyle = 'rgba(134, 180, 92, 0.45)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(-1, -h + 4); ctx.bezierCurveTo(-8, -h * 0.68, -13, -h * 0.34, -9, -15); ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawBattirOliveTree(ctx, x, groundY, scale) {
+    ctx.save();
+    ctx.translate(x, groundY);
+    ctx.scale(scale, scale);
+    // Ground contact shadow
+    ctx.fillStyle = 'rgba(28, 25, 23, 0.24)';
+    ctx.beginPath(); ctx.ellipse(2, 0, 38, 6, 0, 0, Math.PI * 2); ctx.fill();
+    // Ancient gnarled multi-root Palestinian olive trunk (زيتون رومي معمر)
+    const trG = ctx.createLinearGradient(-22, -90, 22, 0);
+    trG.addColorStop(0.0, '#a3927d'); trG.addColorStop(0.45, '#766552'); trG.addColorStop(1.0, '#3e3226');
+    ctx.fillStyle = trG; ctx.strokeStyle = '#291e14'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-24, 0); ctx.quadraticCurveTo(-14, -18, -13, -44);
+    ctx.quadraticCurveTo(-24, -64, -38, -82); ctx.lineTo(-27, -88);
+    ctx.quadraticCurveTo(-10, -72, -3, -64); ctx.quadraticCurveTo(0, -80, 3, -94);
+    ctx.lineTo(13, -92); ctx.quadraticCurveTo(12, -74, 28, -86);
+    ctx.lineTo(37, -79); ctx.quadraticCurveTo(18, -58, 14, -36);
+    ctx.quadraticCurveTo(16, -16, 24, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Twisted bark fissure lines
+    ctx.strokeStyle = 'rgba(41, 30, 20, 0.5)'; ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.moveTo(-8, -6); ctx.quadraticCurveTo(-4, -34, -14, -62);
+    ctx.moveTo(6, -4); ctx.quadraticCurveTo(4, -32, 12, -60);
+    ctx.stroke();
+    // Sculpted 3-depth-layer silvery-sage Mediterranean olive canopy (deep shade -> mid -> sunlit silver-green crown)
+    const deepShade = [[-44, -92, 26, 17], [42, -90, 25, 16], [-12, -98, 28, 19], [16, -96, 27, 18]];
+    const midLeaf = [[-36, -104, 24, 16], [34, -102, 23, 15], [0, -114, 30, 20], [-18, -110, 22, 15], [20, -108, 22, 15]];
+    const sunCrown = [[-26, -116, 17, 11], [4, -124, 22, 12], [24, -114, 16, 10], [-42, -108, 14, 9]];
+    ctx.fillStyle = '#3b522a';
+    for (const [px, py, rx, ry] of deepShade) { ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = '#5e7d42';
+    for (const [px, py, rx, ry] of midLeaf) { ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = '#8fa96e';
+    for (const [px, py, rx, ry] of sunCrown) { ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = '#b9cc9e';
+    ctx.beginPath(); ctx.ellipse(-4, -128, 14, 6, -0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawBattirAlmondTree(ctx, x, groundY, scale, time) {
+    ctx.save();
+    ctx.translate(x, groundY);
+    ctx.scale(scale, scale);
+    ctx.fillStyle = 'rgba(28, 25, 23, 0.2)';
+    ctx.beginPath(); ctx.ellipse(0, 0, 26, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+    // Slender branching dark-bark almond trunk
+    ctx.fillStyle = '#5c402c'; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(-10, 0); ctx.quadraticCurveTo(-5, -36, -18, -74); ctx.lineTo(-10, -78);
+    ctx.quadraticCurveTo(0, -60, 12, -78); ctx.lineTo(20, -74); ctx.quadraticCurveTo(6, -36, 11, 0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Multi-layered pale-rose & ivory Palestinian almond blossom canopy (زهر اللوز)
+    const layers = [
+      ['#f472b6', [[-28, -84, 21, 15], [26, -82, 20, 14], [0, -96, 26, 18]]],
+      ['#fbcfe8', [[-22, -92, 18, 13], [20, -90, 18, 13], [-4, -104, 22, 15]]],
+      ['#fff1f2', [[-14, -98, 13, 9], [8, -108, 15, 9], [18, -96, 12, 8]]],
+    ];
+    for (const [col, pts] of layers) {
+      ctx.fillStyle = col;
+      for (const [px, py, rx, ry] of pts) { ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); }
+    }
+    // Gently drifting pink almond blossom petals in the breeze
+    ctx.fillStyle = 'rgba(255, 241, 242, 0.85)';
+    for (let k = 0; k < 4; k++) {
+      const prog = ((time * 0.45 + k * 0.27) % 1);
+      const px = -22 + k * 14 + Math.sin(prog * 6 + k) * 9;
+      const py = -80 + prog * 72;
+      ctx.beginPath(); ctx.ellipse(px, py, 2.6, 1.4, prog * 4, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawBattirMidground(ctx, camX, w, h, time) {
+    // 6-Zone Museum-Grade Authentic Battir (Bethlehem & Jerusalem) Archaeological & Touristic Panorama
+    const p = 0.45;
+    const blockW = 1140;
+    const worldStart = Math.floor((camX * p) / blockW) * blockW - blockW;
+    const worldEnd = camX * p + w + blockW;
+
+    // 1. Deep Lush Emerald Wadi al-Makhrour Valley Slope Descending into Shimmering Battir Spring Stream!
+    const wallY = 528;
+    const slopeG = ctx.createLinearGradient(0, wallY, 0, 650);
+    slopeG.addColorStop(0.0, '#4d7c0f'); slopeG.addColorStop(0.45, '#365314'); slopeG.addColorStop(1.0, '#1a2e05');
+    ctx.fillStyle = slopeG;
+    ctx.fillRect(0, wallY, w, 126);
+    // Stepped dry-stone terrace ribbon across the lush green slope
+    const stoneShift = -(camX * 0.45) % 44;
+    for (let x = stoneShift - 44; x < w + 44; x += 44) {
+      ctx.fillStyle = '#cbb591'; ctx.strokeStyle = '#574631'; ctx.lineWidth = 1.0;
+      ctx.beginPath(); ctx.roundRect(x + 1, wallY + 4, 42, 16, 3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ad9570';
+      ctx.beginPath(); ctx.roundRect(x + 22, wallY + 21, 42, 14, 3); ctx.fill(); ctx.stroke();
+    }
+    // Continuous Shimmering Turquoise Battir Spring Stream at the valley floor (visible through every gap!)
+    const streamG = ctx.createLinearGradient(0, 646, 0, h);
+    streamG.addColorStop(0.0, '#0284c7'); streamG.addColorStop(0.45, '#0ea5e9'); streamG.addColorStop(1.0, '#0369a1');
+    ctx.fillStyle = streamG;
+    ctx.fillRect(0, 646, w, h - 646);
+    ctx.strokeStyle = 'rgba(224, 242, 254, 0.65)'; ctx.lineWidth = 1.6;
+    for (let r = 0; r < 3; r++) {
+      const ry = 656 + r * 18;
+      for (let wx = -((camX * (0.5 + r * 0.08) + time * (42 + r * 14)) % 110); wx < w + 110; wx += 110) {
+        ctx.beginPath(); ctx.moveTo(wx, ry); ctx.quadraticCurveTo(wx + 24, ry - 3, wx + 48, ry); ctx.stroke();
+      }
+    }
+    // Gravity-fed carved limestone Ma'dud irrigation channel along upper terrace lip
+    ctx.fillStyle = '#9c8360'; ctx.strokeStyle = '#473824'; ctx.lineWidth = 1.2;
+    ctx.fillRect(0, wallY - 9, w, 10); ctx.strokeRect(0, wallY - 9, w, 10);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(0, wallY - 7, w, 5);
+
+    // 2. Render Each Distinct Authentic Battir Landmark Zone (Zero Floating Text Boxes!)
+    for (let bx = worldStart; bx <= worldEnd; bx += blockW) {
+      const sx = bx - camX * p;
+      const zoneIdx = ((Math.round(bx / blockW) % 6) + 6) % 6;
+
+      if (zoneIdx === 0) {
+        // ZONE 0: UNESCO Al-Jinan Dry-Stone Terraces (الجنّان) & Conical Stone Manatir Watchtower
+        for (let st = 0; st < 3; st++) {
+          const tx = sx + 45 + st * 22, ty = 438 + st * 30, tw = 390 - st * 44;
+          drawBattirAshlarBlock(ctx, tx, ty, tw, 32, 10, '#efe4cf', '#b59d78');
+          ctx.fillStyle = '#4d7c0f'; ctx.fillRect(tx - 2, ty - 2, tw + 4, 6);
+          // Wild red Palestinian poppies (الدحنون) & greenery along terrace top
+          for (let px2 = tx + 24; px2 < tx + tw - 20; px2 += 56) {
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath(); ctx.arc(px2, ty - 5, 3.2, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#1c1917';
+            ctx.beginPath(); ctx.arc(px2, ty - 5, 1.1, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+        // Conical dry-stone Palestinian agricultural watchtower (المنطار)
+        const mx = sx + 540, my = 398;
+        const mG = ctx.createLinearGradient(mx, my, mx + 98, my + 132);
+        mG.addColorStop(0, '#f2e5ce'); mG.addColorStop(0.65, '#cbb591'); mG.addColorStop(1, '#856e4d');
+        ctx.fillStyle = mG; ctx.strokeStyle = '#473824'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(mx + 14, my); ctx.lineTo(mx + 82, my); ctx.lineTo(mx + 102, my + 132); ctx.lineTo(mx - 6, my + 132); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = 'rgba(71, 56, 36, 0.4)'; ctx.lineWidth = 1.1;
+        for (let r = my + 14; r < my + 124; r += 13) { ctx.beginPath(); ctx.moveTo(mx + 4, r); ctx.lineTo(mx + 92, r); ctx.stroke(); }
+        drawBattirPointedArch(ctx, mx + 48, my + 132, 13, 46, '#231911');
+        // Wooden olive-wood lintel above watchtower doorway
+        ctx.fillStyle = '#6b4222'; ctx.fillRect(mx + 26, my + 78, 44, 6);
+        drawBattirCypress(ctx, sx + 686, 528, 128);
+        drawBattirOliveTree(ctx, sx + 795, 528, 1.12);
+        drawBattirAlmondTree(ctx, sx + 985, 528, 1.0, time);
+      } else if (zoneIdx === 1) {
+        // ZONE 1: 1892 Ottoman Jerusalem–Jaffa Railway 5-Arch Stone Viaduct & Historic Battir Station
+        const vx = sx + 25, vy = 404;
+        const vG = ctx.createLinearGradient(vx, vy, vx, vy + 128);
+        vG.addColorStop(0, '#f3e8d2'); vG.addColorStop(0.55, '#cbb591'); vG.addColorStop(1, '#856e4d');
+        ctx.fillStyle = vG; ctx.strokeStyle = '#473824'; ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(vx, vy); ctx.lineTo(vx + 680, vy); ctx.lineTo(vx + 680, vy + 128);
+        for (let a = 4; a >= 0; a--) {
+          const ax = vx + 26 + a * 130;
+          ctx.lineTo(ax + 96, vy + 128); ctx.lineTo(ax + 96, vy + 68);
+          ctx.arc(ax + 48, vy + 68, 48, 0, Math.PI, true);
+          ctx.lineTo(ax, vy + 128);
+        }
+        ctx.lineTo(vx, vy + 128); ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Carved radial voussoir arch rings & masonry lines on viaduct
+        ctx.strokeStyle = 'rgba(71, 56, 36, 0.45)'; ctx.lineWidth = 1.3;
+        for (let a = 0; a < 5; a++) {
+          const cxA = vx + 74 + a * 130;
+          ctx.beginPath(); ctx.arc(cxA, vy + 68, 54, Math.PI, 0); ctx.stroke();
+        }
+        // Steel railway tracks, sleepers & wrought-iron parapet railing
+        ctx.fillStyle = '#334155'; ctx.fillRect(vx - 6, vy - 5, 692, 5);
+        ctx.fillStyle = '#78350f';
+        for (let sl = vx; sl < vx + 680; sl += 18) ctx.fillRect(sl, vy - 2, 10, 4);
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(vx, vy - 14); ctx.lineTo(vx + 680, vy - 14); ctx.stroke();
+        for (let rp = vx; rp <= vx + 680; rp += 34) { ctx.beginPath(); ctx.moveTo(rp, vy - 14); ctx.lineTo(rp, vy - 4); ctx.stroke(); }
+        // Vintage 1892 Ottoman Jaffa–Jerusalem Steam Locomotive gliding across the stone viaduct!
+        const locoX = vx + 40 + ((time * 38) % 520);
+        ctx.fillStyle = '#1c1917'; ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.roundRect(locoX, vy - 30, 56, 20, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#7f1d1d'; ctx.fillRect(locoX + 2, vy - 38, 22, 18);
+        ctx.fillStyle = '#f59e0b'; ctx.fillRect(locoX + 46, vy - 40, 8, 12);
+        for (let pf = 0; pf < 4; pf++) {
+          const pr = ((time * 1.4 + pf * 0.25) % 1);
+          ctx.fillStyle = `rgba(255, 255, 255, ${((1 - pr) * 0.55).toFixed(2)})`;
+          ctx.beginPath(); ctx.arc(locoX + 50 - pr * 34, vy - 44 - pr * 28, 4 + pr * 9, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // 2.5D Historic 1892 Ottoman Battir Stone Station House with Terracotta Pitched Roof
+        const stX = sx + 742, stY = 390;
+        drawBattirAshlarBlock(ctx, stX, stY + 32, 212, 110, 18, '#f7efe0', '#cbb692');
+        // Scalloped Ottoman terracotta tile roof with overhanging timber eaves
+        const rfG = ctx.createLinearGradient(stX, stY - 14, stX, stY + 34);
+        rfG.addColorStop(0, '#c2410c'); rfG.addColorStop(1, '#7c2d12');
+        ctx.fillStyle = rfG; ctx.strokeStyle = '#431407'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(stX - 16, stY + 34); ctx.lineTo(stX + 106, stY - 14); ctx.lineTo(stX + 236, stY + 34); ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Arched wooden station windows with carved limestone sills
+        for (const wx of [stX + 36, stX + 106, stX + 176]) {
+          drawBattirPointedArch(ctx, wx, stY + 108, 16, 44, '#1e293b');
+          ctx.fillStyle = '#efe4cf'; ctx.fillRect(wx - 20, stY + 108, 40, 5);
+        }
+        // Glowing warm brass Ottoman station clock medallion under gable
+        ctx.fillStyle = '#fef9c3'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(stX + 106, stY + 14, 10, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        drawBattirCypress(ctx, sx + 1020, 528, 132);
+        drawBattirOliveTree(ctx, sx + 1082, 528, 0.9);
+      } else if (zoneIdx === 2) {
+        // ZONE 2: Seven Widows Quarter (حوش السبع أرامل), Vaulted Old Town & Hanging Stone Stairway
+        const hx = sx + 55, hy = 338;
+        // Left 2.5D vaulted limestone house with shallow Bethlehem stone dome
+        drawBattirAshlarBlock(ctx, hx, hy + 62, 178, 132, 16, '#f8f0e2', '#cbb591');
+        drawBattirStoneDome(ctx, hx + 89, hy + 62, 50);
+        // Central connecting stone Qantara archway (القنطرة) spanning the courtyard alley
+        drawBattirAshlarBlock(ctx, hx + 178, hy + 86, 136, 108, 10, '#efe4cf', '#bfa882');
+        drawBattirPointedArch(ctx, hx + 246, hy + 194, 38, 84, '#291e14');
+        // Warm glowing courtyard lantern inside Qantara arch
+        const lgG = ctx.createRadialGradient(hx + 246, hy + 136, 2, hx + 246, hy + 136, 30);
+        lgG.addColorStop(0, 'rgba(254, 240, 138, 0.85)'); lgG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = lgG; ctx.beginPath(); ctx.arc(hx + 246, hy + 136, 30, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.arc(hx + 246, hy + 136, 4.5, 0, Math.PI * 2); ctx.fill();
+        // Right upper terrace stone house + cantilevered external stone stairway (درج حجري معلّق)
+        drawBattirAshlarBlock(ctx, hx + 314, hy + 38, 186, 156, 20, '#f7efe0', '#c8b28e');
+        drawBattirStoneDome(ctx, hx + 407, hy + 38, 42);
+        for (let st = 0; st < 8; st++) {
+          const sx2 = hx + 314 - st * 11, sy2 = hy + 96 + st * 12;
+          ctx.fillStyle = '#efe4cf'; ctx.strokeStyle = '#5c462e'; ctx.lineWidth = 1.1;
+          ctx.fillRect(sx2, sy2, 16, 12); ctx.strokeRect(sx2, sy2, 16, 12);
+        }
+        // Arched olive-green wooden shuttered windows + cascading magenta bougainvillea (المجنونة)
+        for (const [wx, wy] of [[hx + 46, hy + 148], [hx + 130, hy + 148], [hx + 364, hy + 128], [hx + 446, hy + 128]]) {
+          drawBattirPointedArch(ctx, wx, wy, 14, 38, '#365314');
+        }
+        ctx.fillStyle = '#be185d';
+        for (const [bx2, by2, r2] of [[hx + 186, hy + 92, 14], [hx + 206, hy + 88, 12], [hx + 174, hy + 108, 11], [hx + 224, hy + 94, 10]]) {
+          ctx.beginPath(); ctx.arc(bx2, by2, r2, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = '#f472b6';
+        for (const [bx2, by2, r2] of [[hx + 184, hy + 89, 6], [hx + 204, hy + 86, 5.5], [hx + 176, hy + 105, 5]]) {
+          ctx.beginPath(); ctx.arc(bx2, by2, r2, 0, Math.PI * 2); ctx.fill();
+        }
+        // Open-air Battir Eco-Museum stone pergola pavilion
+        const ex = sx + 640, ey = 416;
+        drawBattirAshlarBlock(ctx, ex, ey + 20, 215, 96, 14, '#f3e8d2', '#bfa882');
+        ctx.fillStyle = '#6b4222'; ctx.fillRect(ex - 12, ey + 10, 240, 10);
+        ctx.fillStyle = '#4d7c0f';
+        for (let vx2 = ex - 6; vx2 < ex + 226; vx2 += 24) { ctx.beginPath(); ctx.ellipse(vx2, ey + 10, 14, 7, 0, 0, Math.PI * 2); ctx.fill(); }
+        drawBattirAlmondTree(ctx, sx + 978, 528, 1.05, time);
+      } else if (zoneIdx === 3) {
+        // ZONE 3: Ancient Roman Bath (الحمام الروماني), 4m Roman Pool (البركة الرومانية) & Ain Jama Cascade
+        const rx = sx + 60, ry = 374;
+        drawBattirAshlarBlock(ctx, rx, ry + 32, 256, 126, 20, '#f3e8d2', '#b59d78');
+        drawBattirStoneDome(ctx, rx + 128, ry + 32, 66);
+        for (const ax of [rx + 46, rx + 128, rx + 210]) {
+          drawBattirPointedArch(ctx, ax, ry + 158, 26, 68, '#1e293b');
+        }
+        // Gentle rising thermal steam wisps from Roman Bath dome oculus
+        for (let s2 = 0; s2 < 4; s2++) {
+          const sp = ((time * 0.55 + s2 * 0.25) % 1);
+          ctx.fillStyle = `rgba(255, 251, 235, ${((1 - sp) * 0.34).toFixed(2)})`;
+          ctx.beginPath(); ctx.arc(rx + 128 + Math.sin(sp * 5 + s2) * 14, ry - 42 - sp * 48, 8 + sp * 12, 0, Math.PI * 2); ctx.fill();
+        }
+        // 4-Meter-Deep Roman Pool (البركة الرومانية) with dressed-stone coping, steps & shimmering caustics
+        const px = sx + 408, py = 456;
+        drawBattirAshlarBlock(ctx, px, py, 294, 76, 16, '#e7dcc8', '#9c8360');
+        const poolG = ctx.createLinearGradient(px + 14, py + 10, px + 14, py + 62);
+        poolG.addColorStop(0.0, '#0369a1'); poolG.addColorStop(0.45, '#0ea5e9'); poolG.addColorStop(1.0, '#2dd4bf');
+        ctx.fillStyle = poolG;
+        ctx.fillRect(px + 14, py + 10, 266, 52);
+        // Animated sunlit water caustics & ripples inside Roman Pool
+        ctx.strokeStyle = 'rgba(224, 242, 254, 0.72)'; ctx.lineWidth = 1.5;
+        for (let r = 0; r < 6; r++) {
+          const rpx = px + 28 + r * 42 + Math.sin(time * 2.4 + r * 1.1) * 6;
+          const rpy = py + 22 + (r % 3) * 12;
+          ctx.beginPath(); ctx.moveTo(rpx, rpy); ctx.quadraticCurveTo(rpx + 14, rpy - 3, rpx + 28, rpy); ctx.stroke();
+        }
+        // Cascading Ain Jama spring waterfall pouring from carved stone spout into the Roman Pool
+        ctx.strokeStyle = '#bae6fd'; ctx.lineWidth = 5.5;
+        ctx.beginPath(); ctx.moveTo(px - 14, py + 8); ctx.quadraticCurveTo(px + 12, py + 6, px + 24, py + 34); ctx.stroke();
+        ctx.fillStyle = 'rgba(224, 242, 254, 0.75)';
+        ctx.beginPath(); ctx.ellipse(px + 25, py + 36, 12 + Math.sin(time * 7) * 2, 4, 0, 0, Math.PI * 2); ctx.fill();
+        drawBattirOliveTree(ctx, sx + 835, 528, 1.16);
+        drawBattirCypress(ctx, sx + 965, 528, 122);
+        drawBattirAlmondTree(ctx, sx + 1045, 528, 0.94, time);
+      } else if (zoneIdx === 4) {
+        // ZONE 4: Al-Khirbeh Ancient Canaanite & Roman Fortress (قلعة بتّير) & Maqam Abu Yazeid Shrine
+        const fx = sx + 65, fy = 336;
+        // Massive stepped cyclopean stone citadel ramparts with 3D shadowed buttresses
+        drawBattirAshlarBlock(ctx, fx + 16, fy + 52, 344, 144, 22, '#e5d8c0', '#8d7553');
+        drawBattirAshlarBlock(ctx, fx + 98, fy + 16, 152, 50, 16, '#efe4cf', '#ad9570');
+        // Ruined crenellations along citadel crown
+        for (let c = 0; c < 5; c++) {
+          drawBattirAshlarBlock(ctx, fx + 104 + c * 30, fy + 4, 18, 14, 5, '#f3e8d2', '#cbb591');
+        }
+        // Deep arrow slits & climbing green ivy on fortress walls
+        ctx.fillStyle = '#1c1917';
+        for (const asx of [fx + 62, fx + 148, fx + 204, fx + 292]) ctx.fillRect(asx, fy + 82, 7, 26);
+        ctx.fillStyle = '#3f6212';
+        for (let iv = 0; iv < 6; iv++) { ctx.beginPath(); ctx.arc(fx + 38 + iv * 10, fy + 150 + (iv % 2) * 14, 9, 0, Math.PI * 2); ctx.fill(); }
+        // Serene 2.5D Domed Heritage Shrine: Maqam Abu Yazeid Al-Bastami (مقام أبو يزيد البسطامي)
+        const qx = sx + 558, qy = 408;
+        drawBattirAshlarBlock(ctx, qx, qy + 38, 162, 86, 16, '#f8f0e2', '#cbb692');
+        drawBattirStoneDome(ctx, qx + 81, qy + 38, 52);
+        drawBattirPointedArch(ctx, qx + 81, qy + 124, 20, 52, '#291e14');
+        drawBattirCypress(ctx, qx - 30, 528, 136);
+        drawBattirCypress(ctx, qx + 206, 528, 126);
+        drawBattirOliveTree(ctx, sx + 935, 528, 1.08);
+      } else {
+        // ZONE 5: Wadi al-Makhrour & Palestinian Heritage Trail (مسار التراث الفلسطيني)
+        // Stacked limestone trail cairn (رجم حجري) & weathered cedar trail signpost
+        const tx = sx + 165, ty = 434;
+        for (let st = 0; st < 4; st++) {
+          ctx.fillStyle = st % 2 === 0 ? '#e7dcc8' : '#cbb591'; ctx.strokeStyle = '#5c462e'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.ellipse(tx - 32, 524 - st * 10, 18 - st * 3, 6.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        }
+        ctx.fillStyle = '#6b4222'; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.4;
+        ctx.fillRect(tx, ty, 11, 96); ctx.strokeRect(tx, ty, 11, 96);
+        ctx.fillStyle = '#fef3c7'; ctx.strokeStyle = '#78350f';
+        ctx.beginPath(); ctx.moveTo(tx - 14, ty + 8); ctx.lineTo(tx + 82, ty + 8); ctx.lineTo(tx + 96, ty + 19); ctx.lineTo(tx + 82, ty + 30); ctx.lineTo(tx - 14, ty + 30); ctx.closePath(); ctx.fill(); ctx.stroke();
+        drawBattirOliveTree(ctx, sx + 410, 528, 1.22);
+        drawBattirCypress(ctx, sx + 560, 528, 138);
+        drawBattirAlmondTree(ctx, sx + 685, 528, 1.08, time);
+        drawBattirOliveTree(ctx, sx + 905, 528, 1.14);
+      }
+    }
+
+    // 3. Ambient Native Palestine Sunbirds (عصفور الشمس الفلسطيني) & Peaceful White Doves
+    for (let b = 0; b < 6; b++) {
+      const bx = ((b * 310 + time * (42 + b * 6) - camX * 0.55) % (w + 180) + (w + 180)) % (w + 180) - 90;
+      const by = 218 + (b % 3) * 54 + Math.sin(time * 3.4 + b * 1.9) * 16;
+      const flap = Math.sin(time * 13 + b * 2.1) * 7;
+      ctx.save();
+      ctx.translate(bx, by);
+      if (b % 2 === 0) {
+        ctx.fillStyle = '#0f766e';
+        ctx.beginPath(); ctx.ellipse(0, 0, 7.5, 4.2, -0.1, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath(); ctx.arc(6.5, -2, 3.6, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.moveTo(9.5, -2); ctx.quadraticCurveTo(14.5, -1, 15.5, 2); ctx.stroke();
+        ctx.strokeStyle = '#134e4a'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.moveTo(-2, -1); ctx.quadraticCurveTo(-7, -8 - flap, -13, -3 - flap); ctx.stroke();
+      } else {
+        ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.ellipse(0, 0, 9, 4.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-2, -1); ctx.quadraticCurveTo(-8, -10 - flap, -16, -4 - flap); ctx.quadraticCurveTo(-8, 1, -2, 2); ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawBattirFinishGate(ctx, g, sx, sy, time, goalLabel) {
+    // Monumental 2.5D Ain al-Balad Heritage Limestone Archway (بوابة عين البلد التراثية)
+    ctx.save();
+    const cx = sx + g.w * 0.5;
+    const baseY = sy + g.h;
+    const topY = baseY - 208;
+    const archW = 160;
+    const leftX = cx - archW * 0.5;
+    // 2.5D Dressed Jerusalem-stone piers with shaded side facets & sculpted plinths
+    drawBattirAshlarBlock(ctx, leftX, topY + 62, 32, 146, 10, '#f7efe0', '#b59d78');
+    drawBattirAshlarBlock(ctx, leftX + archW - 32, topY + 62, 32, 146, 10, '#f7efe0', '#b59d78');
+    // Sculpted pointed voussoir crown arch with carved keystone
+    const aG = ctx.createLinearGradient(leftX, topY - 18, leftX + archW, topY + 66);
+    aG.addColorStop(0, '#fbf5e8'); aG.addColorStop(0.55, '#dfd0b4'); aG.addColorStop(1, '#a68e6a');
+    ctx.fillStyle = aG; ctx.strokeStyle = '#473824'; ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.moveTo(leftX - 10, topY + 66); ctx.lineTo(leftX - 10, topY + 14);
+    ctx.quadraticCurveTo(cx, topY - 26, leftX + archW + 10, topY + 14);
+    ctx.lineTo(leftX + archW + 10, topY + 66); ctx.lineTo(leftX + archW - 32, topY + 66);
+    ctx.quadraticCurveTo(cx, topY + 16, leftX + 32, topY + 66);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Carved olive-wreath golden keystone medallion
+    ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(cx, topY + 16, 13, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#84cc16';
+    ctx.beginPath(); ctx.ellipse(cx - 4, topY + 16, 4.5, 2.4, -0.5, 0, Math.PI * 2); ctx.ellipse(cx + 4, topY + 16, 4.5, 2.4, 0.5, 0, Math.PI * 2); ctx.fill();
+    // Climbing lush olive & grapevine garlands draped over the arch crown
+    ctx.fillStyle = '#4d7c0f';
+    for (const [vx, vy, r] of [[leftX + 12, topY + 26, 11], [leftX + 34, topY + 10, 10], [leftX + archW - 12, topY + 26, 11], [leftX + archW - 34, topY + 10, 10]]) {
+      ctx.beginPath(); ctx.arc(vx, vy, r, 0, Math.PI * 2); ctx.fill();
+    }
+    // Luminous Ain al-Balad spring portal glow & bubbling water basin inside archway
+    const glowG = ctx.createRadialGradient(cx, baseY - 72, 10, cx, baseY - 72, 72);
+    glowG.addColorStop(0, 'rgba(186, 230, 253, 0.88)'); glowG.addColorStop(0.55, 'rgba(56, 189, 248, 0.36)'); glowG.addColorStop(1, 'rgba(56, 189, 248, 0)');
+    ctx.fillStyle = glowG;
+    ctx.beginPath(); ctx.ellipse(cx, baseY - 72, 48, 72, 0, 0, Math.PI * 2); ctx.fill();
+    // Hanging warm wrought-iron heritage lanterns
+    for (const lx of [leftX + 16, leftX + archW - 16]) {
+      const sway = Math.sin(time * 2.5 + lx) * 2.5;
+      ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(lx, topY + 66); ctx.lineTo(lx + sway, topY + 84); ctx.stroke();
+      ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#92400e'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.ellipse(lx + sway, topY + 93, 7, 10, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
+    // Floating localized stage completion banner
+    const rawLbl = goalLabel || '🌿 بوابة عين البلد في بتّير!';
+    const labelText = (window.Game && window.Game.I18n) ? window.Game.I18n.translateDynamic(rawLbl) : rawLbl;
+    const bob = Math.sin(time * 3.1) * 3;
+    ctx.font = 'bold 13.5px sans-serif';
+    ctx.textAlign = 'center';
+    const tw = Math.max(196, ctx.measureText(labelText).width + 32);
+    ctx.fillStyle = 'rgba(20, 83, 45, 0.94)'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.9;
+    ctx.beginPath(); ctx.roundRect(cx - tw * 0.5, topY - 48 + bob, tw, 26, 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fef9c3';
+    ctx.fillText(labelText, cx, topY - 30 + bob);
+    ctx.restore();
+  }
+
+  Art.drawGreeceSkyAndHorizon = drawGreeceSkyAndHorizon;
+  Art.drawGreeceMidground = drawGreeceMidground;
+  Art.drawGreeceAcropolisGate = drawGreeceAcropolisGate;
+  Art.drawBattirSkyAndHorizon = drawBattirSkyAndHorizon;
+  Art.drawBattirMidground = drawBattirMidground;
+  Art.drawBattirFinishGate = drawBattirFinishGate;
+  Art.drawCheckpoint = drawCheckpointExtended;
   Art.drawPlatform = drawPlatformExtended;
+  Art.drawWorldTeasers = drawWorldTeasersExtended;
 })();

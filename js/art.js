@@ -3650,7 +3650,10 @@ window.Game.Art = (function () {
   }
 
   function drawStreetlamps(ctx, lamps, camX, time) {
-    for (const lx of lamps) {
+    if (!lamps) return;
+    for (const lamp of lamps) {
+      const lx = typeof lamp === 'number' ? lamp : (lamp && typeof lamp.x === 'number' ? lamp.x : NaN);
+      if (!Number.isFinite(lx)) continue;
       const sx = lx - camX;
       if (sx < -240 || sx > 1520) continue;
 

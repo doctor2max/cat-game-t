@@ -3,8 +3,9 @@ window.Game = window.Game || {};
 window.Game.Store = (function () {
   const SAVE_KEY = 'theWayHome_saveData_v2';
   const LEGACY_UNLOCK_KEY = 'theWayHome_maxUnlockedStage';
-  const TOTAL_STAGES = 15;
-  const TEMP_UNLOCK_ALL = false; // قفل المراحل الافتراضي للإصدار النهائي (تُفتح تدريجياً أو من المتجر)
+  const TOTAL_STAGES = 26;
+  const SEASON1_STAGES = 15;
+  const TEMP_UNLOCK_ALL = true; // وضع التجربة: فتح جميع المراحل تلقائياً
 
   const UPGRADES = [
     {
@@ -133,6 +134,7 @@ window.Game.Store = (function () {
       ownedSkins: ['classic'],
       equippedSkin: 'classic',
       lastDailyClaim: '',
+      season2Unlocked: false,
     };
   }
 
@@ -158,6 +160,7 @@ window.Game.Store = (function () {
         ownedSkins: Array.isArray(parsed.ownedSkins) && parsed.ownedSkins.length ? parsed.ownedSkins : ['classic'],
         equippedSkin: typeof parsed.equippedSkin === 'string' ? parsed.equippedSkin : 'classic',
         lastDailyClaim: typeof parsed.lastDailyClaim === 'string' ? parsed.lastDailyClaim : '',
+        season2Unlocked: !!parsed.season2Unlocked,
       };
     } catch (e) {
       return def;
@@ -190,8 +193,23 @@ window.Game.Store = (function () {
     return true;
   }
 
+  function isSeason2Unlocked() {
+    return !!state.season2Unlocked;
+  }
+
+  function setSeason2Unlocked(unlocked) {
+    state.season2Unlocked = !!unlocked;
+    saveState();
+    return state.season2Unlocked;
+  }
+
+  function getVisibleStages() {
+    return state.season2Unlocked ? TOTAL_STAGES : SEASON1_STAGES;
+  }
+
   function getMaxUnlockedStage() {
-    return TEMP_UNLOCK_ALL ? TOTAL_STAGES : state.maxUnlockedStage;
+    const cap = getVisibleStages();
+    return TEMP_UNLOCK_ALL ? cap : Math.min(cap, state.maxUnlockedStage);
   }
 
   function getStageStars(stageNum) {
@@ -204,7 +222,8 @@ window.Game.Store = (function () {
 
   function getTotalStars() {
     let total = 0;
-    for (let s = 1; s <= TOTAL_STAGES; s++) {
+    const cap = getVisibleStages();
+    for (let s = 1; s <= cap; s++) {
       total += state.stageStars[s] || 0;
     }
     return total;
@@ -283,7 +302,8 @@ window.Game.Store = (function () {
   }
 
   function unlockNextStageWithCoins() {
-    if (state.maxUnlockedStage >= TOTAL_STAGES) return { ok: false, reason: 'all_unlocked' };
+    const cap = getVisibleStages();
+    if (state.maxUnlockedStage >= cap) return { ok: false, reason: 'all_unlocked' };
     if (!spendCoins(UNLOCK_STAGE_COST)) return { ok: false, reason: 'coins' };
     state.maxUnlockedStage += 1;
     saveState();
@@ -362,11 +382,25 @@ window.Game.Store = (function () {
 
     const platforms = level.platforms || [];
     const puddles = level.puddles || [];
-    const hazardTypes = new Set(['third_rail', 'welding_spark', 'laser_grid', 'steam_vent', 'wind_zone']);
+    const hazardTypes = new Set([
+      'third_rail', 'welding_spark', 'laser_grid', 'steam_vent', 'wind_zone', 'blizzard_zone',
+      'tunnel_clearance', 'pressure_boiler_valve', 'pendulum_censer', 'crushing_lantern',
+      'pinch_wall', 'track_switch_lever', 'steam_ramen_vent', 'wagasa_ricochet',
+      'carnival_bell_swing', 'canal_tide_gate', 'venice_water_spout',
+      'paris_chimney_updraft', 'paris_bridge_crank', 'moulin_sail_wheel',
+      'morocco_fountain_geyser', 'morocco_cedar_lever', 'morocco_lantern_swing',
+      'maya_cenote_geyser', 'maya_jade_switch', 'maya_vine_swing',
+      'maya_thorn_pit', 'maya_dart_totem', 'maya_serpent_ring',
+      'maya_rolling_wheel', 'maya_vault_door', 'maya_glyph_seal',
+      'greece_sun_mirror', 'greece_poseidon_wave', 'greece_lyre_pillar',
+      'greece_medusa_aegis', 'greece_discobolus', 'greece_zeus_obelisk',
+    ]);
     const groundTypes = new Set([
       'asphalt', 'cobble', 'grass', 'pier', 'rooftop',
       'rail_platform', 'concrete_slab', 'marble', 'bridge_deck',
-      'glass_floor', 'neon_deck', 'home_deck', 'oil_deck',
+      'glass_floor', 'neon_deck', 'home_deck', 'oil_deck', 'ice_deck',
+      'circus_deck', 'desert_deck', 'japan_deck', 'steam_car_deck', 'venice_quay',
+      'paris_zinc_roof', 'kasbah_terrace', 'maya_stone_terrace', 'greece_terrace',
     ]);
 
     function isSafeCoinPos(x, y) {
@@ -375,9 +409,16 @@ window.Game.Store = (function () {
       if (tooClose(x, y, 32)) return false;
       // Reject if inside or clipping any solid wall/box/train or hazard!
       for (const sp of platforms) {
-        if (sp.type === 'wind_zone' || sp.hiddenInDay) continue;
+        if (sp.type === 'wind_zone' || sp.type === 'blizzard_zone' || sp.hiddenInDay) continue;
+        if (sp.type === 'maya_thorn_pit') {
+          // Never place unreachable coins above Mayan floor thorn/spike troughs!
+          if (x + 28 > sp.x && x - 28 < sp.x + sp.w && y + 76 > sp.y && y - 24 < sp.y + sp.h) {
+            return false;
+          }
+          continue;
+        }
         if (!sp.oneWay || hazardTypes.has(sp.type)) {
-          const pad = hazardTypes.has(sp.type) ? 30 : 26;
+          const pad = hazardTypes.has(sp.type) ? 34 : 26;
           if (x + pad > sp.x && x - pad < sp.x + sp.w && y + pad > sp.y && y - pad < sp.y + sp.h) {
             return false;
           }
@@ -472,6 +513,7 @@ window.Game.Store = (function () {
 
   return {
     TOTAL_STAGES,
+    SEASON1_STAGES,
     UPGRADES,
     SKINS,
     UNLOCK_STAGE_COST,
@@ -480,6 +522,9 @@ window.Game.Store = (function () {
     getCoins,
     addCoins,
     spendCoins,
+    isSeason2Unlocked,
+    setSeason2Unlocked,
+    getVisibleStages,
     getMaxUnlockedStage,
     getStageStars,
     isStageCleared,
