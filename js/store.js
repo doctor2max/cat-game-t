@@ -397,6 +397,8 @@ window.Game.Store = (function () {
       'battir_madud_gate', 'battir_roman_bath_vent', 'battir_spring_geyser',
       'battir_press_pad', 'battir_stone_roller', 'battir_olive_press',
       'battir_railway_semaphore', 'battir_aqueduct_surge',
+      'battir_noria_wheel', 'battir_taboon_oven', 'battir_sabr_hedge',
+      'battir_flash_sluice', 'battir_locomotive_crossing',
     ]);
     const groundTypes = new Set([
       'asphalt', 'cobble', 'grass', 'pier', 'rooftop',
@@ -405,6 +407,7 @@ window.Game.Store = (function () {
       'circus_deck', 'desert_deck', 'japan_deck', 'steam_car_deck', 'venice_quay',
       'paris_zinc_roof', 'kasbah_terrace', 'maya_stone_terrace', 'greece_terrace',
       'battir_terrace', 'battir_hosh_roof', 'battir_fortress_wall',
+      'battir_cliff_terrace', 'battir_qantara_arcade',
     ]);
 
     function isSafeCoinPos(x, y) {
@@ -454,7 +457,7 @@ window.Game.Store = (function () {
       if (p.x < 180) continue; // Don't clutter spawn point
       if (p.climbable && p.h > 140 && p.w < 70) continue; // Skip narrow wall-jump shafts
 
-      if (p.bouncy || p.type === 'battir_olive_bough') {
+      if (p.bouncy || p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy') {
         const cx = p.x + p.w / 2;
         tryAddCoin(cx - 22, p.y - 78, 1);
         tryAddCoin(cx, p.y - 118, 1);

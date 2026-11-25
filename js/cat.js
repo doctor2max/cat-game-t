@@ -162,7 +162,7 @@ window.Game.Cat = function (startX, startY) {
       if (p.hiddenInDay && !cat.nightVision) continue;
       if (p.broken || p.nonSolid) continue;
       if (p.type === 'maya_vault_door' && (p.openAnim || 0) >= 0.78) continue;
-      if (p.type === 'wind_zone' || p.type === 'blizzard_zone' || p.type === 'thermal_updraft' || p.type === 'steam_ramen_vent' || p.type === 'pendulum_censer' || p.type === 'wagasa_ricochet' || p.type === 'tunnel_clearance' || p.type === 'track_switch_lever' || p.type === 'carnival_bell_swing' || p.type === 'canal_tide_gate' || p.type === 'venice_water_spout' || p.type === 'paris_chimney_updraft' || p.type === 'paris_bridge_crank' || p.type === 'morocco_fountain_geyser' || p.type === 'morocco_cedar_lever' || p.type === 'maya_cenote_geyser' || p.type === 'maya_jade_switch' || p.type === 'greece_sun_mirror' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk' || p.type === 'battir_madud_gate' || p.type === 'battir_roman_bath_vent') continue;
+      if (p.type === 'wind_zone' || p.type === 'blizzard_zone' || p.type === 'thermal_updraft' || p.type === 'steam_ramen_vent' || p.type === 'pendulum_censer' || p.type === 'wagasa_ricochet' || p.type === 'tunnel_clearance' || p.type === 'track_switch_lever' || p.type === 'carnival_bell_swing' || p.type === 'canal_tide_gate' || p.type === 'venice_water_spout' || p.type === 'paris_chimney_updraft' || p.type === 'paris_bridge_crank' || p.type === 'morocco_fountain_geyser' || p.type === 'morocco_cedar_lever' || p.type === 'maya_cenote_geyser' || p.type === 'maya_jade_switch' || p.type === 'greece_sun_mirror' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk' || p.type === 'battir_madud_gate' || p.type === 'battir_roman_bath_vent' || p.type === 'battir_taboon_oven' || p.type === 'battir_sabr_hedge' || p.type === 'battir_flash_sluice' || p.type === 'battir_locomotive_crossing') continue;
       if (p.type === 'greece_light_bridge' && (p.activeTimer || 0) <= 0) continue;
       if (p.type === 'maya_rolling_wheel') {
         const wOverlapX = cat.x + 8 < p.x + p.w - 8 && cat.x + cat.w - 8 > p.x + 8;
@@ -179,7 +179,7 @@ window.Game.Cat = function (startX, startY) {
         }
         continue;
       }
-      if (p.type === 'moulin_sail_wheel') {
+      if (p.type === 'moulin_sail_wheel' || p.type === 'battir_noria_wheel') {
         if (p.blades) {
           const stickTol = !wasAirborne ? 12 : 2;
           for (let bi = 0; bi < p.blades.length; bi++) {
@@ -228,15 +228,15 @@ window.Game.Cat = function (startX, startY) {
         const stickTol = !wasAirborne ? 6 : 0;
         if (cat.vy >= 0 && prevBottom <= effY + 14 && cat.y + cat.h >= effY - stickTol) {
           cat.y = effY - cat.h;
-          if (p.bouncy || p.type === 'battir_olive_bough') {
+          if (p.bouncy || p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy') {
             const mult = (p.type === 'circus_trampoline' || p.type === 'maya_bounce_drum') ? 1.44 : (p.type === 'paris_awning_spring' || p.type === 'souk_carpet_bounce') ? 1.42 : p.type === 'bamboo_spring' ? 1.40 : p.type === 'oasis_palm_bounce' ? 1.38 : p.type === 'flower_bounce' ? 1.36 : p.type === 'ice_bounce' ? 1.34 : 1.28;
-            cat.vy = p.type === 'battir_olive_bough' ? (p.bounceVy || -770) : (-cat.physics.jumpForce * mult);
+            cat.vy = (p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy') ? (p.bounceVy || -780) : (-cat.physics.jumpForce * mult);
             cat.scaleX = 0.94;
             cat.scaleY = 1.07;
             p.bounceAnim = 1;
             Audio.playJump();
-            if (p.type === 'battir_olive_bough') {
-              Particles.spawnDust(cat.x + cat.w * 0.5, cat.y + cat.h, 10, '#84cc16');
+            if (p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy') {
+              Particles.spawnDust(cat.x + cat.w * 0.5, cat.y + cat.h, 12, p.type === 'battir_fig_canopy' ? '#22c55e' : '#84cc16');
             }
             if (p.type === 'flower_bounce') {
               // Firm, poised botanical cushion dip (sturdy, no wild shaking!) & lush nectar burst
@@ -1042,20 +1042,21 @@ window.Game.Cat = function (startX, startY) {
           cat.onGround = false;
           cat.coyoteTimer = Math.max(cat.coyoteTimer || 0, 0.14);
         }
-      } else if (p.type === 'moulin_sail_wheel') {
-        const r = p.radius || 130;
+      } else if (p.type === 'moulin_sail_wheel' || p.type === 'battir_noria_wheel') {
+        const r = p.radius || (p.type === 'battir_noria_wheel' ? 108 : 130);
         if (p.wheelAngle === undefined) p.wheelAngle = p.phase || 0;
-        p.wheelAngle += (p.rotSpeed || 0.72) * dt;
+        p.wheelAngle += (p.rotSpeed || 0.76) * dt;
         const ang0 = p.wheelAngle;
         if (!p.blades) p.blades = [{}, {}, {}, {}];
+        const orbitR = p.type === 'battir_noria_wheel' ? (r * 0.88) : (r * 0.76);
+        const bw = p.type === 'battir_noria_wheel' ? 86 : 78;
         for (let bi = 0; bi < 4; bi++) {
           const b = p.blades[bi];
           const prevBx = b.x !== undefined ? b.x : p.x;
           b.prevY = b.y !== undefined ? b.y : p.y;
           const a = ang0 + bi * (Math.PI * 0.5);
-          const bw = 78;
-          b.x = p.x + Math.cos(a) * (r * 0.76) - bw * 0.5;
-          b.y = p.y + Math.sin(a) * (r * 0.76) - 8;
+          b.x = p.x + Math.cos(a) * orbitR - bw * 0.5;
+          b.y = p.y + Math.sin(a) * orbitR - 8;
           b.w = bw;
           b.h = 16;
           if (p === standing && p.standingBladeIdx === bi) {
@@ -1509,6 +1510,54 @@ window.Game.Cat = function (startX, startY) {
         p.pumpPhase += dx * 0.065;
         if (p === standing) {
           cat.x += dx;
+          cat.y = p.y - cat.h;
+        }
+      } else if (p.type === 'battir_grape_zipline') {
+        // Overhead Vineyard Harvest Basket Pulley Ride across Wadi al-Makhrour gorges!
+        if (p.startX === undefined) p.startX = p.x;
+        if (p.startY === undefined) p.startY = p.y;
+        if (p.endX === undefined) p.endX = p.x + 420;
+        if (p.endY === undefined) p.endY = p.y - 60;
+        if (p.zipT === undefined) p.zipT = 0;
+        const prevX = p.x;
+        const prevY = p.y;
+        const rate = p.zipSpeed || 0.42;
+        if (p === standing) {
+          p.riding = true;
+          p.holdTimer = 1.5;
+        }
+        if (p.riding) {
+          if (p.zipT < 1) {
+            p.zipT = Math.min(1, p.zipT + rate * dt);
+          } else {
+            p.holdTimer = Math.max(0, (p.holdTimer || 0) - dt);
+            if (p !== standing && p.holdTimer <= 0) p.riding = false;
+          }
+        } else if (p.zipT > 0) {
+          p.zipT = Math.max(0, p.zipT - rate * 0.75 * dt);
+        }
+        const ease = p.zipT * p.zipT * (3 - 2 * p.zipT);
+        p.x = p.startX + (p.endX - p.startX) * ease;
+        p.y = p.startY + (p.endY - p.startY) * ease + Math.sin(p.zipT * Math.PI) * 14;
+        p.pulleySpin = (p.pulleySpin || 0) + (p.x - prevX) * 0.09;
+        if (p === standing) {
+          cat.x += (p.x - prevX);
+          cat.y = p.y - cat.h;
+        } else if (Math.abs(p.y - prevY) > 0.01 && cat.x + cat.w > p.x && cat.x < p.x + p.w && Math.abs((cat.y + cat.h) - p.y) < 10) {
+          cat.y = p.y - cat.h;
+        }
+      } else if (p.type === 'battir_shadoof_beam') {
+        // Counterbalanced Stone Well-Sweep Platform (رافعة البئر الحجرية المتوازنة)
+        if (p.restY === undefined) p.restY = p.y;
+        const prevY = p.y;
+        if (p === standing) {
+          p.liftT = Math.min(1, (p.liftT || 0) + dt * 0.88);
+        } else {
+          p.liftT = Math.max(0, (p.liftT || 0) - dt * 0.65);
+        }
+        const ease = (p.liftT || 0) * (p.liftT || 0) * (3 - 2 * (p.liftT || 0));
+        p.y = p.restY - (p.liftHeight || 120) * ease;
+        if (p === standing) {
           cat.y = p.y - cat.h;
         }
       } else if (p.type === 'battir_hosh_arch_swing') {

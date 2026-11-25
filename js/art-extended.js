@@ -10902,56 +10902,44 @@ window.Game = window.Game || {};
     }
 
     if (p.type === 'battir_fortress_wall') {
-      // Khirbet al-Yahud / Ancient Battir Citadel Cyclopean Bossed Masonry (قلعة بتّير الأثرية)
+      // Khirbet al-Yahud / Ancient Battir Citadel Sunset-Lit Megalithic Bastion (قلعة بتّير الأثرية)
       ctx.save();
       const isGround = p.h >= 60;
       const fG = ctx.createLinearGradient(px, py, px, py + p.h);
-      fG.addColorStop(0, '#e6d8bc'); fG.addColorStop(0.48, '#b89f78'); fG.addColorStop(1, '#665033');
+      fG.addColorStop(0, '#d8aa7d'); fG.addColorStop(0.45, '#9c6e46'); fG.addColorStop(1, '#4a2e19');
       ctx.fillStyle = fG;
-      ctx.beginPath(); ctx.roundRect(px, py + 5, p.w, p.h - 5, 3); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(px, py + 5, p.w, p.h - 5, 4); ctx.fill();
       ctx.save();
-      ctx.beginPath(); ctx.roundRect(px, py + 5, p.w, p.h - 5, 3); ctx.clip();
+      ctx.beginPath(); ctx.roundRect(px, py + 5, p.w, p.h - 5, 4); ctx.clip();
       const rowH = isGround ? 28 : 13;
       for (let r = 0; r < Math.ceil(p.h / rowH); r++) {
         const ry = py + 7 + r * rowH;
         let bx = px - ((r % 2) * 28);
         let idx = r * 5 + Math.floor(p.x * 0.03);
         while (bx < px + p.w) {
-          const bw = 52 + ((idx * 19) % 28);
-          ctx.fillStyle = (idx % 3 === 0) ? '#eadcc2' : (idx % 3 === 1) ? '#cfb994' : '#b59b73';
-          ctx.strokeStyle = 'rgba(54, 39, 23, 0.68)'; ctx.lineWidth = 1.5;
-          ctx.fillRect(bx + 1, ry + 1, bw - 2, rowH - 2);
-          ctx.strokeRect(bx + 1, ry + 1, bw - 2, rowH - 2);
-          // Chiseled Herodian/Roman marginal draft & raised 3D stone boss!
+          const bw = 54 + ((idx * 19) % 28);
+          ctx.fillStyle = (idx % 3 === 0) ? '#dfb489' : (idx % 3 === 1) ? '#bc8c61' : '#966842';
+          ctx.strokeStyle = 'rgba(38, 22, 11, 0.72)'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.roundRect(bx + 1.5, ry + 1.5, bw - 3, rowH - 3, 4); ctx.fill(); ctx.stroke();
           if (isGround) {
-            ctx.fillStyle = 'rgba(255, 250, 235, 0.28)';
-            ctx.fillRect(bx + 5, ry + 4, bw - 10, rowH - 9);
-            ctx.strokeStyle = 'rgba(63, 46, 29, 0.42)'; ctx.lineWidth = 1.0;
-            ctx.strokeRect(bx + 5, ry + 4, bw - 10, rowH - 9);
-            // Occasional carved ancient Canaanite/Roman rosette medallion block
-            if (r === 1 && idx % 6 === 0 && bx > px + 20 && bx + bw < px + p.w - 20) {
-              const rcx = bx + bw * 0.5, rcy = ry + rowH * 0.5;
-              ctx.strokeStyle = 'rgba(71, 52, 32, 0.55)'; ctx.lineWidth = 1.1;
-              ctx.beginPath(); ctx.arc(rcx, rcy, 7.5, 0, Math.PI * 2); ctx.stroke();
-              for (let a = 0; a < 6; a++) {
-                const ang = a * (Math.PI / 3);
-                ctx.beginPath(); ctx.ellipse(rcx + Math.cos(ang) * 3.8, rcy + Math.sin(ang) * 3.8, 2.8, 1.3, ang, 0, Math.PI * 2); ctx.stroke();
-              }
-            }
+            ctx.fillStyle = 'rgba(254, 215, 170, 0.24)';
+            ctx.fillRect(bx + 6, ry + 4, bw - 12, rowH - 9);
           }
           bx += bw; idx++;
         }
       }
       ctx.restore();
-      // Chiseled ancient stone parapet crown + creeping Mediterranean ivy sprigs
-      ctx.fillStyle = '#f3e8d2'; ctx.strokeStyle = '#3f2e1d'; ctx.lineWidth = 1.6;
-      ctx.fillRect(px - 1, py, p.w + 2, 7.5); ctx.strokeRect(px - 1, py, p.w + 2, 7.5);
+      // Sunset-gilded sandstone coping + wild thyme & crimson ivy
+      const cpG = ctx.createLinearGradient(px, py, px, py + 9);
+      cpG.addColorStop(0, '#fed7aa'); cpG.addColorStop(1, '#9a643a');
+      ctx.fillStyle = cpG; ctx.strokeStyle = '#382010'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(px - 1, py, p.w + 2, 8, 3); ctx.fill(); ctx.stroke();
       if (isGround) {
-        for (let ix = 48; ix < p.w - 48; ix += 160) {
-          ctx.strokeStyle = '#3f6212'; ctx.lineWidth = 1.5;
-          ctx.beginPath(); ctx.moveTo(px + ix, py + 2); ctx.quadraticCurveTo(px + ix + 10, py + 16, px + ix + 4, py + 30); ctx.stroke();
+        for (let ix = 48; ix < p.w - 48; ix += 150) {
+          ctx.strokeStyle = '#365314'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.moveTo(px + ix, py + 3); ctx.quadraticCurveTo(px + ix + 12, py + 18, px + ix + 4, py + 34); ctx.stroke();
           ctx.fillStyle = '#4d7c0f';
-          ctx.beginPath(); ctx.arc(px + ix + 6, py + 12, 3.8, 0, Math.PI * 2); ctx.arc(px + ix + 3, py + 22, 3.2, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(px + ix + 6, py + 13, 4, 0, Math.PI * 2); ctx.arc(px + ix + 3, py + 24, 3.4, 0, Math.PI * 2); ctx.fill();
         }
       }
       ctx.restore();
@@ -11901,7 +11889,715 @@ window.Game = window.Game || {};
       return;
     }
 
-    origDrawPlatform(ctx, p, px, py, nv, time);
+    // =========================================================================
+    // BRAND-NEW STAGE 26 REDESIGNED TERRAIN, TRAVERSAL & OBSTACLES
+    // =========================================================================
+    if (p.type === 'battir_cliff_terrace') {
+      // Rich Palestinian Terra-Rossa Red Earth & Organic Polygonal Fieldstone Sanasel Crags!
+      ctx.save();
+      const isGround = p.h >= 60;
+      const trG = ctx.createLinearGradient(px, py, px, py + p.h);
+      trG.addColorStop(0.0, '#7c3420');
+      trG.addColorStop(0.45, '#592214');
+      trG.addColorStop(1.0, '#331109');
+      ctx.fillStyle = trG;
+      ctx.beginPath(); ctx.roundRect(px, py + 6, p.w, p.h - 6, isGround ? 5 : 8); ctx.fill();
+
+      // Organic irregular polygonal fieldstone boulders nestled into the red earth (NO brick grid!)
+      ctx.save();
+      ctx.beginPath(); ctx.roundRect(px, py + 6, p.w, p.h - 6, isGround ? 5 : 8); ctx.clip();
+      const stoneCols = ['#e2b887', '#c99866', '#ad7c4f', '#946b4b', '#d4a373'];
+      const rows = isGround ? 3 : 1;
+      for (let r = 0; r < rows; r++) {
+        let sx0 = px + 4 - (r % 2) * 14;
+        let idx = r * 11 + Math.floor(p.x * 0.03);
+        const ry = py + 11 + r * 28;
+        while (sx0 < px + p.w - 4) {
+          const sw = 28 + ((idx * 17) % 24);
+          const sh = isGround ? (21 + (idx % 5)) : 12;
+          const col = stoneCols[Math.abs(idx) % stoneCols.length];
+          ctx.fillStyle = col;
+          ctx.strokeStyle = 'rgba(38, 16, 8, 0.72)';
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(sx0 + 4, ry);
+          ctx.lineTo(sx0 + sw - 5, ry + (idx % 2 === 0 ? 1.5 : -1));
+          ctx.quadraticCurveTo(sx0 + sw, ry + sh * 0.5, sx0 + sw - 3, ry + sh);
+          ctx.lineTo(sx0 + 3, ry + sh - (idx % 3 === 0 ? 1.5 : 0));
+          ctx.quadraticCurveTo(sx0 - 1, ry + sh * 0.5, sx0 + 4, ry);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          // Warm sunset top highlight on boulder
+          ctx.strokeStyle = 'rgba(255, 237, 213, 0.52)';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(sx0 + 6, ry + 2); ctx.lineTo(sx0 + sw - 7, ry + 2.5); ctx.stroke();
+          sx0 += sw + 3;
+          idx++;
+        }
+      }
+      ctx.restore();
+
+      // Lush Sunset-Lit Olive-Emerald Turf Rim + Ruby Pomegranates, Poppies & Battiri Eggplants!
+      const turfG = ctx.createLinearGradient(px, py - 1, px, py + 12);
+      turfG.addColorStop(0, '#65a30d');
+      turfG.addColorStop(0.55, '#3f6212');
+      turfG.addColorStop(1, '#29420b');
+      ctx.fillStyle = turfG;
+      ctx.beginPath();
+      ctx.moveTo(px - 2, py + 4);
+      ctx.lineTo(px + p.w + 2, py + 4);
+      ctx.lineTo(px + p.w + 2, py + 10);
+      for (let wx = px + p.w; wx >= px; wx -= 24) {
+        ctx.quadraticCurveTo(wx - 12, py + 15 + ((Math.floor(wx) % 3) * 2), wx - 24, py + 9);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#84cc16';
+      ctx.beginPath(); ctx.roundRect(px - 2, py, p.w + 4, 6, 3); ctx.fill();
+
+      const step = isGround ? 74 : 58;
+      for (let gx = 24; gx < p.w - 24; gx += step) {
+        const seed = Math.abs(Math.floor(p.x + gx));
+        if (isGround && seed % 3 === 0) {
+          // Glossy Purple Battiri Eggplant Bush!
+          ctx.fillStyle = '#365314';
+          ctx.beginPath(); ctx.ellipse(px + gx, py - 4, 9, 4.5, -0.2, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#9333ea'; ctx.strokeStyle = '#4c1d95'; ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.ellipse(px + gx + 5, py - 1, 3.8, 8.2, 0.35, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        } else if (seed % 3 === 1) {
+          // Ruby Palestinian Pomegranate Fruit resting in grass!
+          ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#7f1d1d'; ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.arc(px + gx, py - 3.5, 4.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fbbf24';
+          ctx.fillRect(px + gx - 1.5, py - 9.5, 3, 2);
+        } else {
+          // Wild Scarlet Poppy
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath(); ctx.arc(px + gx, py - 7, 3.6, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#18181b';
+          ctx.beginPath(); ctx.arc(px + gx, py - 7, 1.2, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_qantara_arcade') {
+      // Warm Sunset-Lit Aged Terracotta-Ochre Village Arcade with Marseilles Tile Eaves & Woven Straw Plates!
+      ctx.save();
+      const isGround = p.h >= 60;
+      const aG = ctx.createLinearGradient(px, py, px, py + p.h);
+      aG.addColorStop(0.0, '#e3b685');
+      aG.addColorStop(0.42, '#b88456');
+      aG.addColorStop(1.0, '#613c20');
+      ctx.fillStyle = aG;
+      ctx.strokeStyle = '#3b210e';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(px, py + 7, p.w, p.h - 7, 4); ctx.fill(); ctx.stroke();
+
+      if (isGround) {
+        // Deep Open Vaulted Riwaq Stone Colonnades glowing with warm evening copper oil lamps!
+        for (let ax = px + 80; ax < px + p.w - 75; ax += 155) {
+          ctx.fillStyle = '#f2cca0'; ctx.strokeStyle = '#452712'; ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(ax - 28, py + p.h); ctx.lineTo(ax - 28, py + 44);
+          ctx.quadraticCurveTo(ax, py + 14, ax + 28, py + 44);
+          ctx.lineTo(ax + 28, py + p.h); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+          const vG = ctx.createLinearGradient(ax, py + 20, ax, py + p.h);
+          vG.addColorStop(0, '#241208'); vG.addColorStop(0.55, '#472411'); vG.addColorStop(1, '#6e3a1c');
+          ctx.fillStyle = vG;
+          ctx.beginPath();
+          ctx.moveTo(ax - 21, py + p.h); ctx.lineTo(ax - 21, py + 46);
+          ctx.quadraticCurveTo(ax, py + 22, ax + 21, py + 46);
+          ctx.lineTo(ax + 21, py + p.h); ctx.closePath(); ctx.fill();
+
+          const lg = ctx.createRadialGradient(ax, py + 44, 2, ax, py + 44, 24);
+          lg.addColorStop(0, 'rgba(253, 224, 71, 0.92)');
+          lg.addColorStop(0.55, 'rgba(249, 115, 22, 0.42)');
+          lg.addColorStop(1, 'rgba(249, 115, 22, 0)');
+          ctx.fillStyle = lg;
+          ctx.beginPath(); ctx.arc(ax, py + 44, 24, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#fef08a';
+          ctx.beginPath(); ctx.arc(ax, py + 44, 3.6, 0, Math.PI * 2); ctx.fill();
+
+          // Colorful Traditional Palestinian Woven Straw Wall-Tray (طبق القش التراثي الملون) between arches!
+          if (ax + 78 < px + p.w - 30) {
+            const wx = ax + 77, wy = py + 38;
+            ctx.fillStyle = '#fde047'; ctx.strokeStyle = '#991b1b'; ctx.lineWidth = 2.0;
+            ctx.beginPath(); ctx.arc(wx, wy, 9, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#15803d'; ctx.lineWidth = 1.4;
+            ctx.beginPath(); ctx.arc(wx, wy, 5, 0, Math.PI * 2); ctx.stroke();
+          }
+        }
+      }
+
+      // Scalloped Red-Terracotta Marseilles Roof Tile Eave Along Top!
+      const tlG = ctx.createLinearGradient(px, py, px, py + 10);
+      tlG.addColorStop(0, '#ea580c');
+      tlG.addColorStop(0.55, '#b91c1c');
+      tlG.addColorStop(1, '#7f1d1d');
+      ctx.fillStyle = tlG;
+      ctx.strokeStyle = '#450a0a';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.roundRect(px - 3, py, p.w + 6, 9, 4); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(254, 215, 170, 0.55)';
+      ctx.lineWidth = 1.1;
+      for (let tx = px + 8; tx < px + p.w - 6; tx += 14) {
+        ctx.beginPath(); ctx.arc(tx, py + 7, 5, Math.PI, 0); ctx.stroke();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_noria_wheel') {
+      // =====================================================================
+      // GIANT ROTATING WOODEN AIN AL-BALAD WATERWHEEL (ناعورة عين البلد المائية!)
+      // =====================================================================
+      ctx.save();
+      const r = p.radius || 108;
+      const cx = px;
+      const cy = py;
+      const ang0 = p.wheelAngle !== undefined ? p.wheelAngle : (p.phase || 0);
+
+      // 1. Stationary Carved Stone Aqueduct Support Pier & Overhead Spring Flume!
+      const pierG = ctx.createLinearGradient(cx - 22, cy, cx + 22, 720);
+      pierG.addColorStop(0, '#d8aa7d'); pierG.addColorStop(1, '#5c3a21');
+      ctx.fillStyle = pierG; ctx.strokeStyle = '#382010'; ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(cx - 14, cy); ctx.lineTo(cx + 14, cy);
+      ctx.lineTo(cx + 26, 720); ctx.lineTo(cx - 26, 720);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // Cascading turquoise spring stream pouring down across the wheel rim
+      const flG = ctx.createLinearGradient(cx, cy - r - 12, cx, cy + r + 40);
+      flG.addColorStop(0, 'rgba(186, 230, 253, 0.78)');
+      flG.addColorStop(0.5, 'rgba(56, 189, 248, 0.45)');
+      flG.addColorStop(1, 'rgba(14, 165, 233, 0.15)');
+      ctx.fillStyle = flG;
+      ctx.beginPath();
+      ctx.ellipse(cx + r * 0.62, cy + 10, 14, r * 0.95, 0.08, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 2. Rotating Olive-Wood Spokes & Double Wooden Rim
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(ang0);
+      ctx.strokeStyle = '#5c3419';
+      ctx.lineWidth = 4.5;
+      for (let s = 0; s < 8; s++) {
+        const sa = s * (Math.PI * 0.25);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(sa) * (r - 6), Math.sin(sa) * (r - 6));
+        ctx.stroke();
+      }
+      // Outer & inner wooden wheel rims with iron rivets
+      ctx.strokeStyle = '#7c431e'; ctx.lineWidth = 8;
+      ctx.beginPath(); ctx.arc(0, 0, r - 8, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#b46934'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(0, 0, r - 8, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#45220d'; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(0, 0, r * 0.52, 0, Math.PI * 2); ctx.stroke();
+      // Central forged-iron & brass hub
+      ctx.fillStyle = '#334155'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+
+      // 3. Four Horizontal Orbiting Wooden Bucket-Paddle Platforms!
+      const orbitR = r * 0.88;
+      const bw = 86, bh = 16;
+      for (let bi = 0; bi < 4; bi++) {
+        const a = ang0 + bi * (Math.PI * 0.5);
+        const bx = cx + Math.cos(a) * orbitR - bw * 0.5;
+        const by = cy + Math.sin(a) * orbitR - 8;
+        // Copper-bound wooden water bucket underneath paddle
+        ctx.fillStyle = '#78350f'; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.roundRect(bx + bw * 0.5 - 14, by + 11, 28, 16, [2, 2, 8, 8]); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(bx + bw * 0.5 - 11, by + 12, 22, 4);
+        // Dripping turquoise spring droplets
+        ctx.fillStyle = '#bae6fd';
+        const dropOff = ((time * 38 + bi * 11) % 18);
+        ctx.beginPath(); ctx.arc(bx + bw * 0.5, by + 28 + dropOff, 2.3, 0, Math.PI * 2); ctx.fill();
+        // Solid cedar & brass-trimmed landing deck
+        const dG = ctx.createLinearGradient(bx, by, bx, by + bh);
+        dG.addColorStop(0, '#f59e0b'); dG.addColorStop(0.5, '#b45309'); dG.addColorStop(1, '#451a03');
+        ctx.fillStyle = dG; ctx.strokeStyle = '#271105'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.roundRect(bx, by, bw, bh - 2, 5); ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_grape_zipline') {
+      // =====================================================================
+      // OVERHEAD VINEYARD HARVEST BASKET ZIPLINE RIDE (سلك سلال قطاف العنب المعلّق!)
+      // =====================================================================
+      ctx.save();
+      const camOffX = p.x - px;
+      const camOffY = p.y - py;
+      const sx0 = (p.startX !== undefined ? p.startX : p.x) - camOffX + p.w * 0.5;
+      const sy0 = (p.startY !== undefined ? p.startY : p.y) - camOffY - 46;
+      const ex0 = (p.endX !== undefined ? p.endX : p.x + 420) - camOffX + p.w * 0.5;
+      const ey0 = (p.endY !== undefined ? p.endY : p.y - 60) - camOffY - 46;
+      const curCx = px + p.w * 0.5;
+      const curTopY = py - 46;
+
+      // 1. Stone & Timber Vineyard Cable Anchor Posts at both ends + Taut Overhead Cable!
+      for (const [ax, ay] of [[sx0, sy0], [ex0, ey0]]) {
+        ctx.fillStyle = '#5c3419'; ctx.strokeStyle = '#271105'; ctx.lineWidth = 1.5;
+        ctx.fillRect(ax - 5, ay - 8, 10, 74);
+        ctx.strokeRect(ax - 5, ay - 8, 10, 74);
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath(); ctx.arc(ax, ay, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = 3.0;
+      ctx.beginPath();
+      ctx.moveTo(sx0, sy0);
+      ctx.quadraticCurveTo((sx0 + ex0) * 0.5, (sy0 + ey0) * 0.5 + 14, ex0, ey0);
+      ctx.stroke();
+
+      // 2. Spinning Brass Pulley Wheel & Hemp Suspension Ropes
+      ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(curCx, curTopY, 8.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(curCx, curTopY + 6); ctx.lineTo(px + 18, py + 4);
+      ctx.moveTo(curCx, curTopY + 6); ctx.lineTo(px + p.w - 18, py + 4);
+      ctx.stroke();
+
+      // 3. Hand-Woven Reed Vineyard Basket Overflowing with Purple & Green Battir Grapes!
+      const bkG = ctx.createLinearGradient(px, py, px, py + 26);
+      bkG.addColorStop(0, '#f59e0b'); bkG.addColorStop(0.55, '#b45309'); bkG.addColorStop(1, '#6c2e09');
+      ctx.fillStyle = bkG; ctx.strokeStyle = '#291205'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(px, py, p.w, 24, [4, 4, 12, 12]); ctx.fill(); ctx.stroke();
+      // Woven basket cross-ribs
+      ctx.strokeStyle = 'rgba(254, 243, 199, 0.45)'; ctx.lineWidth = 1.2;
+      for (let wx = px + 14; wx < px + p.w - 12; wx += 14) {
+        ctx.beginPath(); ctx.moveTo(wx, py + 3); ctx.lineTo(wx, py + 22); ctx.stroke();
+      }
+      // Hanging purple & emerald grape bunches along basket rim!
+      for (const [gx, col] of [[px + 22, '#7e22ce'], [px + p.w * 0.5, '#84cc16'], [px + p.w - 22, '#6b21a8']]) {
+        ctx.fillStyle = col;
+        for (const [dx, dy] of [[-3, 0], [3, 0], [0, 4], [-2, 7], [2, 7]]) {
+          ctx.beginPath(); ctx.arc(gx + dx, py + 2 + dy, 2.8, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_fig_canopy') {
+      // Elastic Broad-Leafed Palestinian Fig Tree Canopy (شجرة التين المباركة المرنة!)
+      ctx.save();
+      const flex = (p.bounceAnim || 0) * 10;
+      const by = py + flex;
+      const cx = px + p.w * 0.5;
+
+      // Smooth twisted silver-grey Palestinian fig trunk anchoring down to earth
+      const trG = ctx.createLinearGradient(cx - 18, by + 10, cx + 18, by + 115);
+      trG.addColorStop(0, '#cbd5e1'); trG.addColorStop(0.5, '#94a3b8'); trG.addColorStop(1, '#475569');
+      ctx.fillStyle = trG; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - 14, by + 14); ctx.quadraticCurveTo(cx - 8, by + 58, cx - 20, by + 110);
+      ctx.lineTo(cx + 20, by + 110); ctx.quadraticCurveTo(cx + 8, by + 58, cx + 14, by + 14);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+
+      // Cushion of lush broad emerald-green fig foliage + ripe purple-crimson figs!
+      const lfCols = ['#14532d', '#15803d', '#22c55e', '#84cc16'];
+      const puffs = [[-52, 8, 26, 13], [52, 8, 26, 13], [-28, 3, 30, 14], [28, 3, 30, 14], [0, 0, 36, 15]];
+      for (let l = 0; l < 3; l++) {
+        ctx.fillStyle = lfCols[l];
+        for (const [dx, dy, rx, ry] of puffs) {
+          ctx.beginPath();
+          ctx.ellipse(cx + dx * (1 - l * 0.08), by + 11 + dy - l * 3, rx * (1 - l * 0.1), ry * (1 - l * 0.12), 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      // Plump ripe purple-violet Palestinian figs (ثمار التين الناضجة)!
+      for (const fx of [cx - 38, cx - 12, cx + 16, cx + 42]) {
+        ctx.fillStyle = '#701a75'; ctx.strokeStyle = '#3b0764'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.ellipse(fx, by + 15, 4.5, 5.8, 0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#e879f9';
+        ctx.beginPath(); ctx.arc(fx - 1.2, by + 14, 1.4, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_shadoof_beam') {
+      // Counterbalanced Stone Well-Sweep Platform (رافعة البئر الحجرية المتوازنة / الشادوف)
+      ctx.save();
+      const cx = px + p.w * 0.5;
+      // Stone well-head fulcrum column beneath platform
+      const fG = ctx.createLinearGradient(cx - 14, py, cx + 14, 700);
+      fG.addColorStop(0, '#d8aa7d'); fG.addColorStop(1, '#5c3a21');
+      ctx.fillStyle = fG; ctx.strokeStyle = '#382010'; ctx.lineWidth = 1.5;
+      ctx.fillRect(cx - 11, py + 12, 22, 690 - py);
+      ctx.strokeRect(cx - 11, py + 12, 22, 690 - py);
+      // Heavy iron-bound cedar platform beam + hanging stone counterweight & copper water bucket
+      const bG = ctx.createLinearGradient(px, py, px, py + p.h);
+      bG.addColorStop(0, '#f59e0b'); bG.addColorStop(0.55, '#9a3412'); bG.addColorStop(1, '#431407');
+      ctx.fillStyle = bG; ctx.strokeStyle = '#271105'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.roundRect(px, py, p.w, p.h - 2, 5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.arc(cx, py + 9, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_taboon_oven') {
+      // =====================================================================
+      // NEW OBSTACLE #1: TRADITIONAL PALESTINIAN CLAY TABOON BREAD OVEN
+      // (فرن الطابون الفلاحي المشتعل — قبة طينية، أرغفة طابون وجمر متطاير!)
+      // =====================================================================
+      ctx.save();
+      const floorY = py + p.h;
+      const cx = px + p.w * 0.5;
+      const state = p.ovenState || 'bake';
+      const pwr = p.emberPower || 0;
+      const rattle = state === 'warn' ? Math.sin(time * 48) * 2.2 : 0;
+
+      // 1. Stone Hearth Ring & Glowing Red Coals Base
+      ctx.fillStyle = '#573a28'; ctx.strokeStyle = '#29180e'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.roundRect(px + 6, floorY - 12, p.w - 12, 12, 4); ctx.fill(); ctx.stroke();
+
+      // 2. Sculpted Sun-Baked Terracotta Clay Taboon Dome!
+      const dmG = ctx.createRadialGradient(cx - 8, floorY - 28, 4, cx, floorY - 14, 38);
+      dmG.addColorStop(0.0, '#ea580c');
+      dmG.addColorStop(0.45, '#b45309');
+      dmG.addColorStop(0.85, '#78350f');
+      dmG.addColorStop(1.0, '#451a03');
+      ctx.fillStyle = dmG;
+      ctx.strokeStyle = '#271105';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(cx - 34, floorY - 10);
+      ctx.bezierCurveTo(cx - 34, floorY - 42, cx - 16, floorY - 46, cx, floorY - 46);
+      ctx.bezierCurveTo(cx + 16, floorY - 46, cx + 34, floorY - 42, cx + 34, floorY - 10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Glowing arched firebox mouth at front of Taboon dome
+      const fireGlow = ctx.createRadialGradient(cx, floorY - 16, 2, cx, floorY - 16, 18);
+      fireGlow.addColorStop(0, '#fef08a');
+      fireGlow.addColorStop(0.55, '#f97316');
+      fireGlow.addColorStop(1, 'rgba(220, 38, 38, 0)');
+      ctx.fillStyle = fireGlow;
+      ctx.beginPath(); ctx.arc(cx, floorY - 16, 18, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = state === 'damped' ? '#44403c' : '#ef4444';
+      ctx.beginPath(); ctx.arc(cx, floorY - 10, 11, Math.PI, 0); ctx.fill();
+
+      // Freshly baked golden-dimpled Palestinian Taboon Flatbreads resting beside oven!
+      for (let b = 0; b < 2; b++) {
+        ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.ellipse(px + p.w - 14, floorY - 13 - b * 4, 10, 3.5, -0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+
+      // 3. Cast-Iron Top Damper Lid (rattles on warn, lifts high on erupt!)
+      const lidLift = state === 'erupt' ? pwr * 26 : (state === 'warn' ? 3 : 0);
+      ctx.save();
+      ctx.translate(cx + rattle, floorY - 47 - lidLift);
+      ctx.rotate(state === 'erupt' ? 0.18 : (rattle * 0.04));
+      ctx.fillStyle = '#334155'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.ellipse(0, 0, 18, 4.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.arc(0, -4, 4.5, Math.PI, 0); ctx.stroke();
+      ctx.restore();
+
+      // 4. Rising Swirling Column of Blazing Hearth Embers & Flame Sparks!
+      if (state === 'warn') {
+        ctx.fillStyle = '#fb923c';
+        for (let s = 0; s < 5; s++) {
+          const sy0 = floorY - 52 - ((time * 55 + s * 8) % 20);
+          ctx.beginPath(); ctx.arc(cx - 10 + s * 5, sy0, 2.5, 0, Math.PI * 2); ctx.fill();
+        }
+      } else if (pwr > 0.15 && state !== 'damped') {
+        const colH = 68 * pwr;
+        const flmG = ctx.createLinearGradient(cx, floorY - 44, cx, floorY - 44 - colH);
+        flmG.addColorStop(0, 'rgba(254, 240, 138, 0.92)');
+        flmG.addColorStop(0.45, 'rgba(249, 115, 22, 0.78)');
+        flmG.addColorStop(1, 'rgba(220, 38, 38, 0)');
+        ctx.fillStyle = flmG;
+        ctx.beginPath();
+        ctx.moveTo(cx - 15, floorY - 44);
+        ctx.quadraticCurveTo(cx - 22 + Math.sin(time * 18) * 5, floorY - 44 - colH * 0.5, cx, floorY - 48 - colH);
+        ctx.quadraticCurveTo(cx + 22 - Math.sin(time * 18) * 5, floorY - 44 - colH * 0.5, cx + 15, floorY - 44);
+        ctx.closePath();
+        ctx.fill();
+        for (let e = 0; e < 9; e++) {
+          const u = ((time * 1.9 + e * 0.11) % 1);
+          const ex = cx + Math.sin(u * 9 + e) * 14;
+          const ey = floorY - 46 - u * colH;
+          ctx.fillStyle = e % 2 === 0 ? '#fef08a' : '#ef4444';
+          ctx.beginPath(); ctx.arc(ex, ey, Math.max(1.4, 3.8 * (1 - u)), 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_sabr_hedge') {
+      // =====================================================================
+      // NEW OBSTACLE #2: PALESTINIAN PRICKLY-PEAR CACTUS HEDGE (الصبر الفلسطيني!)
+      // =====================================================================
+      ctx.save();
+      const floorY = py + p.h;
+      const cx = px + p.w * 0.5;
+      const harvested = (p.bloomTimer || 0) > 0;
+
+      // Segmented emerald-sage cactus paddles (ألواح الصبر)
+      const paddles = [
+        [-22, -13, 13, 16, -0.35],
+        [22, -13, 13, 16, 0.35],
+        [0, -16, 15, 19, 0],
+        [-14, -29, 11, 14, -0.25],
+        [15, -29, 11, 14, 0.28],
+      ];
+      for (const [dx, dy, rx, ry, rot] of paddles) {
+        ctx.save();
+        ctx.translate(cx + dx, floorY + dy);
+        ctx.rotate(rot);
+        const pdG = ctx.createLinearGradient(-rx, -ry, rx, ry);
+        pdG.addColorStop(0, '#65a30d');
+        pdG.addColorStop(0.55, '#3f6212');
+        pdG.addColorStop(1, '#1a2e05');
+        ctx.fillStyle = pdG;
+        ctx.strokeStyle = '#142603';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        // Sharp pale cactus spines (hidden when harvested with Meow!)
+        if (!harvested) {
+          ctx.strokeStyle = '#fef9c3';
+          ctx.lineWidth = 1.2;
+          for (const [sx0, sy0] of [[-5, -5], [5, -4], [0, 3], [-6, 5], [6, 4]]) {
+            ctx.beginPath();
+            ctx.moveTo(sx0, sy0); ctx.lineTo(sx0 * 1.45, sy0 - 4.5);
+            ctx.stroke();
+          }
+        }
+        ctx.restore();
+      }
+
+      // Juicy Orange-Crimson Sabr Prickly-Pear Fruits crowning the paddles!
+      const fruitPts = [[-22, -42], [-8, -37], [8, -37], [23, -41]];
+      for (const [fx, fy] of fruitPts) {
+        ctx.fillStyle = harvested ? '#fde047' : '#f97316';
+        ctx.strokeStyle = '#9a3412';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.ellipse(cx + fx, floorY + fy, 4.4, 5.8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#be123c';
+        ctx.beginPath(); ctx.arc(cx + fx, floorY + fy - 4.5, 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_flash_sluice') {
+      // =====================================================================
+      // NEW OBSTACLE #3: OVERHEAD ARCHED ROMAN AQUEDUCT CASCADE (شلال قنطرة المعدود!)
+      // =====================================================================
+      ctx.save();
+      const floorY = py + p.h;
+      const state = p.sluiceState || 'calm';
+      const pwr = p.cascadePower || 0;
+
+      // 1. Right-side Stone Support Pier & Vaulted Dry Shelter Arch
+      const stG = ctx.createLinearGradient(px, py, px + p.w, floorY);
+      stG.addColorStop(0, '#e6be92'); stG.addColorStop(0.55, '#b58356'); stG.addColorStop(1, '#664225');
+      ctx.fillStyle = stG; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.6;
+      // Left slender pier + overhead aqueduct beam + right arched alcove pier
+      ctx.fillRect(px + 6, py + 18, 16, p.h - 18);
+      ctx.strokeRect(px + 6, py + 18, 16, p.h - 18);
+      ctx.beginPath(); ctx.roundRect(px, py, p.w, 24, 4); ctx.fill(); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(px + 108, floorY);
+      ctx.lineTo(px + 108, floorY - 72);
+      ctx.lineTo(px + p.w - 6, floorY - 72);
+      ctx.lineTo(px + p.w - 6, floorY);
+      ctx.lineTo(px + p.w - 22, floorY);
+      ctx.lineTo(px + p.w - 22, floorY - 38);
+      ctx.quadraticCurveTo(px + 146, floorY - 58, px + 124, floorY - 38);
+      ctx.lineTo(px + 124, floorY);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      // Overhead turquoise aqueduct channel & carved stone spout + bronze valve wheel
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(px + 6, py + 4, p.w - 12, 7);
+      const spoutCx = px + 61;
+      ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(spoutCx, py + 16, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.arc(px + 116, floorY - 56, 7.5, 0, Math.PI * 2); ctx.stroke();
+
+      // 2. Telegraph Foam or Roaring Turquoise Waterfall Curtain!
+      if (state === 'warn') {
+        ctx.fillStyle = '#e0f2fe';
+        for (let b = 0; b < 6; b++) {
+          ctx.beginPath();
+          ctx.arc(px + 32 + b * 11, py + 28 + Math.sin(time * 24 + b) * 4, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (pwr > 0.15 && state !== 'shut') {
+        const dropH = (p.h - 24) * pwr;
+        const wfG = ctx.createLinearGradient(spoutCx, py + 24, spoutCx, py + 24 + dropH);
+        wfG.addColorStop(0, 'rgba(224, 242, 254, 0.92)');
+        wfG.addColorStop(0.45, 'rgba(56, 189, 248, 0.82)');
+        wfG.addColorStop(1, 'rgba(2, 132, 199, 0.78)');
+        ctx.fillStyle = wfG;
+        ctx.fillRect(px + 28, py + 24, 66, dropH);
+        // Animated vertical white foam ribbons & bottom splash mist!
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; ctx.lineWidth = 2.0;
+        for (let r = 0; r < 4; r++) {
+          const rx = px + 36 + r * 16;
+          const ry = py + 28 + ((time * 160 + r * 28) % Math.max(20, dropH - 24));
+          ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx, Math.min(py + 24 + dropH, ry + 22)); ctx.stroke();
+        }
+        if (pwr > 0.8) {
+          ctx.fillStyle = 'rgba(224, 242, 254, 0.88)';
+          for (let s = 0; s < 5; s++) {
+            ctx.beginPath(); ctx.arc(px + 30 + s * 15, floorY - 4 - Math.abs(Math.sin(time * 16 + s)) * 8, 6.5, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (p.type === 'battir_locomotive_crossing') {
+      // =====================================================================
+      // NEW OBSTACLE #4: LIVE FOREGROUND 1892 OTTOMAN EXPRESS TRAIN CROSSING!
+      // (معبر سكة حديد القدس–يافا ١٨٩٢ مع الحاجز المخطط والقطار البخاري السريع!)
+      // =====================================================================
+      ctx.save();
+      const floorY = py + p.h;
+      const close = p.gateClose || 0;
+      const state = p.crossState || 'open';
+
+      // 1. Flush Timber-Sleeper & Steel Rail Bed along the ground
+      ctx.fillStyle = '#451a03';
+      for (let sl = px + 6; sl < px + p.w - 8; sl += 18) {
+        ctx.fillRect(sl, floorY - 4, 11, 5);
+      }
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(px, floorY - 6, p.w, 3.5);
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillRect(px, floorY - 6.5, p.w, 1.5);
+
+      // 2. Cast-Iron 1892 Crossing Gate Post, Flashing Lantern & Striped Barrier Arm!
+      const postX = px + 20;
+      ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#09090b'; ctx.lineWidth = 1.5;
+      ctx.fillRect(postX - 5, floorY - 72, 10, 72);
+      ctx.strokeRect(postX - 5, floorY - 72, 10, 72);
+      // Crossing X-Crossbuck Sign
+      ctx.save();
+      ctx.translate(postX, floorY - 58);
+      for (const ang of [-0.6, 0.6]) {
+        ctx.save(); ctx.rotate(ang);
+        ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#991b1b'; ctx.lineWidth = 1.2;
+        ctx.fillRect(-16, -3.5, 32, 7); ctx.strokeRect(-16, -3.5, 32, 7);
+        ctx.restore();
+      }
+      ctx.restore();
+
+      // Flashing Red/Green Signal Lamp
+      const flashRed = state === 'warn' || state === 'pass';
+      const lampCol = flashRed ? (Math.floor(time * 8) % 2 === 0 ? '#ef4444' : '#f97316') : '#22c55e';
+      const lg = ctx.createRadialGradient(postX, floorY - 76, 2, postX, floorY - 76, 20);
+      lg.addColorStop(0, lampCol); lg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = lg;
+      ctx.beginPath(); ctx.arc(postX, floorY - 76, 20, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = lampCol;
+      ctx.beginPath(); ctx.arc(postX, floorY - 76, 5.5, 0, Math.PI * 2); ctx.fill();
+
+      // Pivoting Red-and-White Striped Wooden Crossing Barrier Arm
+      const armAng = -1.18 * (1 - close);
+      ctx.save();
+      ctx.translate(postX, floorY - 38);
+      ctx.rotate(armAng);
+      ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#18181b'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.roundRect(-8, -4, 96, 8, 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#dc2626';
+      for (let sx0 = 6; sx0 < 84; sx0 += 20) ctx.fillRect(sx0, -3.5, 10, 7);
+      ctx.restore();
+
+      // Distant Whistle Steam Telegraph at Right Edge before Train Arrives!
+      if (state === 'warn') {
+        for (let k = 0; k < 4; k++) {
+          const u = ((time * 2.2 + k * 0.25) % 1);
+          ctx.fillStyle = `rgba(254, 215, 170, ${((1 - u) * 0.7).toFixed(2)})`;
+          ctx.beginPath(); ctx.arc(px + p.w - 10 - u * 35, floorY - 56 - u * 24, 6 + u * 10, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      // 3. Roaring Foreground-Scale 1892 Ottoman Steam Locomotive (148x68, moving left)!
+      if (p.trainActive && p.trainX !== undefined) {
+        const tx = p.trainX - (p.x - px);
+        const ty = floorY - 6;
+        ctx.save();
+        ctx.translate(tx, ty);
+        // Warm golden headlamp beam projecting left!
+        const beamG = ctx.createLinearGradient(0, -34, -95, -24);
+        beamG.addColorStop(0, 'rgba(254, 240, 138, 0.75)');
+        beamG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = beamG;
+        ctx.beginPath(); ctx.moveTo(4, -38); ctx.lineTo(-95, -56); ctx.lineTo(-95, -8); ctx.closePath(); ctx.fill();
+
+        // Steel cowcatcher at front-left
+        ctx.fillStyle = '#991b1b'; ctx.strokeStyle = '#09090b'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-8, 0); ctx.lineTo(14, -18); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Riveted Black Iron Boiler + Maroon/Gold Engineer Cab!
+        const blG = ctx.createLinearGradient(0, -52, 0, -14);
+        blG.addColorStop(0, '#475569'); blG.addColorStop(0.45, '#1e293b'); blG.addColorStop(1, '#09090b');
+        ctx.fillStyle = blG;
+        ctx.beginPath(); ctx.roundRect(10, -48, 92, 34, 6); ctx.fill(); ctx.stroke();
+        // Brass bands, steam dome & flared smokestack
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(36, -48, 4, 34); ctx.fillRect(72, -48, 4, 34);
+        ctx.beginPath(); ctx.arc(56, -48, 10, Math.PI, 0); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath(); ctx.moveTo(22, -48); ctx.lineTo(17, -68); ctx.lineTo(33, -68); ctx.lineTo(28, -48); ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Maroon Ottoman cab with warm glowing engineer window
+        ctx.fillStyle = '#7f1d1d';
+        ctx.beginPath(); ctx.roundRect(96, -60, 48, 46, [4, 4, 2, 2]); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(92, -63, 56, 5);
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath(); ctx.roundRect(106, -50, 24, 16, 3); ctx.fill();
+
+        // 4 Red Spoked Driving Wheels + Pumping Steel Side-Rod!
+        const wAng = time * 22;
+        for (const [wx, wr] of [[22, 10], [48, 13], [78, 13], [116, 12]]) {
+          ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.0;
+          ctx.beginPath(); ctx.arc(wx, -10, wr, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath(); ctx.arc(wx, -10, 3.5, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 3.2;
+        ctx.beginPath();
+        ctx.moveTo(48 + Math.cos(wAng) * 6, -10 + Math.sin(wAng) * 6);
+        ctx.lineTo(116 + Math.cos(wAng) * 6, -10 + Math.sin(wAng) * 6);
+        ctx.stroke();
+
+        // Billowing Sunset-Lit Steam Plume Trailing Behind Smokestack!
+        for (let pf = 0; pf < 6; pf++) {
+          const pr = ((time * 2.6 + pf * 0.16) % 1);
+          ctx.fillStyle = `rgba(255, 237, 213, ${((1 - pr) * 0.78).toFixed(2)})`;
+          ctx.beginPath(); ctx.arc(26 + pr * 75, -72 - pr * 22, 6 + pr * 13, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+      }
+      ctx.restore();
+      return;
+    }
     if (p.climbable) {
       drawClimbWallSign(ctx, p, px, py, time);
     }
@@ -22800,915 +23496,537 @@ window.Game = window.Game || {};
   Art.drawMayaMidground = drawMayaMidground;
   Art.drawMayaTempleGate = drawMayaTempleGate;
   // =========================================================================
-  // 21. STAGE 26: BATTIR, BETHLEHEM & JERUSALEM — COMPLETE 3D PAINTERLY REBUILD
-  //     UNESCO "Land of Olives and Vines": Jerusalem & Bethlehem Horizon,
-  //     Dry-Stone Sanasel, Conical Manatir, Hosh al-Sab' Aramel, Ain al-Balad
-  //     Grotto & Stepped Roman Pool, 1892 Ottoman Station & Viaduct, Khirbeh Citadel
+  // 21. STAGE 26: BATTIR, BETHLEHEM & JERUSALEM — COMPLETELY NEW SUNSET GORGE
+  //     & STACKED 3-TIER CLIFFSIDE HILL-TOWN MASTERPIECE (ZERO OLD ASSETS!)
   // =========================================================================
   function drawBattirSkyAndHorizon(ctx, camX, w, h, time) {
-    // 1. Luminous Golden-Hour Palestinian Highland Sky (Bethlehem–Jerusalem Ridge)
-    const skyG = ctx.createLinearGradient(0, 0, 0, h * 0.9);
-    skyG.addColorStop(0.0, '#172554');
-    skyG.addColorStop(0.24, '#1d4ed8');
-    skyG.addColorStop(0.50, '#60a5fa');
-    skyG.addColorStop(0.73, '#fde68a');
-    skyG.addColorStop(0.90, '#fdba74');
-    skyG.addColorStop(1.0, '#fed7aa');
+    // 1. Dramatic Mediterranean Twilight-Rose, Terracotta & Molten Apricot Sunset Sky!
+    const skyG = ctx.createLinearGradient(0, 0, 0, h * 0.92);
+    skyG.addColorStop(0.00, '#241638');
+    skyG.addColorStop(0.22, '#5c294a');
+    skyG.addColorStop(0.46, '#b5483d');
+    skyG.addColorStop(0.70, '#ec7d3c');
+    skyG.addColorStop(0.88, '#fbbf60');
+    skyG.addColorStop(1.00, '#fde69e');
     ctx.fillStyle = skyG;
     ctx.fillRect(0, 0, w, h);
 
-    // 2. Warm Afternoon Sun & Diagonal Crepuscular Light Shafts over Wadi al-Makhrour
-    const sunX = w * 0.76 - ((camX * 0.005) % (w * 0.24));
-    const sunY = h * 0.20;
-    const haloG = ctx.createRadialGradient(sunX, sunY, 8, sunX, sunY, 235);
-    haloG.addColorStop(0.0, 'rgba(255, 251, 235, 0.98)');
-    haloG.addColorStop(0.22, 'rgba(253, 224, 71, 0.48)');
-    haloG.addColorStop(0.60, 'rgba(251, 146, 60, 0.16)');
-    haloG.addColorStop(1.0, 'rgba(251, 146, 60, 0)');
-    ctx.fillStyle = haloG;
-    ctx.beginPath(); ctx.arc(sunX, sunY, 235, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#fffbeb';
-    ctx.beginPath(); ctx.arc(sunX, sunY, 31, 0, Math.PI * 2); ctx.fill();
-
-    ctx.save();
-    for (let r = 0; r < 5; r++) {
-      const ang = 0.44 + r * 0.15;
-      const alpha = 0.042 + Math.sin(time * 0.75 + r * 1.3) * 0.014;
-      const rayG = ctx.createLinearGradient(sunX, sunY, sunX - Math.cos(ang) * 580, sunY + Math.sin(ang) * 580);
-      rayG.addColorStop(0, `rgba(254, 240, 138, ${(alpha * 1.9).toFixed(3)})`);
-      rayG.addColorStop(1, 'rgba(254, 240, 138, 0)');
-      ctx.fillStyle = rayG;
-      ctx.beginPath();
-      ctx.moveTo(sunX - 8, sunY);
-      ctx.lineTo(sunX - Math.cos(ang - 0.045) * 650, sunY + Math.sin(ang - 0.045) * 650);
-      ctx.lineTo(sunX - Math.cos(ang + 0.065) * 650, sunY + Math.sin(ang + 0.065) * 650);
-      ctx.closePath();
-      ctx.fill();
+    // Subtle early evening stars twinkling in the plum-violet zenith
+    for (let s = 0; s < 18; s++) {
+      const sx = ((s * 97 - camX * 0.008) % w + w) % w;
+      const sy = 14 + (s * 37) % 105;
+      const twk = 0.25 + 0.55 * Math.abs(Math.sin(time * 2.3 + s * 1.7));
+      ctx.fillStyle = `rgba(255, 247, 237, ${twk.toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(sx, sy, s % 3 === 0 ? 1.6 : 1.0, 0, Math.PI * 2); ctx.fill();
     }
-    ctx.restore();
 
-    // 3. Painterly Multi-Layered Clouds with Rose-Gold & Amber Underlighting
+    // 2. Low Setting Crimson-Gold Palestinian Sun & Warm Sunset Rim-Rays!
+    const sunX = w * 0.74 - ((camX * 0.004) % (w * 0.20));
+    const sunY = h * 0.34;
+    const haloG = ctx.createRadialGradient(sunX, sunY, 12, sunX, sunY, 270);
+    haloG.addColorStop(0.00, 'rgba(255, 251, 235, 0.96)');
+    haloG.addColorStop(0.20, 'rgba(253, 186, 116, 0.58)');
+    haloG.addColorStop(0.55, 'rgba(234, 88, 12, 0.24)');
+    haloG.addColorStop(1.00, 'rgba(154, 52, 18, 0)');
+    ctx.fillStyle = haloG;
+    ctx.beginPath(); ctx.arc(sunX, sunY, 270, 0, Math.PI * 2); ctx.fill();
+
+    const sunCoreG = ctx.createLinearGradient(sunX, sunY - 38, sunX, sunY + 38);
+    sunCoreG.addColorStop(0, '#fffbeb');
+    sunCoreG.addColorStop(0.6, '#fde047');
+    sunCoreG.addColorStop(1, '#fb923c');
+    ctx.fillStyle = sunCoreG;
+    ctx.beginPath(); ctx.arc(sunX, sunY, 38, 0, Math.PI * 2); ctx.fill();
+
+    // 3. Sculpted Sunset Clouds in Deep Plum-Rose Shadows & Glowing Molten-Gold Rims!
     for (let i = 0; i < 6; i++) {
-      const s = 0.8 + (i % 3) * 0.22;
-      const cx = ((i * 285 - camX * 0.022 + time * (4.2 + (i % 2) * 1.6)) % (w + 360) + (w + 360)) % (w + 360) - 170;
-      const cy = 58 + (i % 3) * 32;
-      const clG = ctx.createLinearGradient(cx, cy - 30 * s, cx, cy + 16 * s);
-      clG.addColorStop(0.0, 'rgba(255, 255, 255, 0.94)');
-      clG.addColorStop(0.60, 'rgba(255, 247, 237, 0.82)');
-      clG.addColorStop(1.0, 'rgba(251, 146, 60, 0.44)');
+      const sc = 0.85 + (i % 3) * 0.22;
+      const cx = ((i * 290 - camX * 0.02 + time * (3.6 + (i % 2) * 1.4)) % (w + 380) + (w + 380)) % (w + 380) - 180;
+      const cy = 66 + (i % 3) * 38;
+      const clG = ctx.createLinearGradient(cx, cy - 26 * sc, cx, cy + 16 * sc);
+      clG.addColorStop(0.0, 'rgba(107, 45, 78, 0.82)');
+      clG.addColorStop(0.58, 'rgba(194, 78, 68, 0.85)');
+      clG.addColorStop(1.0, 'rgba(253, 211, 106, 0.92)');
       ctx.fillStyle = clG;
       ctx.beginPath();
-      ctx.moveTo(cx - 26 * s, cy + 14 * s);
-      ctx.bezierCurveTo(cx - 32 * s, cy - 3 * s, cx - 12 * s, cy - 18 * s, cx + 6 * s, cy - 13 * s);
-      ctx.bezierCurveTo(cx + 16 * s, cy - 32 * s, cx + 50 * s, cy - 31 * s, cx + 60 * s, cy - 13 * s);
-      ctx.bezierCurveTo(cx + 76 * s, cy - 18 * s, cx + 92 * s, cy - 6 * s, cx + 96 * s, cy + 14 * s);
+      ctx.moveTo(cx - 34 * sc, cy + 12 * sc);
+      ctx.bezierCurveTo(cx - 38 * sc, cy - 4 * sc, cx - 14 * sc, cy - 18 * sc, cx + 6 * sc, cy - 12 * sc);
+      ctx.bezierCurveTo(cx + 18 * sc, cy - 30 * sc, cx + 52 * sc, cy - 28 * sc, cx + 64 * sc, cy - 11 * sc);
+      ctx.bezierCurveTo(cx + 82 * sc, cy - 16 * sc, cx + 98 * sc, cy - 4 * sc, cx + 102 * sc, cy + 12 * sc);
       ctx.closePath();
       ctx.fill();
     }
 
-    // 4. Distant Highland Ridge Featuring JERUSALEM OLD CITY (القدس) & BETHLEHEM (بيت لحم)!
+    // 4. Distant Sunset Crag Ridge with Silhouetted JERUSALEM (القدس) & BETHLEHEM (بيت لحم)!
     const ridgeSpan = 1560;
-    const ridgeOff = -((camX * 0.038) % ridgeSpan);
-    const farG = ctx.createLinearGradient(0, 260, 0, 480);
-    farG.addColorStop(0, '#788ca8');
-    farG.addColorStop(0.55, '#9fb0c4');
-    farG.addColorStop(1, '#d8d2c5');
+    const ridgeOff = -((camX * 0.036) % ridgeSpan);
+    const farG = ctx.createLinearGradient(0, 275, 0, 500);
+    farG.addColorStop(0.0, '#4c2640');
+    farG.addColorStop(0.55, '#7c3d48');
+    farG.addColorStop(1.0, '#b8684b');
     for (let rep = -1; rep <= 1; rep++) {
       const bx = ridgeOff + rep * ridgeSpan;
-      const ridgeY = (x) => 332 - Math.sin(x * 0.0041 + 0.6) * 52 - Math.cos(x * 0.0095 + 1.2) * 18;
+      // Angular rocky mountain ridge profile (NOT sine wave!)
+      const pts = [
+        [0, 368], [140, 342], [290, 318], [430, 304], [560, 326],
+        [720, 356], [880, 330], [1040, 298], [1210, 308], [1380, 344], [1560, 368],
+      ];
       ctx.fillStyle = farG;
       ctx.beginPath();
       ctx.moveTo(bx, h);
-      for (let x = 0; x <= ridgeSpan; x += 30) ctx.lineTo(bx + x, ridgeY(x));
+      for (const [px0, py0] of pts) ctx.lineTo(bx + px0, py0);
       ctx.lineTo(bx + ridgeSpan, h);
       ctx.closePath();
       ctx.fill();
 
-      // (A) Distant JERUSALEM OLD CITY Silhouette on the Northeastern Crest (قبة الصخرة وأسوار القدس)!
-      const jx = bx + 410;
-      const jy = ridgeY(410) + 4;
+      // (A) JERUSALEM OLD CITY Sunset Silhouette + Radiant Golden Dome of the Rock!
+      const jx = bx + 420, jy = 306;
       ctx.save();
-      // Crenellated Ottoman/Herodian Old City stone ramparts & Tower of David
-      const wallG = ctx.createLinearGradient(jx - 115, jy - 26, jx + 115, jy + 12);
-      wallG.addColorStop(0, 'rgba(248, 237, 214, 0.92)');
-      wallG.addColorStop(1, 'rgba(182, 160, 132, 0.78)');
-      ctx.fillStyle = wallG;
-      ctx.fillRect(jx - 108, jy - 10, 216, 18);
-      for (let m = -104; m <= 100; m += 10) ctx.fillRect(jx + m, jy - 13.5, 6, 4);
-      // Citadel Tower of David on western flank
-      ctx.fillRect(jx - 92, jy - 30, 14, 22);
-      ctx.beginPath(); ctx.moveTo(jx - 94, jy - 30); ctx.lineTo(jx - 76, jy - 30); ctx.lineTo(jx - 79, jy - 36); ctx.lineTo(jx - 91, jy - 36); ctx.closePath(); ctx.fill();
-      // Octagonal cobalt-and-stone drum + Gleaming Golden Dome of the Rock (قبة الصخرة المشرفة)!
-      ctx.fillStyle = 'rgba(30, 64, 175, 0.68)';
-      ctx.fillRect(jx - 26, jy - 22, 52, 12);
-      ctx.fillStyle = 'rgba(250, 240, 220, 0.88)';
-      ctx.fillRect(jx - 16, jy - 28, 32, 7);
-      const domeGlow = ctx.createRadialGradient(jx, jy - 34, 3, jx, jy - 34, 34);
-      domeGlow.addColorStop(0, 'rgba(254, 240, 138, 0.65)');
-      domeGlow.addColorStop(1, 'rgba(254, 240, 138, 0)');
-      ctx.fillStyle = domeGlow;
-      ctx.beginPath(); ctx.arc(jx, jy - 32, 34, 0, Math.PI * 2); ctx.fill();
-      const gdG = ctx.createRadialGradient(jx - 5, jy - 38, 2, jx, jy - 28, 19);
-      gdG.addColorStop(0, '#fef08a');
-      gdG.addColorStop(0.5, '#f59e0b');
-      gdG.addColorStop(1, '#b45309');
+      ctx.fillStyle = '#3b1d33';
+      ctx.fillRect(jx - 106, jy - 12, 212, 22);
+      for (let m = -102; m <= 98; m += 10) ctx.fillRect(jx + m, jy - 16, 6, 4.5);
+      // Citadel Tower of David
+      ctx.fillRect(jx - 90, jy - 34, 15, 24);
+      // Octagonal shrine & Sunset-Blazing Golden Dome of the Rock!
+      ctx.fillStyle = '#4c2848';
+      ctx.fillRect(jx - 28, jy - 24, 56, 12);
+      const dGlow = ctx.createRadialGradient(jx, jy - 32, 3, jx, jy - 32, 38);
+      dGlow.addColorStop(0, 'rgba(254, 240, 138, 0.82)');
+      dGlow.addColorStop(1, 'rgba(251, 146, 60, 0)');
+      ctx.fillStyle = dGlow;
+      ctx.beginPath(); ctx.arc(jx, jy - 32, 38, 0, Math.PI * 2); ctx.fill();
+      const gdG = ctx.createLinearGradient(jx - 16, jy - 44, jx + 16, jy - 24);
+      gdG.addColorStop(0, '#fef08a'); gdG.addColorStop(0.5, '#f59e0b'); gdG.addColorStop(1, '#9a3412');
       ctx.fillStyle = gdG;
-      ctx.beginPath();
-      ctx.arc(jx, jy - 28, 16, Math.PI, 0);
-      ctx.closePath();
-      ctx.fill();
-      // Golden finial spire
-      ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.4;
-      ctx.beginPath(); ctx.moveTo(jx, jy - 44); ctx.lineTo(jx, jy - 51); ctx.stroke();
-      // Silver-lead Al-Aqsa Dome & slender Jerusalem minarets
-      ctx.fillStyle = 'rgba(148, 163, 184, 0.88)';
-      ctx.beginPath(); ctx.arc(jx + 54, jy - 16, 10, Math.PI, 0); ctx.fill();
-      ctx.fillStyle = 'rgba(245, 235, 215, 0.9)';
-      ctx.fillRect(jx - 48, jy - 34, 4.5, 24);
-      ctx.fillRect(jx + 76, jy - 31, 4.5, 21);
+      ctx.beginPath(); ctx.arc(jx, jy - 24, 17, Math.PI, 0); ctx.fill();
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(jx, jy - 41); ctx.lineTo(jx, jy - 49); ctx.stroke();
+      // Al-Aqsa Dome & Old City minarets
+      ctx.fillStyle = '#64415a';
+      ctx.beginPath(); ctx.arc(jx + 56, jy - 16, 11, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = '#3b1d33';
+      ctx.fillRect(jx - 50, jy - 36, 4.5, 24);
+      ctx.fillRect(jx + 78, jy - 33, 4.5, 21);
       ctx.restore();
 
-      // (B) Distant BETHLEHEM Hilltop Town Silhouette on the Southeastern Crest (تلال بيت لحم وكنيسة المهد)!
-      const btx = bx + 1160;
-      const bty = ridgeY(1160) + 5;
+      // (B) BETHLEHEM Sunset Hilltop Silhouette + Nativity Bell-Tower & Glowing Windows!
+      const btx = bx + 1120, bty = 304;
       ctx.save();
-      // Cascading Bethlehem honey-stone hillside houses
-      const bHouses = [[-72, 6, 22, 13], [-48, 1, 24, 15], [-22, -4, 28, 17], [8, 0, 26, 15], [36, 4, 22, 14], [60, 9, 20, 12], [-34, 10, 26, 12], [18, 11, 24, 11]];
-      for (const [dx, dy, dw, dh] of bHouses) {
-        ctx.fillStyle = 'rgba(248, 239, 222, 0.88)';
+      ctx.fillStyle = '#3b1d33';
+      for (const [dx, dy, dw, dh] of [[-68, 6, 24, 14], [-42, 0, 28, 18], [-12, -5, 32, 20], [22, 1, 26, 16], [50, 7, 22, 14]]) {
         ctx.fillRect(btx + dx, bty + dy, dw, dh);
-        ctx.fillStyle = 'rgba(161, 136, 106, 0.62)';
-        ctx.fillRect(btx + dx + dw - 5, bty + dy, 5, dh);
+        ctx.fillStyle = '#fde047';
+        ctx.fillRect(btx + dx + 6, bty + dy + 4, 3, 3);
+        ctx.fillStyle = '#3b1d33';
       }
-      // Basilica of the Nativity pitched roof & square stone bell-tower + Mosque of Omar minaret!
-      ctx.fillStyle = 'rgba(185, 74, 52, 0.78)';
-      ctx.beginPath(); ctx.moveTo(btx - 24, bty - 4); ctx.lineTo(btx - 6, bty - 12); ctx.lineTo(btx + 12, bty - 4); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = 'rgba(245, 235, 215, 0.94)';
-      ctx.fillRect(btx - 32, bty - 27, 11, 24);
-      ctx.beginPath(); ctx.moveTo(btx - 33, bty - 27); ctx.lineTo(btx - 26.5, bty - 35); ctx.lineTo(btx - 20, bty - 27); ctx.closePath(); ctx.fill();
-      // Slender minaret opposite Manger Square
-      ctx.fillRect(btx + 28, bty - 29, 5, 26);
-      ctx.beginPath(); ctx.arc(btx + 30.5, bty - 29, 3.2, Math.PI, 0); ctx.fill();
-      // Bethlehem highland cypress spires
-      ctx.fillStyle = 'rgba(42, 72, 40, 0.72)';
-      for (const cx2 of [-80, -40, 14, 52, 82]) {
-        ctx.beginPath(); ctx.moveTo(btx + cx2 - 3, bty + 18); ctx.lineTo(btx + cx2, bty - 4); ctx.lineTo(btx + cx2 + 3, bty + 18); ctx.closePath(); ctx.fill();
-      }
+      ctx.fillRect(btx - 24, bty - 28, 12, 24);
+      ctx.beginPath(); ctx.moveTo(btx - 25, bty - 28); ctx.lineTo(btx - 18, bty - 37); ctx.lineTo(btx - 11, bty - 28); ctx.closePath(); ctx.fill();
+      ctx.fillRect(btx + 32, bty - 30, 5, 28);
       ctx.restore();
     }
 
-    // 5. Two True 3D Stepped Dry-Stone Terraced Judean Mountain Layers (السناسل المدرجة)!
-    const drawTerracedJudeanHills = (parallax, baseY, amp, hillTop, hillBot, stoneCol, groveCol, seed) => {
-      const span = 1440;
-      const off = -((camX * parallax) % span);
-      const hG = ctx.createLinearGradient(0, baseY - amp - 20, 0, h);
-      hG.addColorStop(0, hillTop);
-      hG.addColorStop(1, hillBot);
-      const prof = (x) => baseY - Math.sin(x * 0.0044 + seed) * amp - Math.cos(x * 0.0105 + seed * 1.5) * (amp * 0.32);
-      for (let rep = -1; rep <= 1; rep++) {
-        const bx = off + rep * span;
-        ctx.fillStyle = hG;
+    // 5. Angular Terraced Sunset-Ochre & Sienna Limestone Gorge Ridges (NO green sine hills!)
+    const gorgeSpan = 1480;
+    const gorgeOff = -((camX * 0.10) % gorgeSpan);
+    const gG = ctx.createLinearGradient(0, 340, 0, 580);
+    gG.addColorStop(0.0, '#6e3832');
+    gG.addColorStop(0.52, '#8c4b34');
+    gG.addColorStop(1.0, '#47261a');
+    for (let rep = -1; rep <= 1; rep++) {
+      const gx = gorgeOff + rep * gorgeSpan;
+      const crags = [
+        [0, 442], [160, 412], [240, 412], [350, 374], [490, 374], [610, 422],
+        [780, 438], [930, 386], [1090, 386], [1220, 418], [1360, 418], [1480, 442],
+      ];
+      ctx.fillStyle = gG;
+      ctx.beginPath();
+      ctx.moveTo(gx, h);
+      for (const [cx0, cy0] of crags) ctx.lineTo(gx + cx0, cy0);
+      ctx.lineTo(gx + gorgeSpan, h);
+      ctx.closePath();
+      ctx.fill();
+
+      // Sunlit golden sandstone cliff rim-lines & twinkling distant mountain hamlet lights
+      ctx.strokeStyle = 'rgba(253, 186, 116, 0.42)';
+      ctx.lineWidth = 2.4;
+      for (let t = 0; t < 3; t++) {
         ctx.beginPath();
-        ctx.moveTo(bx, h);
-        for (let x = 0; x <= span; x += 30) ctx.lineTo(bx + x, prof(x));
-        ctx.lineTo(bx + span, h);
-        ctx.closePath();
-        ctx.fill();
-
-        // True 3D stepped stone riser bands + olive-tree rows along hill contours
-        for (let t = 1; t <= 4; t++) {
-          const stepOff = t * 19;
-          ctx.fillStyle = stoneCol;
-          ctx.beginPath();
-          for (let x = 0; x <= span; x += 32) {
-            const y = prof(x) * 0.88 + baseY * 0.12 + stepOff;
-            if (x === 0) ctx.moveTo(bx + x, y); else ctx.lineTo(bx + x, y);
-          }
-          for (let x = span; x >= 0; x -= 32) {
-            const y = prof(x) * 0.88 + baseY * 0.12 + stepOff + 4.5;
-            ctx.lineTo(bx + x, y);
-          }
-          ctx.closePath();
-          ctx.fill();
-
-          // Miniature silvery-green olive orchard crowns dotting the terrace benches
-          ctx.fillStyle = groveCol;
-          for (let ox = 28 + (t % 2) * 20; ox < span - 24; ox += 48) {
-            const oy = prof(ox) * 0.88 + baseY * 0.12 + stepOff - 2.5;
-            ctx.beginPath();
-            ctx.ellipse(bx + ox, oy, 7.5, 4.2, 0, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
+        ctx.moveTo(gx + 140 + t * 40, 424 + t * 24);
+        ctx.lineTo(gx + 540 - t * 30, 396 + t * 24);
+        ctx.moveTo(gx + 880 + t * 35, 408 + t * 22);
+        ctx.lineTo(gx + 1320 - t * 35, 428 + t * 22);
+        ctx.stroke();
       }
-    };
-
-    drawTerracedJudeanHills(0.09, 408, 52, '#6b8657', '#94aa78', 'rgba(238, 226, 201, 0.46)', 'rgba(72, 102, 52, 0.58)', 1.9);
-    drawTerracedJudeanHills(0.15, 464, 40, '#4f6e39', '#779256', 'rgba(229, 213, 182, 0.62)', 'rgba(54, 83, 36, 0.68)', 3.4);
-
-    // Warm golden valley mist softening transition into midground
-    const hazeG = ctx.createLinearGradient(0, 435, 0, 560);
-    hazeG.addColorStop(0, 'rgba(254, 243, 199, 0)');
-    hazeG.addColorStop(1, 'rgba(254, 243, 199, 0.25)');
-    ctx.fillStyle = hazeG;
-    ctx.fillRect(0, 435, w, 125);
+    }
   }
 
-  // --- Painterly 3D Palestinian Stone Architecture, Sanasel & Flora Helpers ---
-  function drawSanaselWall(ctx, x, y, w, h, seed) {
-    // Authentic unmortared polygonal dry-stone Sanasel wall (السناسل الحجرية غير الملاطية)
+  // --- Brand-New Sunset Cliffside Palestinian Architecture & Orchard Helpers ---
+  function drawFieldstoneRetainingWall(ctx, x, y, w, h, seed) {
+    // Rugged Natural Polygonal Fieldstone Sanasel Wall in Warm Sunset Ochre & Umber!
     ctx.save();
-    const baseG = ctx.createLinearGradient(x, y, x, y + h);
-    baseG.addColorStop(0, '#e8dac0');
-    baseG.addColorStop(0.55, '#bfa782');
-    baseG.addColorStop(1, '#786142');
-    ctx.fillStyle = baseG;
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, h, 4);
-    ctx.fill();
+    const wG = ctx.createLinearGradient(x, y, x, y + h);
+    wG.addColorStop(0.0, '#d9a673');
+    wG.addColorStop(0.55, '#9c663b');
+    wG.addColorStop(1.0, '#4f2d16');
+    ctx.fillStyle = wG;
+    ctx.strokeStyle = '#2e180b';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, 5); ctx.fill(); ctx.stroke();
 
     ctx.save();
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, h, 4);
-    ctx.clip();
-    const rowH = Math.max(9, Math.min(14, Math.floor(h / 3)));
-    const tones = ['#f4ead6', '#e5d5b7', '#d2bc97', '#c2a982', '#ebe0c9'];
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, 5); ctx.clip();
+    const cols = ['#eab985', '#cf9863', '#b37a49', '#8f5d36', '#dba670'];
+    const rowH = 14;
     let r = 0;
     for (let ry = y + 2; ry < y + h; ry += rowH) {
-      let rx = x - ((r % 2) * 13);
-      let idx = (seed || 1) * 7 + r * 11;
+      let rx = x - (r % 2) * 14;
+      let idx = (seed || 1) * 9 + r * 13;
       while (rx < x + w) {
-        const bw = 18 + ((idx * 17) % 18);
-        ctx.fillStyle = tones[idx % tones.length];
-        ctx.strokeStyle = 'rgba(58, 43, 27, 0.62)';
-        ctx.lineWidth = 1.1;
+        const bw = 20 + ((idx * 17) % 20);
+        ctx.fillStyle = cols[idx % cols.length];
+        ctx.strokeStyle = 'rgba(38, 18, 8, 0.68)';
+        ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.roundRect(rx + 0.8, ry + 0.8, bw - 1.6, rowH - 1.6, 3.5);
-        ctx.fill();
-        ctx.stroke();
-        // Sunlit top limestone highlight
-        ctx.strokeStyle = 'rgba(255, 252, 240, 0.48)';
+        ctx.roundRect(rx + 1, ry + 1, bw - 2, rowH - 2, 4.5);
+        ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255, 237, 213, 0.42)';
         ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        ctx.moveTo(rx + 3, ry + 2);
-        ctx.lineTo(rx + bw - 3, ry + 2);
-        ctx.stroke();
-        rx += bw;
-        idx++;
+        ctx.beginPath(); ctx.moveTo(rx + 3, ry + 2.2); ctx.lineTo(rx + bw - 3, ry + 2.2); ctx.stroke();
+        rx += bw; idx++;
       }
       r++;
     }
     ctx.restore();
 
-    // Lush emerald terra-rossa grass & thyme verge along top of Sanasel wall + scarlet poppies
-    const topG = ctx.createLinearGradient(x, y - 4, x, y + 5);
-    topG.addColorStop(0, '#65a30d');
-    topG.addColorStop(1, '#3f6212');
-    ctx.fillStyle = topG;
-    ctx.beginPath();
-    ctx.roundRect(x - 2, y - 3, w + 4, 6.5, 3);
-    ctx.fill();
-    for (let px0 = x + 22; px0 < x + w - 18; px0 += 54) {
-      ctx.fillStyle = '#dc2626';
-      ctx.beginPath(); ctx.arc(px0, y - 5.5, 3.0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#18181b';
-      ctx.beginPath(); ctx.arc(px0, y - 5.5, 1.0, 0, Math.PI * 2); ctx.fill();
-    }
+    // Deep olive-emerald grass ledge crowning the fieldstone wall
+    ctx.fillStyle = '#3f6212';
+    ctx.beginPath(); ctx.roundRect(x - 3, y - 4, w + 6, 7, 3); ctx.fill();
+    ctx.fillStyle = '#65a30d';
+    ctx.beginPath(); ctx.roundRect(x - 2, y - 4, w + 4, 3.5, 2); ctx.fill();
     ctx.restore();
   }
 
-  function drawBattirMintar(ctx, cx, botY, scale) {
-    // Authentic Conical Corbelled Dry-Stone Battir Watchtower (منطار / قصر حجري تراثي)
-    ctx.save();
-    ctx.translate(cx, botY);
-    ctx.scale(scale, scale);
-
-    // Contact shadow
-    ctx.fillStyle = 'rgba(28, 25, 23, 0.28)';
-    ctx.beginPath(); ctx.ellipse(4, 2, 58, 8, 0, 0, Math.PI * 2); ctx.fill();
-
-    // Stepped circular/corbelled dry-stone courses tapering upward (NOT a flat trapezoid!)
-    const tiers = [
-      [-52, 0, 104, 24],
-      [-47, -22, 94, 22],
-      [-41, -42, 82, 20],
-      [-35, -60, 70, 18],
-      [-28, -76, 56, 16],
-    ];
-    for (let t = 0; t < tiers.length; t++) {
-      const [tx, ty, tw, th] = tiers[t];
-      const tG = ctx.createLinearGradient(tx, ty - th, tx + tw, ty);
-      tG.addColorStop(0.0, '#fbf3e2');
-      tG.addColorStop(0.48, '#dfcda9');
-      tG.addColorStop(0.82, '#b39a74');
-      tG.addColorStop(1.0, '#786142');
-      ctx.fillStyle = tG;
-      ctx.strokeStyle = '#473824';
-      ctx.lineWidth = 1.3;
-      ctx.beginPath();
-      ctx.roundRect(tx, ty - th, tw, th + 2, 5);
-      ctx.fill();
-      ctx.stroke();
-
-      // Individual stacked unmortared boulders along each conical course
-      ctx.strokeStyle = 'rgba(68, 52, 33, 0.48)';
-      ctx.lineWidth = 1.0;
-      ctx.beginPath();
-      ctx.moveTo(tx + 3, ty - th * 0.5);
-      ctx.lineTo(tx + tw - 3, ty - th * 0.5);
-      ctx.stroke();
-      for (let sx = tx + 11 + (t % 2) * 6; sx < tx + tw - 9; sx += 15) {
-        ctx.beginPath();
-        ctx.moveTo(sx, ty - th + 1);
-        ctx.lineTo(sx + 1.5, ty);
-        ctx.stroke();
-      }
-    }
-
-    // Corbelled stone dome cap + rustic olive-wood shade arbor on top of the Mintar!
-    const capG = ctx.createRadialGradient(-6, -100, 3, 0, -92, 28);
-    capG.addColorStop(0, '#fffbeb');
-    capG.addColorStop(0.6, '#d6c3a1');
-    capG.addColorStop(1, '#8c7350');
-    ctx.fillStyle = capG;
-    ctx.strokeStyle = '#473824';
-    ctx.lineWidth = 1.3;
-    ctx.beginPath();
-    ctx.moveTo(-24, -90);
-    ctx.quadraticCurveTo(-16, -106, 0, -107);
-    ctx.quadraticCurveTo(16, -106, 24, -90);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // Rustic watcher's grapevine pergola sticks on the Mintar roof
-    ctx.strokeStyle = '#5c3a21';
-    ctx.lineWidth = 2.0;
-    ctx.beginPath();
-    ctx.moveTo(-22, -90); ctx.lineTo(-22, -114);
-    ctx.moveTo(22, -90); ctx.lineTo(22, -114);
-    ctx.moveTo(-26, -114); ctx.lineTo(26, -114);
-    ctx.stroke();
-    ctx.fillStyle = '#4d7c0f';
-    for (let gx = -20; gx <= 20; gx += 10) {
-      ctx.beginPath(); ctx.arc(gx, -115, 6.5, 0, Math.PI * 2); ctx.fill();
-    }
-
-    // Deep lintel stone doorway with megalithic jambs & warm shadow
-    ctx.fillStyle = '#efe3cc';
-    ctx.strokeStyle = '#3f2e1d';
-    ctx.lineWidth = 1.4;
-    ctx.fillRect(-16, -42, 32, 42);
-    ctx.strokeRect(-16, -42, 32, 42);
-    ctx.fillRect(-20, -47, 40, 7);
-    ctx.strokeRect(-20, -47, 40, 7);
-    ctx.fillStyle = '#1f160f';
-    ctx.fillRect(-10, -39, 20, 39);
-
-    ctx.restore();
-  }
-
-  function drawBattirPointedArch(ctx, cx, botY, halfW, h, fillCol) {
-    const springY = botY - h * 0.58;
-    ctx.fillStyle = '#efe4cf';
-    ctx.strokeStyle = '#523e27';
-    ctx.lineWidth = 1.25;
-    ctx.beginPath();
-    ctx.moveTo(cx - halfW - 5, botY);
-    ctx.lineTo(cx - halfW - 5, springY);
-    ctx.quadraticCurveTo(cx - halfW - 3, botY - h - 5, cx, botY - h - 7);
-    ctx.quadraticCurveTo(cx + halfW + 3, botY - h - 5, cx + halfW + 5, springY);
-    ctx.lineTo(cx + halfW + 5, botY);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    // Radial voussoir joint ticks
-    ctx.strokeStyle = 'rgba(82, 62, 39, 0.45)';
-    ctx.lineWidth = 0.9;
-    for (const ang of [-2.5, -2.0, -1.57, -1.14, -0.64]) {
-      const r0 = halfW, r1 = halfW + 5;
-      const ay = botY - h * 0.62;
-      ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(ang) * r0, ay + Math.sin(ang) * (h * 0.38));
-      ctx.lineTo(cx + Math.cos(ang) * r1, ay + Math.sin(ang) * ((h + 10) * 0.38));
-      ctx.stroke();
-    }
-    ctx.fillStyle = fillCol || '#231911';
-    ctx.beginPath();
-    ctx.moveTo(cx - halfW, botY);
-    ctx.lineTo(cx - halfW, springY);
-    ctx.quadraticCurveTo(cx - halfW + 2, botY - h + 2, cx, botY - h);
-    ctx.quadraticCurveTo(cx + halfW - 2, botY - h + 2, cx + halfW, springY);
-    ctx.lineTo(cx + halfW, botY);
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  function drawBattirStoneDome(ctx, cx, baseY, r) {
-    const dG = ctx.createRadialGradient(cx - r * 0.32, baseY - r * 0.55, r * 0.08, cx, baseY - r * 0.18, r * 1.1);
-    dG.addColorStop(0.0, '#fffdf7');
-    dG.addColorStop(0.52, '#dfd0b2');
-    dG.addColorStop(1.0, '#856d4b');
-    ctx.fillStyle = dG;
-    ctx.strokeStyle = '#523e27';
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    ctx.moveTo(cx - r, baseY);
-    ctx.bezierCurveTo(cx - r, baseY - r * 0.92, cx - r * 0.35, baseY - r * 1.06, cx, baseY - r * 1.06);
-    ctx.bezierCurveTo(cx + r * 0.35, baseY - r * 1.06, cx + r, baseY - r * 0.92, cx + r, baseY);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = '#d4be98';
-    ctx.beginPath(); ctx.arc(cx, baseY - r * 1.1, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-  }
-
-  function drawBattirVaultedHouse(ctx, x, botY, w, h, opts) {
-    // Authentic Multi-Story Mamluk/Ottoman Hosh Stone Courtyard House (بيوت الحوش والعقود الحجرية)
+  function drawSunsetVillageHouse(ctx, x, botY, w, h, opts) {
+    // Authentic Stacked Palestinian Hill-Town Stone House with Mashrabiya, Riwaq Arches & Pigeon-Cote!
     const o = opts || {};
     const y = botY - h;
-    const sideW = o.sideW !== undefined ? o.sideW : 18;
+    const sideW = o.sideW !== undefined ? o.sideW : 20;
     ctx.save();
 
-    // 1. Sunlit Front Rusticated Jerusalem-Stone Facade
+    // 1. Shaded Deep-Umber 3D Right Facet
+    const sG = ctx.createLinearGradient(x + w, y, x + w + sideW, botY);
+    sG.addColorStop(0, '#7c4d2b');
+    sG.addColorStop(1, '#3b200e');
+    ctx.fillStyle = sG;
+    ctx.beginPath();
+    ctx.moveTo(x + w, y);
+    ctx.lineTo(x + w + sideW, y + 10);
+    ctx.lineTo(x + w + sideW, botY);
+    ctx.lineTo(x + w, botY);
+    ctx.closePath();
+    ctx.fill();
+
+    // 2. Warm Sunset-Apricot & Honey-Sandstone Weathered Front Wall (organic irregular stone courses!)
     const fG = ctx.createLinearGradient(x, y, x, botY);
-    fG.addColorStop(0, o.topCol || '#fbf4e4');
-    fG.addColorStop(0.55, '#e5d5b7');
-    fG.addColorStop(1, o.botCol || '#b89f78');
+    fG.addColorStop(0.0, o.topCol || '#f0c493');
+    fG.addColorStop(0.52, '#c99361');
+    fG.addColorStop(1.0, '#855530');
     ctx.fillStyle = fG;
+    ctx.strokeStyle = '#3b210e';
+    ctx.lineWidth = 1.6;
     ctx.fillRect(x, y, w, h);
-
-    ctx.save();
-    ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
-    const rowH = 13;
-    const tones = ['#fcf6e8', '#eee2ca', '#dfd0b2', '#d0b996', '#f4e9d4'];
-    let rIdx = 0;
-    for (let ry = y; ry < botY; ry += rowH) {
-      let rx = x - ((rIdx % 2) * 13);
-      let cIdx = rIdx * 5 + Math.floor(x * 0.02);
-      while (rx < x + w) {
-        const bw = 23 + ((Math.abs(cIdx) * 13) % 15);
-        ctx.fillStyle = tones[Math.abs(cIdx) % tones.length];
-        ctx.fillRect(rx + 0.6, ry + 0.6, bw - 1.2, rowH - 1.2);
-        ctx.strokeStyle = 'rgba(84, 65, 41, 0.34)';
-        ctx.lineWidth = 0.85;
-        ctx.strokeRect(rx + 0.5, ry + 0.5, bw - 1, rowH - 1);
-        ctx.strokeStyle = 'rgba(255, 253, 245, 0.45)';
-        ctx.lineWidth = 0.7;
-        ctx.beginPath(); ctx.moveTo(rx + 2, ry + 1.5); ctx.lineTo(rx + bw - 2, ry + 1.5); ctx.stroke();
-        rx += bw;
-        cIdx++;
-      }
-      rIdx++;
-    }
-    ctx.restore();
-
-    // 2. Shaded 3D Perspective Side Wall
-    if (sideW > 0) {
-      const sG = ctx.createLinearGradient(x + w, y, x + w + sideW, botY);
-      sG.addColorStop(0, '#ad9570');
-      sG.addColorStop(1, '#6e5739');
-      ctx.fillStyle = sG;
-      ctx.beginPath();
-      ctx.moveTo(x + w, y);
-      ctx.lineTo(x + w + sideW, y + 9);
-      ctx.lineTo(x + w + sideW, botY);
-      ctx.lineTo(x + w, botY);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = '#4e3b25';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-    }
-
-    // 3. Moulded Stone Cornice & Roof (Cross-Vault Stone Dome OR Pitched Red Marseilles Tile Roof!)
-    ctx.fillStyle = '#fff9ed';
-    ctx.strokeStyle = '#523e27';
-    ctx.lineWidth = 1.3;
-    ctx.fillRect(x - 3, y - 5, w + 6, 6);
-    ctx.strokeRect(x - 3, y - 5, w + 6, 6);
-
-    if (o.redTileRoof) {
-      // Historic 1892/Ottoman Pitched Red Marseilles Clay-Tile Roof (قرميد أحمر تراثي)
-      const rfG = ctx.createLinearGradient(x, y - 34, x, y - 5);
-      rfG.addColorStop(0, '#dc2626');
-      rfG.addColorStop(0.55, '#b91c1c');
-      rfG.addColorStop(1, '#7f1d1d');
-      ctx.fillStyle = rfG;
-      ctx.strokeStyle = '#450a0a';
-      ctx.lineWidth = 1.4;
-      ctx.beginPath();
-      ctx.moveTo(x - 8, y - 5);
-      ctx.lineTo(x + 22, y - 32);
-      ctx.lineTo(x + w - 18, y - 32);
-      ctx.lineTo(x + w + sideW * 0.5 + 6, y - 5);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      ctx.strokeStyle = 'rgba(254, 202, 202, 0.35)';
-      ctx.lineWidth = 1.0;
-      for (let tx = x + 8; tx < x + w - 8; tx += 12) {
-        ctx.beginPath(); ctx.moveTo(tx, y - 6); ctx.lineTo(tx + 10, y - 31); ctx.stroke();
-      }
-    } else if (o.domeR) {
-      drawBattirStoneDome(ctx, x + w * 0.5, y - 5, o.domeR);
-      // Crenelated rooftop stone balustrade around dome
-      for (let bx0 = x + 4; bx0 < x + w - 10; bx0 += 16) {
-        ctx.fillStyle = '#f5ead6';
-        ctx.fillRect(bx0, y - 12, 10, 7);
-        ctx.strokeRect(bx0, y - 12, 10, 7);
-      }
-    }
-
-    // 4. Ground-Level Vaulted Qantara Archway or Recessed Courtyard Door
-    if (o.qantara) {
-      drawBattirPointedArch(ctx, x + w * 0.5, botY, o.qantaraW || 26, o.qantaraH || 68, '#1f160f');
-      // Warm hanging lantern inside Qantara passage
-      const lx = x + w * 0.5, ly = botY - (o.qantaraH || 68) + 18;
-      const lg = ctx.createRadialGradient(lx, ly, 2, lx, ly, 20);
-      lg.addColorStop(0, 'rgba(254, 240, 138, 0.85)');
-      lg.addColorStop(1, 'rgba(254, 240, 138, 0)');
-      ctx.fillStyle = lg;
-      ctx.beginPath(); ctx.arc(lx, ly, 20, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#fef08a';
-      ctx.beginPath(); ctx.arc(lx, ly, 3.2, 0, Math.PI * 2); ctx.fill();
-    } else {
-      drawBattirPointedArch(ctx, x + w * 0.5, botY, 15, 44, '#3b2514');
-    }
-
-    // 5. Upper-Story Twin Arched Windows (المندلون) with Turquoise/Olive Louvered Shutters!
-    const winY = y + Math.min(62, h * 0.44);
-    const shutterCol = o.turquoiseShutters ? '#0f766e' : '#3f6212';
-    const winXs = w >= 150 ? [x + w * 0.27, x + w * 0.73] : [x + w * 0.5];
-    for (const wx of winXs) {
-      drawBattirPointedArch(ctx, wx, winY, 11, 30, '#1e293b');
-      // Warm interior amber window glow
-      ctx.fillStyle = 'rgba(254, 240, 138, 0.45)';
-      ctx.fillRect(wx - 7, winY - 19, 14, 17);
-      // Open wooden shutters flanking window
-      ctx.fillStyle = shutterCol;
-      ctx.strokeStyle = '#1c1917';
-      ctx.lineWidth = 1.0;
-      ctx.fillRect(wx - 18, winY - 22, 6, 22);
-      ctx.strokeRect(wx - 18, winY - 22, 6, 22);
-      ctx.fillRect(wx + 12, winY - 22, 6, 22);
-      ctx.strokeRect(wx + 12, winY - 22, 6, 22);
-    }
-
-    // 6. Optional External Cantilevered Stone Staircase (الدرج الحجري الخارجي)
-    if (o.stairsLeft) {
-      for (let s = 0; s < 6; s++) {
-        const sx0 = x - 36 + s * 6;
-        const sy0 = botY - 10 - s * 11;
-        ctx.fillStyle = '#efe3cc';
-        ctx.strokeStyle = '#523e27';
-        ctx.lineWidth = 1.1;
-        ctx.fillRect(sx0, sy0, 38 - s * 6, 11);
-        ctx.strokeRect(sx0, sy0, 38 - s * 6, 11);
-      }
-      ctx.strokeStyle = '#292524';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(x - 35, botY - 22);
-      ctx.lineTo(x - 2, botY - 78);
-      ctx.stroke();
-    }
-
-    // 7. Optional Cascading Magenta Bougainvillea (المجنونة)
-    if (o.bougainvillea) {
-      const bx0 = x + (o.bougainvillea === 'left' ? 12 : w - 14);
-      const by0 = y + 8;
-      ctx.fillStyle = '#15803d';
-      for (const [dx, dy, r] of [[0, 0, 13], [-10, 12, 11], [10, 10, 12], [-4, 24, 10]]) {
-        ctx.beginPath(); ctx.arc(bx0 + dx, by0 + dy, r, 0, Math.PI * 2); ctx.fill();
-      }
-      const bCols = ['#be185d', '#db2777', '#ec4899', '#f472b6'];
-      const bPts = [[-8, 2, 9], [6, -2, 10], [14, 10, 8.5], [-12, 16, 8.5], [2, 14, 9.5], [-4, 28, 7.5], [8, 24, 7]];
-      for (let i = 0; i < bPts.length; i++) {
-        ctx.fillStyle = bCols[i % bCols.length];
-        ctx.beginPath(); ctx.arc(bx0 + bPts[i][0], by0 + bPts[i][1], bPts[i][2], 0, Math.PI * 2); ctx.fill();
-      }
-    }
-
-    ctx.strokeStyle = '#523e27';
-    ctx.lineWidth = 1.4;
     ctx.strokeRect(x, y, w, h);
+
+    // Subtle weathered stone plaster patches & random corner quoins (NOT a sterile grid!)
+    ctx.fillStyle = 'rgba(255, 237, 213, 0.28)';
+    for (let qy = y + 6; qy < botY - 12; qy += 18) {
+      ctx.fillRect(x + 2, qy, 14 + ((qy * 7) % 8), 11);
+      ctx.fillRect(x + w - 18, qy + 6, 16, 11);
+    }
+
+    // 3. Roof Style: Ribbed Sunset Stone Dome, Pitched Marseilles Terracotta Roof, or Clay Pigeon-Tower!
+    if (o.tileRoof) {
+      const rfG = ctx.createLinearGradient(x, y - 34, x, y);
+      rfG.addColorStop(0, '#ea580c'); rfG.addColorStop(0.55, '#b91c1c'); rfG.addColorStop(1, '#7f1d1d');
+      ctx.fillStyle = rfG; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x - 8, y); ctx.lineTo(x + 22, y - 32);
+      ctx.lineTo(x + w - 18, y - 32); ctx.lineTo(x + w + 10, y);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if (o.domeR) {
+      const r = o.domeR;
+      const cx = x + w * 0.5;
+      const dG = ctx.createRadialGradient(cx - r * 0.35, y - r * 0.55, 4, cx, y - r * 0.15, r * 1.1);
+      dG.addColorStop(0, '#fde68a'); dG.addColorStop(0.5, '#d99b66'); dG.addColorStop(1, '#6e4221');
+      ctx.fillStyle = dG; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - r, y);
+      ctx.bezierCurveTo(cx - r, y - r * 0.95, cx - r * 0.3, y - r * 1.1, cx, y - r * 1.1);
+      ctx.bezierCurveTo(cx + r * 0.3, y - r * 1.1, cx + r, y - r * 0.95, cx + r, y);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.arc(cx, y - r * 1.14, 4, 0, Math.PI * 2); ctx.fill();
+    }
+    if (o.pigeonTower) {
+      // Traditional Palestinian Clay Rooftop Pigeon-Cote (برج الحمام الفخاري)!
+      const px0 = x + w - 38;
+      ctx.fillStyle = '#c27849'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(px0, y); ctx.lineTo(px0 + 5, y - 32); ctx.lineTo(px0 + 27, y - 32); ctx.lineTo(px0 + 32, y);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#1c1008';
+      for (const [hx, hy] of [[10, -22], [20, -22], [11, -12], [21, -12]]) {
+        ctx.beginPath(); ctx.arc(px0 + hx, y + hy, 2.4, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    // 4. Protruding Carved Wooden Mashrabiya Balcony OR Glowing Twin Mandaloun Arched Windows!
+    if (o.mashrabiya) {
+      const mx = x + w * 0.5 - 28, my = y + 22;
+      ctx.fillStyle = '#5c2e14'; ctx.strokeStyle = '#271105'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.roundRect(mx, my, 56, 38, 3); ctx.fill(); ctx.stroke();
+      // Warm amber lantern glow shining through Mashrabiya lattice!
+      ctx.fillStyle = '#fde047';
+      ctx.fillRect(mx + 6, my + 6, 44, 24);
+      ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.2;
+      for (let lx = mx + 12; lx < mx + 50; lx += 7) {
+        ctx.beginPath(); ctx.moveTo(lx, my + 6); ctx.lineTo(lx, my + 30); ctx.stroke();
+      }
+    } else {
+      const winY = y + Math.min(54, h * 0.45);
+      for (const wx of (w > 135 ? [x + w * 0.28, x + w * 0.72] : [x + w * 0.5])) {
+        ctx.fillStyle = '#271308'; ctx.strokeStyle = '#f5d0a9'; ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(wx - 11, winY); ctx.lineTo(wx - 11, winY - 18);
+        ctx.arc(wx, winY - 18, 11, Math.PI, 0);
+        ctx.lineTo(wx + 11, winY); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(253, 224, 71, 0.78)';
+        ctx.beginPath(); ctx.arc(wx, winY - 15, 7.5, Math.PI, 0); ctx.fillRect(wx - 7.5, winY - 15, 15, 12); ctx.fill();
+      }
+    }
+
+    // 5. Lower Vaulted Qantara Tunnel Passage with Glowing Copper Lamp
+    if (o.qantara) {
+      const qx = x + w * 0.5, qw = o.qantaraW || 28, qh = o.qantaraH || 64;
+      ctx.fillStyle = '#f5cfa0'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(qx - qw - 6, botY); ctx.lineTo(qx - qw - 6, botY - qh * 0.6);
+      ctx.quadraticCurveTo(qx, botY - qh - 10, qx + qw + 6, botY - qh * 0.6);
+      ctx.lineTo(qx + qw + 6, botY); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#1f0f07';
+      ctx.beginPath();
+      ctx.moveTo(qx - qw, botY); ctx.lineTo(qx - qw, botY - qh * 0.58);
+      ctx.quadraticCurveTo(qx, botY - qh - 2, qx + qw, botY - qh * 0.58);
+      ctx.lineTo(qx + qw, botY); ctx.closePath(); ctx.fill();
+      const lg = ctx.createRadialGradient(qx, botY - qh + 18, 2, qx, botY - qh + 18, 24);
+      lg.addColorStop(0, 'rgba(254, 240, 138, 0.92)'); lg.addColorStop(1, 'rgba(249, 115, 22, 0)');
+      ctx.fillStyle = lg;
+      ctx.beginPath(); ctx.arc(qx, botY - qh + 18, 24, 0, Math.PI * 2); ctx.fill();
+    }
+
     ctx.restore();
   }
 
-  function drawBattirCypress(ctx, x, groundY, h) {
+  function drawPomegranateTree(ctx, x, groundY, scale) {
+    // Lush Palestinian Pomegranate Tree Heavy with Ruby-Crimson Pomegranates (شجرة الرمان المثمرة!)
     ctx.save();
     ctx.translate(x, groundY);
-    ctx.fillStyle = '#4a3525';
-    ctx.fillRect(-3.5, -15, 7, 15);
-    const cG = ctx.createLinearGradient(-16, -h, 16, -10);
-    cG.addColorStop(0.0, '#4d7c3f');
-    cG.addColorStop(0.48, '#294d24');
-    cG.addColorStop(1.0, '#142912');
+    ctx.scale(scale, scale);
+    ctx.fillStyle = 'rgba(28, 14, 8, 0.3)';
+    ctx.beginPath(); ctx.ellipse(0, 0, 32, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+    // Multi-stemmed twisted warm-brown pomegranate trunk
+    ctx.strokeStyle = '#4a2c18'; ctx.lineWidth = 6.5; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-6, 0); ctx.quadraticCurveTo(-12, -32, -22, -66);
+    ctx.moveTo(0, 0); ctx.quadraticCurveTo(2, -38, 0, -76);
+    ctx.moveTo(6, 0); ctx.quadraticCurveTo(14, -32, 24, -64);
+    ctx.stroke();
+    // Glossy emerald-olive foliage clusters
+    const puffs = [
+      ['#1b4332', [[-34, -72, 22, 16], [34, -70, 22, 16], [0, -84, 28, 19]]],
+      ['#2d6a4f', [[-24, -82, 20, 15], [24, -80, 20, 15], [0, -94, 24, 16]]],
+      ['#52b788', [[-14, -90, 14, 10], [14, -88, 14, 10], [0, -100, 16, 10]]],
+    ];
+    for (const [col, list] of puffs) {
+      ctx.fillStyle = col;
+      for (const [px, py, rx, ry] of list) {
+        ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    // Glowing ruby-red ripe pomegranates with little crown calyxes!
+    for (const [rx, ry] of [[-26, -68], [-8, -76], [12, -74], [28, -66], [2, -90]]) {
+      const pmG = ctx.createRadialGradient(rx - 2, ry - 2, 1, rx, ry, 7);
+      pmG.addColorStop(0, '#fca5a5'); pmG.addColorStop(0.45, '#dc2626'); pmG.addColorStop(1, '#7f1d1d');
+      ctx.fillStyle = pmG;
+      ctx.beginPath(); ctx.arc(rx, ry, 6.2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(rx - 2, ry + 5.2, 4, 2.2);
+    }
+    ctx.restore();
+  }
+
+  function drawAncientOliveSunset(ctx, x, groundY, scale) {
+    // Millennia-Old Twisted Rumi Olive Tree Lit by Warm Sunset Gold!
+    ctx.save();
+    ctx.translate(x, groundY);
+    ctx.scale(scale, scale);
+    ctx.fillStyle = 'rgba(28, 14, 8, 0.3)';
+    ctx.beginPath(); ctx.ellipse(2, 0, 38, 6, 0, 0, Math.PI * 2); ctx.fill();
+    const trG = ctx.createLinearGradient(-24, -88, 24, 0);
+    trG.addColorStop(0, '#c29b78'); trG.addColorStop(0.5, '#6e4e37'); trG.addColorStop(1, '#332014');
+    ctx.fillStyle = trG; ctx.strokeStyle = '#1f120a'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-24, 0); ctx.quadraticCurveTo(-12, -22, -14, -46);
+    ctx.quadraticCurveTo(-28, -66, -38, -84); ctx.lineTo(-26, -89);
+    ctx.quadraticCurveTo(-10, -70, -2, -64); ctx.quadraticCurveTo(2, -80, 5, -94);
+    ctx.lineTo(15, -91); ctx.quadraticCurveTo(14, -72, 30, -86);
+    ctx.lineTo(38, -78); ctx.quadraticCurveTo(18, -56, 15, -34);
+    ctx.quadraticCurveTo(17, -14, 25, 0);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Silvery-sage canopy with warm golden-apricot sunset rim-highlight!
+    for (const [col, pts] of [
+      ['#2d3f22', [[-42, -90, 26, 16], [40, -88, 25, 16], [0, -96, 30, 18]]],
+      ['#55713e', [[-32, -102, 24, 15], [30, -100, 23, 15], [0, -112, 28, 18]]],
+      ['#98b075', [[-20, -114, 17, 10], [18, -112, 17, 10], [0, -122, 21, 11]]],
+      ['#fde68a', [[6, -126, 14, 4.5], [24, -116, 10, 3.5]]],
+    ]) {
+      ctx.fillStyle = col;
+      for (const [px, py, rx, ry] of pts) {
+        ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawCypressSilhouette(ctx, x, groundY, h) {
+    ctx.save();
+    ctx.translate(x, groundY);
+    ctx.fillStyle = '#3b210e';
+    ctx.fillRect(-3.5, -14, 7, 14);
+    const cG = ctx.createLinearGradient(-14, -h, 14, -10);
+    cG.addColorStop(0, '#3f6212'); cG.addColorStop(0.5, '#1e3a1e'); cG.addColorStop(1, '#0f2110');
     ctx.fillStyle = cG;
     ctx.beginPath();
     ctx.moveTo(0, -h);
-    ctx.bezierCurveTo(-9, -h * 0.72, -16, -h * 0.32, -11, -12);
+    ctx.bezierCurveTo(-10, -h * 0.7, -16, -h * 0.3, -11, -12);
     ctx.quadraticCurveTo(0, -7, 11, -12);
-    ctx.bezierCurveTo(16, -h * 0.32, 9, -h * 0.72, 0, -h);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(148, 197, 101, 0.45)';
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    ctx.moveTo(-1, -h + 4);
-    ctx.bezierCurveTo(-8, -h * 0.68, -13, -h * 0.34, -9, -15);
-    ctx.stroke();
+    ctx.bezierCurveTo(16, -h * 0.3, 10, -h * 0.7, 0, -h);
+    ctx.closePath(); ctx.fill();
+    // Warm sunset orange-gold edge rim!
+    ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(1, -h + 4); ctx.bezierCurveTo(8, -h * 0.68, 13, -h * 0.32, 9, -14); ctx.stroke();
     ctx.restore();
   }
 
-  function drawBattirOliveTree(ctx, x, groundY, scale) {
+  function drawRuggedMintar(ctx, cx, botY, scale) {
+    // Rugged Fieldstone Corbelled Battir Mintar with Thatched Vine Roof & Watchman Lantern!
     ctx.save();
-    ctx.translate(x, groundY);
+    ctx.translate(cx, botY);
     ctx.scale(scale, scale);
-    ctx.fillStyle = 'rgba(28, 25, 23, 0.24)';
-    ctx.beginPath(); ctx.ellipse(2, 0, 38, 6, 0, 0, Math.PI * 2); ctx.fill();
-    // Ancient gnarled multi-root Palestinian Rumi olive trunk (زيتون رومي معمر)
-    const trG = ctx.createLinearGradient(-22, -90, 22, 0);
-    trG.addColorStop(0.0, '#a6947e');
-    trG.addColorStop(0.45, '#766552');
-    trG.addColorStop(1.0, '#3e3226');
-    ctx.fillStyle = trG;
-    ctx.strokeStyle = '#291e14';
-    ctx.lineWidth = 1.5;
+    ctx.fillStyle = 'rgba(24, 12, 6, 0.34)';
+    ctx.beginPath(); ctx.ellipse(2, 2, 56, 8, 0, 0, Math.PI * 2); ctx.fill();
+    const tiers = [[-50, 0, 100, 24], [-44, -22, 88, 22], [-38, -42, 76, 20], [-31, -60, 62, 18], [-24, -76, 48, 15]];
+    for (let t = 0; t < tiers.length; t++) {
+      const [tx, ty, tw, th] = tiers[t];
+      drawFieldstoneRetainingWall(ctx, tx, ty - th, tw, th + 2, t + 4);
+    }
+    // Rustic olive-branch watcher's pergola & warm hanging watchman lantern!
+    ctx.strokeStyle = '#451a03'; ctx.lineWidth = 2.6;
     ctx.beginPath();
-    ctx.moveTo(-24, 0); ctx.quadraticCurveTo(-14, -18, -13, -44);
-    ctx.quadraticCurveTo(-24, -64, -38, -82); ctx.lineTo(-27, -88);
-    ctx.quadraticCurveTo(-10, -72, -3, -64); ctx.quadraticCurveTo(0, -80, 3, -94);
-    ctx.lineTo(13, -92); ctx.quadraticCurveTo(12, -74, 28, -86);
-    ctx.lineTo(37, -79); ctx.quadraticCurveTo(18, -58, 14, -36);
-    ctx.quadraticCurveTo(16, -16, 24, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.strokeStyle = 'rgba(41, 30, 20, 0.52)';
-    ctx.lineWidth = 1.1;
-    ctx.beginPath();
-    ctx.moveTo(-8, -6); ctx.quadraticCurveTo(-4, -34, -14, -62);
-    ctx.moveTo(6, -4); ctx.quadraticCurveTo(4, -32, 12, -60);
+    ctx.moveTo(-22, -90); ctx.lineTo(-22, -118);
+    ctx.moveTo(22, -90); ctx.lineTo(22, -118);
+    ctx.moveTo(-28, -118); ctx.lineTo(28, -118);
     ctx.stroke();
-    const deepShade = [[-44, -92, 26, 17], [42, -90, 25, 16], [-12, -98, 28, 19], [16, -96, 27, 18]];
-    const midLeaf = [[-36, -104, 24, 16], [34, -102, 23, 15], [0, -114, 30, 20], [-18, -110, 22, 15], [20, -108, 22, 15]];
-    const sunCrown = [[-26, -116, 17, 11], [4, -124, 22, 12], [24, -114, 16, 10], [-42, -108, 14, 9]];
-    ctx.fillStyle = '#364d26';
-    for (const [px, py, rx, ry] of deepShade) { ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); }
-    ctx.fillStyle = '#5c7c3f';
-    for (const [px, py, rx, ry] of midLeaf) { ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); }
-    ctx.fillStyle = '#92ad70';
-    for (const [px, py, rx, ry] of sunCrown) { ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); }
-    ctx.fillStyle = '#c2d4a8';
-    ctx.beginPath(); ctx.ellipse(-4, -128, 14, 6, -0.1, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-  }
-
-  function drawBattirAlmondTree(ctx, x, groundY, scale, time) {
-    ctx.save();
-    ctx.translate(x, groundY);
-    ctx.scale(scale, scale);
-    ctx.fillStyle = 'rgba(28, 25, 23, 0.2)';
-    ctx.beginPath(); ctx.ellipse(0, 0, 26, 4.5, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#5c402c';
-    ctx.strokeStyle = '#291509';
-    ctx.lineWidth = 1.3;
-    ctx.beginPath();
-    ctx.moveTo(-10, 0); ctx.quadraticCurveTo(-5, -36, -18, -74); ctx.lineTo(-10, -78);
-    ctx.quadraticCurveTo(0, -60, 12, -78); ctx.lineTo(20, -74); ctx.quadraticCurveTo(6, -36, 11, 0);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-    const layers = [
-      ['#f472b6', [[-28, -84, 21, 15], [26, -82, 20, 14], [0, -96, 26, 18]]],
-      ['#fbcfe8', [[-22, -92, 18, 13], [20, -90, 18, 13], [-4, -104, 22, 15]]],
-      ['#fff1f2', [[-14, -98, 13, 9], [8, -108, 15, 9], [18, -96, 12, 8]]],
-    ];
-    for (const [col, pts] of layers) {
-      ctx.fillStyle = col;
-      for (const [px, py, rx, ry] of pts) { ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = '#3f6212';
+    for (let gx = -22; gx <= 22; gx += 11) {
+      ctx.beginPath(); ctx.arc(gx, -120, 8, 0, Math.PI * 2); ctx.fill();
     }
-    ctx.fillStyle = 'rgba(255, 241, 242, 0.85)';
-    for (let k = 0; k < 4; k++) {
-      const prog = ((time * 0.45 + k * 0.27) % 1);
-      const px = -22 + k * 14 + Math.sin(prog * 6 + k) * 9;
-      const py = -80 + prog * 72;
-      ctx.beginPath(); ctx.ellipse(px, py, 2.6, 1.4, prog * 4, 0, Math.PI * 2); ctx.fill();
-    }
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath(); ctx.arc(0, -104, 4.2, 0, Math.PI * 2); ctx.fill();
+    // Megalithic doorway
+    ctx.fillStyle = '#e6b885'; ctx.strokeStyle = '#2e1608'; ctx.lineWidth = 1.4;
+    ctx.fillRect(-16, -42, 32, 42); ctx.strokeRect(-16, -42, 32, 42);
+    ctx.fillStyle = '#1c0d06';
+    ctx.fillRect(-10, -37, 20, 37);
     ctx.restore();
   }
 
   function drawBattirMidground(ctx, camX, w, h, time) {
     // =========================================================================
-    // 1. WADI AL-MAKHROUR AMPHITHEATER & MULTI-ARCH 1892 OTTOMAN RAILWAY VIADUCT
+    // 1. TOWERING FULL-VALLEY WADI AL-MAKHROUR VIADUCT & CANYON CRAGS (0.22x)
     // =========================================================================
-    const hillSpan = 1640;
-    const hillOff = -((camX * 0.22) % hillSpan);
+    const span = 1720;
+    const off = -((camX * 0.22) % span);
     for (let rep = -1; rep <= 1; rep++) {
-      const hx = hillOff + rep * hillSpan;
-      // Sculpted emerald-olive terraced Judean mountain amphitheater
-      const hG = ctx.createLinearGradient(0, 310, 0, 565);
-      hG.addColorStop(0.0, '#68864b');
-      hG.addColorStop(0.55, '#486531');
-      hG.addColorStop(1.0, '#2a3f1b');
-      ctx.fillStyle = hG;
+      const vx = off + rep * span;
+      // Colossal Full-Height 6-Arch Ottoman Stone Gorge Viaduct spanning across the misty sunset canyon!
+      const vdX = vx + 680, vdW = 780, vdTopY = 368, vdBotY = 648;
+      const vdG = ctx.createLinearGradient(vdX, vdTopY, vdX, vdBotY);
+      vdG.addColorStop(0.0, '#d9a472');
+      vdG.addColorStop(0.45, '#9e683e');
+      vdG.addColorStop(1.0, '#4a2b16');
+      ctx.fillStyle = vdG;
+      ctx.strokeStyle = '#361d0d';
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(hx, 585);
-      ctx.bezierCurveTo(hx + 220, 405, hx + 470, 316, hx + 780, 334);
-      ctx.bezierCurveTo(hx + 1070, 352, hx + 1350, 442, hx + hillSpan, 585);
-      ctx.closePath();
-      ctx.fill();
-
-      // True stepped dry-stone Sanasel benches along the curved amphitheater hillside
-      for (let t = 0; t < 3; t++) {
-        const yOff = 36 + t * 30;
-        ctx.strokeStyle = 'rgba(238, 225, 198, 0.52)';
-        ctx.lineWidth = 3.2;
-        ctx.beginPath();
-        ctx.moveTo(hx + 160 + t * 34, 480 + t * 14);
-        ctx.quadraticCurveTo(hx + 780, 336 + yOff, hx + 1400 - t * 34, 492 + t * 14);
-        ctx.stroke();
-      }
-
-      // Grand Multi-Arch 1892 Jaffa–Jerusalem Stone Viaduct curving across Wadi al-Makhrour!
-      const railPt = (u) => {
-        const rx = hx + 120 + u * 1380;
-        const ry = 492 - Math.sin(u * Math.PI) * 94 + Math.sin(u * Math.PI * 2) * 8;
-        return [rx, ry];
-      };
-      ctx.save();
-      const viaductG = ctx.createLinearGradient(0, 395, 0, 520);
-      viaductG.addColorStop(0, '#efe3cc');
-      viaductG.addColorStop(0.55, '#cbb48e');
-      viaductG.addColorStop(1, '#856d4b');
-      ctx.fillStyle = viaductG;
-      ctx.strokeStyle = '#4e3b25';
-      ctx.lineWidth = 1.4;
-      ctx.beginPath();
-      for (let i = 0; i <= 28; i++) {
-        const [rx, ry] = railPt(i / 28);
-        if (i === 0) ctx.moveTo(rx, ry); else ctx.lineTo(rx, ry);
-      }
-      for (let i = 28; i >= 0; i--) {
-        const [rx, ry] = railPt(i / 28);
-        const pierH = 18 + Math.sin((i / 28) * Math.PI) * 24;
-        ctx.lineTo(rx, ry + pierH);
+      ctx.moveTo(vdX, vdTopY);
+      ctx.lineTo(vdX + vdW, vdTopY);
+      ctx.lineTo(vdX + vdW, vdBotY);
+      // Carve 6 soaring monumental semicircular viaduct arches!
+      const archCount = 6;
+      const stepW = vdW / archCount;
+      for (let a = archCount - 1; a >= 0; a--) {
+        const acx = vdX + (a + 0.5) * stepW;
+        const hw = stepW * 0.34;
+        ctx.lineTo(acx + hw, vdBotY);
+        ctx.lineTo(acx + hw, vdTopY + 76);
+        ctx.arc(acx, vdTopY + 76, hw, 0, Math.PI, true);
+        ctx.lineTo(acx - hw, vdBotY);
       }
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
+      // Sunset-gilded stone balustrade along top of viaduct
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(vdX, vdTopY - 4, vdW, 6);
 
-      // Vaulted stone viaduct arches carved through the tall viaduct embankment!
-      for (let a = 3; a <= 25; a += 2) {
-        const u = a / 28;
-        const [rx, ry] = railPt(u);
-        const pierH = 18 + Math.sin(u * Math.PI) * 24;
-        const archW = 13;
-        const archH = Math.max(10, pierH - 7);
-        ctx.fillStyle = '#263818';
-        ctx.beginPath();
-        ctx.moveTo(rx - archW, ry + pierH);
-        ctx.lineTo(rx - archW, ry + pierH - archH * 0.55);
-        ctx.quadraticCurveTo(rx, ry + pierH - archH - 4, rx + archW, ry + pierH - archH * 0.55);
-        ctx.lineTo(rx + archW, ry + pierH);
-        ctx.closePath();
-        ctx.fill();
-      }
-
-      // Steel rail track & parapet along top of viaduct
-      ctx.strokeStyle = '#334155';
-      ctx.lineWidth = 2.2;
-      ctx.beginPath();
-      for (let i = 0; i <= 28; i++) {
-        const [rx, ry] = railPt(i / 28);
-        if (i === 0) ctx.moveTo(rx, ry - 1.5); else ctx.lineTo(rx, ry - 1.5);
-      }
-      ctx.stroke();
-
-      // Detailed Vintage 1892 Ottoman Steam Locomotive + Tender + 3 Clerestory Coaches!
-      const trainU = ((time * 0.04 + rep * 0.41) % 1.24) - 0.12;
-      const carOffsets = [0, 0.032, 0.072, 0.114, 0.156];
-      for (let car = carOffsets.length - 1; car >= 0; car--) {
-        const cu = trainU - carOffsets[car];
-        if (cu < 0.02 || cu > 0.98) continue;
-        const [cx0, cy0] = railPt(cu);
-        const [cx1, cy1] = railPt(Math.min(0.995, cu + 0.01));
-        const ang = Math.atan2(cy1 - cy0, cx1 - cx0);
-        const sc = 0.85 + Math.sin(cu * Math.PI) * 0.25;
+      // Distant Silhouette of the 1892 Steam Express gliding across the high gorge viaduct!
+      const trX = vdX + vdW - (((time * 58 + rep * 260) % (vdW + 260)));
+      if (trX > vdX - 160 && trX < vdX + vdW + 40) {
         ctx.save();
-        ctx.translate(cx0, cy0 - 2);
-        ctx.rotate(ang);
-        ctx.scale(sc, sc);
-
-        if (car === 0) {
-          // 1892 Ottoman Steam Engine: Cowcatcher, Red Spoked Wheels + Connecting Rod, Riveted Boiler, Brass Dome & Smokestack!
-          ctx.fillStyle = '#991b1b';
-          ctx.beginPath(); ctx.moveTo(22, 0); ctx.lineTo(30, 0); ctx.lineTo(22, -7); ctx.closePath(); ctx.fill();
-          // Cylindrical boiler & cab
-          const blG = ctx.createLinearGradient(0, -21, 0, -4);
-          blG.addColorStop(0, '#334155'); blG.addColorStop(0.5, '#1e293b'); blG.addColorStop(1, '#0f172a');
-          ctx.fillStyle = blG; ctx.strokeStyle = '#09090b'; ctx.lineWidth = 1.1;
-          ctx.beginPath(); ctx.roundRect(-10, -18, 33, 13, 3); ctx.fill(); ctx.stroke();
-          // Crimson-and-teak engineer cab
-          ctx.fillStyle = '#7f1d1d';
-          ctx.beginPath(); ctx.roundRect(-24, -24, 16, 19, [2, 2, 0, 0]); ctx.fill(); ctx.stroke();
-          ctx.fillStyle = '#fef08a';
-          ctx.fillRect(-20, -20, 8, 6);
-          // Polished brass steam dome & flared smokestack
-          ctx.fillStyle = '#f59e0b';
-          ctx.beginPath(); ctx.arc(4, -18, 4.5, Math.PI, 0); ctx.fill(); ctx.stroke();
-          ctx.fillStyle = '#1e293b';
-          ctx.beginPath(); ctx.moveTo(15, -18); ctx.lineTo(13, -29); ctx.lineTo(20, -29); ctx.lineTo(18, -18); ctx.closePath(); ctx.fill(); ctx.stroke();
-          // Spoked driving wheels + animated steel side-rod
-          const wRot = time * 11;
-          for (const wx of [-15, -3, 9, 19]) {
-            const wr = wx < 12 ? 5.2 : 3.6;
-            ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.1;
-            ctx.beginPath(); ctx.arc(wx, -2.5, wr, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-          }
-          ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.6;
-          ctx.beginPath();
-          ctx.moveTo(-15 + Math.cos(wRot) * 3, -2.5 + Math.sin(wRot) * 2);
-          ctx.lineTo(9 + Math.cos(wRot) * 3, -2.5 + Math.sin(wRot) * 2);
-          ctx.stroke();
-          // Billowing sunlit white-and-cream steam puffs
-          for (let pf = 0; pf < 6; pf++) {
-            const pr = ((time * 1.45 + pf * 0.17) % 1);
-            ctx.fillStyle = `rgba(255, 252, 245, ${((1 - pr) * 0.72).toFixed(2)})`;
-            ctx.beginPath();
-            ctx.arc(16 - pr * 38, -32 - pr * 26, 3.5 + pr * 9, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        } else if (car === 1) {
-          // Coal Tender Car
-          ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#09090b'; ctx.lineWidth = 1.0;
-          ctx.beginPath(); ctx.roundRect(-14, -15, 26, 11, 2); ctx.fill(); ctx.stroke();
-          ctx.fillStyle = '#09090b';
-          ctx.beginPath(); ctx.ellipse(-1, -15, 10, 3, 0, Math.PI, 0); ctx.fill();
-        } else {
-          // Ornate Teakwood & Maroon Clerestory Passenger Coach
-          const cG = ctx.createLinearGradient(0, -19, 0, -4);
-          cG.addColorStop(0, '#9a3412'); cG.addColorStop(0.55, '#7c2d12'); cG.addColorStop(1, '#431407');
-          ctx.fillStyle = cG; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.0;
-          ctx.beginPath(); ctx.roundRect(-21, -17, 40, 13, 2); ctx.fill(); ctx.stroke();
-          // Clerestory roof & brass trim
-          ctx.fillStyle = '#e7e5e4';
-          ctx.beginPath(); ctx.roundRect(-22, -20, 42, 3.5, 2); ctx.fill();
-          ctx.fillStyle = '#fef08a';
-          for (let wx = -16; wx <= 12; wx += 7) ctx.fillRect(wx, -14, 4.8, 5.2);
-          for (const wx of [-14, 12]) {
-            ctx.fillStyle = '#334155';
-            ctx.beginPath(); ctx.arc(wx, -2, 3.5, 0, Math.PI * 2); ctx.fill();
-          }
+        ctx.beginPath(); ctx.rect(vdX, vdTopY - 60, vdW, 62); ctx.clip();
+        ctx.fillStyle = '#29150e';
+        ctx.fillRect(trX, vdTopY - 22, 46, 18);
+        ctx.fillRect(trX + 6, vdTopY - 32, 7, 11);
+        for (let c = 1; c <= 3; c++) {
+          ctx.fillStyle = '#5c2418';
+          ctx.fillRect(trX + c * 52, vdTopY - 20, 46, 16);
+          ctx.fillStyle = '#fde047';
+          for (let wx = 6; wx < 40; wx += 10) ctx.fillRect(trX + c * 52 + wx, vdTopY - 16, 6, 5);
+        }
+        for (let pf = 0; pf < 5; pf++) {
+          const u = ((time * 1.6 + pf * 0.2) % 1);
+          ctx.fillStyle = `rgba(254, 215, 170, ${((1 - u) * 0.65).toFixed(2)})`;
+          ctx.beginPath(); ctx.arc(trX + 10 + u * 45, vdTopY - 36 - u * 20, 4 + u * 8, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
       }
-      ctx.restore();
-
-      // Anatomically Graceful Palestinian Mountain Gazelle (غزال الجبل الفلسطيني) bounding on meadow!
-      const gzU = ((time * 0.032 + rep * 0.5) % 0.62) + 0.19;
-      const gx = hx + 220 + gzU * 960;
-      const stride = time * 6.4;
-      const leap = Math.max(0, Math.sin(stride)) * 11;
-      const gy = 508 - Math.sin(gzU * Math.PI) * 26 - leap;
-      ctx.save();
-      ctx.translate(gx, gy);
-      // Gazelle body, white belly & dark flank band, slender neck & curved lyre horns
-      ctx.strokeStyle = '#5c3a21'; ctx.lineWidth = 1.6;
-      const legSwing = Math.sin(stride) * 6;
-      ctx.beginPath();
-      ctx.moveTo(-7, -9); ctx.lineTo(-11 - legSwing, -1);
-      ctx.moveTo(-4, -9); ctx.lineTo(-6 + legSwing * 0.6, -1);
-      ctx.moveTo(6, -9); ctx.lineTo(11 + legSwing, -2);
-      ctx.moveTo(8, -9); ctx.lineTo(8 - legSwing * 0.6, -1);
-      ctx.stroke();
-      ctx.fillStyle = '#c28e5c';
-      ctx.beginPath(); ctx.ellipse(0, -12, 12.5, 5.5, -0.08, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#fef3c7';
-      ctx.beginPath(); ctx.ellipse(0, -9.2, 9.5, 2.2, -0.05, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.moveTo(-7, -10.8); ctx.lineTo(7, -11.2); ctx.stroke();
-      // Slender neck, head, ear & ringed lyre horn
-      ctx.fillStyle = '#c28e5c';
-      ctx.beginPath();
-      ctx.moveTo(8, -13); ctx.lineTo(14, -23); ctx.lineTo(20, -21); ctx.lineTo(15, -18); ctx.lineTo(11, -10);
-      ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = '#291e14'; ctx.lineWidth = 1.3;
-      ctx.beginPath(); ctx.moveTo(14.5, -23); ctx.quadraticCurveTo(10.5, -30, 6.5, -28); ctx.stroke();
-      ctx.restore();
     }
 
     // =========================================================================
-    // 2. FIVE AUTHENTIC 3D BATTIR HERITAGE PANORAMAS (Aligned with Chapters 1..5!)
+    // 2. FIVE MONUMENTAL STACKED CLIFFSIDE BATTIR SCENES (0.44x — NO FLAT LINE!)
     // =========================================================================
-    const valleyG = ctx.createLinearGradient(0, 512, 0, 650);
-    valleyG.addColorStop(0.0, '#5a8225');
-    valleyG.addColorStop(0.52, '#3a5c15');
-    valleyG.addColorStop(1.0, '#1d3308');
-    ctx.fillStyle = valleyG;
+    // Rugged warm Terra-Rossa & dark olive canyon base slope
+    const baseG = ctx.createLinearGradient(0, 520, 0, 650);
+    baseG.addColorStop(0.0, '#4d5e22');
+    baseG.addColorStop(0.55, '#3b2816');
+    baseG.addColorStop(1.0, '#24140a');
+    ctx.fillStyle = baseG;
     ctx.beginPath();
     ctx.moveTo(-20, 655);
-    for (let x = -20; x <= w + 40; x += 32) {
-      const wx = x + camX * 0.36;
-      const sy = 542 + Math.sin(wx * 0.0042) * 16 + Math.cos(wx * 0.0105) * 8;
-      ctx.lineTo(x, sy);
+    for (let x = -20; x <= w + 40; x += 36) {
+      const wx = x + camX * 0.44;
+      ctx.lineTo(x, 548 + Math.sin(wx * 0.005) * 18 + Math.cos(wx * 0.013) * 9);
     }
     ctx.lineTo(w + 40, 655);
     ctx.closePath();
@@ -23725,444 +24043,348 @@ window.Game = window.Game || {};
 
       if (zoneIdx === 0) {
         // ---------------------------------------------------------------------
-        // PANORAMA 0: SEVEN WIDOWS QUARTER (حوش السبع أرامل) & BATTIR ECO-MUSEUM
+        // SCENE 0: 3-TIER STACKED CLIFFSIDE SEVEN WIDOWS QUARTER (حارة السبع أرامل!)
         // ---------------------------------------------------------------------
-        drawSanaselWall(ctx, sx + 30, 536, 660, 26, 1);
-        drawBattirVaultedHouse(ctx, sx + 78, 540, 168, 168, { domeR: 46, stairsLeft: true, turquoiseShutters: true, bougainvillea: 'right', sideW: 16 });
-        // Flying Qantara Stone Archway Bridge connecting the Old Town Hosh houses!
-        drawBattirVaultedHouse(ctx, sx + 246, 540, 118, 122, { qantara: true, qantaraW: 32, qantaraH: 78, sideW: 10, topCol: '#f5ead6' });
-        drawBattirVaultedHouse(ctx, sx + 364, 540, 178, 186, { domeR: 50, turquoiseShutters: false, bougainvillea: 'left', sideW: 18 });
-        // Battir Eco-Museum (متحف بتير البيئي) Courtyard & Grapevine Pergola Terrace
-        drawBattirVaultedHouse(ctx, sx + 566, 542, 136, 108, { redTileRoof: true, turquoiseShutters: true, sideW: 14 });
-        ctx.strokeStyle = '#5c3a21'; ctx.lineWidth = 2.6;
-        ctx.beginPath();
-        ctx.moveTo(sx + 716, 542); ctx.lineTo(sx + 716, 484);
-        ctx.moveTo(sx + 818, 542); ctx.lineTo(sx + 818, 484);
-        ctx.moveTo(sx + 706, 484); ctx.lineTo(sx + 828, 484);
-        ctx.stroke();
-        ctx.fillStyle = '#4d7c0f';
-        for (let gx = sx + 714; gx <= sx + 822; gx += 16) {
-          ctx.beginPath(); ctx.arc(gx, 482, 9, 0, Math.PI * 2); ctx.fill();
-        }
-        drawBattirCypress(ctx, sx + 875, 548, 148);
-        drawBattirOliveTree(ctx, sx + 1015, 552, 1.18);
-        drawBattirAlmondTree(ctx, sx + 1175, 548, 1.05, time);
+        // Tier 3 (Upper Mountain Crest Houses y: 260..390)
+        drawFieldstoneRetainingWall(ctx, sx + 95, 386, 440, 32, 1);
+        drawSunsetVillageHouse(ctx, sx + 125, 388, 150, 118, { domeR: 42, mashrabiya: true, sideW: 16 });
+        drawSunsetVillageHouse(ctx, sx + 315, 388, 165, 108, { pigeonTower: true, tileRoof: true, sideW: 16 });
+
+        // Tier 2 (Mid-Cliff Vaulted Riwaq Houses y: 390..510)
+        drawFieldstoneRetainingWall(ctx, sx + 55, 494, 540, 34, 2);
+        drawSunsetVillageHouse(ctx, sx + 75, 496, 175, 122, { qantara: true, qantaraW: 28, qantaraH: 62, sideW: 18 });
+        drawSunsetVillageHouse(ctx, sx + 285, 496, 195, 134, { domeR: 48, mashrabiya: true, pigeonTower: true, sideW: 18 });
+
+        // Tier 1 (Lower Courtyard Wall, Pomegranate & Ancient Olive Orchard)
+        drawFieldstoneRetainingWall(ctx, sx + 30, 558, 620, 36, 3);
+        drawPomegranateTree(ctx, sx + 690, 560, 1.12);
+        drawCypressSilhouette(ctx, sx + 835, 558, 162);
+        drawAncientOliveSunset(ctx, sx + 985, 564, 1.22);
+        drawPomegranateTree(ctx, sx + 1155, 558, 1.04);
 
       } else if (zoneIdx === 1) {
         // ---------------------------------------------------------------------
-        // PANORAMA 1: AIN AL-BALAD SPRING GROTTO, STEPPED 4m ROMAN POOL & BATH
+        // SCENE 1: GRAND 3-TIER AIN AL-BALAD CLIFF WATERFALLS & ROMAN COLONNADE
         // ---------------------------------------------------------------------
-        // 1. Natural Limestone Cliff Grotto of Ain al-Balad (مغارة نبع عين البلد الصخرية)!
-        const gx = sx + 60, gy = 546;
-        const cliffG = ctx.createLinearGradient(gx, 392, gx + 210, gy);
-        cliffG.addColorStop(0, '#ebe0c9');
-        cliffG.addColorStop(0.55, '#bfa782');
-        cliffG.addColorStop(1, '#786142');
-        ctx.fillStyle = cliffG;
-        ctx.strokeStyle = '#473824';
-        ctx.lineWidth = 1.6;
+        // Towering Split Sunset Limestone Cliff Chasm (جرف وشلالات عين البلد!)
+        const cx0 = sx + 70;
+        const clG = ctx.createLinearGradient(cx0, 235, cx0 + 460, 565);
+        clG.addColorStop(0.0, '#e0ac79');
+        clG.addColorStop(0.5, '#9c6339');
+        clG.addColorStop(1.0, '#4a2914');
+        ctx.fillStyle = clG;
+        ctx.strokeStyle = '#2e180b';
+        ctx.lineWidth = 1.8;
         ctx.beginPath();
-        ctx.moveTo(gx, gy);
-        ctx.bezierCurveTo(gx + 8, 446, gx + 48, 392, gx + 112, 398);
-        ctx.bezierCurveTo(gx + 168, 404, gx + 196, 448, gx + 208, gy);
+        ctx.moveTo(cx0, 565);
+        ctx.lineTo(cx0 + 28, 340);
+        ctx.lineTo(cx0 + 115, 248);
+        ctx.lineTo(cx0 + 330, 256);
+        ctx.lineTo(cx0 + 415, 355);
+        ctx.lineTo(cx0 + 448, 565);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        // Maidenhair ferns & mossy overhang crowning the rock-cut spring cave
-        ctx.fillStyle = '#3f6212';
-        for (const [fx, fy, r] of [[gx + 64, 412, 14], [gx + 104, 404, 16], [gx + 144, 416, 13], [gx + 44, 442, 11]]) {
-          ctx.beginPath(); ctx.arc(fx, fy, r, 0, Math.PI * 2); ctx.fill();
-        }
-        // Dark cave mouth + glowing crystal spring pool inside grotto
-        ctx.fillStyle = '#0f172a';
-        ctx.beginPath();
-        ctx.moveTo(gx + 62, gy - 32);
-        ctx.quadraticCurveTo(gx + 108, 434, gx + 154, gy - 32);
-        ctx.closePath();
-        ctx.fill();
-        // Gushing multi-ribbon Ain al-Balad waterfall pouring along stone Ma'dud channel into the Roman Pool!
-        const wfG = ctx.createLinearGradient(gx + 105, 476, sx + 320, 512);
-        wfG.addColorStop(0, '#e0f2fe');
-        wfG.addColorStop(0.45, '#38bdf8');
-        wfG.addColorStop(1, '#0284c7');
-        ctx.fillStyle = wfG;
-        ctx.beginPath();
-        ctx.moveTo(gx + 92, gy - 44);
-        ctx.quadraticCurveTo(gx + 185, gy - 42, sx + 318, 500);
-        ctx.lineTo(sx + 318, 516);
-        ctx.quadraticCurveTo(gx + 180, gy - 26, gx + 88, gy - 30);
-        ctx.closePath();
-        ctx.fill();
 
-        // 2. 3D Perspective Stepped 4m Roman Pool (البركة الرومانية المدرجة)!
-        const px0 = sx + 295, py0 = 482, pw = 310, ph = 66;
-        drawSanaselWall(ctx, px0 - 12, py0 - 4, pw + 24, ph + 10, 3);
-        // Inner stepped Roman limestone basin walls & submerged stone stairs
-        ctx.fillStyle = '#d6c3a1';
-        ctx.fillRect(px0, py0 + 2, pw, 14);
-        for (let st = 0; st < 4; st++) {
-          ctx.fillStyle = `rgba(214, 195, 161, ${(0.82 - st * 0.16).toFixed(2)})`;
-          ctx.fillRect(px0 + 6, py0 + 14 + st * 9, 36 - st * 6, 8);
+        // Dark mossy spring cavern high in the cliff + 3 plunging turquoise-and-gold waterfalls!
+        ctx.fillStyle = '#140c08';
+        ctx.beginPath(); ctx.arc(cx0 + 220, 326, 36, Math.PI, 0); ctx.fill();
+        for (let tier = 0; tier < 3; tier++) {
+          const wy = 324 + tier * 68;
+          const ww = 42 + tier * 14;
+          const wfG = ctx.createLinearGradient(cx0 + 220, wy, cx0 + 220, wy + 72);
+          wfG.addColorStop(0, '#fef9c3');
+          wfG.addColorStop(0.35, '#7dd3fc');
+          wfG.addColorStop(1, '#0284c7');
+          ctx.fillStyle = wfG;
+          ctx.beginPath();
+          ctx.roundRect(cx0 + 220 - ww * 0.5, wy, ww, 70, 8);
+          ctx.fill();
+          // Mossy rock shelf & glowing sunset spray mist at each cascade step!
+          ctx.fillStyle = '#3f6212';
+          ctx.beginPath();
+          ctx.ellipse(cx0 + 220 - ww * 0.6, wy + 66, 22, 8, 0, 0, Math.PI * 2);
+          ctx.ellipse(cx0 + 220 + ww * 0.6, wy + 66, 22, 8, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = 'rgba(254, 249, 195, 0.65)';
+          ctx.beginPath(); ctx.ellipse(cx0 + 220, wy + 68, ww * 0.65, 6, 0, 0, Math.PI * 2); ctx.fill();
         }
-        const poolG = ctx.createLinearGradient(px0, py0 + 14, px0, py0 + ph - 4);
-        poolG.addColorStop(0, '#0284c7');
-        poolG.addColorStop(0.55, '#0ea5e9');
-        poolG.addColorStop(1, '#2dd4bf');
+
+        // Recessed Roman 4-Column Stone Colonnade & Stepped Emerald-Turquoise Roman Pool!
+        const plX = sx + 520, plY = 468, plW = 330;
+        drawFieldstoneRetainingWall(ctx, plX - 10, plY + 42, plW + 20, 56, 5);
+        for (let c = 0; c < 4; c++) {
+          const colX = plX + 28 + c * 90;
+          ctx.fillStyle = '#f2cba0'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.4;
+          ctx.fillRect(colX - 8, plY - 58, 16, 102); ctx.strokeRect(colX - 8, plY - 58, 16, 102);
+          ctx.fillRect(colX - 13, plY - 64, 26, 7); ctx.strokeRect(colX - 13, plY - 64, 26, 7);
+        }
+        ctx.fillStyle = '#e6b885'; ctx.strokeStyle = '#3b210e';
+        ctx.fillRect(plX + 8, plY - 76, plW - 16, 13); ctx.strokeRect(plX + 8, plY - 76, plW - 16, 13);
+        const poolG = ctx.createLinearGradient(plX, plY + 44, plX, plY + 86);
+        poolG.addColorStop(0, '#0284c7'); poolG.addColorStop(0.6, '#0d9488'); poolG.addColorStop(1, '#115e59');
         ctx.fillStyle = poolG;
-        ctx.fillRect(px0 + 4, py0 + 14, pw - 8, ph - 18);
-        // Animated sunlit water caustics & splash foam where Ain al-Balad enters!
-        ctx.strokeStyle = 'rgba(224, 242, 254, 0.78)';
-        ctx.lineWidth = 1.6;
-        for (let k = 0; k < 4; k++) {
-          const rx = px0 + 28 + k * 68 + Math.sin(time * 2.6 + k) * 8;
-          const ry = py0 + 26 + (k % 2) * 14;
-          ctx.beginPath(); ctx.moveTo(rx, ry); ctx.quadraticCurveTo(rx + 22, ry - 4, rx + 44, ry); ctx.stroke();
-        }
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-        ctx.beginPath(); ctx.ellipse(px0 + 22, py0 + 20, 14, 5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillRect(plX + 6, plY + 46, plW - 12, 38);
 
-        // 3. Vaulted Ancient Roman Bathhouse (الحمام الروماني الأثري) with rising warm steam
-        drawBattirVaultedHouse(ctx, sx + 660, 546, 228, 138, { domeR: 56, qantara: true, qantaraW: 28, qantaraH: 62, sideW: 18, topCol: '#f3e8d2' });
-        for (let s = 0; s < 4; s++) {
-          const pr = ((time * 0.55 + s * 0.25) % 1);
-          ctx.fillStyle = `rgba(255, 251, 235, ${((1 - pr) * 0.36).toFixed(2)})`;
-          ctx.beginPath(); ctx.arc(sx + 774 + Math.sin(pr * 5 + s) * 10, 344 - pr * 46, 8 + pr * 12, 0, Math.PI * 2); ctx.fill();
-        }
-        drawBattirOliveTree(ctx, sx + 975, 552, 1.2);
-        drawBattirCypress(ctx, sx + 1135, 548, 140);
+        drawPomegranateTree(ctx, sx + 945, 560, 1.1);
+        drawAncientOliveSunset(ctx, sx + 1115, 564, 1.2);
 
       } else if (zoneIdx === 2) {
         // ---------------------------------------------------------------------
-        // PANORAMA 2: UNESCO AL-JINAN SANASEL TERRACES, MANATIR & EGGPLANT GARDENS
+        // SCENE 2: 5-LEVEL ZIG-ZAG SANASEL GORGE, RUGGED MANATIR & POMEGRANATES
         // ---------------------------------------------------------------------
-        // 4 Sweeping 3D Stepped Dry-Stone Sanasel Terraces (السناسل الحجرية ومدرجات الجنّان)
-        for (let st = 0; st < 4; st++) {
-          const tx = sx + 45 + st * 28;
-          const ty = 432 + st * 29;
-          const tw = 520 - st * 56;
-          drawSanaselWall(ctx, tx, ty, tw, 30, st + 2);
-          // Famous purple Battiri Eggplant rows growing on the lower irrigated benches!
-          if (st >= 2) {
-            for (let ex = tx + 28; ex < tx + tw - 28; ex += 38) {
-              ctx.fillStyle = '#365314';
-              ctx.beginPath(); ctx.ellipse(ex, ty - 6, 8, 4, 0, 0, Math.PI * 2); ctx.fill();
-              ctx.fillStyle = '#9333ea';
-              ctx.beginPath(); ctx.ellipse(ex + 4, ty - 3, 3.0, 6.5, 0.3, 0, Math.PI * 2); ctx.fill();
-            }
-          }
+        for (let st = 0; st < 5; st++) {
+          const tx = sx + 40 + st * 26;
+          const ty = 368 + st * 44;
+          const tw = 560 - st * 52;
+          drawFieldstoneRetainingWall(ctx, tx, ty, tw, 46, st + 8);
         }
-        // Orchard trees rooted on the upper Sanasel benches + Two Conical Dry-Stone Manatir!
-        drawBattirOliveTree(ctx, sx + 185, 432, 0.92);
-        drawBattirAlmondTree(ctx, sx + 365, 432, 0.88, time);
-        drawBattirMintar(ctx, sx + 665, 548, 1.08);
-        drawBattirOliveTree(ctx, sx + 835, 552, 1.24);
-        drawBattirMintar(ctx, sx + 995, 544, 0.82);
-        drawBattirAlmondTree(ctx, sx + 1145, 548, 1.08, time);
+        drawPomegranateTree(ctx, sx + 165, 368, 0.94);
+        drawAncientOliveSunset(ctx, sx + 355, 368, 0.96);
+        drawRuggedMintar(ctx, sx + 695, 562, 1.15);
+        drawPomegranateTree(ctx, sx + 865, 560, 1.16);
+        drawRuggedMintar(ctx, sx + 1025, 556, 0.86);
+        drawAncientOliveSunset(ctx, sx + 1175, 564, 1.14);
 
       } else if (zoneIdx === 3) {
         // ---------------------------------------------------------------------
-        // PANORAMA 3: HISTORIC 1892 BATTIR OTTOMAN RAILWAY STATION & WATER TOWER
+        // SCENE 3: 1892 OTTOMAN BATTIR STONE RAILWAY STATION & SIGNAL CLOCK TOWER
         // ---------------------------------------------------------------------
-        drawSanaselWall(ctx, sx + 55, 538, 560, 22, 7);
-        // Authentic 1892/1905 Battir Ottoman Stone Station House with Red Marseilles Tile Roof!
-        drawBattirVaultedHouse(ctx, sx + 110, 540, 248, 128, { redTileRoof: true, turquoiseShutters: true, qantara: true, qantaraW: 24, qantaraH: 56, sideW: 18 });
-        // Covered Station Platform Veranda & Vintage Arabic Heritage Signboard ("بتّير ١٨٩٢")
-        ctx.fillStyle = '#7f1d1d';
-        ctx.strokeStyle = '#291509';
-        ctx.lineWidth = 1.4;
-        ctx.beginPath();
-        ctx.moveTo(sx + 92, 476); ctx.lineTo(sx + 376, 476); ctx.lineTo(sx + 366, 466); ctx.lineTo(sx + 102, 466);
-        ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#1e3a8a'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.roundRect(sx + 196, 444, 76, 18, 3); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#fef9c3';
-        ctx.font = 'bold 10px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('بتّير ١٨٩٢', sx + 234, 457);
+        drawFieldstoneRetainingWall(ctx, sx + 50, 548, 620, 32, 12);
+        // Grand 2-Story 1892 Ottoman Stone Station House + Clock Tower!
+        drawSunsetVillageHouse(ctx, sx + 95, 550, 275, 142, { tileRoof: true, qantara: true, qantaraW: 30, qantaraH: 64, sideW: 20 });
+        drawSunsetVillageHouse(ctx, sx + 370, 550, 92, 196, { tileRoof: true, sideW: 16 });
+        // Illuminated Ottoman Station Clock Dial & Heritage Brass Plaque ("محطة بتّير ١٨٩٢")
+        ctx.fillStyle = '#fef9c3'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.arc(sx + 416, 392, 16, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(sx + 416, 392); ctx.lineTo(sx + 416, 381); ctx.moveTo(sx + 416, 392); ctx.lineTo(sx + 425, 395); ctx.stroke();
 
-        // Ottoman Stone & Riveted-Iron Steam Locomotive Water Tower beside the station!
-        drawSanaselWall(ctx, sx + 430, 468, 66, 72, 9);
-        const tkG = ctx.createLinearGradient(sx + 424, 418, sx + 502, 468);
-        tkG.addColorStop(0, '#64748b'); tkG.addColorStop(0.5, '#334155'); tkG.addColorStop(1, '#1e293b');
-        ctx.fillStyle = tkG; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.4;
-        ctx.beginPath(); ctx.roundRect(sx + 424, 420, 78, 48, 4); ctx.fill(); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(sx + 418, 420); ctx.lineTo(sx + 463, 402); ctx.lineTo(sx + 508, 420); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#7f1d1d'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.roundRect(sx + 178, 456, 108, 20, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fef08a'; ctx.font = 'bold 10.5px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('محطة بتّير ١٨٩٢', sx + 232, 470);
 
-        // Lush Wadi al-Makhrour Cypresses, Ancient Olive & Blossoming Almond Grove
-        drawBattirCypress(ctx, sx + 640, 548, 150);
-        drawBattirOliveTree(ctx, sx + 790, 552, 1.22);
-        drawBattirAlmondTree(ctx, sx + 965, 548, 1.12, time);
-        drawBattirOliveTree(ctx, sx + 1135, 552, 1.14);
+        // Glowing Vintage Cast-Iron Station Lampposts & Wooden Olive-Oil Barrels!
+        for (const lx of [sx + 72, sx + 505]) {
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(lx - 2.5, 468, 5, 82);
+          const lg = ctx.createRadialGradient(lx, 464, 2, lx, 464, 28);
+          lg.addColorStop(0, 'rgba(254, 240, 138, 0.95)'); lg.addColorStop(1, 'rgba(249, 115, 22, 0)');
+          ctx.fillStyle = lg;
+          ctx.beginPath(); ctx.arc(lx, 464, 28, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#fef08a';
+          ctx.beginPath(); ctx.arc(lx, 464, 5, 0, Math.PI * 2); ctx.fill();
+        }
+
+        drawCypressSilhouette(ctx, sx + 695, 558, 165);
+        drawAncientOliveSunset(ctx, sx + 855, 564, 1.24);
+        drawPomegranateTree(ctx, sx + 1045, 560, 1.14);
+        drawCypressSilhouette(ctx, sx + 1190, 558, 148);
 
       } else {
         // ---------------------------------------------------------------------
-        // PANORAMA 4: KHIRBET AL-YAHUD CITADEL, COLUMBARIUM CAVES & MAQAM SHRINE
+        // SCENE 4: KHIRBET AL-YAHUD ROCK-CUT TOMBS, CITADEL & GOLDEN MAQAM DOME
         // ---------------------------------------------------------------------
-        // 1. Limestone Cliff Base with Rock-Cut Roman Columbarium Cave Niches!
-        const cx0 = sx + 65;
-        const rkG = ctx.createLinearGradient(cx0, 468, cx0, 552);
-        rkG.addColorStop(0, '#e5d6b8'); rkG.addColorStop(1, '#8c7350');
-        ctx.fillStyle = rkG; ctx.strokeStyle = '#473824'; ctx.lineWidth = 1.5;
+        // Sheer Red-Gold Rock Acropolis with Pedimented Roman Rock-Cut Tomb Facades!
+        const kx = sx + 55;
+        const rkG = ctx.createLinearGradient(kx, 420, kx, 565);
+        rkG.addColorStop(0, '#cf9460'); rkG.addColorStop(1, '#573018');
+        ctx.fillStyle = rkG; ctx.strokeStyle = '#2e1608'; ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.moveTo(cx0 - 15, 552); ctx.lineTo(cx0 + 12, 474); ctx.lineTo(cx0 + 365, 474); ctx.lineTo(cx0 + 392, 552);
+        ctx.moveTo(kx - 10, 565); ctx.lineTo(kx + 18, 434); ctx.lineTo(kx + 410, 434); ctx.lineTo(kx + 440, 565);
         ctx.closePath(); ctx.fill(); ctx.stroke();
-        // Arched rock-cut columbarium caves & dovecote niches carved into cliff face
-        for (let c = 0; c < 3; c++) {
-          drawBattirPointedArch(ctx, cx0 + 82 + c * 105, 548, 22, 46, '#1c1917');
+        // Two carved Roman pediment rock-cut tomb portals hewn into the cliff!
+        for (const tx of [kx + 115, kx + 295]) {
+          ctx.fillStyle = '#eabf8c'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.moveTo(tx - 36, 488); ctx.lineTo(tx, 464); ctx.lineTo(tx + 36, 488); ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillRect(tx - 30, 488, 60, 74); ctx.strokeRect(tx - 30, 488, 60, 74);
+          ctx.fillStyle = '#140a05';
+          ctx.fillRect(tx - 15, 504, 30, 58);
         }
 
-        // 2. Towering Ancient Canaanite–Roman Cyclopean Citadel (قلعة بتّير الأثرية / الخربة)!
-        drawBattirVaultedHouse(ctx, cx0 + 25, 476, 326, 108, { qantara: true, qantaraW: 24, qantaraH: 54, sideW: 22, topCol: '#eadcc2', botCol: '#9c825d' });
-        drawBattirVaultedHouse(ctx, cx0 + 112, 368, 146, 56, { sideW: 16, topCol: '#f3e8d2', botCol: '#b59b73' });
-        // Crenellated fortress battlements
-        for (let m = 0; m < 6; m++) {
-          ctx.fillStyle = '#efe3cc'; ctx.strokeStyle = '#473824'; ctx.lineWidth = 1.2;
-          ctx.fillRect(cx0 + 116 + m * 24, 302, 15, 11);
-          ctx.strokeRect(cx0 + 116 + m * 24, 302, 15, 11);
+        // Towering Megalithic Canaanite–Roman Citadel Bastions atop the Cliff!
+        drawSunsetVillageHouse(ctx, kx + 40, 436, 340, 112, { qantara: true, qantaraW: 26, qantaraH: 56, sideW: 22, topCol: '#e0ad7b' });
+        for (let m = 0; m < 8; m++) {
+          ctx.fillStyle = '#eab985'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.2;
+          ctx.fillRect(kx + 48 + m * 42, 312, 24, 13); ctx.strokeRect(kx + 48 + m * 42, 312, 24, 13);
         }
 
-        // 3. White-and-Honey Domed Shrine of Maqam Abu Yazeid Al-Bastami / Sheikh Khattab
-        drawBattirCypress(ctx, sx + 565, 548, 148);
-        drawBattirVaultedHouse(ctx, sx + 612, 546, 174, 112, { domeR: 54, turquoiseShutters: true, bougainvillea: 'right', sideW: 16, topCol: '#fffdf7' });
-        drawBattirCypress(ctx, sx + 835, 548, 138);
-        drawBattirOliveTree(ctx, sx + 995, 552, 1.2);
-        drawBattirAlmondTree(ctx, sx + 1165, 548, 1.02, time);
+        // Sunset-Gilded Ribbed Dome of Maqam Abu Yazeid Al-Bastami
+        drawCypressSilhouette(ctx, sx + 585, 558, 164);
+        drawSunsetVillageHouse(ctx, sx + 635, 558, 186, 122, { domeR: 58, mashrabiya: true, sideW: 18, topCol: '#f7d5a8' });
+        drawCypressSilhouette(ctx, sx + 868, 558, 152);
+        drawPomegranateTree(ctx, sx + 1015, 560, 1.12);
+        drawAncientOliveSunset(ctx, sx + 1165, 564, 1.18);
       }
     }
 
     // =========================================================================
-    // 3. MOSSY RIVERBANK BOULDERS, PINK OLEANDER & CRYSTAL SPRING STREAM (Chasms)
+    // 3. SUNSET-REFLECTING EMERALD-AMBER GORGE STREAM & WARM FIREFLY MOTES
     // =========================================================================
-    const bankOff = -((camX * 0.48) % 240);
-    for (let bx = bankOff - 240; bx < w + 240; bx += 240) {
-      // Smooth mossy Wadi boulders & pink oleander blossoms (الدفلى الوردية) along stream edge
-      ctx.fillStyle = '#78716c';
-      ctx.beginPath(); ctx.ellipse(bx + 48, 644, 26, 10, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#4d7c0f';
-      ctx.beginPath(); ctx.ellipse(bx + 46, 639, 18, 5, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#15803d';
-      ctx.beginPath(); ctx.arc(bx + 148, 638, 13, 0, Math.PI * 2); ctx.arc(bx + 164, 640, 11, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#f472b6';
-      for (const ox of [bx + 144, bx + 155, bx + 166]) {
-        ctx.beginPath(); ctx.arc(ox, 633, 3.6, 0, Math.PI * 2); ctx.fill();
-      }
-    }
-
-    const streamG = ctx.createLinearGradient(0, 642, 0, h);
-    streamG.addColorStop(0.0, '#0284c7');
-    streamG.addColorStop(0.45, '#0ea5e9');
-    streamG.addColorStop(1.0, '#075985');
+    const streamG = ctx.createLinearGradient(0, 640, 0, h);
+    streamG.addColorStop(0.0, '#0f766e');
+    streamG.addColorStop(0.45, '#0e7490');
+    streamG.addColorStop(1.0, '#164e63');
     ctx.fillStyle = streamG;
-    ctx.fillRect(0, 642, w, h - 642);
-    ctx.strokeStyle = 'rgba(224, 242, 254, 0.78)';
-    ctx.lineWidth = 1.7;
+    ctx.fillRect(0, 640, w, h - 640);
+
+    // Molten sunset-gold & apricot water reflections dancing across the gorge river!
     for (let r = 0; r < 3; r++) {
-      const ry = 652 + r * 18;
-      for (let wx = -((camX * (0.52 + r * 0.08) + time * (44 + r * 14)) % 110); wx < w + 110; wx += 110) {
-        ctx.beginPath(); ctx.moveTo(wx, ry); ctx.quadraticCurveTo(wx + 24, ry - 3.5, wx + 48, ry); ctx.stroke();
+      const ry = 650 + r * 18;
+      ctx.strokeStyle = r === 0 ? 'rgba(253, 224, 71, 0.72)' : 'rgba(251, 146, 60, 0.52)';
+      ctx.lineWidth = 2.0;
+      for (let wx = -((camX * (0.52 + r * 0.08) + time * (46 + r * 14)) % 115); wx < w + 115; wx += 115) {
+        ctx.beginPath(); ctx.moveTo(wx, ry); ctx.quadraticCurveTo(wx + 26, ry - 3.5, wx + 52, ry); ctx.stroke();
       }
     }
 
-    // 4. Iridescent Palestine Sunbirds (عصفور الشمس الفلسطيني) & White Doves
-    for (let b = 0; b < 6; b++) {
-      const bx = ((b * 310 + time * (42 + b * 6) - camX * 0.55) % (w + 180) + (w + 180)) % (w + 180) - 90;
-      const by = 208 + (b % 3) * 52 + Math.sin(time * 3.4 + b * 1.9) * 15;
-      const flap = Math.sin(time * 13 + b * 2.1) * 7;
-      ctx.save();
-      ctx.translate(bx, by);
-      if (b % 2 === 0) {
-        ctx.fillStyle = '#0f766e';
-        ctx.beginPath(); ctx.ellipse(0, 0, 7.5, 4.2, -0.1, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#0284c7';
-        ctx.beginPath(); ctx.arc(6.5, -2, 3.6, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.1;
-        ctx.beginPath(); ctx.moveTo(9.5, -2); ctx.quadraticCurveTo(14.5, -1, 15.5, 2); ctx.stroke();
-        ctx.strokeStyle = '#134e4a'; ctx.lineWidth = 2.0;
-        ctx.beginPath(); ctx.moveTo(-2, -1); ctx.quadraticCurveTo(-7, -8 - flap, -13, -3 - flap); ctx.stroke();
-      } else {
-        ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.ellipse(0, 0, 9, 4.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(-2, -1); ctx.quadraticCurveTo(-8, -10 - flap, -16, -4 - flap); ctx.quadraticCurveTo(-8, 1, -2, 2); ctx.fill(); ctx.stroke();
-      }
-      ctx.restore();
+    // Warm Golden Sunset Pollen & Firefly Motes Drifting Gently Across the Gorge!
+    for (let m = 0; m < 18; m++) {
+      const mx = ((m * 173 - camX * 0.34 + time * 18) % (w + 60) + (w + 60)) % (w + 60) - 30;
+      const my = 160 + ((m * 89 + Math.sin(time * 2.1 + m) * 24) % 420);
+      const a = 0.28 + 0.48 * Math.abs(Math.sin(time * 2.9 + m));
+      ctx.fillStyle = `rgba(254, 240, 138, ${a.toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(mx, my, m % 3 === 0 ? 2.3 : 1.4, 0, Math.PI * 2); ctx.fill();
     }
   }
 
   function drawBattirFinishGate(ctx, g, sx, sy, time, goalLabel) {
     // =========================================================================
-    // GRAND 3D AIN AL-BALAD ROYAL STONE NYMPHAEUM & HERITAGE ARCHWAY
-    // (قنطرة ونبع عين البلد الكبرى — أبلق مقدسي، نوافير مائية، نقوش زيتون وتطريز)
+    // GRAND TWIN-DOMED SUNSET RIWAQ & TATREEZ PALACE GATE OF BATTIR
+    // (رواق وقنطرة عين البلد الملكية — قباب توأم، أبلق ناري، تطريز ونوافير أسود)
     // =========================================================================
     ctx.save();
     const cx = sx + g.w * 0.5;
     const baseY = sy + g.h;
-    const gateH = 232;
+    const gateH = 242;
     const topY = baseY - gateH;
-    const totalW = 212;
+    const totalW = 228;
     const leftX = cx - totalW * 0.5;
-    const pierW = 54;
 
-    // 1. Shaded 3D Perspective Side Return Wall
-    const sideG = ctx.createLinearGradient(leftX + totalW, topY + 18, leftX + totalW + 18, baseY);
-    sideG.addColorStop(0, '#ad9570');
-    sideG.addColorStop(1, '#665033');
-    ctx.fillStyle = sideG;
+    // 1. Deep Shaded 3D Side Bastion
+    ctx.fillStyle = '#4a2812';
     ctx.beginPath();
-    ctx.moveTo(leftX + totalW, topY + 18);
-    ctx.lineTo(leftX + totalW + 18, topY + 28);
-    ctx.lineTo(leftX + totalW + 18, baseY);
+    ctx.moveTo(leftX + totalW, topY + 24);
+    ctx.lineTo(leftX + totalW + 20, topY + 34);
+    ctx.lineTo(leftX + totalW + 20, baseY);
     ctx.lineTo(leftX + totalW, baseY);
     ctx.closePath();
     ctx.fill();
 
-    // 2. Monumental Dressed Jerusalem-Stone Nymphaeum Facade
-    const facG = ctx.createLinearGradient(leftX, topY + 18, leftX, baseY);
-    facG.addColorStop(0, '#fcf6e8');
-    facG.addColorStop(0.5, '#e6d6b8');
-    facG.addColorStop(1, '#b59b73');
+    // 2. TwinRibbed Sunset-Gold Palestinian Stone Domes Crowning the Left & Right Towers!
+    for (const dx of [-68, 68]) {
+      const dcx = cx + dx;
+      const dG = ctx.createRadialGradient(dcx - 10, topY + 2, 3, dcx, topY + 18, 36);
+      dG.addColorStop(0, '#fef08a');
+      dG.addColorStop(0.5, '#ea580c');
+      dG.addColorStop(1, '#7c2d12');
+      ctx.fillStyle = dG;
+      ctx.strokeStyle = '#3b1808';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(dcx, topY + 24, 30, Math.PI, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath(); ctx.arc(dcx, topY - 9, 4, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // 3. Warm Sunset Terracotta-and-Honey Monumental Riwaq Facade
+    const facG = ctx.createLinearGradient(leftX, topY + 24, leftX, baseY);
+    facG.addColorStop(0.0, '#f5caa0');
+    facG.addColorStop(0.5, '#c98a55');
+    facG.addColorStop(1.0, '#784724');
     ctx.fillStyle = facG;
-    ctx.strokeStyle = '#473824';
+    ctx.strokeStyle = '#3b1d0b';
     ctx.lineWidth = 1.8;
     ctx.beginPath();
     ctx.moveTo(leftX, baseY);
-    ctx.lineTo(leftX, topY + 18);
-    ctx.lineTo(leftX + totalW, topY + 18);
+    ctx.lineTo(leftX, topY + 24);
+    ctx.lineTo(leftX + totalW, topY + 24);
     ctx.lineTo(leftX + totalW, baseY);
-    ctx.lineTo(cx + 46, baseY);
-    ctx.lineTo(cx + 46, baseY - 102);
-    ctx.quadraticCurveTo(cx, baseY - 158, cx - 46, baseY - 102);
-    ctx.lineTo(cx - 46, baseY);
+    ctx.lineTo(cx + 48, baseY);
+    ctx.lineTo(cx + 48, baseY - 106);
+    ctx.quadraticCurveTo(cx, baseY - 164, cx - 48, baseY - 106);
+    ctx.lineTo(cx - 48, baseY);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
-    // Horizontal stone masonry courses across twin piers
-    ctx.strokeStyle = 'rgba(78, 59, 37, 0.36)';
-    ctx.lineWidth = 1.0;
-    for (let ry = topY + 34; ry < baseY; ry += 16) {
+    // 4. Full-Width Polychrome Palestinian Tatreez Geometric Frieze Across the Crown!
+    ctx.fillStyle = '#7f1d1d';
+    ctx.fillRect(leftX + 6, topY + 32, totalW - 12, 18);
+    for (let tx = leftX + 18; tx < leftX + totalW - 14; tx += 18) {
+      ctx.fillStyle = (Math.floor(tx / 18) % 2 === 0) ? '#fde047' : '#22c55e';
       ctx.beginPath();
-      ctx.moveTo(leftX + 2, ry); ctx.lineTo(leftX + pierW, ry);
-      ctx.moveTo(leftX + totalW - pierW, ry); ctx.lineTo(leftX + totalW - 2, ry);
-      ctx.stroke();
+      ctx.moveTo(tx, topY + 35); ctx.lineTo(tx + 6, topY + 41);
+      ctx.lineTo(tx, topY + 47); ctx.lineTo(tx - 6, topY + 41);
+      ctx.closePath(); ctx.fill();
     }
 
-    // 3. Alternating Cream & Rose-Ochre Mamluk/Jerusalem Ablaq Voussoir Arch!
-    for (let v = 0; v < 11; v++) {
-      const a0 = Math.PI + (v / 11) * Math.PI;
-      const a1 = Math.PI + ((v + 1) / 11) * Math.PI;
-      const ay = baseY - 102;
-      ctx.fillStyle = v % 2 === 0 ? '#d97757' : '#fffbeb';
-      ctx.strokeStyle = '#473824';
+    // 5. Alternating Crimson-Terracotta & Honey-Gold Ablaq Central Arch Voussoirs!
+    for (let v = 0; v < 13; v++) {
+      const a0 = Math.PI + (v / 13) * Math.PI;
+      const a1 = Math.PI + ((v + 1) / 13) * Math.PI;
+      const ay = baseY - 106;
+      ctx.fillStyle = v % 2 === 0 ? '#b91c1c' : '#fef3c7';
+      ctx.strokeStyle = '#3b1d0b';
       ctx.lineWidth = 1.1;
       ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(a0) * 46, ay + Math.sin(a0) * 48);
-      ctx.lineTo(cx + Math.cos(a0) * 60, ay + Math.sin(a0) * 62);
-      ctx.lineTo(cx + Math.cos(a1) * 60, ay + Math.sin(a1) * 62);
-      ctx.lineTo(cx + Math.cos(a1) * 46, ay + Math.sin(a1) * 48);
+      ctx.moveTo(cx + Math.cos(a0) * 48, ay + Math.sin(a0) * 50);
+      ctx.lineTo(cx + Math.cos(a0) * 63, ay + Math.sin(a0) * 65);
+      ctx.lineTo(cx + Math.cos(a1) * 63, ay + Math.sin(a1) * 65);
+      ctx.lineTo(cx + Math.cos(a1) * 48, ay + Math.sin(a1) * 50);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
     }
 
-    // 4. Twin Sculpted Stone Niche Fountains Pouring Live Turquoise Spring Jets!
+    // 6. Twin Bronze Lion-Spout Wall Fountains Pouring Turquoise-Gold Spring Water!
     for (const side of [-1, 1]) {
-      const fx = cx + side * 78;
-      const fy = baseY - 38;
-      drawBattirPointedArch(ctx, fx, fy, 14, 42, '#1e3a8a');
-      // Semicircular carved limestone fountain basin
-      ctx.fillStyle = '#efe3cc';
-      ctx.strokeStyle = '#473824';
-      ctx.lineWidth = 1.3;
-      ctx.beginPath();
-      ctx.roundRect(fx - 18, fy - 4, 36, 12, [2, 2, 10, 10]);
-      ctx.fill();
-      ctx.stroke();
-      // Live arcing crystal spring jet + splash!
-      ctx.strokeStyle = '#7dd3fc';
-      ctx.lineWidth = 3.0;
-      ctx.beginPath();
-      ctx.moveTo(fx, fy - 24);
-      ctx.quadraticCurveTo(fx + side * 4, fy - 12, fx, fy - 3);
-      ctx.stroke();
-      ctx.fillStyle = '#e0f2fe';
-      ctx.beginPath(); ctx.ellipse(fx, fy - 3, 11, 2.8, 0, 0, Math.PI * 2); ctx.fill();
-
-      // Palestinian Tatreez Crimson & Gold Heritage Banner above each niche
-      ctx.fillStyle = '#9f1239';
-      ctx.strokeStyle = '#fbbf24';
-      ctx.lineWidth = 1.1;
-      ctx.beginPath();
-      ctx.moveTo(fx - 10, topY + 34);
-      ctx.lineTo(fx + 10, topY + 34);
-      ctx.lineTo(fx + 10, topY + 68);
-      ctx.lineTo(fx, topY + 76);
-      ctx.lineTo(fx - 10, topY + 68);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      // Cross-stitch diamond motif
-      ctx.fillStyle = '#fde047';
-      ctx.beginPath();
-      ctx.moveTo(fx, topY + 44); ctx.lineTo(fx + 5, topY + 51); ctx.lineTo(fx, topY + 58); ctx.lineTo(fx - 5, topY + 51);
-      ctx.closePath();
-      ctx.fill();
+      const fx = cx + side * 82;
+      const fy = baseY - 36;
+      ctx.fillStyle = '#271308';
+      ctx.beginPath(); ctx.arc(fx, fy - 18, 15, Math.PI, 0); ctx.fillRect(fx - 15, fy - 18, 30, 18); ctx.fill();
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath(); ctx.arc(fx, fy - 20, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3.2;
+      ctx.beginPath(); ctx.moveTo(fx, fy - 18); ctx.quadraticCurveTo(fx + side * 5, fy - 8, fx, fy + 2); ctx.stroke();
+      ctx.fillStyle = '#d9a472'; ctx.strokeStyle = '#3b1d0b'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.roundRect(fx - 19, fy, 38, 12, [2, 2, 10, 10]); ctx.fill(); ctx.stroke();
     }
 
-    // 5. Stepped Crown Cornice, Stone Dome Pediment & Olive-Branch Relief Medallion
-    ctx.fillStyle = '#fff9ed';
-    ctx.strokeStyle = '#473824';
-    ctx.lineWidth = 1.6;
-    ctx.beginPath();
-    ctx.roundRect(leftX - 8, topY + 8, totalW + 16, 12, 3);
-    ctx.fill();
-    ctx.stroke();
-    drawBattirStoneDome(ctx, cx, topY + 8, 36);
-
-    // Carved Golden Olive-Branch & Grape Medallion above central arch
-    ctx.fillStyle = '#f59e0b';
-    ctx.strokeStyle = '#78350f';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(cx, topY + 42, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#65a30d';
-    ctx.beginPath();
-    ctx.ellipse(cx - 5, topY + 42, 5, 2.4, -0.45, 0, Math.PI * 2);
-    ctx.ellipse(cx + 5, topY + 42, 5, 2.4, 0.45, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 6. Radiant Ain al-Balad Turquoise Spring Portal Inside Central Archway
-    const pGlow = ctx.createRadialGradient(cx, baseY - 68, 8, cx, baseY - 68, 66);
-    pGlow.addColorStop(0, 'rgba(224, 242, 254, 0.94)');
-    pGlow.addColorStop(0.5, 'rgba(56, 189, 248, 0.48)');
-    pGlow.addColorStop(1, 'rgba(14, 165, 233, 0)');
+    // 7. Radiant Sunset-and-Turquoise Sanctuary Portal & Pierced Brass Mosque Lamp!
+    const pGlow = ctx.createRadialGradient(cx, baseY - 70, 8, cx, baseY - 70, 68);
+    pGlow.addColorStop(0.0, 'rgba(254, 249, 195, 0.96)');
+    pGlow.addColorStop(0.45, 'rgba(56, 189, 248, 0.62)');
+    pGlow.addColorStop(1.0, 'rgba(234, 88, 12, 0)');
     ctx.fillStyle = pGlow;
-    ctx.beginPath(); ctx.ellipse(cx, baseY - 68, 44, 68, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx, baseY - 70, 46, 70, 0, 0, Math.PI * 2); ctx.fill();
 
-    // Hanging Brass Heritage Lantern
-    const sway = Math.sin(time * 2.6) * 2.2;
-    ctx.strokeStyle = '#3b210e';
-    ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.moveTo(cx, baseY - 148); ctx.lineTo(cx + sway, baseY - 126); ctx.stroke();
-    ctx.fillStyle = '#fef08a';
-    ctx.strokeStyle = '#92400e';
-    ctx.lineWidth = 1.3;
-    ctx.beginPath(); ctx.ellipse(cx + sway, baseY - 118, 6.5, 9.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    const sway = Math.sin(time * 2.7) * 2.4;
+    ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(cx, baseY - 152); ctx.lineTo(cx + sway, baseY - 128); ctx.stroke();
+    ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#b45309'; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.ellipse(cx + sway, baseY - 118, 7.5, 10.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
 
-    // 7. Localized Stage Completion Banner
-    const rawLbl = goalLabel || 'قنطرة عين البلد • بتّير';
+    // 8. Localized Stage Completion Banner
+    const rawLbl = goalLabel || 'رواق عين البلد • بتّير';
     const labelText = (window.Game && window.Game.I18n) ? window.Game.I18n.translateDynamic(rawLbl) : rawLbl;
     const bob = Math.sin(time * 3.1) * 3;
     ctx.font = 'bold 13.5px sans-serif';
     ctx.textAlign = 'center';
-    const tw = Math.max(204, ctx.measureText(labelText).width + 34);
-    ctx.fillStyle = 'rgba(20, 83, 45, 0.95)';
-    ctx.strokeStyle = '#fbbf24';
-    ctx.lineWidth = 1.9;
+    const tw = Math.max(206, ctx.measureText(labelText).width + 34);
+    ctx.fillStyle = 'rgba(124, 45, 18, 0.95)';
+    ctx.strokeStyle = '#fde047';
+    ctx.lineWidth = 2.0;
     ctx.beginPath();
-    ctx.roundRect(cx - tw * 0.5, topY - 58 + bob, tw, 26, 8);
+    ctx.roundRect(cx - tw * 0.5, topY - 46 + bob, tw, 26, 8);
     ctx.fill();
     ctx.stroke();
     ctx.fillStyle = '#fef9c3';
-    ctx.fillText(labelText, cx, topY - 40 + bob);
+    ctx.fillText(labelText, cx, topY - 28 + bob);
     ctx.restore();
   }
 

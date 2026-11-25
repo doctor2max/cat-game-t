@@ -58,7 +58,8 @@ window.Game.EnemiesExtended = (function () {
     repelPatrol(level.greece_goats, 2.4);
     repelPatrol(level.greece_hoplites, 2.4);
     repelPatrol(level.battir_porcupines, 2.4);
-    repelPatrol(level.battir_hyraxes, 2.4);
+    repelPatrol(level.battir_boars, 2.5);
+    repelPatrol(level.battir_scorpions, 2.3);
     if (level.mail_owls) {
       for (const ow of level.mail_owls) {
         const ox = ow.x + ow.w * 0.5, oy = ow.y + ow.h * 0.5;
@@ -140,7 +141,7 @@ window.Game.EnemiesExtended = (function () {
       level.morocco_storks,
       level.maya_quetzals,
       level.greece_owls,
-      level.battir_kestrels,
+      level.battir_hoopoes,
     ]) {
       if (!list) continue;
       for (const f of list) {
@@ -1367,34 +1368,53 @@ window.Game.EnemiesExtended = (function () {
       }
     }
 
-    // 52. Rock Hyraxes (Stage 26: Battir — الوبر الصخري agile terrace mammal!)
-    if (level.battir_hyraxes) {
-      for (const h of level.battir_hyraxes) {
-        const prevX = h.x;
-        if (stepRepelled(h, 215)) { h.walkDist = (h.walkDist || 0) + Math.abs(h.x - prevX); continue; }
-        const dxCat = catCx - (h.x + h.w * 0.5);
-        const dyCat = Math.abs(catCy - (h.y + h.h * 0.5));
-        const alert = Math.abs(dxCat) < 165 && dyCat < 60;
-        const spd = (h.speed || 98) * (alert ? 1.38 : 1.0);
-        h.x += (h.facing || 1) * spd * dt;
-        if (h.x <= h.minX) { h.x = h.minX; h.facing = 1; }
-        else if (h.x >= h.maxX) { h.x = h.maxX; h.facing = -1; }
-        h.walkDist = (h.walkDist || 0) + Math.abs(h.x - prevX);
-        if (hitBox(h.x, h.y, h.w, h.h, 7)) onHit('الوبر الصخري السريع! -1 ❤️');
+    // 52. Wild Wadi Boars (Stage 26: Battir — الخنزير البري الجبلي في وادي المخرور — tusks, bristle mane & brisk trot!)
+    if (level.battir_boars) {
+      for (const b of level.battir_boars) {
+        const prevX = b.x;
+        if (stepRepelled(b, 215)) { b.walkDist = (b.walkDist || 0) + Math.abs(b.x - prevX); continue; }
+        const dxCat = catCx - (b.x + b.w * 0.5);
+        const dyCat = Math.abs(catCy - (b.y + b.h * 0.5));
+        const charging = Math.abs(dxCat) < 190 && dyCat < 68;
+        b.snortAnim = charging ? Math.min(1, (b.snortAnim || 0) + dt * 4.5) : Math.max(0, (b.snortAnim || 0) - dt * 3.0);
+        const spd = (b.speed || 96) * (charging ? 1.42 : 1.0);
+        b.x += (b.facing || 1) * spd * dt;
+        if (b.x <= b.minX) { b.x = b.minX; b.facing = 1; }
+        else if (b.x >= b.maxX) { b.x = b.maxX; b.facing = -1; }
+        b.walkDist = (b.walkDist || 0) + Math.abs(b.x - prevX);
+        if (hitBox(b.x, b.y, b.w, b.h, 8)) onHit('الخنزير البري في وادي المخرور! -1 ❤️');
       }
     }
 
-    // 53. Valley Kestrels (Stage 26: Battir — صقر العوسق البري smooth sine patrol!)
-    if (level.battir_kestrels) {
-      for (const k of level.battir_kestrels) {
-        const baseY = k.baseY !== undefined ? k.baseY : k.y;
-        k.y = baseY + Math.sin(timeSec * 2.1 + (k.phase || 0)) * (k.ampY || 24);
-        if (stepRepelled(k, 215)) continue;
-        const spd = k.speed || 120;
-        k.x += (k.facing || 1) * spd * dt;
-        if (k.x <= k.minX) { k.x = k.minX; k.facing = 1; }
-        else if (k.x >= k.maxX) { k.x = k.maxX; k.facing = -1; }
-        if (hitBox(k.x, k.y, k.w, k.h, 7)) onHit('صقر العوسق في وادي المخرور! -1 ❤️');
+    // 53. Crowned Palestinian Hoopoes (Stage 26: Battir — طائر الهدهد الفلسطيني المتوّج — undulating butterfly wave flight!)
+    if (level.battir_hoopoes) {
+      for (const hp of level.battir_hoopoes) {
+        const baseY = hp.baseY !== undefined ? hp.baseY : hp.y;
+        hp.y = baseY + Math.sin(timeSec * 2.9 + (hp.phase || 0)) * (hp.ampY || 26);
+        if (stepRepelled(hp, 215)) continue;
+        const spd = hp.speed || 116;
+        hp.x += (hp.facing || 1) * spd * dt;
+        if (hp.x <= hp.minX) { hp.x = hp.minX; hp.facing = 1; }
+        else if (hp.x >= hp.maxX) { hp.x = hp.maxX; hp.facing = -1; }
+        if (hitBox(hp.x, hp.y, hp.w, hp.h, 7)) onHit('طائر الهدهد البري المتوّج! -1 ❤️');
+      }
+    }
+
+    // 54. Palestinian Golden Cliff Scorpions (Stage 26: Battir — عقرب الصخور الجبلي في الخربة!)
+    if (level.battir_scorpions) {
+      for (const sc of level.battir_scorpions) {
+        const prevX = sc.x;
+        if (stepRepelled(sc, 200)) { sc.walkDist = (sc.walkDist || 0) + Math.abs(sc.x - prevX); continue; }
+        const dxCat = catCx - (sc.x + sc.w * 0.5);
+        const dyCat = Math.abs(catCy - (sc.y + sc.h * 0.5));
+        const alert = Math.abs(dxCat) < 160 && dyCat < 60;
+        sc.threat = alert ? Math.min(1, (sc.threat || 0) + dt * 5.0) : Math.max(0, (sc.threat || 0) - dt * 3.2);
+        const spd = (sc.speed || 88) * (alert ? 1.3 : 1.0);
+        sc.x += (sc.facing || 1) * spd * dt;
+        if (sc.x <= sc.minX) { sc.x = sc.minX; sc.facing = 1; }
+        else if (sc.x >= sc.maxX) { sc.x = sc.maxX; sc.facing = -1; }
+        sc.walkDist = (sc.walkDist || 0) + Math.abs(sc.x - prevX);
+        if (hitBox(sc.x, sc.y, sc.w, sc.h, 7)) onHit('عقرب صخور قلعة بتّير! -1 ❤️');
       }
     }
 
@@ -1413,7 +1433,7 @@ window.Game.EnemiesExtended = (function () {
         level.morocco_monkeys, level.morocco_merchants, level.morocco_storks,
         level.maya_jaguars, level.maya_warriors, level.maya_quetzals,
         level.greece_goats, level.greece_hoplites, level.greece_owls,
-        level.battir_porcupines, level.battir_hyraxes, level.battir_kestrels,
+        level.battir_porcupines, level.battir_boars, level.battir_hoopoes, level.battir_scorpions,
       ];
       for (const list of boxLists) {
         if (!list) continue;
@@ -7049,275 +7069,355 @@ window.Game.EnemiesExtended = (function () {
       }
     }
 
-    // 52. Palestinian Cliff Rock Hyrax (Stage 26: Battir — الوبر الصخري الجبلي — anatomical 2-segment limbs, fur tufts & incisors!)
-    if (level.battir_hyraxes) {
-      for (const h of level.battir_hyraxes) {
-        const sx = h.x - camX, sy = h.y - camY;
-        if (sx + h.w < -80 || sx > 1400) continue;
-        const face = h.facing || 1;
-        const wPhase = (h.walkDist || 0) * 0.16;
+    // 52. Wild Wadi Boar (Stage 26: Battir — الخنزير البري الجبلي في وادي المخرور — curved ivory tusks, spiky dorsal mane & hooves!)
+    if (level.battir_boars) {
+      for (const b of level.battir_boars) {
+        const sx = b.x - camX, sy = b.y - camY;
+        if (sx + b.w < -80 || sx > 1400) continue;
+        const face = b.facing || 1;
+        const wPhase = (b.walkDist || 0) * 0.15;
         const bob = Math.abs(Math.sin(wPhase)) * 2.4;
-        const nearA = Math.sin(wPhase) * 6.0;
-        const farA = Math.sin(wPhase + Math.PI) * 6.0;
+        const nearA = Math.sin(wPhase) * 7.2;
+        const farA = Math.sin(wPhase + Math.PI) * 7.2;
+        const snort = b.snortAnim || 0;
         ctx.save();
-        ctx.translate(sx + h.w * 0.5, sy + h.h);
+        ctx.translate(sx + b.w * 0.5, sy + b.h);
         ctx.scale(face, 1);
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
 
         // Ground contact shadow
-        ctx.fillStyle = 'rgba(28, 25, 23, 0.28)';
-        ctx.beginPath(); ctx.ellipse(0, 0, 24, 4.2, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(24, 16, 12, 0.34)';
+        ctx.beginPath(); ctx.ellipse(0, 0, 32, 4.8, 0, 0, Math.PI * 2); ctx.fill();
 
-        // Far 2-segment articulated rock-gripping limbs
-        ctx.strokeStyle = '#4a3726'; ctx.lineWidth = 4.8;
+        // Far 2-segment muscular legs + cloven hooves
+        ctx.strokeStyle = '#291d16'; ctx.lineWidth = 5.6;
         ctx.beginPath();
-        ctx.moveTo(-12, -13 - bob); ctx.lineTo(-14 + farA * 0.5, -6 - bob * 0.5); ctx.lineTo(-11 + farA, -1.5);
-        ctx.moveTo(10, -12 - bob); ctx.lineTo(12 - farA * 0.5, -6 - bob * 0.5); ctx.lineTo(13 - farA, -1.5);
+        ctx.moveTo(-16, -15 - bob); ctx.lineTo(-18 + farA * 0.5, -7 - bob * 0.4); ctx.lineTo(-15 + farA, -1.5);
+        ctx.moveTo(14, -15 - bob); ctx.lineTo(15 - farA * 0.5, -7 - bob * 0.4); ctx.lineTo(16 - farA, -1.5);
         ctx.stroke();
 
-        // Sculpted muscular grizzled golden-ochre body (tailless compact cliff mammal!)
-        const hyG = ctx.createRadialGradient(2, -23 - bob, 4, -2, -17 - bob, 25);
-        hyG.addColorStop(0.0, '#d4a976');
-        hyG.addColorStop(0.45, '#9c744c');
-        hyG.addColorStop(0.82, '#6b4d32');
-        hyG.addColorStop(1.0, '#3e2b1b');
-        ctx.fillStyle = hyG;
-        ctx.strokeStyle = '#26190f';
-        ctx.lineWidth = 1.5;
+        // Curly tufted boar tail flicking behind
+        const tailWag = Math.sin(time * 9 + sx * 0.03) * 0.25;
+        ctx.strokeStyle = '#3b281c'; ctx.lineWidth = 2.6;
         ctx.beginPath();
-        ctx.moveTo(-21, -12 - bob);
-        ctx.bezierCurveTo(-23, -24 - bob, -11, -31 - bob, 4, -29 - bob);
-        ctx.bezierCurveTo(14, -28 - bob, 19, -22 - bob, 18, -12 - bob);
-        ctx.quadraticCurveTo(0, -7 - bob, -21, -12 - bob);
+        ctx.moveTo(-26, -24 - bob);
+        ctx.quadraticCurveTo(-34, -32 - bob, -31 + tailWag * 8, -36 - bob);
+        ctx.stroke();
+        ctx.fillStyle = '#1c140f';
+        ctx.beginPath(); ctx.ellipse(-31 + tailWag * 8, -37 - bob, 3.8, 2.4, -0.4, 0, Math.PI * 2); ctx.fill();
+
+        // Spiky erect dorsal bristle mane ridge along spine & shoulders!
+        ctx.fillStyle = '#1c140f';
+        ctx.beginPath();
+        ctx.moveTo(-22, -28 - bob);
+        for (let m = 0; m < 9; m++) {
+          const mx0 = -20 + m * 4.6;
+          const mh = (m >= 3 && m <= 6 ? 9.5 : 6.5) + snort * 3.0;
+          ctx.lineTo(mx0, -33 - bob - mh);
+          ctx.lineTo(mx0 + 2.4, -31 - bob);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        // Heavy front-shouldered Wild Boar torso (grizzled dark umber & chestnut coat)
+        const brG = ctx.createRadialGradient(4, -24 - bob, 5, -2, -20 - bob, 32);
+        brG.addColorStop(0.0, '#78533a');
+        brG.addColorStop(0.50, '#4e3524');
+        brG.addColorStop(0.85, '#322116');
+        brG.addColorStop(1.0, '#1c120c');
+        ctx.fillStyle = brG;
+        ctx.strokeStyle = '#140c08';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(-27, -15 - bob);
+        ctx.bezierCurveTo(-29, -29 - bob, -15, -36 - bob, 6, -37 - bob);
+        ctx.bezierCurveTo(20, -37 - bob, 26, -27 - bob, 23, -13 - bob);
+        ctx.quadraticCurveTo(0, -8 - bob, -27, -15 - bob);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Characteristic pale honey-cream dorsal scent-patch & warm cream belly fur
-        ctx.fillStyle = '#f5deb3';
-        ctx.beginPath(); ctx.ellipse(-2, -27.2 - bob, 7.5, 2.2, -0.06, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ead5b7';
-        ctx.beginPath(); ctx.ellipse(2, -11 - bob, 14, 4.2, 0.04, 0, Math.PI * 2); ctx.fill();
-
-        // Fine grizzled dorsal fur guard-hair strokes
-        ctx.strokeStyle = 'rgba(254, 243, 199, 0.45)';
-        ctx.lineWidth = 1.0;
-        for (let f = -14; f <= 6; f += 5) {
-          ctx.beginPath(); ctx.moveTo(f, -25 - bob); ctx.lineTo(f - 3, -27.5 - bob); ctx.stroke();
+        // Coarse grizzled silver-buff shoulder & flank hair strokes
+        ctx.strokeStyle = 'rgba(214, 191, 166, 0.36)';
+        ctx.lineWidth = 1.1;
+        for (const [hx0, hy0] of [[-14, -24], [-4, -27], [6, -28], [-9, -18], [3, -20]]) {
+          ctx.beginPath(); ctx.moveTo(hx0, hy0 - bob); ctx.lineTo(hx0 - 5, hy0 + 2 - bob); ctx.stroke();
         }
 
-        // Sculpted alert angular-muzzled head & cheek ruff
-        const hdG = ctx.createLinearGradient(8, -31 - bob, 26, -14 - bob);
-        hdG.addColorStop(0, '#be9363');
-        hdG.addColorStop(0.6, '#8a6541');
-        hdG.addColorStop(1, '#573d26');
+        // Sloping wedge-shaped boar head & snout (tilts down menacingly when snorting!)
+        ctx.save();
+        ctx.translate(18, -24 - bob);
+        ctx.rotate(snort * 0.14);
+        const hdG = ctx.createLinearGradient(-4, -12, 20, 8);
+        hdG.addColorStop(0, '#5c3f2b');
+        hdG.addColorStop(1, '#2b1c12');
         ctx.fillStyle = hdG;
-        ctx.strokeStyle = '#26190f';
-        ctx.lineWidth = 1.45;
+        ctx.strokeStyle = '#140c08';
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(7, -27 - bob);
-        ctx.bezierCurveTo(14, -31 - bob, 23, -28 - bob, 27, -21 - bob);
-        ctx.quadraticCurveTo(28, -16 - bob, 22, -14.5 - bob);
-        ctx.quadraticCurveTo(13, -14 - bob, 8, -18 - bob);
+        ctx.moveTo(-6, -11);
+        ctx.lineTo(18, -2);
+        ctx.lineTo(18, 6);
+        ctx.quadraticCurveTo(4, 9, -6, 6);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Rounded buff-rimmed ear with dark inner pinna
-        ctx.fillStyle = '#7c5a3a';
-        ctx.strokeStyle = '#26190f';
-        ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.ellipse(10.5, -29.5 - bob, 4.4, 4.8, -0.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#3b2516';
-        ctx.beginPath(); ctx.ellipse(11, -29.2 - bob, 2.3, 2.7, -0.2, 0, Math.PI * 2); ctx.fill();
+        // Pointed furry ear
+        ctx.fillStyle = '#3b271a';
+        ctx.beginPath();
+        ctx.moveTo(-3, -10); ctx.lineTo(-8, -19); ctx.lineTo(2, -13);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
 
-        // Expressive amber-rimmed glossy eye, pale brow arc, dark nose & tiny white hyrax tusk-incisor!
-        ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 1.1;
-        ctx.beginPath(); ctx.arc(18.5, -23.2 - bob, 3.6, Math.PI * 1.1, Math.PI * 1.85); ctx.stroke();
-        ctx.fillStyle = '#1c1917';
-        ctx.beginPath(); ctx.arc(18.8, -22.8 - bob, 2.5, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath(); ctx.arc(19.6, -23.6 - bob, 0.85, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#18181b';
-        ctx.beginPath(); ctx.ellipse(26.4, -20.2 - bob, 2.1, 1.6, 0.2, 0, Math.PI * 2); ctx.fill();
-        // Characteristic tiny gleaming hyrax incisor tooth & tactile rock whiskers
-        ctx.fillStyle = '#fffbeb';
-        ctx.beginPath(); ctx.moveTo(23.5, -16.2 - bob); ctx.lineTo(25.2, -16.2 - bob); ctx.lineTo(24.4, -14.0 - bob); ctx.closePath(); ctx.fill();
-        ctx.strokeStyle = 'rgba(28, 25, 23, 0.7)'; ctx.lineWidth = 0.85;
-        ctx.beginPath();
-        ctx.moveTo(23, -19 - bob); ctx.lineTo(31, -21 - bob);
-        ctx.moveTo(23, -18 - bob); ctx.lineTo(30.5, -17 - bob);
-        ctx.stroke();
+        // Pinkish-brown flat nasal disc & nostrils
+        ctx.fillStyle = '#a16256';
+        ctx.strokeStyle = '#29150e';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.ellipse(18.5, 2, 3.2, 4.6, 0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#1c100b';
+        ctx.beginPath(); ctx.arc(19, 0.5, 1.0, 0, Math.PI * 2); ctx.arc(19, 3.5, 1.0, 0, Math.PI * 2); ctx.fill();
 
-        // Near 2-segment furry legs + cushioned 3-toed paws flush at y = 0
-        ctx.strokeStyle = '#5c422a'; ctx.lineWidth = 5.2;
+        // Gleaming Curved Ivory Boar Tusks (أنياب عاجية مقوسة)!
+        ctx.fillStyle = '#fef9c3';
+        ctx.strokeStyle = '#573d26';
+        ctx.lineWidth = 1.1;
         ctx.beginPath();
-        ctx.moveTo(-9, -12 - bob); ctx.lineTo(-11 + nearA * 0.5, -5.5 - bob * 0.4); ctx.lineTo(-8 + nearA, -1.5);
-        ctx.moveTo(11, -11.5 - bob); ctx.lineTo(13 - nearA * 0.5, -5.5 - bob * 0.4); ctx.lineTo(12 - nearA, -1.5);
-        ctx.stroke();
-        ctx.fillStyle = '#291e14';
-        ctx.beginPath();
-        ctx.ellipse(-7.5 + nearA, -1.2, 4.2, 1.6, 0, 0, Math.PI * 2);
-        ctx.ellipse(12.5 - nearA, -1.2, 4.0, 1.6, 0, 0, Math.PI * 2);
+        ctx.moveTo(11, 5);
+        ctx.quadraticCurveTo(16, 4, 17.5, -5.5);
+        ctx.quadraticCurveTo(13.5, 1, 9, 3.5);
+        ctx.closePath();
         ctx.fill();
+        ctx.stroke();
+
+        // Fierce amber-gold eye under heavy brow
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath(); ctx.arc(5.5, -4.5, 2.3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#09090b';
+        ctx.beginPath(); ctx.arc(6.0, -4.5, 1.2, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#140c08'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(2.5, -7.2); ctx.lineTo(8.5, -5.8); ctx.stroke();
+
+        // Snorting steam puff when charging
+        if (snort > 0.25) {
+          ctx.fillStyle = `rgba(254, 243, 199, ${(snort * 0.55).toFixed(2)})`;
+          ctx.beginPath(); ctx.arc(24 + Math.sin(time * 16) * 2, 3, 3.5, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+
+        // Near 2-segment legs & dark cloven hooves flush at y = 0
+        ctx.strokeStyle = '#3b271a'; ctx.lineWidth = 6.0;
+        ctx.beginPath();
+        ctx.moveTo(-13, -14 - bob); ctx.lineTo(-15 + nearA * 0.5, -6.5 - bob * 0.4); ctx.lineTo(-12 + nearA, -1.8);
+        ctx.moveTo(12, -14 - bob); ctx.lineTo(14 - nearA * 0.5, -6.5 - bob * 0.4); ctx.lineTo(13 - nearA, -1.8);
+        ctx.stroke();
+        ctx.fillStyle = '#0c0a09';
+        ctx.fillRect(-15 + nearA, -2.5, 6, 2.5);
+        ctx.fillRect(10 - nearA, -2.5, 6, 2.5);
         ctx.restore();
       }
     }
 
-    // 53. Lesser Kestrel / Palestine Falcon (Stage 26: Battir — صقر العوسق الفلسطيني — slotted primaries, spotted breast & talons!)
-    if (level.battir_kestrels) {
-      for (const k of level.battir_kestrels) {
-        const sx = k.x - camX, sy = k.y - camY;
-        if (sx + k.w < -80 || sx > 1400) continue;
-        const face = k.facing || 1;
-        const flap = Math.sin(time * 9.6 + (k.phase || 0));
-        const wingY = flap * 14.5;
+    // 53. Crowned Palestinian Hoopoe (Stage 26: Battir — طائر الهدهد الفلسطيني المتوّج — fan crest & zebra-striped wings!)
+    if (level.battir_hoopoes) {
+      for (const hp of level.battir_hoopoes) {
+        const sx = hp.x - camX, sy = hp.y - camY;
+        if (sx + hp.w < -80 || sx > 1400) continue;
+        const face = hp.facing || 1;
+        const flap = Math.sin(time * 10.5 + (hp.phase || 0));
+        const wingY = flap * 14;
+        const crestOpen = 0.65 + 0.35 * Math.sin(time * 4.8 + (hp.phase || 0));
         ctx.save();
-        ctx.translate(sx + k.w * 0.5, sy + k.h * 0.5);
+        ctx.translate(sx + hp.w * 0.5, sy + hp.h * 0.5);
         ctx.scale(face, 1);
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
 
-        // 1. Fanned Blue-Grey Kestrel Tail with Black Subterminal Band & Crisp White Feather Tips!
-        const tlG = ctx.createLinearGradient(-12, 0, -32, 3);
-        tlG.addColorStop(0, '#64748b');
-        tlG.addColorStop(0.68, '#94a3b8');
-        tlG.addColorStop(0.72, '#0f172a');
-        tlG.addColorStop(0.90, '#0f172a');
-        tlG.addColorStop(1.0, '#f8fafc');
-        ctx.fillStyle = tlG;
-        ctx.strokeStyle = '#1e293b';
+        // 1. Bold Black-and-White Banded Hoopoe Tail
+        ctx.fillStyle = '#18181b';
+        ctx.strokeStyle = '#09090b';
         ctx.lineWidth = 1.1;
         ctx.beginPath();
-        ctx.moveTo(-12, 0);
-        ctx.lineTo(-31, -6.5);
-        ctx.quadraticCurveTo(-34, 1.5, -29, 8.5);
-        ctx.lineTo(-12, 4.5);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // 2. Far Pointed Falcon Wing (depth-shaded rufous & slate)
-        ctx.fillStyle = '#7c2d12';
-        ctx.strokeStyle = '#291509';
-        ctx.lineWidth = 1.2;
+        ctx.moveTo(-12, 0); ctx.lineTo(-31, -4.5); ctx.lineTo(-29, 6.5); ctx.lineTo(-12, 4.5);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Crisp white central tail bar
+        ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.moveTo(0, -3);
-        ctx.bezierCurveTo(-6, -16 - wingY * 0.72, -18, -20 - wingY * 0.85, -27, -12 - wingY * 0.88);
-        ctx.quadraticCurveTo(-14, -3, -2, 2);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
+        ctx.moveTo(-21, -2.2); ctx.lineTo(-25, -3.1); ctx.lineTo(-23.8, 5.2); ctx.lineTo(-19.8, 4.4);
+        ctx.closePath(); ctx.fill();
 
-        // 3. Tucked Golden Talons Beneath Belly
-        ctx.strokeStyle = '#eab308';
-        ctx.lineWidth = 1.8;
+        // 2. Far Rounded Wing (black with white bars)
+        ctx.fillStyle = '#27272a';
         ctx.beginPath();
-        ctx.moveTo(-3, 7); ctx.lineTo(-7, 10.5);
-        ctx.moveTo(2, 7); ctx.lineTo(-2, 10.5);
-        ctx.stroke();
+        ctx.moveTo(-2, -3);
+        ctx.quadraticCurveTo(-10, -18 - wingY * 0.75, -23, -11 - wingY * 0.8);
+        ctx.quadraticCurveTo(-14, -1, -2, 2);
+        ctx.closePath(); ctx.fill();
 
-        // 4. Aerodynamic Cinnamon-Rufous Back & Spotted Warm-Apricot Breast!
-        const bdG = ctx.createLinearGradient(0, -9, 0, 9);
-        bdG.addColorStop(0.0, '#b45309');
-        bdG.addColorStop(0.45, '#ea580c');
-        bdG.addColorStop(0.75, '#fed7aa');
-        bdG.addColorStop(1.0, '#fef3c7');
-        ctx.fillStyle = bdG;
+        // 3. Warm Cinnamon-Terracotta & Salmon-Pink Hoopoe Body!
+        const hpG = ctx.createLinearGradient(0, -9, 0, 9);
+        hpG.addColorStop(0.0, '#ea580c');
+        hpG.addColorStop(0.55, '#fb923c');
+        hpG.addColorStop(1.0, '#ffedd5');
+        ctx.fillStyle = hpG;
         ctx.strokeStyle = '#431407';
-        ctx.lineWidth = 1.35;
+        ctx.lineWidth = 1.3;
         ctx.beginPath();
-        ctx.moveTo(-15, 1.5);
-        ctx.bezierCurveTo(-8, -8.5, 10, -9, 17, -3);
-        ctx.bezierCurveTo(19, 3, 10, 9, -2, 8.5);
-        ctx.quadraticCurveTo(-11, 7.5, -15, 1.5);
-        ctx.closePath();
+        ctx.ellipse(2, 1.5, 16, 7.5, -0.08, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
-        // Authentic dark falcon breast spots
-        ctx.fillStyle = '#451a03';
-        for (const [bx0, by0] of [[1, 3.5], [6, 4.2], [10.5, 2.8], [-3.5, 4.5], [3.5, 6.2]]) {
-          ctx.beginPath(); ctx.ellipse(bx0, by0, 1.3, 0.8, 0.2, 0, Math.PI * 2); ctx.fill();
-        }
-
-        // 5. Near Sculpted Falcon Wing with Cinnamon Coverts & 5 Slotted Dark Primary Flight Feathers!
-        const tipY = -10 - wingY * 1.15;
-        const wristY = -14 - wingY * 0.9;
-        // Slotted charcoal-black primary flight feathers
-        for (let f = 0; f < 5; f++) {
-          const fx = -28 + f * 3.8;
-          const fy = tipY + f * 2.4;
-          ctx.fillStyle = '#18181b';
-          ctx.strokeStyle = '#09090b';
-          ctx.lineWidth = 0.9;
+        // 4. Near Rounded Zebra-Striped Black-and-White Hoopoe Wing!
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(5, -1);
+        ctx.bezierCurveTo(-2, -19 - wingY, -19, -19 - wingY, -24, -7 - wingY * 0.9);
+        ctx.bezierCurveTo(-22, 3 - wingY * 0.3, -8, 6, 4, 4);
+        ctx.closePath();
+        ctx.fillStyle = '#18181b';
+        ctx.fill();
+        ctx.clip();
+        // Three bold snow-white diagonal wing bands!
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3.4;
+        for (const off of [-6, -13, -20]) {
           ctx.beginPath();
-          ctx.moveTo(2, -1);
-          ctx.quadraticCurveTo(-10, wristY + f * 1.6, fx, fy);
-          ctx.quadraticCurveTo(-10, wristY + 4 + f * 1.8, -2, 3);
-          ctx.closePath();
-          ctx.fill();
+          ctx.moveTo(off + 8, -22 - wingY);
+          ctx.lineTo(off - 4, 8);
           ctx.stroke();
         }
-        // Rich cinnamon-chestnut upper wing covert mantle with black spots
-        const cvG = ctx.createLinearGradient(4, -3, -16, wristY);
-        cvG.addColorStop(0, '#ea580c');
-        cvG.addColorStop(0.65, '#c2410c');
-        cvG.addColorStop(1, '#7c2d12');
-        ctx.fillStyle = cvG;
-        ctx.strokeStyle = '#431407';
+        ctx.restore();
+        ctx.strokeStyle = '#09090b';
         ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.moveTo(6, -2);
-        ctx.quadraticCurveTo(-4, wristY - 2, -17, wristY + 2);
-        ctx.quadraticCurveTo(-9, 1, 3, 3.5);
+        ctx.moveTo(5, -1);
+        ctx.bezierCurveTo(-2, -19 - wingY, -19, -19 - wingY, -24, -7 - wingY * 0.9);
+        ctx.bezierCurveTo(-22, 3 - wingY * 0.3, -8, 6, 4, 4);
         ctx.closePath();
-        ctx.fill();
         ctx.stroke();
-        ctx.fillStyle = '#1c1917';
-        for (const [sx0, sy0] of [[-3, wristY * 0.42], [-8, wristY * 0.52], [-5, wristY * 0.25]]) {
-          ctx.beginPath(); ctx.arc(sx0, sy0, 1.15, 0, Math.PI * 2); ctx.fill();
+
+        // 5. Cinnamon Head + Iconic Fanning 7-Feather Black-and-White-Tipped Crown Crest (تاج الهدهد المروحي)!
+        ctx.fillStyle = '#ea580c';
+        ctx.strokeStyle = '#431407';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(16.5, -3.5, 6.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        for (let f = 0; f < 7; f++) {
+          const frac = f / 6;
+          const baseA = -Math.PI * 0.96 + frac * (Math.PI * 0.68 * crestOpen);
+          const fLen = 14 + Math.sin(frac * Math.PI) * 5;
+          const rx0 = 15, ry0 = -7.5;
+          const ex = rx0 + Math.cos(baseA) * fLen;
+          const ey = ry0 + Math.sin(baseA) * fLen;
+          // Golden-orange feather shaft
+          ctx.strokeStyle = '#f97316';
+          ctx.lineWidth = 2.8;
+          ctx.beginPath(); ctx.moveTo(rx0, ry0); ctx.lineTo(ex, ey); ctx.stroke();
+          // Subterminal snow-white band
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.6;
+          ctx.beginPath();
+          ctx.moveTo(rx0 + Math.cos(baseA) * (fLen * 0.65), ry0 + Math.sin(baseA) * (fLen * 0.65));
+          ctx.lineTo(rx0 + Math.cos(baseA) * (fLen * 0.82), ry0 + Math.sin(baseA) * (fLen * 0.82));
+          ctx.stroke();
+          // Jet-black feather tip!
+          ctx.strokeStyle = '#09090b';
+          ctx.lineWidth = 2.8;
+          ctx.beginPath();
+          ctx.moveTo(rx0 + Math.cos(baseA) * (fLen * 0.82), ry0 + Math.sin(baseA) * (fLen * 0.82));
+          ctx.lineTo(ex, ey);
+          ctx.stroke();
         }
 
-        // 6. Slate-Blue Falcon Crown, White Cheek, Black Malar Tear-Stripe & Hooked Golden-Cere Beak!
-        const hdG = ctx.createLinearGradient(12, -10, 22, 2);
-        hdG.addColorStop(0, '#475569');
-        hdG.addColorStop(0.6, '#64748b');
-        hdG.addColorStop(1, '#cbd5e1');
-        ctx.fillStyle = hdG;
-        ctx.strokeStyle = '#1e293b';
-        ctx.lineWidth = 1.25;
-        ctx.beginPath();
-        ctx.arc(17.5, -3.5, 6.6, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        // Crisp white cheek patch & black falcon malar stripe
-        ctx.fillStyle = '#f8fafc';
-        ctx.beginPath(); ctx.ellipse(17.2, -1.0, 3.4, 2.3, 0.1, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#09090b';
-        ctx.lineWidth = 1.8;
-        ctx.beginPath(); ctx.moveTo(19.2, -2.5); ctx.lineTo(18.0, 2.4); ctx.stroke();
-        // Golden orbital ring + keen dark eye + catchlight
-        ctx.fillStyle = '#facc15';
-        ctx.beginPath(); ctx.arc(19.8, -4.4, 2.3, 0, Math.PI * 2); ctx.fill();
+        // Bright dark eye + catchlight + Long Slender Decurved Black Hoopoe Bill!
         ctx.fillStyle = '#09090b';
-        ctx.beginPath(); ctx.arc(19.8, -4.4, 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(18.8, -4.2, 1.7, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#ffffff';
-        ctx.beginPath(); ctx.arc(20.3, -4.9, 0.55, 0, Math.PI * 2); ctx.fill();
-        // Golden cere & sharp hooked slate-black falcon beak
-        ctx.fillStyle = '#eab308';
-        ctx.beginPath(); ctx.arc(23.5, -4.2, 1.8, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#1e293b';
-        ctx.strokeStyle = '#09090b';
-        ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.arc(19.3, -4.7, 0.6, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#18181b';
+        ctx.lineWidth = 2.0;
         ctx.beginPath();
-        ctx.moveTo(24.0, -5.2);
-        ctx.quadraticCurveTo(29.2, -3.8, 26.8, 1.2);
-        ctx.lineTo(23.2, -1.8);
-        ctx.closePath();
+        ctx.moveTo(21.5, -3.8);
+        ctx.quadraticCurveTo(29.5, -3.2, 33.5, 1.8);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+    }
+
+    // 54. Palestinian Golden Cliff Scorpion (Stage 26: Battir — عقرب الصخور الجبلي الذهبي — segmented arched stinger & pincers!)
+    if (level.battir_scorpions) {
+      for (const sc of level.battir_scorpions) {
+        const sx = sc.x - camX, sy = sc.y - camY;
+        if (sx + sc.w < -80 || sx > 1400) continue;
+        const face = sc.facing || 1;
+        const wPhase = (sc.walkDist || 0) * 0.24;
+        const threat = sc.threat || 0;
+        ctx.save();
+        ctx.translate(sx + sc.w * 0.5, sy + sc.h);
+        ctx.scale(face, 1);
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+
+        // Contact shadow
+        ctx.fillStyle = 'rgba(24, 16, 12, 0.28)';
+        ctx.beginPath(); ctx.ellipse(0, 0, 23, 3.6, 0, 0, Math.PI * 2); ctx.fill();
+
+        // 4 pairs of articulated amber walking legs
+        ctx.strokeStyle = '#b45309';
+        ctx.lineWidth = 2.2;
+        for (let l = 0; l < 4; l++) {
+          const lx = -10 + l * 6;
+          const step = Math.sin(wPhase + l * 1.4) * 3.5;
+          ctx.beginPath();
+          ctx.moveTo(lx, -8);
+          ctx.lineTo(lx - 2 + step * 0.5, -13);
+          ctx.lineTo(lx + step, -1);
+          ctx.stroke();
+        }
+
+        // Segmented golden-amber scorpion carapace
+        const scG = ctx.createLinearGradient(-14, -14, 14, -5);
+        scG.addColorStop(0, '#f59e0b');
+        scG.addColorStop(0.6, '#d97706');
+        scG.addColorStop(1, '#78350f');
+        ctx.fillStyle = scG;
+        ctx.strokeStyle = '#451a03';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.ellipse(0, -9, 15, 5.5, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
+
+        // Segmented overarching scorpion tail (metasoma) + dark venom telson stinger!
+        const tailCurl = threat * 0.25 + Math.sin(time * 5 + sx * 0.02) * 0.06;
+        let tx0 = -13, ty0 = -10;
+        const segAngles = [-2.2, -1.65, -1.05 + tailCurl, -0.45 + tailCurl, 0.15 + tailCurl];
+        for (let s = 0; s < segAngles.length; s++) {
+          const nx = tx0 + Math.cos(segAngles[s]) * 6.5;
+          const ny = ty0 + Math.sin(segAngles[s]) * 6.5;
+          ctx.strokeStyle = s === 4 ? '#78350f' : '#f59e0b';
+          ctx.lineWidth = 4.6 - s * 0.45;
+          ctx.beginPath(); ctx.moveTo(tx0, ty0); ctx.lineTo(nx, ny); ctx.stroke();
+          tx0 = nx; ty0 = ny;
+        }
+        // Sharp curved dark-crimson stinger barb
+        ctx.fillStyle = '#1c1917';
+        ctx.beginPath();
+        ctx.arc(tx0 + 1, ty0, 3.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#09090b'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.moveTo(tx0 + 2, ty0); ctx.quadraticCurveTo(tx0 + 8, ty0 + 2, tx0 + 5, ty0 + 7); ctx.stroke();
+
+        // Twin snapping front pedipalp pincers (كلابات العقرب)
+        const snap = Math.abs(Math.sin(time * 7)) * (0.2 + threat * 0.35);
+        ctx.strokeStyle = '#d97706'; ctx.lineWidth = 3.0;
+        ctx.beginPath(); ctx.moveTo(12, -9); ctx.lineTo(20, -13); ctx.stroke();
+        ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.ellipse(23, -15 - snap * 3, 5.5, 2.2, -0.25 - snap, 0, Math.PI * 2);
+        ctx.ellipse(23, -11 + snap * 2, 5.2, 2.0, 0.25 + snap, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
 
         ctx.restore();
       }

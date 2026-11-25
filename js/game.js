@@ -1268,6 +1268,31 @@ window.Game = window.Game || {};
             Particles.spawnDust(p.waveX || p.x, p.y + p.h - 16, 10, '#7dd3fc');
             Particles.spawnPopup(p.waveX || p.x, p.y - 6, isEn ? '💧 Canal Wave Calmed!' : '💧 هدأت موجة المعدود!', '#7dd3fc');
           }
+        } else if (p.type === 'battir_taboon_oven') {
+          const oCx = p.x + p.w * 0.5, oCy = p.y + p.h - 28;
+          if (Math.hypot(mx - oCx, my - oCy) < range + 40 && !(p.dampedTimer > 0.2)) {
+            p.dampedTimer = 3.8;
+            p.ovenState = 'damped';
+            Particles.spawnDust(oCx, oCy - 16, 10, '#fdba74');
+            Particles.spawnPopup(oCx, p.y + 8, isEn ? '🫓 Taboon Lid Closed!' : '🫓 أُغلق غطاء الطابون!', '#fed7aa');
+          }
+        } else if (p.type === 'battir_sabr_hedge') {
+          const sCx = p.x + p.w * 0.5, sCy = p.y + p.h - 20;
+          if (Math.hypot(mx - sCx, my - sCy) < range + 35 && !(p.bloomTimer > 0.2)) {
+            p.bloomTimer = 4.5;
+            catCtrl.cat.eggplantBoostTimer = 2.6;
+            if (Audio.playCollect) Audio.playCollect();
+            Particles.spawnDust(sCx, sCy - 10, 12, '#fb923c');
+            Particles.spawnPopup(sCx, p.y - 12, isEn ? '🌵 Sweet Sabr Boost!' : '🌵 نشاط ثمر الصبر الحلو!', '#fdba74');
+          }
+        } else if (p.type === 'battir_flash_sluice') {
+          const fCx = p.x + 62, fCy = p.y + p.h - 48;
+          if (Math.hypot(mx - fCx, my - fCy) < range + 50 && !(p.shutTimer > 0.2)) {
+            p.shutTimer = 3.8;
+            p.sluiceState = 'shut';
+            Particles.spawnDust(fCx, p.y + 28, 12, '#38bdf8');
+            Particles.spawnPopup(fCx, p.y + 12, isEn ? '💧 Aqueduct Sluice Shut!' : '💧 أُغلق شلال القنطرة!', '#7dd3fc');
+          }
         }
       }
     }
@@ -1876,6 +1901,123 @@ window.Game = window.Game || {};
           Particles.spawnDust(patchX, floorY - 12, 10, '#a855f7');
           const isEn = window.Game.I18n && window.Game.I18n.isEn();
           Particles.spawnPopup(patchX, floorY - 38, isEn ? '🍆 Battiri Eggplant Boost!' : '🍆 نشاط الباذنجان البتيري!', '#d8b4fe');
+        }
+      } else if (p.type === 'battir_taboon_oven') {
+        // Traditional Palestinian Clay Taboon Bread Oven (فرن الطابون الفلاحي):
+        // Iron lid rattles then vents a vertical plume of glowing hearth embers!
+        const floorY = p.y + p.h;
+        if (p.dampedTimer > 0) {
+          p.dampedTimer = Math.max(0, p.dampedTimer - dt);
+          p.ovenState = 'damped';
+          p.emberPower = Math.max(0, (p.emberPower || 0) - dt * 5);
+        } else {
+          const cyc = (gameTime + (p.phase || 0)) % 4.1;
+          if (cyc < 1.75) {
+            p.ovenState = 'bake';
+            p.emberPower = Math.max(0, (p.emberPower || 0) - dt * 4);
+          } else if (cyc < 2.5) {
+            p.ovenState = 'warn';
+            p.emberPower = 0.2;
+          } else if (cyc < 3.55) {
+            p.ovenState = 'erupt';
+            p.emberPower = Math.min(1, (p.emberPower || 0) + dt * 6);
+          } else {
+            p.ovenState = 'bake';
+            p.emberPower = Math.max(0, (p.emberPower || 0) - dt * 4);
+          }
+        }
+        if (p.ovenState === 'erupt' && (p.emberPower || 0) > 0.5) {
+          if (
+            !isInCheckpointSafeZone(level, p.x, floorY - 82, p.w, 82) &&
+            c.x + c.w - 10 > p.x + 16 &&
+            c.x + 10 < p.x + p.w - 16 &&
+            c.y + c.h > floorY - 80 &&
+            c.y < floorY
+          ) {
+            onCatHit('جمر فرن الطابون المشتعل! انتظر أو موء لإغلاق الغطاء -1 ❤️');
+          }
+        }
+      } else if (p.type === 'battir_sabr_hedge') {
+        // Thorny Palestinian Prickly-Pear Cactus Hedge (ألواح الصبر والتين الشوكي):
+        // Jump over the spines, OR Meow to harvest sweet golden Sabr fruit for a speed boost!
+        const floorY = p.y + p.h;
+        if (p.bloomTimer > 0) {
+          p.bloomTimer = Math.max(0, p.bloomTimer - dt);
+        } else if (
+          !isInCheckpointSafeZone(level, p.x, floorY - 38, p.w, 38) &&
+          c.x + c.w - 10 > p.x + 10 &&
+          c.x + 10 < p.x + p.w - 10 &&
+          c.y + c.h > floorY - 34 &&
+          c.y < floorY + 2
+        ) {
+          onCatHit('أشواك الصبر الفلسطيني! اقفز من فوقها أو موء لقطف الثمر -1 ❤️');
+        }
+      } else if (p.type === 'battir_flash_sluice') {
+        // Overhead Arched Roman Aqueduct Cascade Gate (شلال قنطرة المعدود العلوية)
+        const floorY = p.y + p.h;
+        if (p.shutTimer > 0) {
+          p.shutTimer = Math.max(0, p.shutTimer - dt);
+          p.sluiceState = 'shut';
+          p.cascadePower = Math.max(0, (p.cascadePower || 0) - dt * 5);
+        } else {
+          const cyc = (gameTime + (p.phase || 0)) % 4.4;
+          if (cyc < 1.85) {
+            p.sluiceState = 'calm';
+            p.cascadePower = Math.max(0, (p.cascadePower || 0) - dt * 4);
+          } else if (cyc < 2.6) {
+            p.sluiceState = 'warn';
+            p.cascadePower = 0.18;
+          } else if (cyc < 3.95) {
+            p.sluiceState = 'cascade';
+            p.cascadePower = Math.min(1, (p.cascadePower || 0) + dt * 5.5);
+          } else {
+            p.sluiceState = 'calm';
+            p.cascadePower = Math.max(0, (p.cascadePower || 0) - dt * 4);
+          }
+        }
+        if (p.sluiceState === 'cascade' && (p.cascadePower || 0) > 0.55) {
+          if (
+            !isInCheckpointSafeZone(level, p.x + 22, floorY - 140, 74, 140) &&
+            c.x + c.w - 10 > p.x + 26 &&
+            c.x + 10 < p.x + 96 &&
+            c.y + c.h > floorY - 135 &&
+            c.y < floorY
+          ) {
+            onCatHit('شلال قنطرة المعدود المتدفق! اعبر وقت الهدوء أو موء -1 ❤️');
+          }
+        }
+      } else if (p.type === 'battir_locomotive_crossing') {
+        // Live Foreground 1892 Jaffa–Jerusalem Ottoman Express Train Crossing (معبر قطار بتّير السريع)!
+        const floorY = p.y + p.h;
+        const cyc = (gameTime + (p.phase || 0)) % 5.6;
+        if (cyc < 2.3) {
+          p.crossState = 'open';
+          p.gateClose = Math.max(0, (p.gateClose || 0) - dt * 3.5);
+          p.trainActive = false;
+        } else if (cyc < 3.55) {
+          p.crossState = 'warn';
+          p.gateClose = Math.min(1, (p.gateClose || 0) + dt * 3.5);
+          p.trainActive = false;
+        } else if (cyc < 4.7) {
+          p.crossState = 'pass';
+          p.gateClose = 1;
+          p.trainActive = true;
+          const u = (cyc - 3.55) / 1.15;
+          p.trainX = p.x + p.w + 40 - u * (p.w + 230);
+          const trainW = 148;
+          if (
+            !isInCheckpointSafeZone(level, p.trainX, floorY - 68, trainW, 68) &&
+            c.x + c.w - 10 > p.trainX + 10 &&
+            c.x + 10 < p.trainX + trainW - 10 &&
+            c.y + c.h > floorY - 62 &&
+            c.y < floorY + 2
+          ) {
+            onCatHit('قطار القدس–يافا ١٨٩٢ السريع! اعبر من الجسر الحجري العلوي -1 ❤️');
+          }
+        } else {
+          p.crossState = 'clear';
+          p.gateClose = Math.max(0, (p.gateClose || 0) - dt * 3.2);
+          p.trainActive = false;
         }
       }
     }
