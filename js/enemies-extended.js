@@ -7049,114 +7049,276 @@ window.Game.EnemiesExtended = (function () {
       }
     }
 
-    // 52. Rock Hyrax (Stage 26: Battir — الوبر الصخري — plump cliff mammal flush on ground!)
+    // 52. Palestinian Cliff Rock Hyrax (Stage 26: Battir — الوبر الصخري الجبلي — anatomical 2-segment limbs, fur tufts & incisors!)
     if (level.battir_hyraxes) {
       for (const h of level.battir_hyraxes) {
         const sx = h.x - camX, sy = h.y - camY;
         if (sx + h.w < -80 || sx > 1400) continue;
         const face = h.facing || 1;
         const wPhase = (h.walkDist || 0) * 0.16;
-        const bob = Math.abs(Math.sin(wPhase)) * 2.2;
-        const legA = Math.sin(wPhase) * 4.8;
+        const bob = Math.abs(Math.sin(wPhase)) * 2.4;
+        const nearA = Math.sin(wPhase) * 6.0;
+        const farA = Math.sin(wPhase + Math.PI) * 6.0;
         ctx.save();
         ctx.translate(sx + h.w * 0.5, sy + h.h);
         ctx.scale(face, 1);
-        ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-        // Contact shadow
-        ctx.fillStyle = 'rgba(28, 25, 23, 0.24)';
-        ctx.beginPath(); ctx.ellipse(0, 0, 22, 3.8, 0, 0, Math.PI * 2); ctx.fill();
-        // Far paws
-        ctx.strokeStyle = '#57534e'; ctx.lineWidth = 4.6;
-        ctx.beginPath(); ctx.moveTo(-11, -10 - bob); ctx.lineTo(-11 - legA, -1.5); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(11, -10 - bob); ctx.lineTo(11 + legA, -1.5); ctx.stroke();
-        // Plump warm-grizzled brown furry body (tailless hyrax silhouette)
-        const hyG = ctx.createRadialGradient(2, -20 - bob, 4, 0, -17 - bob, 22);
-        hyG.addColorStop(0, '#a8896c'); hyG.addColorStop(0.55, '#7c6248'); hyG.addColorStop(1, '#4b3828');
-        ctx.fillStyle = hyG; ctx.strokeStyle = '#291e14'; ctx.lineWidth = 1.5;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+
+        // Ground contact shadow
+        ctx.fillStyle = 'rgba(28, 25, 23, 0.28)';
+        ctx.beginPath(); ctx.ellipse(0, 0, 24, 4.2, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Far 2-segment articulated rock-gripping limbs
+        ctx.strokeStyle = '#4a3726'; ctx.lineWidth = 4.8;
         ctx.beginPath();
-        ctx.ellipse(-2, -16.5 - bob, 19, 12.2, -0.04, 0, Math.PI * 2);
-        ctx.fill(); ctx.stroke();
-        // Lighter tawny dorsal patch & cream belly
-        ctx.fillStyle = '#d6bfa6';
-        ctx.beginPath(); ctx.ellipse(1, -11.5 - bob, 13, 4.5, 0, 0, Math.PI * 2); ctx.fill();
-        // Rounded head with short tapered muzzle
-        ctx.fillStyle = '#8b6f52'; ctx.strokeStyle = '#291e14'; ctx.lineWidth = 1.4;
-        ctx.beginPath();
-        ctx.ellipse(15, -20.5 - bob, 10.5, 8.8, 0.1, 0, Math.PI * 2);
-        ctx.fill(); ctx.stroke();
-        // Small rounded ear
-        ctx.fillStyle = '#6b533b';
-        ctx.beginPath(); ctx.arc(10, -28 - bob, 3.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        // Bright dark eye & twitching sensory whiskers
-        ctx.fillStyle = '#0c0a09';
-        ctx.beginPath(); ctx.arc(18.5, -22 - bob, 2.2, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath(); ctx.arc(19.2, -22.7 - bob, 0.75, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#1c1917';
-        ctx.beginPath(); ctx.arc(24.8, -19.5 - bob, 1.8, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = 'rgba(28,25,23,0.65)'; ctx.lineWidth = 0.85;
-        ctx.beginPath();
-        ctx.moveTo(22, -18.5 - bob); ctx.lineTo(29, -20 - bob);
-        ctx.moveTo(22, -17.5 - bob); ctx.lineTo(28.5, -16 - bob);
+        ctx.moveTo(-12, -13 - bob); ctx.lineTo(-14 + farA * 0.5, -6 - bob * 0.5); ctx.lineTo(-11 + farA, -1.5);
+        ctx.moveTo(10, -12 - bob); ctx.lineTo(12 - farA * 0.5, -6 - bob * 0.5); ctx.lineTo(13 - farA, -1.5);
         ctx.stroke();
-        // Near paws flush at y=0
-        ctx.strokeStyle = '#443527'; ctx.lineWidth = 5.0;
-        ctx.beginPath(); ctx.moveTo(-8, -10 - bob); ctx.lineTo(-8 + legA, -1.5); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(10, -10 - bob); ctx.lineTo(10 - legA, -1.5); ctx.stroke();
+
+        // Sculpted muscular grizzled golden-ochre body (tailless compact cliff mammal!)
+        const hyG = ctx.createRadialGradient(2, -23 - bob, 4, -2, -17 - bob, 25);
+        hyG.addColorStop(0.0, '#d4a976');
+        hyG.addColorStop(0.45, '#9c744c');
+        hyG.addColorStop(0.82, '#6b4d32');
+        hyG.addColorStop(1.0, '#3e2b1b');
+        ctx.fillStyle = hyG;
+        ctx.strokeStyle = '#26190f';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-21, -12 - bob);
+        ctx.bezierCurveTo(-23, -24 - bob, -11, -31 - bob, 4, -29 - bob);
+        ctx.bezierCurveTo(14, -28 - bob, 19, -22 - bob, 18, -12 - bob);
+        ctx.quadraticCurveTo(0, -7 - bob, -21, -12 - bob);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Characteristic pale honey-cream dorsal scent-patch & warm cream belly fur
+        ctx.fillStyle = '#f5deb3';
+        ctx.beginPath(); ctx.ellipse(-2, -27.2 - bob, 7.5, 2.2, -0.06, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ead5b7';
+        ctx.beginPath(); ctx.ellipse(2, -11 - bob, 14, 4.2, 0.04, 0, Math.PI * 2); ctx.fill();
+
+        // Fine grizzled dorsal fur guard-hair strokes
+        ctx.strokeStyle = 'rgba(254, 243, 199, 0.45)';
+        ctx.lineWidth = 1.0;
+        for (let f = -14; f <= 6; f += 5) {
+          ctx.beginPath(); ctx.moveTo(f, -25 - bob); ctx.lineTo(f - 3, -27.5 - bob); ctx.stroke();
+        }
+
+        // Sculpted alert angular-muzzled head & cheek ruff
+        const hdG = ctx.createLinearGradient(8, -31 - bob, 26, -14 - bob);
+        hdG.addColorStop(0, '#be9363');
+        hdG.addColorStop(0.6, '#8a6541');
+        hdG.addColorStop(1, '#573d26');
+        ctx.fillStyle = hdG;
+        ctx.strokeStyle = '#26190f';
+        ctx.lineWidth = 1.45;
+        ctx.beginPath();
+        ctx.moveTo(7, -27 - bob);
+        ctx.bezierCurveTo(14, -31 - bob, 23, -28 - bob, 27, -21 - bob);
+        ctx.quadraticCurveTo(28, -16 - bob, 22, -14.5 - bob);
+        ctx.quadraticCurveTo(13, -14 - bob, 8, -18 - bob);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Rounded buff-rimmed ear with dark inner pinna
+        ctx.fillStyle = '#7c5a3a';
+        ctx.strokeStyle = '#26190f';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.ellipse(10.5, -29.5 - bob, 4.4, 4.8, -0.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#3b2516';
+        ctx.beginPath(); ctx.ellipse(11, -29.2 - bob, 2.3, 2.7, -0.2, 0, Math.PI * 2); ctx.fill();
+
+        // Expressive amber-rimmed glossy eye, pale brow arc, dark nose & tiny white hyrax tusk-incisor!
+        ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.arc(18.5, -23.2 - bob, 3.6, Math.PI * 1.1, Math.PI * 1.85); ctx.stroke();
+        ctx.fillStyle = '#1c1917';
+        ctx.beginPath(); ctx.arc(18.8, -22.8 - bob, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(19.6, -23.6 - bob, 0.85, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#18181b';
+        ctx.beginPath(); ctx.ellipse(26.4, -20.2 - bob, 2.1, 1.6, 0.2, 0, Math.PI * 2); ctx.fill();
+        // Characteristic tiny gleaming hyrax incisor tooth & tactile rock whiskers
+        ctx.fillStyle = '#fffbeb';
+        ctx.beginPath(); ctx.moveTo(23.5, -16.2 - bob); ctx.lineTo(25.2, -16.2 - bob); ctx.lineTo(24.4, -14.0 - bob); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = 'rgba(28, 25, 23, 0.7)'; ctx.lineWidth = 0.85;
+        ctx.beginPath();
+        ctx.moveTo(23, -19 - bob); ctx.lineTo(31, -21 - bob);
+        ctx.moveTo(23, -18 - bob); ctx.lineTo(30.5, -17 - bob);
+        ctx.stroke();
+
+        // Near 2-segment furry legs + cushioned 3-toed paws flush at y = 0
+        ctx.strokeStyle = '#5c422a'; ctx.lineWidth = 5.2;
+        ctx.beginPath();
+        ctx.moveTo(-9, -12 - bob); ctx.lineTo(-11 + nearA * 0.5, -5.5 - bob * 0.4); ctx.lineTo(-8 + nearA, -1.5);
+        ctx.moveTo(11, -11.5 - bob); ctx.lineTo(13 - nearA * 0.5, -5.5 - bob * 0.4); ctx.lineTo(12 - nearA, -1.5);
+        ctx.stroke();
+        ctx.fillStyle = '#291e14';
+        ctx.beginPath();
+        ctx.ellipse(-7.5 + nearA, -1.2, 4.2, 1.6, 0, 0, Math.PI * 2);
+        ctx.ellipse(12.5 - nearA, -1.2, 4.0, 1.6, 0, 0, Math.PI * 2);
+        ctx.fill();
         ctx.restore();
       }
     }
 
-    // 53. Valley Kestrel (Stage 26: Battir — صقر العوسق البري — chestnut barred raptor!)
+    // 53. Lesser Kestrel / Palestine Falcon (Stage 26: Battir — صقر العوسق الفلسطيني — slotted primaries, spotted breast & talons!)
     if (level.battir_kestrels) {
       for (const k of level.battir_kestrels) {
         const sx = k.x - camX, sy = k.y - camY;
         if (sx + k.w < -80 || sx > 1400) continue;
         const face = k.facing || 1;
-        const flap = Math.sin(time * 9.5 + (k.phase || 0));
-        const wingY = flap * 13;
+        const flap = Math.sin(time * 9.6 + (k.phase || 0));
+        const wingY = flap * 14.5;
         ctx.save();
         ctx.translate(sx + k.w * 0.5, sy + k.h * 0.5);
         ctx.scale(face, 1);
-        ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-        // Banded fan tail with black subterminal bar
-        ctx.fillStyle = '#9ca3af'; ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 1.1;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+
+        // 1. Fanned Blue-Grey Kestrel Tail with Black Subterminal Band & Crisp White Feather Tips!
+        const tlG = ctx.createLinearGradient(-12, 0, -32, 3);
+        tlG.addColorStop(0, '#64748b');
+        tlG.addColorStop(0.68, '#94a3b8');
+        tlG.addColorStop(0.72, '#0f172a');
+        tlG.addColorStop(0.90, '#0f172a');
+        tlG.addColorStop(1.0, '#f8fafc');
+        ctx.fillStyle = tlG;
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1.1;
         ctx.beginPath();
-        ctx.moveTo(-14, 1); ctx.lineTo(-27, -4); ctx.lineTo(-25, 5); ctx.lineTo(-14, 4); ctx.closePath();
-        ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#18181b';
-        ctx.fillRect(-25.5, -2.5, 4.5, 6.2);
-        // Far wing
-        ctx.fillStyle = '#9a3412'; ctx.strokeStyle = '#431407'; ctx.lineWidth = 1.2;
+        ctx.moveTo(-12, 0);
+        ctx.lineTo(-31, -6.5);
+        ctx.quadraticCurveTo(-34, 1.5, -29, 8.5);
+        ctx.lineTo(-12, 4.5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // 2. Far Pointed Falcon Wing (depth-shaded rufous & slate)
+        ctx.fillStyle = '#7c2d12';
+        ctx.strokeStyle = '#291509';
+        ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.moveTo(-2, -3); ctx.quadraticCurveTo(-12, -16 - wingY * 0.65, -22, -10 - wingY * 0.85);
-        ctx.quadraticCurveTo(-10, -2, -2, 2); ctx.closePath();
-        ctx.fill(); ctx.stroke();
-        // Streamlined buff-cream breast & chestnut back
-        const kG = ctx.createLinearGradient(0, -8, 0, 8);
-        kG.addColorStop(0, '#b45309'); kG.addColorStop(0.5, '#f5d0a9'); kG.addColorStop(1, '#fef3c7');
-        ctx.fillStyle = kG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.3;
-        ctx.beginPath(); ctx.ellipse(2, 1, 16.5, 7.2, -0.08, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        // Near pointed falcon wing with dark primary tips
-        const wG = ctx.createLinearGradient(-4, -16, -22, 4);
-        wG.addColorStop(0, '#c2410c'); wG.addColorStop(0.7, '#9a3412'); wG.addColorStop(1, '#18181b');
-        ctx.fillStyle = wG; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.3;
+        ctx.moveTo(0, -3);
+        ctx.bezierCurveTo(-6, -16 - wingY * 0.72, -18, -20 - wingY * 0.85, -27, -12 - wingY * 0.88);
+        ctx.quadraticCurveTo(-14, -3, -2, 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // 3. Tucked Golden Talons Beneath Belly
+        ctx.strokeStyle = '#eab308';
+        ctx.lineWidth = 1.8;
         ctx.beginPath();
-        ctx.moveTo(4, -2); ctx.quadraticCurveTo(-8, -18 - wingY, -24, -8 - wingY);
-        ctx.quadraticCurveTo(-12, 3, 2, 4); ctx.closePath();
-        ctx.fill(); ctx.stroke();
-        // Slate-blue head with characteristic black kestrel malar stripe
-        ctx.fillStyle = '#64748b'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.arc(17.5, -3.5, 6.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.6;
-        ctx.beginPath(); ctx.moveTo(18.5, -2); ctx.lineTo(17.5, 2.2); ctx.stroke();
-        // Keen dark eye & yellow-cere hooked beak
+        ctx.moveTo(-3, 7); ctx.lineTo(-7, 10.5);
+        ctx.moveTo(2, 7); ctx.lineTo(-2, 10.5);
+        ctx.stroke();
+
+        // 4. Aerodynamic Cinnamon-Rufous Back & Spotted Warm-Apricot Breast!
+        const bdG = ctx.createLinearGradient(0, -9, 0, 9);
+        bdG.addColorStop(0.0, '#b45309');
+        bdG.addColorStop(0.45, '#ea580c');
+        bdG.addColorStop(0.75, '#fed7aa');
+        bdG.addColorStop(1.0, '#fef3c7');
+        ctx.fillStyle = bdG;
+        ctx.strokeStyle = '#431407';
+        ctx.lineWidth = 1.35;
+        ctx.beginPath();
+        ctx.moveTo(-15, 1.5);
+        ctx.bezierCurveTo(-8, -8.5, 10, -9, 17, -3);
+        ctx.bezierCurveTo(19, 3, 10, 9, -2, 8.5);
+        ctx.quadraticCurveTo(-11, 7.5, -15, 1.5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Authentic dark falcon breast spots
+        ctx.fillStyle = '#451a03';
+        for (const [bx0, by0] of [[1, 3.5], [6, 4.2], [10.5, 2.8], [-3.5, 4.5], [3.5, 6.2]]) {
+          ctx.beginPath(); ctx.ellipse(bx0, by0, 1.3, 0.8, 0.2, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // 5. Near Sculpted Falcon Wing with Cinnamon Coverts & 5 Slotted Dark Primary Flight Feathers!
+        const tipY = -10 - wingY * 1.15;
+        const wristY = -14 - wingY * 0.9;
+        // Slotted charcoal-black primary flight feathers
+        for (let f = 0; f < 5; f++) {
+          const fx = -28 + f * 3.8;
+          const fy = tipY + f * 2.4;
+          ctx.fillStyle = '#18181b';
+          ctx.strokeStyle = '#09090b';
+          ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.moveTo(2, -1);
+          ctx.quadraticCurveTo(-10, wristY + f * 1.6, fx, fy);
+          ctx.quadraticCurveTo(-10, wristY + 4 + f * 1.8, -2, 3);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
+        // Rich cinnamon-chestnut upper wing covert mantle with black spots
+        const cvG = ctx.createLinearGradient(4, -3, -16, wristY);
+        cvG.addColorStop(0, '#ea580c');
+        cvG.addColorStop(0.65, '#c2410c');
+        cvG.addColorStop(1, '#7c2d12');
+        ctx.fillStyle = cvG;
+        ctx.strokeStyle = '#431407';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(6, -2);
+        ctx.quadraticCurveTo(-4, wristY - 2, -17, wristY + 2);
+        ctx.quadraticCurveTo(-9, 1, 3, 3.5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#1c1917';
+        for (const [sx0, sy0] of [[-3, wristY * 0.42], [-8, wristY * 0.52], [-5, wristY * 0.25]]) {
+          ctx.beginPath(); ctx.arc(sx0, sy0, 1.15, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // 6. Slate-Blue Falcon Crown, White Cheek, Black Malar Tear-Stripe & Hooked Golden-Cere Beak!
+        const hdG = ctx.createLinearGradient(12, -10, 22, 2);
+        hdG.addColorStop(0, '#475569');
+        hdG.addColorStop(0.6, '#64748b');
+        hdG.addColorStop(1, '#cbd5e1');
+        ctx.fillStyle = hdG;
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1.25;
+        ctx.beginPath();
+        ctx.arc(17.5, -3.5, 6.6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        // Crisp white cheek patch & black falcon malar stripe
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath(); ctx.ellipse(17.2, -1.0, 3.4, 2.3, 0.1, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#09090b';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.moveTo(19.2, -2.5); ctx.lineTo(18.0, 2.4); ctx.stroke();
+        // Golden orbital ring + keen dark eye + catchlight
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath(); ctx.arc(19.8, -4.4, 2.3, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#09090b';
-        ctx.beginPath(); ctx.arc(19.5, -4.5, 1.5, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#facc15'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.arc(19.8, -4.4, 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(20.3, -4.9, 0.55, 0, Math.PI * 2); ctx.fill();
+        // Golden cere & sharp hooked slate-black falcon beak
+        ctx.fillStyle = '#eab308';
+        ctx.beginPath(); ctx.arc(23.5, -4.2, 1.8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#1e293b';
+        ctx.strokeStyle = '#09090b';
+        ctx.lineWidth = 0.9;
         ctx.beginPath();
-        ctx.moveTo(23, -4.8); ctx.quadraticCurveTo(28, -3.5, 25.5, 0.8); ctx.lineTo(22.2, -1.5);
-        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.moveTo(24.0, -5.2);
+        ctx.quadraticCurveTo(29.2, -3.8, 26.8, 1.2);
+        ctx.lineTo(23.2, -1.8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
         ctx.restore();
       }
     }

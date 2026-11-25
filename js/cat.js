@@ -112,7 +112,7 @@ window.Game.Cat = function (startX, startY) {
       if (p.hiddenInDay && !cat.nightVision) continue;
       if (p.broken || p.nonSolid) continue;
       if (p.type === 'maya_vault_door' && (p.openAnim || 0) >= 0.78) continue;
-      if (p.type === 'wind_zone' || p.type === 'blizzard_zone' || p.type === 'thermal_updraft' || p.type === 'steam_ramen_vent' || p.type === 'pendulum_censer' || p.type === 'wagasa_ricochet' || p.type === 'tunnel_clearance' || p.type === 'track_switch_lever' || p.type === 'carnival_bell_swing' || p.type === 'canal_tide_gate' || p.type === 'venice_water_spout' || p.type === 'paris_chimney_updraft' || p.type === 'paris_bridge_crank' || p.type === 'moulin_sail_wheel' || p.type === 'morocco_fountain_geyser' || p.type === 'morocco_cedar_lever' || p.type === 'morocco_lantern_swing' || p.type === 'maya_cenote_geyser' || p.type === 'maya_jade_switch' || p.type === 'maya_vine_swing' || p.type === 'greece_sun_mirror' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk' || p.type === 'battir_water_sluice' || p.type === 'battir_spring_geyser' || p.type === 'battir_stone_roller' || p.type === 'battir_roman_bath_vent') continue;
+      if (p.type === 'wind_zone' || p.type === 'blizzard_zone' || p.type === 'thermal_updraft' || p.type === 'steam_ramen_vent' || p.type === 'pendulum_censer' || p.type === 'wagasa_ricochet' || p.type === 'tunnel_clearance' || p.type === 'track_switch_lever' || p.type === 'carnival_bell_swing' || p.type === 'canal_tide_gate' || p.type === 'venice_water_spout' || p.type === 'paris_chimney_updraft' || p.type === 'paris_bridge_crank' || p.type === 'moulin_sail_wheel' || p.type === 'morocco_fountain_geyser' || p.type === 'morocco_cedar_lever' || p.type === 'morocco_lantern_swing' || p.type === 'maya_cenote_geyser' || p.type === 'maya_jade_switch' || p.type === 'maya_vine_swing' || p.type === 'greece_sun_mirror' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk' || p.type === 'battir_madud_gate' || p.type === 'battir_roman_bath_vent') continue;
       if (p.type === 'greece_light_bridge' && (p.activeTimer || 0) <= 0) continue;
       if (p.type === 'phase_platform' && p.phaseSolid === false) continue;
       if (p.type === 'jump_flip_panel' && p.flipActive === false) continue;
@@ -162,7 +162,7 @@ window.Game.Cat = function (startX, startY) {
       if (p.hiddenInDay && !cat.nightVision) continue;
       if (p.broken || p.nonSolid) continue;
       if (p.type === 'maya_vault_door' && (p.openAnim || 0) >= 0.78) continue;
-      if (p.type === 'wind_zone' || p.type === 'blizzard_zone' || p.type === 'thermal_updraft' || p.type === 'steam_ramen_vent' || p.type === 'pendulum_censer' || p.type === 'wagasa_ricochet' || p.type === 'tunnel_clearance' || p.type === 'track_switch_lever' || p.type === 'carnival_bell_swing' || p.type === 'canal_tide_gate' || p.type === 'venice_water_spout' || p.type === 'paris_chimney_updraft' || p.type === 'paris_bridge_crank' || p.type === 'morocco_fountain_geyser' || p.type === 'morocco_cedar_lever' || p.type === 'maya_cenote_geyser' || p.type === 'maya_jade_switch' || p.type === 'greece_sun_mirror' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk' || p.type === 'battir_water_sluice' || p.type === 'battir_spring_geyser' || p.type === 'battir_stone_roller' || p.type === 'battir_roman_bath_vent') continue;
+      if (p.type === 'wind_zone' || p.type === 'blizzard_zone' || p.type === 'thermal_updraft' || p.type === 'steam_ramen_vent' || p.type === 'pendulum_censer' || p.type === 'wagasa_ricochet' || p.type === 'tunnel_clearance' || p.type === 'track_switch_lever' || p.type === 'carnival_bell_swing' || p.type === 'canal_tide_gate' || p.type === 'venice_water_spout' || p.type === 'paris_chimney_updraft' || p.type === 'paris_bridge_crank' || p.type === 'morocco_fountain_geyser' || p.type === 'morocco_cedar_lever' || p.type === 'maya_cenote_geyser' || p.type === 'maya_jade_switch' || p.type === 'greece_sun_mirror' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk' || p.type === 'battir_madud_gate' || p.type === 'battir_roman_bath_vent') continue;
       if (p.type === 'greece_light_bridge' && (p.activeTimer || 0) <= 0) continue;
       if (p.type === 'maya_rolling_wheel') {
         const wOverlapX = cat.x + 8 < p.x + p.w - 8 && cat.x + cat.w - 8 > p.x + 8;
@@ -477,7 +477,12 @@ window.Game.Cat = function (startX, startY) {
     }
     if (moveDir !== 0) cat.facing = moveDir;
 
-    let targetSpeed = moveDir * cat.physics.runSpeed;
+    if (cat.eggplantBoostTimer > 0) {
+      cat.eggplantBoostTimer = Math.max(0, cat.eggplantBoostTimer - dt);
+      if (Math.random() < dt * 16) Particles.spawnTrailDot(cat.x + cat.w * 0.5, cat.y + cat.h - 4, '#a855f7');
+    }
+
+    let targetSpeed = moveDir * cat.physics.runSpeed * (cat.eggplantBoostTimer > 0 ? 1.28 : 1);
     if (cat.crouching && cat.onGround) {
       targetSpeed *= 0.52;
     }
@@ -1372,89 +1377,77 @@ window.Game.Cat = function (startX, startY) {
         if (p === standing) {
           cat.y += (p.y - prevY);
         }
-      } else if (p.type === 'battir_water_sluice') {
+      } else if (p.type === 'battir_madud_gate') {
+        // Bidirectional Ma'dud Roman Pool Water-Level Gate (نظام المعدود — raises/lowers Roman Pool water!)
         if (p.openAnim === undefined) p.openAnim = 0;
+        if (p.cooldown > 0) p.cooldown = Math.max(0, p.cooldown - dt);
         const cx = p.x + p.w * 0.5, cy = p.y + p.h * 0.5;
-        const near = Math.abs((cat.x + cat.w * 0.5) - cx) < 62 && Math.abs((cat.y + cat.h * 0.5) - cy) < 58;
-        if (near && (p.cooldown || 0) <= 0) {
-          p.cooldown = 3.2;
-          p.activeTimer = p.duration || 11.5;
+        const near = Math.abs((cat.x + cat.w * 0.5) - cx) < 58 && Math.abs((cat.y + cat.h * 0.5) - cy) < 56;
+        if (near && !p.wasNear && (p.cooldown || 0) <= 0) {
+          p.waterOpen = !p.waterOpen;
+          p.cooldown = 1.2;
           if (Audio.playCollect) Audio.playCollect();
           Particles.spawnDust(cx, p.y + 18, 12, '#38bdf8');
           if (Particles.spawnPopup) {
-            const rawMsg = '💧 فُتحت قناة المعدود!';
+            const rawMsg = p.waterOpen ? '💧 ارتفع ماء البركة الرومانية!' : '💧 انخفض ماء البركة!';
             const msg = (window.Game && window.Game.I18n) ? window.Game.I18n.translateDynamic(rawMsg) : rawMsg;
-            Particles.spawnPopup(cx, p.y - 16, msg, '#7dd3fc');
+            Particles.spawnPopup(cx, p.y - 18, msg, '#7dd3fc');
           }
           for (const m of level.platforms) {
-            if (m.type === 'battir_canal_raft' && m.canalId === p.canalId) {
-              m.activeTimer = p.duration || 11.5;
-              m.delayTimer = 0.55;
+            if (m.type === 'battir_pool_bridge' && m.poolId === p.poolId) {
+              m.targetLevel = p.waterOpen ? 1 : 0;
             }
           }
         }
-        if (p.cooldown > 0) p.cooldown = Math.max(0, p.cooldown - dt);
-        if (p.activeTimer > 0) {
-          p.activeTimer = Math.max(0, p.activeTimer - dt);
-          p.openAnim = Math.min(1, p.openAnim + dt * 3.8);
-        } else {
-          p.openAnim = Math.max(0, p.openAnim - dt * 2.2);
-        }
-      } else if (p.type === 'battir_canal_raft') {
-        if (p.baseY === undefined) p.baseY = p.y;
-        const sX = p.startX !== undefined ? p.startX : p.x;
-        const eX = p.endX !== undefined ? p.endX : sX + 260;
-        const prevX = p.x;
-        if (p.activeTimer > 0) {
-          p.activeTimer = Math.max(0, p.activeTimer - dt);
-          if (p.delayTimer > 0 && p !== standing) {
-            p.delayTimer = Math.max(0, p.delayTimer - dt);
-          } else {
-            p.delayTimer = 0;
-            const spd = p.speed || 160;
-            if (p.dir === undefined) p.dir = 1;
-            p.x += p.dir * spd * dt;
-            if (p.x >= eX) { p.x = eX; p.dir = -1; }
-            else if (p.x <= sX) { p.x = sX; p.dir = 1; }
-          }
-        } else {
-          if (p.x > sX + 1) p.x = Math.max(sX, p.x - 110 * dt);
-          p.dir = 1;
-        }
-        const bob = Math.sin(cat.animTime * 3.2 + (p.x * 0.02)) * 2.2;
-        p.y = p.baseY + bob;
-        const dx = p.x - prevX;
+        p.wasNear = near;
+        p.openAnim += ((p.waterOpen ? 1 : 0) - p.openAnim) * Math.min(1, dt * 4.5);
+      } else if (p.type === 'battir_pool_bridge') {
+        // Buoyant Roman Pool Floating Cedar Bridge rising/falling smoothly with Roman Pool water level!
+        const lowY = p.lowY !== undefined ? p.lowY : p.y;
+        const highY = p.highY !== undefined ? p.highY : lowY - 125;
+        const target = p.targetLevel || 0;
+        p.waterLevel = (p.waterLevel || 0) + (target - (p.waterLevel || 0)) * Math.min(1, dt * 2.2);
+        const bob = Math.sin(cat.animTime * 2.8 + (p.x * 0.015)) * 2.4;
+        p.y = lowY - (lowY - highY) * p.waterLevel + bob;
         if (p === standing) {
-          cat.x += dx;
           cat.y = p.y - cat.h;
         }
-      } else if (p.type === 'battir_spring_geyser') {
-        const wave = Math.sin(cat.animTime * 2.0 + (p.phase || 0));
-        const active = wave > -0.25;
-        p.geyserPower = active ? Math.min(1, (p.geyserPower || 0) + dt * 5.2) : Math.max(0, (p.geyserPower || 0) - dt * 4.5);
-        if (p.geyserPower > 0.35) {
-          const inCol = cat.x + cat.w > p.x + 4 && cat.x < p.x + p.w - 4 && cat.y + cat.h > p.y && cat.y < p.y + p.h + 18;
-          if (inCol) {
-            cat.vy = Math.max(-520, cat.vy - (p.liftForce || 1320) * p.geyserPower * dt);
-            cat.onGround = false;
-            if (Math.random() < dt * 16) {
-              Particles.spawnDust(cat.x + cat.w * 0.5 + (Math.random() - 0.5) * 18, cat.y + cat.h, 1, '#bae6fd');
+      } else if (p.type === 'battir_press_pad') {
+        // Carved Limestone Olive-Press Counterweight Pad (رافعة معصرة الزيتون بالثقل المعاكس)
+        if (p.cooldown > 0) p.cooldown = Math.max(0, p.cooldown - dt);
+        const pressed = (p === standing);
+        p.pressAnim = (p.pressAnim || 0) + ((pressed ? 1 : 0) - (p.pressAnim || 0)) * Math.min(1, dt * 7.5);
+        p.sinkOffset = p.pressAnim * 7;
+        if (pressed) {
+          cat.y = p.y + p.sinkOffset - cat.h;
+          if ((p.cooldown || 0) <= 0) {
+            p.cooldown = 3.0;
+            if (Audio.playCollect) Audio.playCollect();
+            Particles.spawnDust(p.x + p.w * 0.5, p.y, 10, '#84cc16');
+            if (Particles.spawnPopup) {
+              const rawMsg = '🫒 ارتفعت سلة معصرة الزيتون!';
+              const msg = (window.Game && window.Game.I18n) ? window.Game.I18n.translateDynamic(rawMsg) : rawMsg;
+              Particles.spawnPopup(p.x + p.w * 0.5, p.y - 22, msg, '#bef264');
+            }
+          }
+          for (const m of level.platforms) {
+            if (m.type === 'battir_olive_basket' && m.pressId === p.pressId) {
+              m.activeTimer = p.duration || 9.5;
             }
           }
         }
-      } else if (p.type === 'battir_railway_handcar') {
-        const sX = p.startX !== undefined ? p.startX : p.x;
-        const eX = p.endX !== undefined ? p.endX : sX + 420;
-        const prevX = p.x;
-        if (p.dir === undefined) p.dir = 1;
-        const spd = p.speed || 175;
-        p.x += p.dir * spd * dt;
-        if (p.x >= eX) { p.x = eX; p.dir = -1; }
-        else if (p.x <= sX) { p.x = sX; p.dir = 1; }
-        const dx = p.x - prevX;
-        p.pumpPhase = (p.pumpPhase || 0) + Math.abs(dx) * 0.065;
+      } else if (p.type === 'battir_olive_basket') {
+        // Woven Olive-Harvest Basket Bridge hoisted by overhead timber pulley ropes!
+        const lowY = p.lowY !== undefined ? p.lowY : p.y;
+        const highY = p.highY !== undefined ? p.highY : lowY - 140;
+        if (p.activeTimer > 0) {
+          p.activeTimer = Math.max(0, p.activeTimer - dt);
+          p.hoistAnim = Math.min(1, (p.hoistAnim || 0) + dt * 1.65);
+        } else {
+          p.hoistAnim = Math.max(0, (p.hoistAnim || 0) - dt * 0.85);
+        }
+        p.y = lowY - (lowY - highY) * (p.hoistAnim || 0);
         if (p === standing) {
-          cat.x += dx;
           cat.y = p.y - cat.h;
         }
       } else if (p.type === 'battir_roman_bath_vent') {
@@ -1465,21 +1458,65 @@ window.Game.Cat = function (startX, startY) {
         p.telegraph = telegraph ? 1 : 0;
         p.steamPower = active ? Math.min(1, (p.steamPower || 0) + dt * 5.0) : Math.max(0, (p.steamPower || 0) - dt * 4.0);
         if (p.steamPower > 0.3) {
-          const inCol = cat.x + cat.w > p.x + 6 && cat.x < p.x + p.w - 6 && cat.y + cat.h > p.y && cat.y < p.y + p.h + 18;
+          const inCol = cat.x + cat.w > p.x + 6 && cat.x < p.x + p.w - 6 && cat.y + cat.h > p.y - 32 && cat.y < p.y + p.h + 18;
           if (inCol) {
-            cat.vy = Math.max(-560, cat.vy - (p.liftForce || 1420) * p.steamPower * dt);
+            const effLift = Math.max(4800, (p.liftForce || 1440) * 3.5) * p.steamPower;
+            if (cat.vy > 80) cat.vy *= 0.65;
+            cat.vy = Math.max(-560, cat.vy - effLift * dt);
             cat.onGround = false;
+            cat.coyoteTimer = Math.max(cat.coyoteTimer || 0, 0.14);
             if (Math.random() < dt * 15) {
               Particles.spawnDust(cat.x + cat.w * 0.5 + (Math.random() - 0.5) * 20, cat.y + cat.h, 1, '#fef3c7');
             }
           }
         }
+      } else if (p.type === 'battir_spring_geyser') {
+        const cyc = (cat.animTime + (p.phase || 0)) % 4.6;
+        const active = cyc >= 1.8;
+        p.geyserPower = active ? Math.min(1, (p.geyserPower || 0) + dt * 5.2) : Math.max(0.18, (p.geyserPower || 0) - dt * 3.6);
+        if (p.geyserPower > 0.35) {
+          const inCol = cat.x + cat.w > p.x + 6 && cat.x < p.x + p.w - 6 && cat.y + cat.h > p.y - 32 && cat.y < p.y + p.h + 16;
+          if (inCol) {
+            const effLift = Math.max(4800, (p.liftForce || 1460) * 3.5) * p.geyserPower;
+            if (cat.vy > 80) cat.vy *= 0.65;
+            cat.vy = Math.max(-560, cat.vy - effLift * dt);
+            cat.onGround = false;
+            cat.coyoteTimer = Math.max(cat.coyoteTimer || 0, 0.14);
+            if (Math.random() < dt * 16) Particles.spawnTrailDot(cat.x + cat.w * 0.5, cat.y + cat.h, '#38bdf8');
+          }
+        }
+      } else if (p.type === 'battir_railway_handcar') {
+        if (p.startX === undefined) p.startX = p.x;
+        if (p.endX === undefined) p.endX = p.x + 360;
+        if (p.pumpPhase === undefined) p.pumpPhase = 0;
+        const prevX = p.x;
+        const spd = p.speed || 158;
+        if (p === standing) {
+          p.riding = true;
+          p.holdTimer = 1.45;
+        }
+        if (p.riding) {
+          if (p.x < p.endX) {
+            p.x = Math.min(p.endX, p.x + spd * dt);
+          } else {
+            p.holdTimer = Math.max(0, (p.holdTimer || 0) - dt);
+            if (p !== standing && p.holdTimer <= 0) p.riding = false;
+          }
+        } else if (p.x > p.startX) {
+          p.x = Math.max(p.startX, p.x - spd * 0.72 * dt);
+        }
+        const dx = p.x - prevX;
+        p.pumpPhase += dx * 0.065;
+        if (p === standing) {
+          cat.x += dx;
+          cat.y = p.y - cat.h;
+        }
       } else if (p.type === 'battir_hosh_arch_swing') {
         if (p.anchorX === undefined) p.anchorX = p.x + p.w * 0.5;
-        if (p.anchorY === undefined) p.anchorY = p.y - (p.ropeLen || 135);
-        const len = p.ropeLen || 135;
+        if (p.anchorY === undefined) p.anchorY = p.y - (p.ropeLen || 145);
+        const len = p.ropeLen || 145;
         const prevX = p.x;
-        const ang = Math.sin(cat.animTime * (p.swingSpeed || 1.55) + (p.phase || 0)) * (p.swingAmp || 0.56);
+        const ang = Math.sin(cat.animTime * (p.swingSpeed || 1.45) + (p.phase || 0)) * (p.swingAmp || 0.58);
         p.swingAngle = ang;
         p.x = p.anchorX + Math.sin(ang) * len - p.w * 0.5;
         p.y = p.anchorY + Math.cos(ang) * len;
@@ -1487,17 +1524,6 @@ window.Game.Cat = function (startX, startY) {
         if (p === standing) {
           cat.x += dx;
           cat.y = p.y - cat.h;
-        }
-      } else if (p.type === 'battir_madud_scale') {
-        let targetTilt = 0;
-        if (p === standing) {
-          const off = Math.max(-1, Math.min(1, ((cat.x + cat.w * 0.5) - (p.x + p.w * 0.5)) / (p.w * 0.5)));
-          targetTilt = off * 0.24;
-        }
-        p.tilt = (p.tilt || 0) + (targetTilt - (p.tilt || 0)) * Math.min(1, dt * 6.5);
-        p.sinkOffset = Math.abs(p.tilt) * 22;
-        if (p === standing) {
-          cat.y = p.y + (p.sinkOffset || 0) - cat.h;
         }
       }
     }

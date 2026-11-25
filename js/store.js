@@ -394,6 +394,9 @@ window.Game.Store = (function () {
       'maya_rolling_wheel', 'maya_vault_door', 'maya_glyph_seal',
       'greece_sun_mirror', 'greece_poseidon_wave', 'greece_lyre_pillar',
       'greece_medusa_aegis', 'greece_discobolus', 'greece_zeus_obelisk',
+      'battir_madud_gate', 'battir_roman_bath_vent', 'battir_spring_geyser',
+      'battir_press_pad', 'battir_stone_roller', 'battir_olive_press',
+      'battir_railway_semaphore', 'battir_aqueduct_surge',
     ]);
     const groundTypes = new Set([
       'asphalt', 'cobble', 'grass', 'pier', 'rooftop',
@@ -401,6 +404,7 @@ window.Game.Store = (function () {
       'glass_floor', 'neon_deck', 'home_deck', 'oil_deck', 'ice_deck',
       'circus_deck', 'desert_deck', 'japan_deck', 'steam_car_deck', 'venice_quay',
       'paris_zinc_roof', 'kasbah_terrace', 'maya_stone_terrace', 'greece_terrace',
+      'battir_terrace', 'battir_hosh_roof', 'battir_fortress_wall',
     ]);
 
     function isSafeCoinPos(x, y) {
@@ -450,7 +454,7 @@ window.Game.Store = (function () {
       if (p.x < 180) continue; // Don't clutter spawn point
       if (p.climbable && p.h > 140 && p.w < 70) continue; // Skip narrow wall-jump shafts
 
-      if (p.bouncy) {
+      if (p.bouncy || p.type === 'battir_olive_bough') {
         const cx = p.x + p.w / 2;
         tryAddCoin(cx - 22, p.y - 78, 1);
         tryAddCoin(cx, p.y - 118, 1);
@@ -467,7 +471,7 @@ window.Game.Store = (function () {
           const y = p.y - 42 - (count === 3 && k === 1 ? 14 : 0);
           tryAddCoin(x, y, 1);
         }
-      } else if (!groundTypes.has(p.type) && p.w >= 70 && p.y > 160 && p.y < 600) {
+      } else if ((!groundTypes.has(p.type) || p.oneWay) && p.w >= 70 && p.y > 160 && p.y < 600) {
         if ((i + stageNum) % 2 === 0) {
           const count = p.w >= 145 ? 2 : 1;
           for (let k = 0; k < count; k++) {

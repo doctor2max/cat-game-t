@@ -1252,6 +1252,22 @@ window.Game = window.Game || {};
             Particles.spawnDust(bCx, bCy - 18, 12, '#fef08a');
             Particles.spawnPopup(bCx, bCy - 36, isEn ? '♨️ Roman Bath Steam!' : '♨️ بخار الحمام الروماني!', '#fde047');
           }
+        } else if (p.type === 'battir_railway_semaphore') {
+          const sCx = p.x + p.w * 0.5;
+          const sCy = p.y + p.h - 48;
+          if (Math.hypot(mx - sCx, my - sCy) < range + 55 && !(p.greenTimer > 0.2)) {
+            p.greenTimer = 3.8;
+            p.semState = 'green';
+            Particles.spawnDust(sCx, p.y + 28, 12, '#4ade80');
+            Particles.spawnPopup(sCx, p.y + 8, isEn ? '🟢 Green Rail Signal!' : '🟢 إشارة السكة خضراء!', '#4ade80');
+          }
+        } else if (p.type === 'battir_aqueduct_surge' && p.waveActive && !p.waveCalmed) {
+          if (Math.hypot(mx - (p.waveX || p.x), my - (p.y + p.h - 14)) < range + 26) {
+            p.waveCalmed = true;
+            p.waveActive = false;
+            Particles.spawnDust(p.waveX || p.x, p.y + p.h - 16, 10, '#7dd3fc');
+            Particles.spawnPopup(p.waveX || p.x, p.y - 6, isEn ? '💧 Canal Wave Calmed!' : '💧 هدأت موجة المعدود!', '#7dd3fc');
+          }
         }
       }
     }
@@ -1715,6 +1731,151 @@ window.Game = window.Game || {};
         const catCx2 = c.x + c.w * 0.5, catCy2 = c.y + c.h * 0.5;
         if (!isInCheckpointSafeZone(level, p.x, p.y, p.w, p.h) && Math.hypot(catCx2 - rCx, catCy2 - rCy) < r + 14) {
           onCatHit('حجر معصرة الزيتون في بتّير! -1 ❤️');
+        }
+      } else if (p.type === 'battir_olive_press') {
+        // Ancient Battir Lever-and-Counterweight Olive Press (معصرة الزيتون الأثرية):
+        // Falling counterweight stone on right slams down, WHILE the left oak lever tail catapults Mashmasha skyward!
+        const cyc = (gameTime + (p.phase || 0)) % 4.2;
+        if (p.launchCd > 0) p.launchCd = Math.max(0, p.launchCd - dt);
+        const prevState = p.pressState || 'rise';
+        if (cyc < 1.9) {
+          p.pressState = 'rise';
+          p.pressDrop = Math.max(0, 1 - cyc / 1.7);
+        } else if (cyc < 2.65) {
+          p.pressState = 'warn';
+          p.pressDrop = 0;
+        } else if (cyc < 3.05) {
+          p.pressState = 'slam';
+          const u = (cyc - 2.65) / 0.4;
+          p.pressDrop = Math.min(1, u * u * 1.35);
+          if (prevState !== 'slam') {
+            if (Audio.playStoneThud) Audio.playStoneThud();
+            Particles.spawnDust(p.x + p.w - 34, p.y + p.h - 6, 12, '#a3e635');
+          }
+        } else {
+          p.pressState = 'hold';
+          p.pressDrop = 1;
+        }
+        const floorY = p.y + p.h;
+        const catCx2 = c.x + c.w * 0.5;
+        // 1. Slamming heavy limestone counterweight on right (x + 96 .. x + 156)
+        if ((p.pressState === 'slam' || (p.pressState === 'hold' && cyc < 3.25)) && p.pressDrop > 0.45) {
+          const stoneBottom = floorY - 58 + p.pressDrop * 54;
+          if (
+            !isInCheckpointSafeZone(level, p.x + 96, floorY - 64, 58, 64) &&
+            catCx2 > p.x + 98 &&
+            catCx2 < p.x + 154 &&
+            c.y + 8 < stoneBottom &&
+            c.y + c.h > stoneBottom - 44
+          ) {
+            onCatHit('حجر معصرة الزيتون! انتبه لهبوط الثقل -1 ❤️');
+          }
+        }
+        // 2. Innovative Lever-Tail Catapult on left (x + 4 .. x + 74) when counterweight slams!
+        if (
+          (p.pressState === 'slam' || (p.pressState === 'hold' && cyc < 3.55)) &&
+          !(p.launchCd > 0) &&
+          catCx2 >= p.x + 2 &&
+          catCx2 <= p.x + 76 &&
+          c.y + c.h >= floorY - 62 &&
+          c.y + c.h <= floorY + 8 &&
+          c.vy >= -180
+        ) {
+          c.vy = -760;
+          c.onGround = false;
+          c.scaleX = 0.84;
+          c.scaleY = 1.2;
+          p.launchCd = 0.65;
+          Audio.playJump();
+          Particles.spawnDust(catCx2, floorY - 28, 12, '#bef264');
+          const isEn = window.Game.I18n && window.Game.I18n.isEn();
+          Particles.spawnPopup(catCx2, floorY - 58, isEn ? '🫒 Olive-Press Launch!' : '🫒 قفزة معصرة الزيتون!', '#bef264');
+        }
+      } else if (p.type === 'battir_railway_semaphore') {
+        // 1892 Jaffa–Jerusalem Ottoman Railway Semaphore & Sanasel Shelter Steam Jet:
+        // Crouch behind the low dry-stone Sanasel wall OR Meow to flip the signal GREEN!
+        if (p.greenTimer > 0) {
+          p.greenTimer = Math.max(0, p.greenTimer - dt);
+          p.semState = 'green';
+          p.jetPower = Math.max(0, (p.jetPower || 0) - dt * 5);
+        } else {
+          const cyc = (gameTime + (p.phase || 0)) % 4.6;
+          const prevSt = p.semState || 'clear';
+          if (cyc < 1.9) {
+            p.semState = 'clear';
+            p.jetPower = Math.max(0, (p.jetPower || 0) - dt * 4);
+          } else if (cyc < 2.75) {
+            p.semState = 'warn';
+            p.jetPower = 0.15;
+          } else if (cyc < 4.05) {
+            p.semState = 'jet';
+            p.jetPower = Math.min(1, (p.jetPower || 0) + dt * 6);
+            if (prevSt !== 'jet' && Audio.playSteamHiss) Audio.playSteamHiss();
+          } else {
+            p.semState = 'clear';
+            p.jetPower = Math.max(0, (p.jetPower || 0) - dt * 4);
+          }
+        }
+        if (p.semState === 'jet' && (p.jetPower || 0) > 0.55) {
+          const floorY = p.y + p.h;
+          const jetTop = floorY - 52;
+          const jetBot = floorY - 27; // Crouching catTop is floorY - 22 (593 > 588) -> shelters safely behind Sanasel wall!
+          const catTop = c.y + (c.crouching ? 22 : 5);
+          const catBot = c.y + 41;
+          if (
+            !c.crouching &&
+            !isInCheckpointSafeZone(level, p.x, jetTop, p.w, 30) &&
+            c.x + c.w - 10 > p.x + 14 &&
+            c.x + 10 < p.x + p.w - 14 &&
+            catTop < jetBot &&
+            catBot > jetTop
+          ) {
+            onCatHit('بخار قاطرة بتّير ١٨٩٢! انحنِ خلف السنسلة أو موء للإشارة -1 ❤️');
+          }
+        }
+      } else if (p.type === 'battir_aqueduct_surge') {
+        // Ma'dud Roman Irrigation Canal Surge + Famous Purple Battiri Eggplant Sprint Boost!
+        const cyc = (gameTime + (p.phase || 0)) % 3.5;
+        if (p.boostCd > 0) p.boostCd = Math.max(0, p.boostCd - dt);
+        if (cyc < 0.55) {
+          p.waveWarn = true;
+          p.waveActive = false;
+          p.waveCalmed = false;
+        } else if (cyc < 2.55 && !p.waveCalmed) {
+          p.waveWarn = false;
+          p.waveActive = true;
+          const u = (cyc - 0.55) / 2.0;
+          const dir = p.waveDir || 1;
+          p.waveX = dir > 0 ? (p.x + 28 + u * (p.w - 64)) : (p.x + p.w - 28 - u * (p.w - 64));
+          const floorY = p.y + p.h;
+          const catCx2 = c.x + c.w * 0.5;
+          if (
+            !isInCheckpointSafeZone(level, p.waveX - 20, floorY - 30, 40, 30) &&
+            Math.abs(catCx2 - p.waveX) < 20 &&
+            c.y + c.h > floorY - 26 &&
+            c.y < floorY + 4
+          ) {
+            onCatHit('موجة سقي قناة المعدود! اقفز فوق الموجة -1 ❤️');
+          }
+        } else {
+          p.waveWarn = false;
+          p.waveActive = false;
+        }
+        // Touching the irrigated Battiri Eggplant patch at the far end grants a joyful stamina sprint boost!
+        const patchX = (p.waveDir || 1) > 0 ? (p.x + p.w - 28) : (p.x + 28);
+        const floorY = p.y + p.h;
+        if (
+          !(p.boostCd > 0) &&
+          Math.abs((c.x + c.w * 0.5) - patchX) < 26 &&
+          c.y + c.h >= floorY - 26 &&
+          c.y <= floorY + 4
+        ) {
+          c.eggplantBoostTimer = 2.5;
+          p.boostCd = 3.6;
+          if (Audio.playCollect) Audio.playCollect();
+          Particles.spawnDust(patchX, floorY - 12, 10, '#a855f7');
+          const isEn = window.Game.I18n && window.Game.I18n.isEn();
+          Particles.spawnPopup(patchX, floorY - 38, isEn ? '🍆 Battiri Eggplant Boost!' : '🍆 نشاط الباذنجان البتيري!', '#d8b4fe');
         }
       }
     }
@@ -2215,7 +2376,7 @@ window.Game = window.Game || {};
       const py = p.y - camY + (p.type !== 'flower_bounce' && p.bounceAnim ? Math.sin(p.bounceAnim * Math.PI) * 6 : 0);
       const pad = (p.type === 'maya_dart_totem' || p.type === 'maya_twin_scale' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk')
         ? 540
-        : (p.type === 'pendulum_censer' || p.type === 'waterwheel_arm' || p.type === 'pressure_boiler_valve' || p.type === 'switch_rail_bridge' || p.type === 'carnival_bell_swing' || p.type === 'gondola_boat' || p.type === 'moulin_sail_wheel' || p.type === 'paris_balcony_drawbridge' || p.type === 'morocco_lantern_swing' || p.type === 'morocco_magic_carpet' || p.type === 'morocco_cedar_bridge' || p.type === 'maya_vine_swing' || p.type === 'maya_sun_disc' || p.type === 'maya_stone_bridge' || p.type === 'maya_serpent_ring' || p.type === 'maya_rolling_wheel' || p.type === 'maya_serpent_spine' || p.type === 'maya_vault_door' || p.type === 'greece_sun_mirror' || p.type === 'greece_light_bridge' || p.type === 'greece_chariot_track' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_marble_lift' || p.type === 'battir_water_sluice' || p.type === 'battir_canal_raft' || p.type === 'battir_spring_geyser' || p.type === 'battir_olive_bough' || p.type === 'battir_railway_handcar' || p.type === 'battir_stone_roller' || p.type === 'battir_roman_bath_vent' || p.type === 'battir_hosh_arch_swing' || p.type === 'battir_madud_scale')
+        : (p.type === 'pendulum_censer' || p.type === 'waterwheel_arm' || p.type === 'pressure_boiler_valve' || p.type === 'switch_rail_bridge' || p.type === 'carnival_bell_swing' || p.type === 'gondola_boat' || p.type === 'moulin_sail_wheel' || p.type === 'paris_balcony_drawbridge' || p.type === 'morocco_lantern_swing' || p.type === 'morocco_magic_carpet' || p.type === 'morocco_cedar_bridge' || p.type === 'maya_vine_swing' || p.type === 'maya_sun_disc' || p.type === 'maya_stone_bridge' || p.type === 'maya_serpent_ring' || p.type === 'maya_rolling_wheel' || p.type === 'maya_serpent_spine' || p.type === 'maya_vault_door' || p.type === 'greece_sun_mirror' || p.type === 'greece_light_bridge' || p.type === 'greece_chariot_track' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_marble_lift' || p.type === 'battir_madud_gate' || p.type === 'battir_pool_bridge' || p.type === 'battir_press_pad' || p.type === 'battir_olive_basket' || p.type === 'battir_roman_bath_vent' || p.type === 'battir_hosh_arch_swing' || p.type === 'battir_olive_bough' || p.type === 'battir_alley_wall')
         ? 280
         : 40;
       if (px + p.w < -pad || px > cullW + pad) continue;
