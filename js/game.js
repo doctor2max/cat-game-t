@@ -1760,7 +1760,7 @@ window.Game = window.Game || {};
       } else if (p.type === 'battir_olive_press') {
         // Ancient Battir Lever-and-Counterweight Olive Press (معصرة الزيتون الأثرية):
         // Falling counterweight stone on right slams down, WHILE the left oak lever tail catapults Mashmasha skyward!
-        const cyc = (gameTime + (p.phase || 0)) % 4.2;
+        const cyc = (timeSec + (p.phase || 0)) % 4.2;
         if (p.launchCd > 0) p.launchCd = Math.max(0, p.launchCd - dt);
         const prevState = p.pressState || 'rise';
         if (cyc < 1.9) {
@@ -1824,7 +1824,7 @@ window.Game = window.Game || {};
           p.semState = 'green';
           p.jetPower = Math.max(0, (p.jetPower || 0) - dt * 5);
         } else {
-          const cyc = (gameTime + (p.phase || 0)) % 4.6;
+          const cyc = (timeSec + (p.phase || 0)) % 4.6;
           const prevSt = p.semState || 'clear';
           if (cyc < 1.9) {
             p.semState = 'clear';
@@ -1860,7 +1860,7 @@ window.Game = window.Game || {};
         }
       } else if (p.type === 'battir_aqueduct_surge') {
         // Ma'dud Roman Irrigation Canal Surge + Famous Purple Battiri Eggplant Sprint Boost!
-        const cyc = (gameTime + (p.phase || 0)) % 3.5;
+        const cyc = (timeSec + (p.phase || 0)) % 3.5;
         if (p.boostCd > 0) p.boostCd = Math.max(0, p.boostCd - dt);
         if (cyc < 0.55) {
           p.waveWarn = true;
@@ -1911,7 +1911,7 @@ window.Game = window.Game || {};
           p.ovenState = 'damped';
           p.emberPower = Math.max(0, (p.emberPower || 0) - dt * 5);
         } else {
-          const cyc = (gameTime + (p.phase || 0)) % 4.1;
+          const cyc = (timeSec + (p.phase || 0)) % 4.1;
           if (cyc < 1.75) {
             p.ovenState = 'bake';
             p.emberPower = Math.max(0, (p.emberPower || 0) - dt * 4);
@@ -1960,7 +1960,7 @@ window.Game = window.Game || {};
           p.sluiceState = 'shut';
           p.cascadePower = Math.max(0, (p.cascadePower || 0) - dt * 5);
         } else {
-          const cyc = (gameTime + (p.phase || 0)) % 4.4;
+          const cyc = (timeSec + (p.phase || 0)) % 4.4;
           if (cyc < 1.85) {
             p.sluiceState = 'calm';
             p.cascadePower = Math.max(0, (p.cascadePower || 0) - dt * 4);
@@ -1989,7 +1989,7 @@ window.Game = window.Game || {};
       } else if (p.type === 'battir_locomotive_crossing') {
         // Live Foreground 1892 Jaffa–Jerusalem Ottoman Express Train Crossing (معبر قطار بتّير السريع)!
         const floorY = p.y + p.h;
-        const cyc = (gameTime + (p.phase || 0)) % 5.6;
+        const cyc = (timeSec + (p.phase || 0)) % 5.6;
         if (cyc < 2.3) {
           p.crossState = 'open';
           p.gateClose = Math.max(0, (p.gateClose || 0) - dt * 3.5);
