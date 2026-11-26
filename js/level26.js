@@ -69,7 +69,7 @@
       // CHAPTER 3 (6100 .. 9300): مدرجات الجرف الأحمر، الصبر وسلال قطاف العنب المعلّقة
       // =====================================================================
       // Overhead Vineyard Harvest Basket Zipline #1 gliding diagonally across Gorge (6100 .. 6780)!
-      { x: 6140, y: 565, w: 118, h: 22, type: 'battir_grape_zipline', oneWay: true, startX: 6140, startY: 565, endX: 6610, endY: 490, zipSpeed: 0.44 },
+      { x: 6120, y: 576, w: 136, h: 22, type: 'battir_grape_zipline', oneWay: true, startX: 6120, startY: 576, endX: 6610, endY: 496, zipSpeed: 0.30 },
       { x: 6780, y: groundY, w: 1480, h: groundH, type: 'battir_cliff_terrace' },
       // Sabr Prickly-Pear Hedge #2 + Overhead Roman Aqueduct Cascade #2
       { x: 7260, y: groundY - 46, w: 86, h: 46, type: 'battir_sabr_hedge', nonSolid: true },
@@ -93,7 +93,7 @@
       { x: 9855, y: 505, w: 130, h: 22, type: 'battir_qantara_arcade', oneWay: true },
 
       // Overhead Vineyard Harvest Basket Zipline #2 soaring over Wadi al-Makhrour Gorge (10460 .. 11180)!
-      { x: 10500, y: 562, w: 118, h: 22, type: 'battir_grape_zipline', oneWay: true, startX: 10500, startY: 562, endX: 11015, endY: 495, zipSpeed: 0.44 },
+      { x: 10480, y: 574, w: 136, h: 22, type: 'battir_grape_zipline', oneWay: true, startX: 10480, startY: 574, endX: 11015, endY: 498, zipSpeed: 0.30 },
       { x: 11180, y: groundY, w: 1170, h: groundH, type: 'battir_cliff_terrace' },
       { x: 11310, y: groundY - 90, w: 94, h: 90, type: 'battir_taboon_oven', nonSolid: true, phase: 0.9 },
       { x: 11850, y: groundY - 46, w: 86, h: 46, type: 'battir_sabr_hedge', nonSolid: true },
@@ -134,7 +134,7 @@
       { x: 3620, y: 364, collected: false },
       { x: 4335, y: 260, collected: false },
       { x: 5555, y: 340, collected: false },
-      { x: 6410, y: 448, collected: false },
+      { x: 6405, y: 478, collected: false },
       { x: 8055, y: 328, collected: false },
       { x: 9705, y: 376, collected: false },
       { x: 13105, y: 334, collected: false },

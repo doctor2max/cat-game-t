@@ -1522,23 +1522,32 @@ window.Game.Cat = function (startX, startY) {
         const prevX = p.x;
         const prevY = p.y;
         const rate = p.zipSpeed || 0.42;
+        const catAboveBasket = (
+          p !== standing &&
+          cat.x + cat.w > p.x - 24 &&
+          cat.x < p.x + p.w + 24 &&
+          cat.y + cat.h <= p.y + 8 &&
+          cat.y > p.y - 175
+        );
         if (p === standing) {
           p.riding = true;
-          p.holdTimer = 1.5;
+          p.holdTimer = 1.8;
         }
         if (p.riding) {
           if (p.zipT < 1) {
-            p.zipT = Math.min(1, p.zipT + rate * dt);
+            if (!catAboveBasket) {
+              p.zipT = Math.min(1, p.zipT + rate * dt);
+            }
           } else {
             p.holdTimer = Math.max(0, (p.holdTimer || 0) - dt);
-            if (p !== standing && p.holdTimer <= 0) p.riding = false;
+            if (p !== standing && !catAboveBasket && p.holdTimer <= 0) p.riding = false;
           }
-        } else if (p.zipT > 0) {
-          p.zipT = Math.max(0, p.zipT - rate * 0.75 * dt);
+        } else if (p.zipT > 0 && !catAboveBasket) {
+          p.zipT = Math.max(0, p.zipT - rate * 0.72 * dt);
         }
         const ease = p.zipT * p.zipT * (3 - 2 * p.zipT);
         p.x = p.startX + (p.endX - p.startX) * ease;
-        p.y = p.startY + (p.endY - p.startY) * ease + Math.sin(p.zipT * Math.PI) * 14;
+        p.y = p.startY + (p.endY - p.startY) * ease + Math.sin(p.zipT * Math.PI) * 10;
         p.pulleySpin = (p.pulleySpin || 0) + (p.x - prevX) * 0.09;
         if (p === standing) {
           cat.x += (p.x - prevX);

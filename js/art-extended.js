@@ -13133,22 +13133,129 @@ window.Game = window.Game || {};
     }
 
     if (p.type === 'battir_shadoof_beam') {
-      // Counterbalanced Stone Well-Sweep Platform (رافعة البئر الحجرية المتوازنة / الشادوف)
+      // =====================================================================
+      // TRADITIONAL PALESTINIAN STONE WELL-HEAD & TIMBER SHADOOF (شادوف البئر التراثي!)
+      // Dressed Battir limestone well column, carved timber Y-fork fulcrum with
+      // forged iron pivot pin, planked olive-wood beam with iron end-straps,
+      // rope-bound stone counterweight on left & gleaming copper bucket on right!
+      // =====================================================================
       ctx.save();
       const cx = px + p.w * 0.5;
-      // Stone well-head fulcrum column beneath platform
-      const fG = ctx.createLinearGradient(cx - 14, py, cx + 14, 700);
-      fG.addColorStop(0, '#d8aa7d'); fG.addColorStop(1, '#5c3a21');
-      ctx.fillStyle = fG; ctx.strokeStyle = '#382010'; ctx.lineWidth = 1.5;
-      ctx.fillRect(cx - 11, py + 12, 22, 690 - py);
-      ctx.strokeRect(cx - 11, py + 12, 22, 690 - py);
-      // Heavy iron-bound cedar platform beam + hanging stone counterweight & copper water bucket
+      const baseBottom = Math.max(py + 165, 720);
+      const liftRatio = p.liftT || 0;
+      const seed = Math.abs(Math.floor((p.x || 0) * 0.13));
+      const stCols = ['#dfd0b8', '#d2be9f', '#c6ad8a', '#e6d8c3', '#baa07c'];
+
+      // 1. Dressed-Limestone Well-Head Support Column extending down to the gorge floor
+      const colW = 28;
+      const colX = cx - colW * 0.5;
+      const colTopY = py + 24;
+      const colH = baseBottom - colTopY;
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(colX, colTopY, colW, colH, 3);
+      const colG = ctx.createLinearGradient(colX, colTopY, colX + colW, colTopY);
+      colG.addColorStop(0, '#9a7a5c'); colG.addColorStop(0.42, '#dec8a8'); colG.addColorStop(1, '#785a3f');
+      ctx.fillStyle = colG; ctx.fill(); ctx.clip();
+      for (let r = 0; r < Math.ceil(colH / 13); r++) {
+        const ry = colTopY + r * 13;
+        const off = (r % 2) * 12;
+        for (let bx = -12 + off; bx < colW + 12; bx += 22) {
+          ctx.fillStyle = stCols[Math.abs(seed + r * 7 + Math.floor(bx / 22) * 11) % stCols.length];
+          ctx.beginPath(); ctx.roundRect(colX + bx + 0.7, ry + 0.7, 20.6, 11.6, 2); ctx.fill();
+        }
+      }
+      ctx.restore();
+      ctx.strokeStyle = '#4a301c'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.roundRect(colX, colTopY, colW, colH, 3); ctx.stroke();
+
+      // Carved stone capital collar & damp moss tuft at the well-head top
+      ctx.fillStyle = '#e5d4ba'; ctx.strokeStyle = '#4a301c'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.roundRect(cx - 19, colTopY - 5, 38, 8, 2.5); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = 'rgba(63, 98, 18, 0.56)';
+      ctx.beginPath(); ctx.ellipse(colX + 6, colTopY + 26, 5.5, 3.0, 0.2, 0, Math.PI * 2); ctx.fill();
+
+      // 2. Carved Olive-Wood Y-Fork Fulcrum Cradle bolted atop the stone pillar
+      ctx.fillStyle = '#6c3e1d'; ctx.strokeStyle = '#291306'; ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(cx - 12, colTopY - 4);
+      ctx.lineTo(cx - 15, py + 7);
+      ctx.lineTo(cx - 7, py + 7);
+      ctx.lineTo(cx - 5, colTopY - 4);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + 12, colTopY - 4);
+      ctx.lineTo(cx + 15, py + 7);
+      ctx.lineTo(cx + 7, py + 7);
+      ctx.lineTo(cx + 5, colTopY - 4);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      // 3. Hanging Rope-Bound Limestone Counterweight Boulder (Left) & Copper Well Bucket (Right)
+      const sway = Math.sin(time * 2.4 + seed) * 2.2;
+      // Left counterweight boulder lashed with braided hemp rope
+      const cwX = px + 14;
+      const cwDrop = 26 + (1 - liftRatio) * 10;
+      ctx.strokeStyle = '#c8a66e'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.moveTo(cwX, py + p.h - 2); ctx.quadraticCurveTo(cwX + sway * 0.4, py + p.h + cwDrop * 0.5, cwX + sway, py + p.h + cwDrop); ctx.stroke();
+      ctx.fillStyle = '#9c8b78'; ctx.strokeStyle = '#3b2e22'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.ellipse(cwX + sway, py + p.h + cwDrop + 8, 11, 9, -0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#d4b47c'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(cwX + sway - 9, py + p.h + cwDrop + 6); ctx.lineTo(cwX + sway + 9, py + p.h + cwDrop + 10); ctx.stroke();
+
+      // Right braided well-rope & gleaming hammered-copper water bucket with dripping spring drops!
+      const bkX = px + p.w - 14;
+      const bkDrop = 30 + liftRatio * 12;
+      const bkY = py + p.h + bkDrop;
+      ctx.strokeStyle = '#c8a66e'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.moveTo(bkX, py + p.h - 2); ctx.quadraticCurveTo(bkX - sway * 0.4, py + p.h + bkDrop * 0.5, bkX - sway, bkY); ctx.stroke();
+      // Copper bucket handle arch
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(bkX - sway, bkY + 4, 8, Math.PI, 0); ctx.stroke();
+      // Hammered copper bucket body
+      const cpG = ctx.createLinearGradient(bkX - sway - 9, bkY + 4, bkX - sway + 9, bkY + 4);
+      cpG.addColorStop(0, '#7c2d12'); cpG.addColorStop(0.4, '#fb923c'); cpG.addColorStop(0.75, '#c2410c'); cpG.addColorStop(1, '#5a1e0a');
+      ctx.fillStyle = cpG; ctx.strokeStyle = '#3b1506'; ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(bkX - sway - 9, bkY + 4); ctx.lineTo(bkX - sway + 9, bkY + 4);
+      ctx.lineTo(bkX - sway + 7, bkY + 18); ctx.quadraticCurveTo(bkX - sway, bkY + 20, bkX - sway - 7, bkY + 18);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Sparkling turquoise spring water inside bucket + dripping droplet
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath(); ctx.ellipse(bkX - sway, bkY + 5, 7.5, 1.8, 0, 0, Math.PI * 2); ctx.fill();
+      const dropU = (time * 1.7 + seed * 0.2) % 1;
+      ctx.fillStyle = `rgba(186, 230, 253, ${((1 - dropU) * 0.85).toFixed(2)})`;
+      ctx.beginPath(); ctx.arc(bkX - sway, bkY + 20 + dropU * 20, 1.8, 0, Math.PI * 2); ctx.fill();
+
+      // 4. Hand-Planked Iron-Banded Olive-Wood Counterbalance Stepping Beam (px, py, p.w, p.h)
       const bG = ctx.createLinearGradient(px, py, px, py + p.h);
-      bG.addColorStop(0, '#f59e0b'); bG.addColorStop(0.55, '#9a3412'); bG.addColorStop(1, '#431407');
-      ctx.fillStyle = bG; ctx.strokeStyle = '#271105'; ctx.lineWidth = 1.6;
-      ctx.beginPath(); ctx.roundRect(px, py, p.w, p.h - 2, 5); ctx.fill(); ctx.stroke();
+      bG.addColorStop(0.0, '#e3a857');
+      bG.addColorStop(0.28, '#be742c');
+      bG.addColorStop(0.75, '#824317');
+      bG.addColorStop(1.0, '#451f08');
+      ctx.fillStyle = bG; ctx.strokeStyle = '#261004'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(px, py, p.w, p.h - 2, 4.5); ctx.fill(); ctx.stroke();
+      // Sunlit top bevel & vertical wood plank seams
+      ctx.fillStyle = 'rgba(255, 245, 214, 0.40)';
+      ctx.fillRect(px + 5, py + 1.4, p.w - 10, 2.2);
+      ctx.strokeStyle = 'rgba(38, 16, 4, 0.36)'; ctx.lineWidth = 1.0;
+      for (let sx0 = px + 26; sx0 < px + p.w - 20; sx0 += 24) {
+        ctx.beginPath(); ctx.moveTo(sx0, py + 2); ctx.lineTo(sx0, py + p.h - 3); ctx.stroke();
+      }
+      // Forged iron reinforcing straps & brass rivets on both ends and center pivot
+      for (const bx of [px + 6, cx - 10, px + p.w - 14]) {
+        const bw0 = bx === cx - 10 ? 20 : 8;
+        ctx.fillStyle = '#334155'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.roundRect(bx, py + 1, bw0, p.h - 4, 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath(); ctx.arc(bx + bw0 * 0.5, py + (p.h - 2) * 0.5, 1.5, 0, Math.PI * 2); ctx.fill();
+      }
+      // Central heavy forged-iron & brass pivot axle boss
+      ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.arc(cx, py + 9, 6.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
       ctx.fillStyle = '#fbbf24';
-      ctx.beginPath(); ctx.arc(cx, py + 9, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, py + 9, 2.8, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
       return;
     }
@@ -26913,10 +27020,150 @@ window.Game = window.Game || {};
         }
         ctx.restore();
 
-        drawRuggedMintar(ctx, sx + 715, 588, 1.12);
-        drawPomegranateTree(ctx, sx + 875, 586, 1.14);
-        drawRuggedMintar(ctx, sx + 1035, 582, 0.86);
-        drawAncientOliveSunset(ctx, sx + 1175, 590, 1.12);
+        // Traditional Palestinian Village Mosque with Emerald-Green Dome & Stone Minaret
+        // (مسجد القرية بقبة خضراء ومئذنة حجرية قدسية — بدلاً من البنايتين الهرميتين!)
+        {
+          const mqX = sx + 740;
+          const mqBot = 588;
+          const mqW = 192;
+          const mqH = 104;
+          const mqTop = mqBot - mqH;
+          const mqCx = mqX + mqW * 0.5;
+          const mPal = ['#e8dbc6', '#ddd0b9', '#d2c2a8', '#efe5d4', '#c8b69a'];
+
+          // Soft ground contact shadow
+          ctx.fillStyle = 'rgba(24, 16, 8, 0.30)';
+          ctx.beginPath(); ctx.ellipse(mqCx + 18, mqBot + 1, 128, 7, 0, 0, Math.PI * 2); ctx.fill();
+
+          // 1. Slender Dressed-Stone Minaret on the Right (مئذنة حجرية قدسية بشرفة وقبة خضراء)
+          const mnX = mqX + mqW - 4;
+          const mnW = 30;
+          const mnTop = mqTop - 106;
+          const mnH = mqBot - mnTop;
+          const mnCx = mnX + mnW * 0.5;
+          ctx.save();
+          ctx.beginPath(); ctx.roundRect(mnX, mnTop, mnW, mnH, 2);
+          const mnG = ctx.createLinearGradient(mnX, mnTop, mnX + mnW, mnTop);
+          mnG.addColorStop(0, '#cfc0a8'); mnG.addColorStop(0.45, '#ece2d0'); mnG.addColorStop(1, '#a8967d');
+          ctx.fillStyle = mnG; ctx.fill(); ctx.clip();
+          for (let r = 0; r < Math.ceil(mnH / 12); r++) {
+            ctx.strokeStyle = 'rgba(72, 52, 34, 0.24)'; ctx.lineWidth = 0.8;
+            ctx.beginPath(); ctx.moveTo(mnX, mnTop + r * 12); ctx.lineTo(mnX + mnW, mnTop + r * 12); ctx.stroke();
+          }
+          ctx.restore();
+          ctx.strokeStyle = '#5a4532'; ctx.lineWidth = 1.2;
+          ctx.strokeRect(mnX, mnTop, mnW, mnH);
+          // Carved stone Muezzin balcony (شرفة المؤذن)
+          const balY = mnTop + 42;
+          ctx.fillStyle = '#e5d8c2'; ctx.strokeStyle = '#5a4532'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.roundRect(mnX - 7, balY, mnW + 14, 10, 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#c4b39a';
+          ctx.beginPath(); ctx.roundRect(mnX - 4, balY + 10, mnW + 8, 5, 1.5); ctx.fill(); ctx.stroke();
+          // Arched lantern openings above balcony
+          ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#4a3524'; ctx.lineWidth = 0.9;
+          for (const ax of [mnCx - 6, mnCx + 6]) {
+            ctx.beginPath(); ctx.roundRect(ax - 3.2, mnTop + 16, 6.4, 16, [4, 4, 1, 1]); ctx.fill(); ctx.stroke();
+          }
+          // Emerald-green minaret dome cap + slender golden finial & crescent (هلال ذهبي)
+          const mdG = ctx.createRadialGradient(mnCx - 4, mnTop - 8, 2, mnCx, mnTop - 2, 18);
+          mdG.addColorStop(0, '#4ade80'); mdG.addColorStop(0.55, '#15803d'); mdG.addColorStop(1, '#064e3b');
+          ctx.fillStyle = mdG; ctx.strokeStyle = '#052e16'; ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.moveTo(mnX + 2, mnTop);
+          ctx.quadraticCurveTo(mnCx - 13, mnTop - 16, mnCx, mnTop - 24);
+          ctx.quadraticCurveTo(mnCx + 13, mnTop - 16, mnX + mnW - 2, mnTop);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.moveTo(mnCx, mnTop - 24); ctx.lineTo(mnCx, mnTop - 34); ctx.stroke();
+          ctx.fillStyle = '#fde047';
+          ctx.beginPath(); ctx.arc(mnCx, mnTop - 37, 3.6, 0.3, Math.PI * 1.9); ctx.fill();
+          ctx.fillStyle = '#15803d';
+          ctx.beginPath(); ctx.arc(mnCx + 1.4, mnTop - 37.6, 2.8, 0, Math.PI * 2); ctx.fill();
+
+          // 2. Ribbed Emerald-Green Main Mosque Dome (القبة الخضراء المضلّعة!)
+          const domeR = 54;
+          const domeBaseY = mqTop + 4;
+          ctx.fillStyle = '#dfd2bc'; ctx.strokeStyle = '#5a4532'; ctx.lineWidth = 1.2;
+          ctx.fillRect(mqCx - domeR - 4, domeBaseY - 14, (domeR + 4) * 2, 15);
+          ctx.strokeRect(mqCx - domeR - 4, domeBaseY - 14, (domeR + 4) * 2, 15);
+          // Small drum windows under the dome
+          ctx.fillStyle = '#fef08a';
+          for (let dw = -36; dw <= 36; dw += 18) {
+            ctx.beginPath(); ctx.roundRect(mqCx + dw - 3.5, domeBaseY - 11, 7, 9, [3.5, 3.5, 1, 1]); ctx.fill();
+          }
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(mqCx, domeBaseY - 12, domeR, Math.PI, 0);
+          ctx.closePath();
+          const dgG = ctx.createRadialGradient(mqCx - 16, domeBaseY - 46, 5, mqCx, domeBaseY - 22, domeR + 8);
+          dgG.addColorStop(0.00, '#4ade80');
+          dgG.addColorStop(0.38, '#16a34a');
+          dgG.addColorStop(0.76, '#15803d');
+          dgG.addColorStop(1.00, '#064e3b');
+          ctx.fillStyle = dgG; ctx.fill();
+          ctx.clip();
+          // Graceful meridian dome ribs
+          ctx.strokeStyle = 'rgba(5, 46, 22, 0.38)'; ctx.lineWidth = 1.3;
+          for (const rx of [-36, -18, 0, 18, 36]) {
+            ctx.beginPath();
+            ctx.moveTo(mqCx, domeBaseY - 12 - domeR);
+            ctx.quadraticCurveTo(mqCx + rx * 0.75, domeBaseY - 38, mqCx + rx, domeBaseY - 12);
+            ctx.stroke();
+          }
+          ctx.restore();
+          ctx.strokeStyle = '#052e16'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(mqCx, domeBaseY - 12, domeR, Math.PI, 0); ctx.closePath(); ctx.stroke();
+          // Golden dome finial & crescent (هلال القبة الذهبي)
+          const finY = domeBaseY - 12 - domeR;
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+          ctx.beginPath(); ctx.moveTo(mqCx, finY); ctx.lineTo(mqCx, finY - 14); ctx.stroke();
+          ctx.fillStyle = '#fde047';
+          ctx.beginPath(); ctx.arc(mqCx, finY - 18, 5.2, 0.25, Math.PI * 1.85); ctx.fill();
+          ctx.fillStyle = '#3b2414';
+          ctx.beginPath(); ctx.arc(mqCx + 2.0, finY - 19, 4.0, 0, Math.PI * 2); ctx.fill();
+
+          // 3. Dressed Jerusalem-Limestone Prayer Hall Body with Pointed Entrance Arch & Glowing Windows
+          ctx.save();
+          ctx.beginPath(); ctx.roundRect(mqX, mqTop, mqW, mqH, [3, 3, 0, 0]);
+          ctx.fillStyle = '#e4d7c2'; ctx.fill(); ctx.clip();
+          const mRowH = 13, mBlkW = 24;
+          for (let r = 0; r < Math.ceil(mqH / mRowH); r++) {
+            const ry = mqTop + r * mRowH;
+            const off = (r % 2) * (mBlkW * 0.5);
+            for (let bx = -mBlkW + off; bx < mqW + mBlkW; bx += mBlkW) {
+              ctx.fillStyle = mPal[Math.abs(29 + r * 7 + Math.floor(bx / mBlkW) * 11) % mPal.length];
+              ctx.beginPath(); ctx.roundRect(mqX + bx + 0.7, ry + 0.7, mBlkW - 1.4, mRowH - 1.4, 1.8); ctx.fill();
+            }
+          }
+          ctx.restore();
+          ctx.strokeStyle = '#5a4532'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.roundRect(mqX, mqTop, mqW, mqH, [3, 3, 0, 0]); ctx.stroke();
+          // Carved limestone cornice parapet along roof
+          ctx.fillStyle = '#efe5d4'; ctx.fillRect(mqX - 4, mqTop - 3, mqW + 8, 6);
+          ctx.strokeRect(mqX - 4, mqTop - 3, mqW + 8, 6);
+
+          // Central Pointed Arch Mosque Portal (بوابة المسجد المقوّسة) + Twin Warm Glowing Arched Windows
+          const pR = 22, pSpY = mqBot - 36;
+          ctx.fillStyle = '#291b10';
+          ctx.beginPath();
+          ctx.moveTo(mqCx - pR, mqBot); ctx.lineTo(mqCx - pR, pSpY);
+          ctx.quadraticCurveTo(mqCx - pR, pSpY - 22, mqCx, pSpY - 28);
+          ctx.quadraticCurveTo(mqCx + pR, pSpY - 22, mqCx + pR, pSpY);
+          ctx.lineTo(mqCx + pR, mqBot); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = '#6b533b'; ctx.lineWidth = 1.3; ctx.stroke();
+          // Warm interior mosque glow
+          const mGlow = ctx.createRadialGradient(mqCx, mqBot - 24, 3, mqCx, mqBot - 24, 24);
+          mGlow.addColorStop(0, 'rgba(254, 240, 138, 0.72)'); mGlow.addColorStop(1, 'rgba(251, 146, 60, 0)');
+          ctx.fillStyle = mGlow; ctx.beginPath(); ctx.arc(mqCx, mqBot - 24, 24, 0, Math.PI * 2); ctx.fill();
+          for (const wx of [mqX + 34, mqX + mqW - 34]) {
+            ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#5a4532'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.roundRect(wx - 12, mqTop + 26, 24, 34, [12, 12, 2, 2]); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#785a3a'; ctx.lineWidth = 1.0;
+            ctx.beginPath(); ctx.moveTo(wx, mqTop + 26); ctx.lineTo(wx, mqTop + 60); ctx.moveTo(wx - 12, mqTop + 44); ctx.lineTo(wx + 12, mqTop + 44); ctx.stroke();
+          }
+        }
+        drawPomegranateTree(ctx, sx + 668, 588, 1.08);
+        drawAncientOliveSunset(ctx, sx + 1068, 590, 1.12);
 
       } else if (zoneIdx === 3) {
         // ---------------------------------------------------------------------
@@ -26966,13 +27213,52 @@ window.Game = window.Game || {};
         ctx.beginPath();
         ctx.moveTo(kx - 10, 565); ctx.lineTo(kx + 18, 434); ctx.lineTo(kx + 410, 434); ctx.lineTo(kx + 440, 565);
         ctx.closePath(); ctx.fill(); ctx.stroke();
-        // Two carved Roman pediment rock-cut tomb portals hewn into the cliff!
+        // Two graceful arched Palestinian stone portals in the lower citadel level (أبواب مقوّسة بدلاً من المثلثة!)
         for (const tx of [kx + 115, kx + 295]) {
-          ctx.fillStyle = '#eabf8c'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.4;
-          ctx.beginPath(); ctx.moveTo(tx - 36, 488); ctx.lineTo(tx, 464); ctx.lineTo(tx + 36, 488); ctx.closePath(); ctx.fill(); ctx.stroke();
-          ctx.fillRect(tx - 30, 488, 60, 74); ctx.strokeRect(tx - 30, 488, 60, 74);
-          ctx.fillStyle = '#140a05';
-          ctx.fillRect(tx - 15, 504, 30, 58);
+          const archTopY = 492;
+          const archR = 24;
+          // Recessed dark vaulted archway interior
+          ctx.fillStyle = '#1b110a';
+          ctx.beginPath();
+          ctx.moveTo(tx - archR, 562);
+          ctx.lineTo(tx - archR, archTopY + 12);
+          ctx.quadraticCurveTo(tx - archR, archTopY - 12, tx, archTopY - 18);
+          ctx.quadraticCurveTo(tx + archR, archTopY - 12, tx + archR, archTopY + 12);
+          ctx.lineTo(tx + archR, 562);
+          ctx.closePath();
+          ctx.fill();
+          // Warm glowing lantern inside the arched citadel doorway
+          const dGlow = ctx.createRadialGradient(tx, archTopY + 8, 2, tx, archTopY + 8, 18);
+          dGlow.addColorStop(0, 'rgba(254, 240, 138, 0.55)');
+          dGlow.addColorStop(1, 'rgba(251, 146, 60, 0)');
+          ctx.fillStyle = dGlow;
+          ctx.beginPath(); ctx.arc(tx, archTopY + 8, 18, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#fef08a';
+          ctx.beginPath(); ctx.arc(tx, archTopY + 8, 3.0, 0, Math.PI * 2); ctx.fill();
+          // Radiating chiseled stone voussoirs framing the arched doorway
+          for (let v = 0; v < 7; v++) {
+            const a0 = Math.PI + (v / 7) * Math.PI;
+            const a1 = Math.PI + ((v + 1) / 7) * Math.PI;
+            const isKey = v === 3;
+            const rOut = archR + (isKey ? 10 : 7.5);
+            ctx.fillStyle = isKey ? '#f2dfc0' : (v % 2 === 0 ? '#e3c497' : '#cfa97a');
+            ctx.strokeStyle = '#4a2c16';
+            ctx.lineWidth = 1.0;
+            ctx.beginPath();
+            ctx.arc(tx, archTopY + 12, rOut, a0, a1);
+            ctx.arc(tx, archTopY + 12, archR, a1, a0, true);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+          }
+          // Molded stone door jamb pilasters flanking the arch
+          ctx.fillStyle = '#dec096';
+          ctx.strokeStyle = '#4a2c16';
+          ctx.lineWidth = 1.1;
+          ctx.fillRect(tx - archR - 7, archTopY + 12, 7, 50);
+          ctx.strokeRect(tx - archR - 7, archTopY + 12, 7, 50);
+          ctx.fillRect(tx + archR, archTopY + 12, 7, 50);
+          ctx.strokeRect(tx + archR, archTopY + 12, 7, 50);
         }
 
         // Towering Megalithic Canaanite–Roman Citadel Bastions atop the Cliff!
