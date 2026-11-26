@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cat-game-touch-v142';
+const CACHE_NAME = 'cat-game-touch-v143';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -16,7 +16,7 @@ const CORE_ASSETS = [
   './js/audio.js?v=34',
   './js/particles.js?v=18',
   './js/art.js?v=23',
-  './js/art-extended.js?v=112',
+  './js/art-extended.js?v=113',
   './js/enemies-extended.js?v=53',
   './js/cat-procedural.js?v=47',
   './js/cat.js?v=54',
@@ -45,7 +45,7 @@ const CORE_ASSETS = [
   './js/level23.js?v=1',
   './js/level24.js?v=4',
   './js/level25.js?v=4',
-  './js/level26.js?v=6',
+  './js/level26.js?v=7',
   './js/game.js?v=53'
 ];
 

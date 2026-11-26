@@ -49,6 +49,7 @@
       // =====================================================================
       { x: 3050, y: groundY, w: 870, h: groundH, type: 'battir_cliff_terrace' },
       // Overhead Arched Roman Aqueduct Cascade #1 (sprint between cascades or Meow to shut!)
+      { x: 3405, y: 512, w: 112, h: 22, type: 'battir_cliff_terrace', oneWay: true },
       { x: 3560, y: groundY - 165, w: 190, h: 165, type: 'battir_flash_sluice', nonSolid: true, phase: 0.5 },
       { x: 3510, y: 412, w: 225, h: 24, type: 'battir_cliff_terrace', oneWay: true },
 

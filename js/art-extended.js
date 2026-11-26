@@ -13360,69 +13360,409 @@ window.Game = window.Game || {};
 
     if (p.type === 'battir_flash_sluice') {
       // =====================================================================
-      // NEW OBSTACLE #3: OVERHEAD ARCHED ROMAN AQUEDUCT CASCADE (شلال قنطرة المعدود!)
+      // OVERHEAD ARCHED ROMAN AQUEDUCT CASCADE (شلال قنطرة المعدود التراثية)
+      // Dressed Battir limestone aqueduct with zero-flicker masonry, open
+      // flowing canal, carved stone spillway spout, sliding iron sluice gate,
+      // 6-spoked bronze valve wheel, dry vaulted shelter arch with voussoirs
+      // & warm lantern, and multi-layered translucent waterfall + splash mist!
       // =====================================================================
       ctx.save();
       const floorY = py + p.h;
       const state = p.sluiceState || 'calm';
       const pwr = p.cascadePower || 0;
-
-      // 1. Right-side Stone Support Pier & Vaulted Dry Shelter Arch
-      const stG = ctx.createLinearGradient(px, py, px + p.w, floorY);
-      stG.addColorStop(0, '#e6be92'); stG.addColorStop(0.55, '#b58356'); stG.addColorStop(1, '#664225');
-      ctx.fillStyle = stG; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.6;
-      // Left slender pier + overhead aqueduct beam + right arched alcove pier
-      ctx.fillRect(px + 6, py + 18, 16, p.h - 18);
-      ctx.strokeRect(px + 6, py + 18, 16, p.h - 18);
-      ctx.beginPath(); ctx.roundRect(px, py, p.w, 24, 4); ctx.fill(); ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(px + 108, floorY);
-      ctx.lineTo(px + 108, floorY - 72);
-      ctx.lineTo(px + p.w - 6, floorY - 72);
-      ctx.lineTo(px + p.w - 6, floorY);
-      ctx.lineTo(px + p.w - 22, floorY);
-      ctx.lineTo(px + p.w - 22, floorY - 38);
-      ctx.quadraticCurveTo(px + 146, floorY - 58, px + 124, floorY - 38);
-      ctx.lineTo(px + 124, floorY);
-      ctx.closePath();
-      ctx.fill(); ctx.stroke();
-
-      // Overhead turquoise aqueduct channel & carved stone spout + bronze valve wheel
-      ctx.fillStyle = '#0284c7';
-      ctx.fillRect(px + 6, py + 4, p.w - 12, 7);
+      const worldSeed = Math.abs(Math.floor((p.x || 0) * 0.13 + (p.y || 0) * 5));
       const spoutCx = px + 61;
-      ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.4;
-      ctx.beginPath(); ctx.arc(spoutCx, py + 16, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.2;
-      ctx.beginPath(); ctx.arc(px + 116, floorY - 56, 7.5, 0, Math.PI * 2); ctx.stroke();
+      const stoneCols = ['#e2cbb0', '#d7bd9e', '#ccb08e', '#e7d5be', '#c2a37e'];
 
-      // 2. Telegraph Foam or Roaring Turquoise Waterfall Curtain!
-      if (state === 'warn') {
-        ctx.fillStyle = '#e0f2fe';
-        for (let b = 0; b < 6; b++) {
+      // Helper: Draw zero-flicker dressed limestone courses clipped to a path function
+      const fillMasonry = (traceFn, x0, y0, w0, h0, rowH = 13, blockW = 24) => {
+        ctx.save();
+        traceFn();
+        const baseG = ctx.createLinearGradient(x0, y0, x0 + w0, y0 + h0);
+        baseG.addColorStop(0, '#dfc6a8');
+        baseG.addColorStop(0.55, '#c4a27d');
+        baseG.addColorStop(1, '#987552');
+        ctx.fillStyle = baseG;
+        ctx.fill();
+        ctx.clip();
+        const rows = Math.ceil(h0 / rowH);
+        for (let r = 0; r < rows; r++) {
+          const ry = y0 + r * rowH;
+          const off = (r % 2) * (blockW * 0.5);
+          for (let bx = -blockW + off; bx < w0 + blockW; bx += blockW) {
+            const idx = Math.abs(worldSeed + r * 7 + Math.floor(bx / blockW) * 13) % stoneCols.length;
+            ctx.fillStyle = stoneCols[idx];
+            ctx.beginPath();
+            ctx.roundRect(x0 + bx + 0.8, ry + 0.8, blockW - 1.6, rowH - 1.6, 2.2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 248, 232, 0.24)';
+            ctx.fillRect(x0 + bx + 2, ry + 1.2, blockW - 4, 1.4);
+            ctx.fillStyle = 'rgba(54, 34, 18, 0.18)';
+            ctx.fillRect(x0 + bx + 2, ry + rowH - 2.3, blockW - 4, 1.3);
+          }
+        }
+        ctx.restore();
+        traceFn();
+        ctx.strokeStyle = '#4e331f';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+      };
+
+      // Soft ground contact shadow under piers & shelter
+      ctx.fillStyle = 'rgba(28, 16, 8, 0.30)';
+      ctx.beginPath();
+      ctx.ellipse(px + 15, floorY - 1, 16, 3.5, 0, 0, Math.PI * 2);
+      ctx.ellipse(px + 146, floorY - 1, 44, 4.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 1. LEFT DRESSED-LIMESTONE AQUEDUCT PIER WITH CAPITAL, PLINTH & DAMP MOSS
+      const traceLeftPier = () => {
+        ctx.beginPath();
+        ctx.roundRect(px + 6, py + 24, 18, p.h - 24, [2, 2, 2, 2]);
+      };
+      fillMasonry(traceLeftPier, px + 6, py + 24, 18, p.h - 24, 14, 18);
+      // Molded stone capital & base plinth
+      ctx.fillStyle = '#e5cfb4';
+      ctx.strokeStyle = '#4e331f';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(px + 3, py + 22, 24, 7, 2);
+      ctx.roundRect(px + 3, floorY - 9, 24, 9, 2);
+      ctx.fill();
+      ctx.stroke();
+      // Damp moss clinging to base of left pier
+      ctx.fillStyle = 'rgba(63, 98, 18, 0.58)';
+      ctx.beginPath();
+      ctx.ellipse(px + 20, floorY - 12, 6, 3.2, 0.25, 0, Math.PI * 2);
+      ctx.ellipse(px + 11, floorY - 7, 5, 2.5, -0.15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 2. RIGHT VAULTED DRY SHELTER ARCH (المخبأ الحجري المقوّس) WITH VOUSSOIRS & LANTERN
+      const shX = px + 106;
+      const shW = p.w - 110;
+      const shTopY = floorY - 78;
+      const archCx = shX + shW * 0.5;
+      const archInnerR = 23;
+      const archSpringY = floorY - 36;
+
+      // Dark shadowed recessed stone interior alcove behind the arch
+      const alcG = ctx.createLinearGradient(archCx, archSpringY - archInnerR, archCx, floorY);
+      alcG.addColorStop(0, '#2a1a10');
+      alcG.addColorStop(0.55, '#462c1c');
+      alcG.addColorStop(1, '#311e13');
+      ctx.fillStyle = alcG;
+      ctx.beginPath();
+      ctx.moveTo(archCx - archInnerR - 2, floorY);
+      ctx.lineTo(archCx - archInnerR - 2, archSpringY);
+      ctx.arc(archCx, archSpringY, archInnerR + 2, Math.PI, 0, false);
+      ctx.lineTo(archCx + archInnerR + 2, floorY);
+      ctx.closePath();
+      ctx.fill();
+
+      // Warm cozy hanging brass shelter lantern inside the dry archway
+      const lanY = archSpringY - 11;
+      const lanGlow = ctx.createRadialGradient(archCx, lanY + 4, 2, archCx, lanY + 4, 22);
+      lanGlow.addColorStop(0, 'rgba(254, 240, 138, 0.52)');
+      lanGlow.addColorStop(0.55, 'rgba(251, 146, 60, 0.18)');
+      lanGlow.addColorStop(1, 'rgba(251, 146, 60, 0)');
+      ctx.fillStyle = lanGlow;
+      ctx.beginPath();
+      ctx.arc(archCx, lanY + 4, 22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#3b2414';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(archCx, archSpringY - archInnerR + 1);
+      ctx.lineTo(archCx, lanY);
+      ctx.stroke();
+      ctx.fillStyle = '#fef08a';
+      ctx.strokeStyle = '#92400e';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.roundRect(archCx - 3, lanY, 6, 8, 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Dressed limestone outer wall framing the vaulted arch
+      const traceShelterWall = () => {
+        ctx.beginPath();
+        ctx.moveTo(shX, floorY);
+        ctx.lineTo(shX, shTopY + 5);
+        ctx.quadraticCurveTo(shX, shTopY, shX + 5, shTopY);
+        ctx.lineTo(shX + shW - 5, shTopY);
+        ctx.quadraticCurveTo(shX + shW, shTopY, shX + shW, shTopY + 5);
+        ctx.lineTo(shX + shW, floorY);
+        ctx.lineTo(archCx + archInnerR, floorY);
+        ctx.lineTo(archCx + archInnerR, archSpringY);
+        ctx.arc(archCx, archSpringY, archInnerR, 0, Math.PI, true);
+        ctx.lineTo(archCx - archInnerR, floorY);
+        ctx.closePath();
+      };
+      fillMasonry(traceShelterWall, shX, shTopY, shW, 78, 12, 20);
+
+      // Radiating Chiseled Voussoir Arch Stones & Keystone (حجارة العقد وحجر المفتاح)
+      const numV = 7;
+      for (let v = 0; v < numV; v++) {
+        const a0 = Math.PI + (v / numV) * Math.PI;
+        const a1 = Math.PI + ((v + 1) / numV) * Math.PI;
+        const isKey = v === 3;
+        const rIn = archInnerR;
+        const rOut = archInnerR + (isKey ? 11.5 : 8.5);
+        ctx.fillStyle = isKey ? '#efe0c8' : (v % 2 === 0 ? '#dec6a7' : '#cfb28e');
+        ctx.strokeStyle = '#4e331f';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.arc(archCx, archSpringY, rOut, a0, a1);
+        ctx.arc(archCx, archSpringY, rIn, a1, a0, true);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      // Molded stone cornice cap atop the dry shelter arch
+      ctx.fillStyle = '#e7d4ba';
+      ctx.strokeStyle = '#4e331f';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(shX - 3, shTopY - 4, shW + 6, 7, 2.5);
+      ctx.fill();
+      ctx.stroke();
+
+      // Slender stone pier rising from shelter roof up to the overhead aqueduct beam
+      const traceRightSupport = () => {
+        ctx.beginPath();
+        ctx.rect(shX + shW - 22, py + 24, 18, shTopY - (py + 24));
+      };
+      fillMasonry(traceRightSupport, shX + shW - 22, py + 24, 18, Math.max(10, shTopY - (py + 24)), 13, 18);
+
+      // 3. OVERHEAD ROMAN AQUEDUCT CANAL, CARVED SPOUT & IRON SLUICE GATE
+      const traceBeam = () => {
+        ctx.beginPath();
+        ctx.roundRect(px - 2, py, p.w + 4, 25, 4);
+      };
+      fillMasonry(traceBeam, px - 2, py, p.w + 4, 25, 12, 26);
+
+      // Carved dentil molding beneath overhead aqueduct beam
+      ctx.fillStyle = '#c9ab86';
+      ctx.strokeStyle = '#5c3c24';
+      ctx.lineWidth = 0.8;
+      for (let dx = px + 26; dx < px + p.w - 24; dx += 14) {
+        ctx.fillRect(dx, py + 24, 8, 4);
+        ctx.strokeRect(dx, py + 24, 8, 4);
+      }
+
+      // Open-top shimmering spring canal water flowing along top of aqueduct
+      const canalG = ctx.createLinearGradient(px + 4, py + 2, px + 4, py + 10);
+      canalG.addColorStop(0, '#bae6fd');
+      canalG.addColorStop(0.55, '#0ea5e9');
+      canalG.addColorStop(1, '#0369a1');
+      ctx.fillStyle = canalG;
+      ctx.beginPath();
+      ctx.roundRect(px + 4, py + 2.5, p.w - 8, 7.5, 2.5);
+      ctx.fill();
+      // Animated surface current glints along the upper canal
+      ctx.strokeStyle = 'rgba(240, 249, 255, 0.72)';
+      ctx.lineWidth = 1.2;
+      ctx.lineCap = 'round';
+      for (let g = 0; g < 4; g++) {
+        const gx = px + 10 + ((time * 38 + g * 46) % (p.w - 30));
+        ctx.beginPath();
+        ctx.moveTo(gx, py + 5.2);
+        ctx.lineTo(gx + 14, py + 5.2);
+        ctx.stroke();
+      }
+
+      // Carved Stone Spillway Collar & Sliding Forged-Iron Sluice Gate at spoutCx
+      ctx.fillStyle = '#dec4a3';
+      ctx.strokeStyle = '#4a2f1b';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.roundRect(spoutCx - 35, py + 14, 70, 14, 3);
+      ctx.fill();
+      ctx.stroke();
+      // Recessed dark spillway throat
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.roundRect(spoutCx - 29, py + 17, 58, 9, 2);
+      ctx.fill();
+      // Sliding iron sluice gate (drops fully closed when state === 'shut' or calm!)
+      const gateClosed = state === 'shut' ? 1 : (state === 'calm' ? 0.85 : (state === 'warn' ? 0.45 : 0.12));
+      const gateH = 9 * gateClosed;
+      ctx.fillStyle = '#334155';
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.0;
+      ctx.fillRect(spoutCx - 28, py + 17, 56, gateH);
+      ctx.strokeRect(spoutCx - 28, py + 17, 56, gateH);
+      // Brass gate rivets
+      ctx.fillStyle = '#d97706';
+      for (const rx of [-20, 0, 20]) {
+        if (gateH > 3) {
           ctx.beginPath();
-          ctx.arc(px + 32 + b * 11, py + 28 + Math.sin(time * 24 + b) * 4, 4, 0, Math.PI * 2);
+          ctx.arc(spoutCx + rx, py + 17 + gateH * 0.5, 1.3, 0, Math.PI * 2);
           ctx.fill();
         }
-      } else if (pwr > 0.15 && state !== 'shut') {
-        const dropH = (p.h - 24) * pwr;
-        const wfG = ctx.createLinearGradient(spoutCx, py + 24, spoutCx, py + 24 + dropH);
-        wfG.addColorStop(0, 'rgba(224, 242, 254, 0.92)');
-        wfG.addColorStop(0.45, 'rgba(56, 189, 248, 0.82)');
-        wfG.addColorStop(1, 'rgba(2, 132, 199, 0.78)');
-        ctx.fillStyle = wfG;
-        ctx.fillRect(px + 28, py + 24, 66, dropH);
-        // Animated vertical white foam ribbons & bottom splash mist!
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; ctx.lineWidth = 2.0;
-        for (let r = 0; r < 4; r++) {
-          const rx = px + 36 + r * 16;
-          const ry = py + 28 + ((time * 160 + r * 28) % Math.max(20, dropH - 24));
-          ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx, Math.min(py + 24 + dropH, ry + 22)); ctx.stroke();
+      }
+
+      // Trailing olive/ivy sprigs draping gracefully off the stone aqueduct edge
+      ctx.fillStyle = '#3f6212';
+      for (const [vx, vy] of [[px + 102, py + 25], [px + 108, py + 29], [px + 114, py + 26], [px + 120, py + 31]]) {
+        ctx.beginPath();
+        ctx.ellipse(vx, vy, 4.2, 2.3, 0.45, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 4. FORGED BRONZE 6-SPOKED VALVE WHEEL & LINKAGE ROD ON SHELTER WALL
+      const vx = shX + 10;
+      const vy = shTopY + 18;
+      // Vertical iron actuator rod linking valve wheel up to overhead sluice gate
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(vx, vy - 9);
+      ctx.lineTo(vx, py + 22);
+      ctx.lineTo(spoutCx + 28, py + 22);
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(vx, vy);
+      const wheelRot = state === 'shut' ? 1.8 : (state === 'warn' ? Math.sin(time * 16) * 0.14 : time * 0.4 * pwr);
+      ctx.rotate(wheelRot);
+      // Subtle cyan/gold interactive halo when shut or active
+      if (state === 'shut') {
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.28)';
+        ctx.beginPath();
+        ctx.arc(0, 0, 14, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 4.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, 9.5, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = state === 'shut' ? '#38bdf8' : '#d97706';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.arc(0, 0, 9.5, 0, Math.PI * 2);
+      ctx.stroke();
+      // 6 bronze spokes
+      ctx.strokeStyle = state === 'shut' ? '#7dd3fc' : '#f59e0b';
+      ctx.lineWidth = 1.5;
+      for (let s = 0; s < 6; s++) {
+        const sa = s * (Math.PI / 3);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(sa) * 9, Math.sin(sa) * 9);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#fef08a';
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.arc(0, 0, 2.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      // 5. CRYSTAL-CLEAR MULTI-LAYERED WATERFALL, WARNING SPRAY & SPLASH MIST
+      if (state === 'calm' || state === 'shut') {
+        // Gentle peaceful dripping droplets from the closed sluice lip
+        for (let d = 0; d < 2; d++) {
+          const dropFrac = ((time * 1.3 + d * 0.52) % 1);
+          const dx = spoutCx + (d === 0 ? -12 : 14);
+          const dy = py + 27 + dropFrac * (p.h - 32);
+          ctx.fillStyle = `rgba(186, 230, 253, ${((1 - dropFrac) * 0.55).toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(dx, dy, 1.8, 0, Math.PI * 2);
+          ctx.fill();
         }
-        if (pwr > 0.8) {
-          ctx.fillStyle = 'rgba(224, 242, 254, 0.88)';
-          for (let s = 0; s < 5; s++) {
-            ctx.beginPath(); ctx.arc(px + 30 + s * 15, floorY - 4 - Math.abs(Math.sin(time * 16 + s)) * 8, 6.5, 0, Math.PI * 2); ctx.fill();
+      } else if (state === 'warn') {
+        // Surging frothy water lip & falling warning spray ribbons
+        const lipG = ctx.createLinearGradient(spoutCx, py + 24, spoutCx, py + 44);
+        lipG.addColorStop(0, 'rgba(224, 242, 254, 0.85)');
+        lipG.addColorStop(1, 'rgba(56, 189, 248, 0)');
+        ctx.fillStyle = lipG;
+        ctx.beginPath();
+        ctx.roundRect(spoutCx - 28, py + 24, 56, 18, [0, 0, 10, 10]);
+        ctx.fill();
+        for (let b = 0; b < 7; b++) {
+          const bx = spoutCx - 24 + b * 8;
+          const byDrop = py + 27 + ((time * 120 + b * 17) % 34);
+          ctx.fillStyle = 'rgba(240, 249, 255, 0.88)';
+          ctx.beginPath();
+          ctx.arc(bx, byDrop, 2.4 + (b % 2) * 0.9, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (pwr > 0.15) {
+        // Organic tapered translucent waterfall curtain (NO flat opaque rectangle!)
+        const topY = py + 24;
+        const dropH = (p.h - 24) * pwr;
+        const botY = topY + dropH;
+        const waveL = Math.sin(time * 9.5) * 2.2;
+        const waveR = Math.cos(time * 8.8) * 2.2;
+
+        // 5a. Outer soft translucent turquoise mist veil
+        const mistG = ctx.createLinearGradient(spoutCx, topY, spoutCx, botY);
+        mistG.addColorStop(0, 'rgba(224, 242, 254, 0.72)');
+        mistG.addColorStop(0.35, 'rgba(56, 189, 248, 0.46)');
+        mistG.addColorStop(0.85, 'rgba(14, 165, 233, 0.38)');
+        mistG.addColorStop(1, 'rgba(224, 242, 254, 0.62)');
+        ctx.fillStyle = mistG;
+        ctx.beginPath();
+        ctx.moveTo(spoutCx - 28, topY);
+        ctx.lineTo(spoutCx + 28, topY);
+        ctx.quadraticCurveTo(spoutCx + 33 + waveR, topY + dropH * 0.5, spoutCx + 34, botY);
+        ctx.lineTo(spoutCx - 34, botY);
+        ctx.quadraticCurveTo(spoutCx - 33 + waveL, topY + dropH * 0.5, spoutCx - 28, topY);
+        ctx.closePath();
+        ctx.fill();
+
+        // 5b. Inner crystalline sunlit water core ribbons
+        const coreG = ctx.createLinearGradient(spoutCx - 26, topY, spoutCx + 26, topY);
+        coreG.addColorStop(0, 'rgba(186, 230, 253, 0.25)');
+        coreG.addColorStop(0.3, 'rgba(240, 249, 255, 0.52)');
+        coreG.addColorStop(0.55, 'rgba(103, 232, 249, 0.44)');
+        coreG.addColorStop(0.85, 'rgba(254, 243, 199, 0.26)');
+        coreG.addColorStop(1, 'rgba(186, 230, 253, 0.20)');
+        ctx.fillStyle = coreG;
+        ctx.beginPath();
+        ctx.moveTo(spoutCx - 22, topY);
+        ctx.lineTo(spoutCx + 22, topY);
+        ctx.lineTo(spoutCx + 26, botY);
+        ctx.lineTo(spoutCx - 26, botY);
+        ctx.closePath();
+        ctx.fill();
+
+        // 5c. Animated cascading white-silver foam ribbons & specular streams
+        ctx.lineCap = 'round';
+        for (let r = 0; r < 6; r++) {
+          const rx = spoutCx - 22 + r * 8.8 + Math.sin(time * 7 + r * 1.4) * 1.6;
+          const segLen = 18 + (r % 3) * 8;
+          const ry = topY + 2 + ((time * (185 + (r % 3) * 32) + r * 31) % Math.max(18, dropH - 12));
+          ctx.strokeStyle = r % 2 === 0 ? 'rgba(255, 255, 255, 0.82)' : 'rgba(186, 230, 253, 0.65)';
+          ctx.lineWidth = r % 2 === 0 ? 2.0 : 1.3;
+          ctx.beginPath();
+          ctx.moveTo(rx, ry);
+          ctx.lineTo(rx + Math.sin(time * 6 + r) * 1.5, Math.min(botY, ry + segLen));
+          ctx.stroke();
+        }
+
+        // 5d. Foaming Bottom Splash Basin, Rising Mist Cloud & Bouncing Water Pearls
+        if (pwr > 0.72) {
+          const spHalo = ctx.createRadialGradient(spoutCx, floorY - 4, 6, spoutCx, floorY - 4, 48);
+          spHalo.addColorStop(0, 'rgba(240, 249, 255, 0.75)');
+          spHalo.addColorStop(0.5, 'rgba(125, 211, 252, 0.35)');
+          spHalo.addColorStop(1, 'rgba(125, 211, 252, 0)');
+          ctx.fillStyle = spHalo;
+          ctx.beginPath();
+          ctx.ellipse(spoutCx, floorY - 4, 48, 15, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          for (let s = 0; s < 7; s++) {
+            const sx = spoutCx - 28 + s * 9.3;
+            const bounceH = Math.abs(Math.sin(time * 14 + s * 1.3)) * 9;
+            ctx.fillStyle = s % 2 === 0 ? 'rgba(255, 255, 255, 0.88)' : 'rgba(224, 242, 254, 0.78)';
+            ctx.beginPath();
+            ctx.arc(sx, floorY - 3 - bounceH, 4.2 + (s % 3) * 1.3, 0, Math.PI * 2);
+            ctx.fill();
           }
         }
       }
