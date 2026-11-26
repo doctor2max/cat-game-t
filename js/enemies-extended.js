@@ -6993,8 +6993,10 @@ window.Game.EnemiesExtended = (function () {
       }
     }
 
-    // 51. Indian Crested Porcupine (Stage 26: Battir — النيص البري — flush on ground, banded flaring quills!)
+    // 51. Indian Crested Porcupine (Stage 26: Battir — النيص الفلسطيني البري)
+    // Style switch: 'enhanced' (museum-grade 3-layer quills, crest mane, claws, whiskers) | 'classic' (previous look preserved)
     if (level.battir_porcupines) {
+      const BATTIR_PORCUPINE_STYLE = 'enhanced';
       for (const p of level.battir_porcupines) {
         const sx = p.x - camX, sy = p.y - camY;
         if (sx + p.w < -80 || sx > 1400) continue;
@@ -7002,69 +7004,212 @@ window.Game.EnemiesExtended = (function () {
         const wPhase = (p.walkDist || 0) * 0.14;
         const bob = Math.abs(Math.sin(wPhase)) * 1.8;
         const flare = p.bristle || 0;
+        const quiver = flare > 0.15 ? Math.sin(time * 34 + p.x) * 0.035 * flare : 0;
         ctx.save();
         ctx.translate(sx + p.w * 0.5, sy + p.h);
         ctx.scale(face, 1);
         ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-        // Contact shadow
-        ctx.fillStyle = 'rgba(28, 25, 23, 0.28)';
-        ctx.beginPath(); ctx.ellipse(0, 0, 29, 4.5, 0, 0, Math.PI * 2); ctx.fill();
-        // Far articulated legs driven by walkDist
+
+        if (BATTIR_PORCUPINE_STYLE === 'classic') {
+          // --- PRESERVED CLASSIC LOOK ---
+          ctx.fillStyle = 'rgba(28, 25, 23, 0.28)';
+          ctx.beginPath(); ctx.ellipse(0, 0, 29, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+          const farA = Math.sin(wPhase + Math.PI) * 5.2;
+          const nearA = Math.sin(wPhase) * 5.2;
+          ctx.strokeStyle = '#292524'; ctx.lineWidth = 5.5;
+          ctx.beginPath(); ctx.moveTo(-14, -13 - bob); ctx.lineTo(-14 + farA, -2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(14, -13 - bob); ctx.lineTo(14 - farA, -2); ctx.stroke();
+          for (let q = 0; q < 15; q++) {
+            const frac = q / 14;
+            const baseAng = -Math.PI * 0.92 + frac * Math.PI * 0.72;
+            const ang = baseAng - flare * 0.24 * (1 - frac);
+            const qLen = (23 + (q % 3) * 5.5) * (1 + flare * 0.22);
+            const bx = -8 + frac * 18, by = -20 - bob;
+            const ex = bx + Math.cos(ang) * qLen, ey = by + Math.sin(ang) * qLen;
+            ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 3.2;
+            ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(ex, ey); ctx.stroke();
+            ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 2.0;
+            ctx.beginPath();
+            ctx.moveTo(bx + Math.cos(ang) * qLen * 0.36, by + Math.sin(ang) * qLen * 0.36);
+            ctx.lineTo(bx + Math.cos(ang) * qLen * 0.62, by + Math.sin(ang) * qLen * 0.62);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(bx + Math.cos(ang) * qLen * 0.80, by + Math.sin(ang) * qLen * 0.80);
+            ctx.lineTo(ex, ey);
+            ctx.stroke();
+          }
+          const bG = ctx.createLinearGradient(0, -34, 0, -8);
+          bG.addColorStop(0, '#44403c'); bG.addColorStop(0.6, '#292524'); bG.addColorStop(1, '#1c1917');
+          ctx.fillStyle = bG; ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.ellipse(-2, -19 - bob, 23, 13.5, -0.05, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#f5f5f4'; ctx.lineWidth = 2.6;
+          ctx.beginPath(); ctx.arc(14, -18 - bob, 9.5, 0.3, 1.85); ctx.stroke();
+          ctx.fillStyle = '#3f3b37'; ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(15, -26 - bob); ctx.quadraticCurveTo(30, -24 - bob, 32, -16 - bob);
+          ctx.quadraticCurveTo(31, -10 - bob, 16, -11 - bob); ctx.closePath();
+          ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#57534e'; ctx.beginPath(); ctx.arc(16, -26 - bob, 4.2, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#0c0a09'; ctx.beginPath(); ctx.arc(24, -20.5 - bob, 2.1, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(24.7, -21.2 - bob, 0.7, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#1c1917'; ctx.beginPath(); ctx.ellipse(31.2, -16.5 - bob, 2.3, 1.8, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 5.8;
+          ctx.beginPath(); ctx.moveTo(-10, -12 - bob); ctx.lineTo(-10 + nearA, -1.5); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(11, -12 - bob); ctx.lineTo(11 - nearA, -1.5); ctx.stroke();
+          ctx.restore();
+          continue;
+        }
+
+        // --- ENHANCED MUSEUM-GRADE PALESTINIAN INDIAN CRESTED PORCUPINE (النيص البري) ---
+        // Soft grounded contact shadow
+        ctx.fillStyle = 'rgba(28, 25, 23, 0.30)';
+        ctx.beginPath(); ctx.ellipse(0, 0, 32, 4.8, 0, 0, Math.PI * 2); ctx.fill();
+
         const farA = Math.sin(wPhase + Math.PI) * 5.2;
         const nearA = Math.sin(wPhase) * 5.2;
-        ctx.strokeStyle = '#292524'; ctx.lineWidth = 5.5;
-        ctx.beginPath(); ctx.moveTo(-14, -13 - bob); ctx.lineTo(-14 + farA, -2); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(14, -13 - bob); ctx.lineTo(14 - farA, -2); ctx.stroke();
-        // Layered radiating banded black-and-ivory quills (fanning outward when bristling!)
-        for (let q = 0; q < 15; q++) {
-          const frac = q / 14;
-          const baseAng = -Math.PI * 0.92 + frac * Math.PI * 0.72;
-          const ang = baseAng - flare * 0.24 * (1 - frac);
-          const qLen = (23 + (q % 3) * 5.5) * (1 + flare * 0.22);
-          const bx = -8 + frac * 18, by = -20 - bob;
+
+        // Helper: draw sculpted articulated porcupine leg + paw + 3 ivory digging claws flush at y=0
+        const drawLeg = (lx, swing, darkCol, pawCol) => {
+          const footX = lx + swing;
+          ctx.fillStyle = darkCol; ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(lx - 4.6, -14 - bob);
+          ctx.quadraticCurveTo(footX - 4.2, -6 - bob * 0.4, footX - 3.2, -1.5);
+          ctx.lineTo(footX + 5.2, -1.5);
+          ctx.quadraticCurveTo(footX + 4.4, -7 - bob * 0.4, lx + 4.4, -14 - bob);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          // Rounded paw & 3 delicate ivory digging claws
+          ctx.fillStyle = pawCol;
+          ctx.beginPath(); ctx.ellipse(footX + 1.4, -1.8, 4.6, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#e7e5e4'; ctx.lineWidth = 1.1;
+          for (let cl = 0; cl < 3; cl++) {
+            const cx0 = footX + 3.2 + cl * 1.4;
+            ctx.beginPath(); ctx.moveTo(cx0, -2.2); ctx.lineTo(cx0 + 1.8, -0.4); ctx.stroke();
+          }
+        };
+
+        // 1. Far articulated legs
+        drawLeg(-14, farA, '#26221f', '#1c1917');
+        drawLeg(13, -farA, '#26221f', '#1c1917');
+
+        // 2. Short vibrating hollow rattle-quill tail at rear
+        ctx.save();
+        ctx.translate(-22, -17 - bob);
+        ctx.rotate(-0.2 + quiver * 4);
+        for (let r = 0; r < 5; r++) {
+          const ra = -Math.PI * 0.85 - r * 0.14;
+          ctx.strokeStyle = r % 2 === 0 ? '#fef3c7' : '#d6d3d1'; ctx.lineWidth = 2.0;
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(ra) * 11, Math.sin(ra) * 11); ctx.stroke();
+        }
+        ctx.restore();
+
+        // 3. Layer 1 — Back Radiating Curved Banded Quills (18 tapered obsidian & ivory needles!)
+        for (let q = 0; q < 18; q++) {
+          const frac = q / 17;
+          const baseAng = -Math.PI * 0.96 + frac * Math.PI * 0.78;
+          const ang = baseAng - flare * 0.28 * (1 - frac) + quiver * (q % 2 === 0 ? 1 : -1);
+          const qLen = (25 + (q % 3) * 6.5) * (1 + flare * 0.25);
+          const bx = -10 + frac * 22, by = -20 - bob;
+          const midAng = ang + 0.06;
+          const mx = bx + Math.cos(midAng) * qLen * 0.52, my = by + Math.sin(midAng) * qLen * 0.52;
           const ex = bx + Math.cos(ang) * qLen, ey = by + Math.sin(ang) * qLen;
-          ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 3.2;
-          ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(ex, ey); ctx.stroke();
-          // Ivory middle & tip bands
-          ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 2.0;
+          // Obsidian-black tapered quill shaft
+          ctx.strokeStyle = '#18181b'; ctx.lineWidth = 3.4;
+          ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo(mx, my, ex, ey); ctx.stroke();
+          // Warm ivory middle band & needle-sharp ivory tip
+          ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 2.1;
           ctx.beginPath();
-          ctx.moveTo(bx + Math.cos(ang) * qLen * 0.36, by + Math.sin(ang) * qLen * 0.36);
-          ctx.lineTo(bx + Math.cos(ang) * qLen * 0.62, by + Math.sin(ang) * qLen * 0.62);
+          ctx.moveTo(bx + Math.cos(midAng) * qLen * 0.30, by + Math.sin(midAng) * qLen * 0.30);
+          ctx.lineTo(bx + Math.cos(midAng) * qLen * 0.54, by + Math.sin(midAng) * qLen * 0.54);
           ctx.stroke();
+          ctx.strokeStyle = '#fffbeb'; ctx.lineWidth = 1.7;
           ctx.beginPath();
-          ctx.moveTo(bx + Math.cos(ang) * qLen * 0.80, by + Math.sin(ang) * qLen * 0.80);
+          ctx.moveTo(bx + Math.cos(ang) * qLen * 0.78, by + Math.sin(ang) * qLen * 0.78);
           ctx.lineTo(ex, ey);
           ctx.stroke();
         }
-        // Rounded dark-umber muscular body
-        const bG = ctx.createLinearGradient(0, -34, 0, -8);
-        bG.addColorStop(0, '#44403c'); bG.addColorStop(0.6, '#292524'); bG.addColorStop(1, '#1c1917');
-        ctx.fillStyle = bG; ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.6;
+
+        // 4. Sculpted Muscular Dark-Umber Body with Warm Rim Highlight
+        const bG = ctx.createRadialGradient(4, -26 - bob, 4, -2, -19 - bob, 26);
+        bG.addColorStop(0.0, '#57534e'); bG.addColorStop(0.55, '#292524'); bG.addColorStop(1.0, '#141210');
+        ctx.fillStyle = bG; ctx.strokeStyle = '#09090b'; ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.ellipse(-2, -19 - bob, 23, 13.5, -0.05, 0, Math.PI * 2);
-        ctx.fill(); ctx.stroke();
-        // White neck collar crescent characteristic of Indian Crested Porcupine
-        ctx.strokeStyle = '#f5f5f4'; ctx.lineWidth = 2.6;
-        ctx.beginPath(); ctx.arc(14, -18 - bob, 9.5, 0.3, 1.85); ctx.stroke();
-        // Blunt rounded snout & head
-        ctx.fillStyle = '#3f3b37'; ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.5;
+        ctx.moveTo(-24, -17 - bob);
+        ctx.bezierCurveTo(-24, -33 - bob, 6, -36 - bob, 18, -25 - bob);
+        ctx.bezierCurveTo(22, -16 - bob, 16, -7 - bob, -2, -7 - bob);
+        ctx.bezierCurveTo(-18, -7 - bob, -24, -11 - bob, -24, -17 - bob);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // 5. Layer 2 — Foreground 3D Shield Quills wrapping across the flank!
+        for (let fq = 0; fq < 9; fq++) {
+          const frac = fq / 8;
+          const ang = -Math.PI * 0.90 + frac * Math.PI * 0.38 - flare * 0.18 + quiver;
+          const qLen = (15 + (fq % 2) * 4.5) * (1 + flare * 0.18);
+          const bx = -14 + frac * 18, by = -18 - bob + (fq % 2) * 2.5;
+          const ex = bx + Math.cos(ang) * qLen, ey = by + Math.sin(ang) * qLen;
+          ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 2.6;
+          ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(ex, ey); ctx.stroke();
+          ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(bx + Math.cos(ang) * qLen * 0.52, by + Math.sin(ang) * qLen * 0.52);
+          ctx.lineTo(ex, ey);
+          ctx.stroke();
+        }
+
+        // 6. Signature Swept-Back Silver-Crest Mane (العُرف الشوكي) over crown & shoulders
+        for (let cr = 0; cr < 6; cr++) {
+          const cx0 = 15 - cr * 2.2, cy0 = -28 - bob;
+          ctx.strokeStyle = cr % 2 === 0 ? '#e7e5e4' : '#57534e'; ctx.lineWidth = 1.9;
+          ctx.beginPath();
+          ctx.moveTo(cx0, cy0);
+          ctx.quadraticCurveTo(cx0 - 8, cy0 - 11 - flare * 4, cx0 - 17, cy0 - 6 - flare * 6);
+          ctx.stroke();
+        }
+
+        // 7. Crisp Snowy-White Throat Collar Crescent characteristic of Hystrix indica
+        ctx.strokeStyle = '#fafaf9'; ctx.lineWidth = 3.0;
+        ctx.beginPath(); ctx.arc(13.5, -17.5 - bob, 10.2, 0.25, 1.85); ctx.stroke();
+
+        // 8. Sculpted Head, Rounded Snout, Inner-Shaded Ear, Expressive Eye & Long Whiskers
+        const hdG = ctx.createLinearGradient(14, -29 - bob, 33, -10 - bob);
+        hdG.addColorStop(0.0, '#57534e'); hdG.addColorStop(0.55, '#3b3632'); hdG.addColorStop(1.0, '#221f1d');
+        ctx.fillStyle = hdG; ctx.strokeStyle = '#09090b'; ctx.lineWidth = 1.4;
         ctx.beginPath();
-        ctx.moveTo(15, -26 - bob); ctx.quadraticCurveTo(30, -24 - bob, 32, -16 - bob);
-        ctx.quadraticCurveTo(31, -10 - bob, 16, -11 - bob); ctx.closePath();
-        ctx.fill(); ctx.stroke();
-        // Rounded ear, glistening dark eye & nose
-        ctx.fillStyle = '#57534e';
-        ctx.beginPath(); ctx.arc(16, -26 - bob, 4.2, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#0c0a09';
-        ctx.beginPath(); ctx.arc(24, -20.5 - bob, 2.1, 0, Math.PI * 2); ctx.fill();
+        ctx.moveTo(14, -27.5 - bob);
+        ctx.bezierCurveTo(23, -29.5 - bob, 33.5, -24.5 - bob, 34, -16.5 - bob);
+        ctx.bezierCurveTo(33.5, -10.5 - bob, 24, -9.5 - bob, 15, -11.5 - bob);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Rounded ear with warm shaded inner concha
+        ctx.fillStyle = '#44403c'; ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.ellipse(16.2, -27.2 - bob, 4.4, 3.6, -0.25, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#a8a29e';
+        ctx.beginPath(); ctx.ellipse(16.6, -26.8 - bob, 2.2, 1.7, -0.25, 0, Math.PI * 2); ctx.fill();
+        // Expressive glistening dark eye with subtle warm amber iris rim & dual catchlights
+        ctx.fillStyle = '#78350f';
+        ctx.beginPath(); ctx.arc(24.2, -20.8 - bob, 2.8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#09090b';
+        ctx.beginPath(); ctx.arc(24.4, -20.8 - bob, 2.0, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#ffffff';
-        ctx.beginPath(); ctx.arc(24.7, -21.2 - bob, 0.7, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#1c1917';
-        ctx.beginPath(); ctx.ellipse(31.2, -16.5 - bob, 2.3, 1.8, 0, 0, Math.PI * 2); ctx.fill();
-        // Near legs + small claws flush at y=0
-        ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 5.8;
-        ctx.beginPath(); ctx.moveTo(-10, -12 - bob); ctx.lineTo(-10 + nearA, -1.5); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(11, -12 - bob); ctx.lineTo(11 - nearA, -1.5); ctx.stroke();
+        ctx.beginPath(); ctx.arc(25.1, -21.5 - bob, 0.85, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fef3c7';
+        ctx.beginPath(); ctx.arc(23.5, -20.0 - bob, 0.45, 0, Math.PI * 2); ctx.fill();
+        // Moist sculpted dark nose with specular highlight
+        ctx.fillStyle = '#18181b';
+        ctx.beginPath(); ctx.ellipse(33.0, -16.8 - bob, 2.6, 2.1, 0.1, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.beginPath(); ctx.ellipse(32.5, -17.6 - bob, 0.9, 0.5, 0, 0, Math.PI * 2); ctx.fill();
+        // Delicate long curved sensory whiskers
+        ctx.strokeStyle = 'rgba(245, 245, 244, 0.65)'; ctx.lineWidth = 0.85;
+        ctx.beginPath();
+        ctx.moveTo(29, -15.5 - bob); ctx.quadraticCurveTo(36, -17.5 - bob, 41, -15.5 - bob);
+        ctx.moveTo(28.5, -14.2 - bob); ctx.quadraticCurveTo(35.5, -14.0 - bob, 40.5, -11.5 - bob);
+        ctx.moveTo(28, -13.0 - bob); ctx.quadraticCurveTo(34, -11.2 - bob, 38.5, -8.5 - bob);
+        ctx.stroke();
+
+        // 9. Near articulated legs + paws + ivory claws flush at y=0
+        drawLeg(-10, nearA, '#1c1917', '#141210');
+        drawLeg(11, -nearA, '#1c1917', '#141210');
+
         ctx.restore();
       }
     }
