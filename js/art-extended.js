@@ -11121,24 +11121,61 @@ window.Game = window.Game || {};
       rimG.addColorStop(0, '#65a30d'); rimG.addColorStop(0.55, '#4d7c0f'); rimG.addColorStop(1, '#7c4a2d');
       ctx.fillStyle = rimG;
       ctx.beginPath(); ctx.roundRect(px - 1, py, p.w + 2, 9.5, [4, 4, 2, 2]); ctx.fill();
-      // Sunlit grass tufts, wild cyclamen & slender Battiri eggplants along terrace rim
+      // Sunlit grass tufts, wild poppies & spaced Battiri Eggplant seedlings (شتلات باذنجان بـ 2-3 حبات)
       const step = isGround ? 68 : 54;
       for (let gx = 20; gx < p.w - 20; gx += step) {
+        const slotIdx = Math.abs(Math.floor((p.x + gx) / step));
         const seed = Math.abs(Math.floor(p.x + gx));
         ctx.strokeStyle = '#84cc16'; ctx.lineWidth = 1.4;
         ctx.beginPath();
         ctx.moveTo(px + gx, py + 2); ctx.lineTo(px + gx - 4, py - 5);
         ctx.moveTo(px + gx + 2, py + 2); ctx.lineTo(px + gx + 5, py - 6);
         ctx.stroke();
-        if (isGround && seed % 3 === 0) {
-          // Famous slender light-purple Battiri Eggplant bush (الباذنجان البتيري)!
-          ctx.fillStyle = '#365314';
-          ctx.beginPath(); ctx.ellipse(px + gx + 10, py - 5, 9, 4.2, -0.2, 0, Math.PI * 2); ctx.fill();
-          ctx.fillStyle = '#9333ea'; ctx.strokeStyle = '#4c1d95'; ctx.lineWidth = 0.9;
-          ctx.beginPath(); ctx.ellipse(px + gx + 15, py - 1, 3.8, 8.2, 0.35, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-          ctx.fillStyle = '#e9d5ff';
-          ctx.beginPath(); ctx.ellipse(px + gx + 13.8, py - 2.8, 1.1, 3.8, 0.35, 0, Math.PI * 2); ctx.fill();
-        } else if (seed % 3 === 1) {
+        if (isGround && slotIdx % 5 === 2) {
+          // Spaced leafy Battiri Eggplant Seedling Plant bearing 2 or 3 hanging eggplants! (شتلة باذنجان تحتوي على 2-3 حبات)
+          const bx0 = px + gx + 10;
+          const fruitCount = 2 + (slotIdx % 2); // 2 or 3 eggplants per plant
+          ctx.save();
+          ctx.translate(bx0, py + 1);
+          // Branching green stems
+          ctx.strokeStyle = '#365314'; ctx.lineWidth = 2.0; ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(0, 0); ctx.quadraticCurveTo(-1, -11, -3, -21);
+          ctx.moveTo(0, -6); ctx.quadraticCurveTo(7, -13, 12, -18);
+          ctx.moveTo(-1, -8); ctx.quadraticCurveTo(-8, -14, -13, -17);
+          ctx.stroke();
+          // Broad velvety green eggplant leaves
+          for (const [lx, ly, lrx, lry, lang, lcol] of [
+            [-12, -16, 7.5, 3.8, -0.35, '#3f6212'], [11, -17, 7.5, 3.8, 0.38, '#3f6212'],
+            [-4, -22, 8.0, 4.2, -0.15, '#4d7c0f'], [5, -20, 7.0, 3.6, 0.22, '#65a30d'],
+            [-8, -10, 6.2, 3.2, -0.5, '#4d7c0f'], [7, -10, 6.2, 3.2, 0.45, '#4d7c0f']
+          ]) {
+            ctx.fillStyle = lcol; ctx.strokeStyle = '#1a2e05'; ctx.lineWidth = 0.7;
+            ctx.beginPath(); ctx.ellipse(lx, ly, lrx, lry, lang, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          }
+          // 2 or 3 glossy slender purple Battiri eggplants hanging from green calyx caps
+          const fruits = fruitCount === 3
+            ? [[-9.5, -8.5, 0.22], [0.5, -10.5, -0.08], [9.5, -8.0, -0.25]]
+            : [[-6.5, -9.0, 0.20], [7.5, -8.5, -0.22]];
+          for (const [fx, fy, fang] of fruits) {
+            ctx.save();
+            ctx.translate(fx, fy); ctx.rotate(fang);
+            ctx.fillStyle = '#7e22ce'; ctx.strokeStyle = '#3b0764'; ctx.lineWidth = 0.85;
+            ctx.beginPath(); ctx.ellipse(0, 3.2, 3.4, 7.2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#e9d5ff';
+            ctx.beginPath(); ctx.ellipse(-1.1, 1.5, 0.95, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+            // Star-like green calyx cap on top of each eggplant
+            ctx.fillStyle = '#4d7c0f';
+            ctx.beginPath(); ctx.ellipse(0, -3.4, 2.6, 1.6, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+          }
+          // Tiny pale-violet eggplant blossom on upper tip
+          ctx.fillStyle = '#d8b4fe';
+          ctx.beginPath(); ctx.arc(-2, -24.5, 2.0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#facc15';
+          ctx.beginPath(); ctx.arc(-2, -24.5, 0.75, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        } else if (seed % 4 === 1) {
           // Wild Scarlet Palestinian Poppy (شقائق النعمان / الدحنون)!
           ctx.strokeStyle = '#3f6212'; ctx.lineWidth = 1.2;
           ctx.beginPath(); ctx.moveTo(px + gx - 2, py + 1); ctx.lineTo(px + gx - 3, py - 10); ctx.stroke();
@@ -27579,6 +27616,172 @@ window.Game = window.Game || {};
         }
         ctx.fillStyle = '#e6b885'; ctx.strokeStyle = '#3b210e';
         ctx.fillRect(plX + 8, plY - 72, plW - 16, 13); ctx.strokeRect(plX + 8, plY - 72, plW - 16, 13);
+
+        // Palestinian Village Woman in Embroidered Thobe behind Fresh Produce Stall between the 2 Central Columns!
+        // (فلاحة فلسطينية بالثوب المطرز تجلس خلف بسطة خضار طازجة: باذنجان، كوسا، نعنع، خس، وتين!)
+        {
+          const stCx = plX + 163; // centered cleanly between column 1 (plX+118) & column 2 (plX+208)
+          const stBaseY = plY + 42;
+          ctx.save();
+          ctx.translate(stCx, stBaseY);
+
+          // 1. Seated Palestinian Woman behind the stall wearing Traditional Embroidered Thobe (الثوب الفلسطيني المطرز)
+          const sway = Math.sin(time * 2.1) * 0.04;
+          const handBob = Math.sin(time * 3.0) * 1.8;
+          ctx.save();
+          ctx.translate(0, -25);
+          ctx.rotate(sway);
+          // Traditional black-indigo Palestinian Thobe torso & wide embroidered sleeves
+          ctx.fillStyle = '#18151e'; ctx.strokeStyle = '#09070c'; ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.moveTo(-12, 4); ctx.lineTo(-10, -17); ctx.quadraticCurveTo(0, -20, 10, -17); ctx.lineTo(12, 4);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          // Rich crimson & gold Palestinian Tatreez chest panel (قبة الثوب المطرزة)
+          ctx.fillStyle = '#b91c1c';
+          ctx.beginPath(); ctx.roundRect(-5.2, -16, 10.4, 13.5, 1.5); ctx.fill();
+          ctx.fillStyle = '#facc15';
+          ctx.fillRect(-3.6, -14.2, 7.2, 1.4);
+          ctx.fillRect(-2.4, -11.0, 4.8, 1.4);
+          ctx.fillRect(-3.6, -7.8, 7.2, 1.4);
+          ctx.fillStyle = '#f97316';
+          ctx.fillRect(-1.0, -14.5, 2.0, 10.5);
+          // Vertical crimson tatreez embroidery bands on shoulders & sleeves
+          ctx.fillStyle = '#dc2626';
+          ctx.fillRect(-9.2, -14, 2.2, 11);
+          ctx.fillRect(7.0, -14, 2.2, 11);
+
+          // Warm smiling face & flowing white Palestinian embroidered headscarf (المنديل الأبيض المطرز)
+          ctx.fillStyle = '#dba47a'; ctx.strokeStyle = '#5c3820'; ctx.lineWidth = 0.85;
+          ctx.beginPath(); ctx.arc(0, -24.5, 6.0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          // Gentle eyes & warm smile
+          ctx.fillStyle = '#1c1917';
+          ctx.beginPath(); ctx.arc(-2.1, -25.2, 0.8, 0, Math.PI * 2); ctx.arc(2.1, -25.2, 0.8, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#7c2d12'; ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.arc(0, -23.0, 2.1, 0.15, Math.PI - 0.15); ctx.stroke();
+          // Flowing white shash/mandil headscarf draping smoothly over shoulders with red tatreez border
+          ctx.fillStyle = '#fffdf9'; ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.arc(0, -25.2, 6.8, Math.PI * 0.88, Math.PI * 2.12);
+          ctx.quadraticCurveTo(9.5, -20, 11.5, -10);
+          ctx.lineTo(6.5, -13);
+          ctx.quadraticCurveTo(6.0, -21, 4.6, -24.5);
+          ctx.arc(0, -25.2, 5.2, -0.1, Math.PI + 0.1, true);
+          ctx.quadraticCurveTo(-6.0, -21, -6.5, -13);
+          ctx.lineTo(-11.5, -10);
+          ctx.quadraticCurveTo(-9.5, -20, -6.6, -24.8);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          // Crimson embroidered trim along headscarf forehead edge
+          ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.arc(0, -25.2, 5.6, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
+
+          // Gently animated arms resting & arranging produce on the stall
+          ctx.strokeStyle = '#18151e'; ctx.lineWidth = 3.8; ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(-9, -12); ctx.quadraticCurveTo(-15, -4, -11, 2 + handBob * 0.5);
+          ctx.moveTo(9, -12); ctx.quadraticCurveTo(15, -5, 13, 1 - handBob * 0.5);
+          ctx.stroke();
+          ctx.fillStyle = '#dba47a';
+          ctx.beginPath();
+          ctx.arc(-11, 2.5 + handBob * 0.5, 2.2, 0, Math.PI * 2);
+          ctx.arc(13, 1.5 - handBob * 0.5, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+
+          // 2. Wooden Village Produce Stall (بسطة خشبية مع مفرش تراثي)
+          const stW = 86, stH = 22;
+          // Wooden legs & rustic crate frame
+          const woodG = ctx.createLinearGradient(0, -stH, 0, 2);
+          woodG.addColorStop(0, '#a66b38'); woodG.addColorStop(0.55, '#7c4a21'); woodG.addColorStop(1, '#4a2910');
+          ctx.fillStyle = woodG; ctx.strokeStyle = '#2e1808'; ctx.lineWidth = 1.2;
+          ctx.fillRect(-stW * 0.5, -stH, stW, stH); ctx.strokeRect(-stW * 0.5, -stH, stW, stH);
+          // Horizontal rustic wood slats
+          ctx.strokeStyle = 'rgba(46, 24, 8, 0.55)'; ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.moveTo(-stW * 0.5, -14); ctx.lineTo(stW * 0.5, -14); ctx.moveTo(-stW * 0.5, -7); ctx.lineTo(stW * 0.5, -7); ctx.stroke();
+          // Cream-and-crimson traditional Palestinian woven cloth runner draped over front lip
+          ctx.fillStyle = '#faf3e6'; ctx.strokeStyle = '#7f1d1d'; ctx.lineWidth = 0.85;
+          ctx.fillRect(-stW * 0.5 - 2, -stH - 2, stW + 4, 7.5); ctx.strokeRect(-stW * 0.5 - 2, -stH - 2, stW + 4, 7.5);
+          ctx.fillStyle = '#b91c1c';
+          for (let sx0 = -stW * 0.5 + 2; sx0 < stW * 0.5 - 4; sx0 += 9) {
+            ctx.fillRect(sx0, -stH + 1.5, 4.5, 2.5);
+          }
+
+          // 3. FIVE CLEARLY VISIBLE FRESH VEGETABLE & FRUIT DISPLAYS ON THE STALL!
+          const topY = -stH - 2;
+
+          // (A) EGGPLANT — الباذنجان (far left: -33)
+          ctx.fillStyle = '#8b5a2b'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 0.8;
+          ctx.fillRect(-41, topY - 4, 16, 4.5); ctx.strokeRect(-41, topY - 4, 16, 4.5);
+          for (const [ex, ey, ea] of [[-37.5, topY - 6.5, -0.35], [-33, topY - 7.5, 0.1], [-28.5, topY - 6.2, 0.45], [-33.5, topY - 4.5, 1.35]]) {
+            ctx.save(); ctx.translate(ex, ey); ctx.rotate(ea);
+            ctx.fillStyle = '#6b21a8'; ctx.strokeStyle = '#3b0764'; ctx.lineWidth = 0.7;
+            ctx.beginPath(); ctx.ellipse(0, 0, 2.8, 5.2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#d8b4fe';
+            ctx.beginPath(); ctx.ellipse(-0.8, -1.2, 0.8, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#4d7c0f';
+            ctx.beginPath(); ctx.ellipse(0, -4.6, 1.8, 1.2, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+          }
+
+          // (B) ZUCCHINI — الكوسا (left-center: -16)
+          ctx.fillStyle = '#8b5a2b'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 0.8;
+          ctx.fillRect(-24, topY - 4, 16, 4.5); ctx.strokeRect(-24, topY - 4, 16, 4.5);
+          for (const [zx, zy, za] of [[-20, topY - 6.5, -0.55], [-16, topY - 7.5, -0.25], [-12.5, topY - 6.8, 0.3], [-16.5, topY - 4.5, 1.48]]) {
+            ctx.save(); ctx.translate(zx, zy); ctx.rotate(za);
+            ctx.fillStyle = '#86efac'; ctx.strokeStyle = '#166534'; ctx.lineWidth = 0.7;
+            ctx.beginPath(); ctx.ellipse(0, 0, 2.0, 5.6, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 0.55;
+            ctx.beginPath(); ctx.moveTo(-0.5, -4); ctx.lineTo(-0.5, 4); ctx.stroke();
+            ctx.fillStyle = '#15803d'; ctx.fillRect(-0.8, -6.2, 1.6, 1.6);
+            ctx.restore();
+          }
+
+          // (C) FRESH MINT — النعنع (center: 0)
+          ctx.fillStyle = '#c4914a'; ctx.strokeStyle = '#5c3c18'; ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.ellipse(0, topY - 2, 8.5, 3.0, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          for (const [mx, my, ma, mc] of [
+            [-5, topY - 5, -0.6, '#15803d'], [-2, topY - 8.5, -0.2, '#22c55e'], [2, topY - 9, 0.25, '#16a34a'],
+            [5, topY - 5.5, 0.65, '#15803d'], [0, topY - 6.5, 0.0, '#4ade80'], [-3.5, topY - 7.2, -0.4, '#4ade80'], [3.5, topY - 7.0, 0.4, '#22c55e']
+          ]) {
+            ctx.fillStyle = mc; ctx.strokeStyle = '#14532d'; ctx.lineWidth = 0.55;
+            ctx.beginPath(); ctx.ellipse(mx, my, 3.2, 1.8, ma, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          }
+
+          // (D) CRISP LETTUCE — الخس (right-center: +17)
+          for (const lx of [13.5, 20.5]) {
+            ctx.fillStyle = '#4d7c0f'; ctx.strokeStyle = '#1a2e05'; ctx.lineWidth = 0.7;
+            ctx.beginPath(); ctx.arc(lx, topY - 6.2, 5.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            // Layered ruffled bright-lime lettuce leaves
+            ctx.fillStyle = '#84cc16';
+            for (let lf = 0; lf < 5; lf++) {
+              const la = (lf / 5) * Math.PI * 2;
+              ctx.beginPath(); ctx.arc(lx + Math.cos(la) * 2.4, topY - 6.5 + Math.sin(la) * 2.2, 2.5, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.fillStyle = '#d9f99d';
+            ctx.beginPath(); ctx.arc(lx, topY - 6.5, 2.0, 0, Math.PI * 2); ctx.fill();
+          }
+
+          // (E) FRESH PALESTINIAN FIGS — التين (far right: +34)
+          ctx.fillStyle = '#c4914a'; ctx.strokeStyle = '#5c3c18'; ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.ellipse(34, topY - 2, 8.5, 3.0, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          for (const [fx, fy, fc] of [
+            [29.5, topY - 4.8, '#65a30d'], [33.5, topY - 5.2, '#581c87'], [37.5, topY - 4.8, '#65a30d'],
+            [31.5, topY - 8.2, '#7e22ce'], [35.5, topY - 8.0, '#84cc16']
+          ]) {
+            ctx.fillStyle = fc; ctx.strokeStyle = '#291509'; ctx.lineWidth = 0.6;
+            ctx.beginPath();
+            ctx.moveTo(fx, fy - 3.6);
+            ctx.bezierCurveTo(fx + 2.8, fy - 1.2, fx + 2.8, fy + 2.4, fx, fy + 2.6);
+            ctx.bezierCurveTo(fx - 2.8, fy + 2.4, fx - 2.8, fy - 1.2, fx, fy - 3.6);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+          }
+          // One open halved fig showing its sweet ruby-crimson center!
+          ctx.fillStyle = '#4c1d95';
+          ctx.beginPath(); ctx.arc(34, topY - 3.4, 2.4, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#f43f5e';
+          ctx.beginPath(); ctx.arc(34, topY - 3.4, 1.6, 0, Math.PI * 2); ctx.fill();
+
+          ctx.restore();
+        }
         // Crystal-clear Roman Pool water with submerged limestone steps & soft column reflections!
         const poolG = ctx.createLinearGradient(plX, plY + 46, plX, plY + 84);
         poolG.addColorStop(0.0, '#1e7682'); poolG.addColorStop(0.45, '#198b96'); poolG.addColorStop(1.0, '#115863');
