@@ -28135,10 +28135,10 @@ window.Game = window.Game || {};
       }
       ctx.stroke();
 
-      // Modern Sleek Regional Express Passenger Train (قطار ركاب حديث ومتطور أكبر حجماً — بديلاً عن البخاري!)
-      const trainU = ((time * 0.062 + (rep + 2) * 0.37) % 1.32) - 0.14;
+      // Modern Sleek Regional Express Passenger Train (قطار ركاب حديث ومتطور أكبر وأسرع — بديلاً عن البخاري!)
+      const trainU = ((time * 0.092 + (rep + 2) * 0.37) % 1.38) - 0.16;
       for (let car = 3; car >= 0; car--) {
-        const cu = trainU - car * 0.062;
+        const cu = trainU - car * 0.078;
         if (cu < -0.02 || cu > 1.02) continue;
         const [cx0, cy0] = valleyRailPt(Math.max(0, Math.min(1, cu)));
         const [cx1, cy1] = valleyRailPt(Math.max(0, Math.min(1, cu + 0.012)));
@@ -28146,6 +28146,7 @@ window.Game = window.Game || {};
         ctx.save();
         ctx.translate(cx0, cy0 - 2.5);
         ctx.rotate(ang);
+        ctx.scale(1.26, 1.26);
 
         // Dark recessed dual rail bogies & steel wheels riding flush on the track
         ctx.fillStyle = '#1e293b';
