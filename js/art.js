@@ -8588,5 +8588,6 @@ window.Game.Art = (function () {
     drawMarketFestoonLanterns,
     drawMarketGate,
     drawWorldTeasers,
+    initPatterns,
   };
 })();

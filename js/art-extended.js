@@ -30205,4 +30205,5 @@ window.Game = window.Game || {};
   Art.drawCheckpoint = drawCheckpointExtended;
   Art.drawPlatform = drawPlatformExtended;
   Art.drawWorldTeasers = drawWorldTeasersExtended;
+  Art.ensureTextures = ensureTextures;
 })();

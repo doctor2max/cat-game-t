@@ -24,6 +24,8 @@ window.Game = window.Game || {};
   const Audio = window.Game.Audio;
   const Particles = window.Game.Particles;
   const Art = window.Game.Art;
+  if (Art && Art.initPatterns) Art.initPatterns(ctx);
+  if (Art && Art.ensureTextures) Art.ensureTextures(ctx);
   const EnemiesExt = window.Game.EnemiesExtended;
   const I18n = window.Game.I18n;
   const t = (key, vars) => (I18n ? I18n.t(key, vars) : key);
@@ -684,6 +686,8 @@ window.Game = window.Game || {};
     paused = false;
     camX = 0;
     camY = 0;
+    bgSkyCache.theme = '';
+    bgMidCache.theme = '';
 
     // Reset touch button visuals
     const nvBtn = document.querySelector('.touch-skill[data-action="nightvision"]');
@@ -2475,7 +2479,7 @@ window.Game = window.Game || {};
     rooftop_neon: 0.40, homeward: 0.40, snow: 0.40, circus: 0.40,
     desert: 0.38, japan: 0.40, steam_train: 0.40, venice: 0.40,
     paris: 0.42, marrakech: 0.42, maya: 0.40, greece: 0.40,
-    construction: 0.40, subway: 0.45, rooftop: 0.42, harbor: 0.40,
+    construction: 0.40, subway: 0.45, rooftop: 0.34, harbor: 0.40,
     park: 0.42, market: 0.40,
   };
   const bgSkyCache = { canvas: null, ctx: null, theme: '', camX: -99999, time: -99999 };
@@ -2487,15 +2491,13 @@ window.Game = window.Game || {};
       sc.width = LOGICAL_W;
       sc.height = LOGICAL_H;
       bgSkyCache.canvas = sc;
-      bgSkyCache.ctx = sc.getContext('2d', { alpha: false });
-      try { Object.defineProperty(bgSkyCache.ctx, 'shadowBlur', { get() { return 0; }, set() {}, configurable: true }); } catch (e) {}
+      bgSkyCache.ctx = sc.getContext('2d');
 
       const mc = document.createElement('canvas');
       mc.width = LOGICAL_W + BG_MID_PAD * 2;
       mc.height = LOGICAL_H;
       bgMidCache.canvas = mc;
       bgMidCache.ctx = mc.getContext('2d');
-      try { Object.defineProperty(bgMidCache.ctx, 'shadowBlur', { get() { return 0; }, set() {}, configurable: true }); } catch (e) {}
     }
   }
 
@@ -2561,64 +2563,79 @@ window.Game = window.Game || {};
   function drawBackground(time) {
     const theme = level.theme;
     ensureBgCacheCanvases();
-
-    // 1. Sky & Far Horizon Layer (cached at ~6 Hz or >=24px camera delta -> 1 drawImage blit!)
-    if (bgSkyCache.canvas) {
-      const skyDirty =
-        bgSkyCache.theme !== theme ||
-        Math.abs(camX - bgSkyCache.camX) >= 24 ||
-        Math.abs(time - bgSkyCache.time) >= 0.16;
-      if (skyDirty) {
-        bgSkyCache.theme = theme;
-        bgSkyCache.camX = camX;
-        bgSkyCache.time = time;
-        renderThemeSky(bgSkyCache.ctx, theme, camX, LOGICAL_W, LOGICAL_H, time);
-      }
-      ctx.drawImage(bgSkyCache.canvas, 0, 0);
-    } else {
-      renderThemeSky(ctx, theme, camX, LOGICAL_W, LOGICAL_H, time);
-    }
-
-    // 2. Midground Layer:
-    //    - Battir (Stage 26) & Greenhouse (Stage 13) run bespoke 60fps Offscreen Tile Baking directly.
-    //    - All other 24 stages use the overscanned sliding-window Offscreen Canvas cache (~8.3 Hz refresh + 60fps parallax blit!).
-    if (theme === 'battir' || theme === 'greenhouse' || !bgMidCache.canvas) {
-      renderThemeMidground(ctx, theme, camX, LOGICAL_W, LOGICAL_H, time);
-    } else {
-      const p = BG_MID_PARALLAX[theme] || 0.40;
-      const shiftX = (camX - bgMidCache.camX) * p;
-      const midDirty =
-        bgMidCache.theme !== theme ||
-        shiftX < -bgMidCache.actualPad + 12 ||
-        shiftX > BG_MID_PAD * 2 - bgMidCache.actualPad - 12 ||
-        Math.abs(time - bgMidCache.time) >= 0.12;
-      if (midDirty) {
-        const safeCamX = Math.max(0, camX - BG_MID_PAD / p);
-        bgMidCache.theme = theme;
-        bgMidCache.camX = camX;
-        bgMidCache.actualPad = (camX - safeCamX) * p;
-        bgMidCache.time = time;
-        bgMidCache.ctx.clearRect(0, 0, bgMidCache.canvas.width, bgMidCache.canvas.height);
-        renderThemeMidground(bgMidCache.ctx, theme, safeCamX, bgMidCache.canvas.width, LOGICAL_H, time);
-        ctx.drawImage(bgMidCache.canvas, -bgMidCache.actualPad, 0);
+    ctx.save();
+    try {
+      // 1. Sky & Far Horizon Layer (cached at ~6 Hz or >=24px camera delta -> 1 drawImage blit!)
+      if (bgSkyCache.canvas && bgSkyCache.ctx) {
+        const skyDirty =
+          bgSkyCache.theme !== theme ||
+          Math.abs(camX - bgSkyCache.camX) >= 24 ||
+          Math.abs(time - bgSkyCache.time) >= 0.16;
+        if (skyDirty) {
+          bgSkyCache.theme = theme;
+          bgSkyCache.camX = camX;
+          bgSkyCache.time = time;
+          bgSkyCache.ctx.save();
+          try {
+            bgSkyCache.ctx.clearRect(0, 0, bgSkyCache.canvas.width, bgSkyCache.canvas.height);
+            renderThemeSky(bgSkyCache.ctx, theme, camX, LOGICAL_W, LOGICAL_H, time);
+          } finally {
+            bgSkyCache.ctx.restore();
+          }
+        }
+        ctx.drawImage(bgSkyCache.canvas, 0, 0);
       } else {
-        ctx.drawImage(bgMidCache.canvas, -bgMidCache.actualPad - shiftX, 0);
+        renderThemeSky(ctx, theme, camX, LOGICAL_W, LOGICAL_H, time);
       }
-    }
 
-    Art.drawStreetlamps(ctx, level.lamps, camX, time);
+      // 2. Midground Layer:
+      //    - Battir (Stage 26) & Greenhouse (Stage 13) run bespoke 60fps Offscreen Tile Baking directly.
+      //    - All other 24 stages use the overscanned sliding-window Offscreen Canvas cache (~8.3 Hz refresh + 60fps parallax blit!).
+      if (theme === 'battir' || theme === 'greenhouse' || !bgMidCache.canvas || !bgMidCache.ctx) {
+        renderThemeMidground(ctx, theme, camX, LOGICAL_W, LOGICAL_H, time);
+      } else {
+        const p = BG_MID_PARALLAX[theme] || 0.40;
+        const shiftX = (camX - bgMidCache.camX) * p;
+        const midDirty =
+          bgMidCache.theme !== theme ||
+          shiftX < -bgMidCache.actualPad + 12 ||
+          shiftX > BG_MID_PAD * 2 - bgMidCache.actualPad - 12 ||
+          Math.abs(time - bgMidCache.time) >= 0.12;
+        if (midDirty) {
+          const safeCamX = Math.max(0, camX - BG_MID_PAD / p);
+          bgMidCache.theme = theme;
+          bgMidCache.camX = camX;
+          bgMidCache.actualPad = (camX - safeCamX) * p;
+          bgMidCache.time = time;
+          bgMidCache.ctx.save();
+          try {
+            bgMidCache.ctx.clearRect(0, 0, bgMidCache.canvas.width, bgMidCache.canvas.height);
+            renderThemeMidground(bgMidCache.ctx, theme, safeCamX, bgMidCache.canvas.width, LOGICAL_H, time);
+          } finally {
+            bgMidCache.ctx.restore();
+          }
+          ctx.drawImage(bgMidCache.canvas, -bgMidCache.actualPad, 0);
+        } else {
+          ctx.drawImage(bgMidCache.canvas, -bgMidCache.actualPad - shiftX, 0);
+        }
+      }
 
-    // Lightweight floating dust motes
-    ctx.fillStyle = 'rgba(255, 226, 170, 0.25)';
-    for (let i = 0; i < 10; i++) {
-      const dx = (i * 197 + time * 18) % LOGICAL_W;
-      const dy = (i * 89 + Math.sin(time + i) * 25) % 600;
-      ctx.fillRect(dx, dy, 3, 3);
-    }
+      Art.drawStreetlamps(ctx, level.lamps, camX, time);
 
-    if (dimBackground) {
-      ctx.fillStyle = 'rgba(6, 9, 18, 0.65)';
-      ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+      // Lightweight floating dust motes
+      ctx.fillStyle = 'rgba(255, 226, 170, 0.25)';
+      for (let i = 0; i < 10; i++) {
+        const dx = (i * 197 + time * 18) % LOGICAL_W;
+        const dy = (i * 89 + Math.sin(time + i) * 25) % 600;
+        ctx.fillRect(dx, dy, 3, 3);
+      }
+
+      if (dimBackground) {
+        ctx.fillStyle = 'rgba(6, 9, 18, 0.65)';
+        ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+      }
+    } finally {
+      ctx.restore();
     }
   }
 
@@ -2627,8 +2644,8 @@ window.Game = window.Game || {};
     const cullW = viewW || LOGICAL_W;
 
     // Atmospheric World Teasers (drawn right BEHIND wooden piers/rooftops & water for true occlusion!)
-    if (Art.drawWorldTeasers && !(level && level.clearSkyOnly)) {
-      Art.drawWorldTeasers(ctx, level, catCtrl ? catCtrl.cat : null, camX, camY, level && level.staticBackground ? 0 : time, cullW);
+    if (Art.drawWorldTeasers) {
+      Art.drawWorldTeasers(ctx, level, catCtrl ? catCtrl.cat : null, camX, camY, time, cullW);
     }
 
     for (const p of level.platforms) {
