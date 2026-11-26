@@ -27357,47 +27357,70 @@ window.Game = window.Game || {};
         ctx.fill();
       }
 
-      // 5. EMERALD-TURQUOISE ROMAN POOL (البركة الرومانية الصافية)
-      const poolG = ctx.createLinearGradient(wallLeft, poolTopY, wallLeft + wallW, poolBotY);
-      poolG.addColorStop(0.0, '#4ea39d');
-      poolG.addColorStop(0.28, '#2d7b77');
-      poolG.addColorStop(0.62, '#1a5656');
-      poolG.addColorStop(1.0, '#0f3638');
-      ctx.fillStyle = poolG;
-      ctx.beginPath();
-      ctx.moveTo(wallLeft, poolTopY + 4);
-      ctx.lineTo(wallLeft + wallW, poolTopY);
-      ctx.lineTo(wallLeft + wallW, poolBotY);
-      ctx.lineTo(wallLeft, poolBotY);
-      ctx.closePath();
-      ctx.fill();
+      // 5. COMPACT 3D PERSPECTIVE SLANTED EMERALD-TURQUOISE ROMAN POOL (البركة الرومانية بالبُعد الحقيقي)
+      const pBackY = 492;
+      const pFrontY = 546;
+      const pBackL = archCx - 124;
+      const pBackR = archCx + 236;
+      const pFrontL = archCx - 172;
+      const pFrontR = archCx + 276;
 
-      // Soft reflected greenery & sunlit stone shimmer on pool surface
-      const refG = ctx.createLinearGradient(0, poolTopY, 0, poolTopY + 56);
-      refG.addColorStop(0, 'rgba(134, 198, 146, 0.26)');
+      // Water polygon clipped cleanly inside the perspective trapezoid
+      const tracePoolWater = () => {
+        ctx.beginPath();
+        ctx.moveTo(pBackL, pBackY);
+        ctx.lineTo(pBackR, pBackY);
+        ctx.lineTo(pFrontR, pFrontY);
+        ctx.lineTo(pFrontL, pFrontY);
+        ctx.closePath();
+      };
+      ctx.save();
+      tracePoolWater();
+      const poolG = ctx.createLinearGradient(pFrontL, pBackY, pFrontR, pFrontY);
+      poolG.addColorStop(0.0, '#4ea9a2');
+      poolG.addColorStop(0.32, '#2c7d78');
+      poolG.addColorStop(0.68, '#1a5a5a');
+      poolG.addColorStop(1.0, '#103b3e');
+      ctx.fillStyle = poolG;
+      ctx.fill();
+      ctx.clip();
+
+      // Subtle dark inner waterline shadow under the back & side walls
+      const edgeShG = ctx.createLinearGradient(0, pBackY, 0, pBackY + 18);
+      edgeShG.addColorStop(0, 'rgba(12, 36, 36, 0.45)');
+      edgeShG.addColorStop(1, 'rgba(12, 36, 36, 0)');
+      ctx.fillStyle = edgeShG;
+      ctx.fillRect(pFrontL, pBackY, pFrontR - pFrontL, 18);
+
+      // Soft reflected greenery & sunlit stone shimmer on the pool surface
+      const refG = ctx.createLinearGradient(0, pBackY + 4, 0, pFrontY);
+      refG.addColorStop(0, 'rgba(134, 198, 146, 0.24)');
       refG.addColorStop(1, 'rgba(26, 86, 86, 0)');
       ctx.fillStyle = refG;
-      ctx.fillRect(wallLeft, poolTopY, wallW, 56);
+      ctx.fillRect(pFrontL, pBackY + 4, pFrontR - pFrontL, pFrontY - pBackY);
 
-      // Gentle sunlit pool water ripples
-      for (let rr = 0; rr < 7; rr++) {
-        const ry = poolTopY + 12 + rr * 14;
-        for (let k = 0; k < 6; k++) {
-          const rx = wallLeft + 34 + k * 108 + Math.sin(time * 1.6 + rr + k) * 9;
-          const rLen = 28 + ((k * 17 + rr * 11) % 30);
-          ctx.fillStyle = k < 2 ? 'rgba(214, 245, 242, 0.22)' : 'rgba(167, 232, 224, 0.14)';
+      // Perspective-scaled gentle pool ripples
+      for (let rr = 0; rr < 5; rr++) {
+        const u = (rr + 0.5) / 5;
+        const ry = pBackY + u * (pFrontY - pBackY);
+        const rowL = pBackL + u * (pFrontL - pBackL);
+        const rowR = pBackR + u * (pFrontR - pBackR);
+        for (let k = 0; k < 5; k++) {
+          const rx = rowL + 28 + k * ((rowR - rowL - 56) / 4) + Math.sin(time * 1.6 + rr + k) * 7;
+          const rLen = (18 + ((k * 13 + rr * 7) % 18)) * (0.75 + u * 0.45);
+          ctx.fillStyle = k < 2 ? 'rgba(218, 248, 244, 0.22)' : 'rgba(167, 232, 224, 0.14)';
           ctx.beginPath();
-          ctx.ellipse(rx, ry, rLen, 1.3, 0, 0, Math.PI * 2);
+          ctx.ellipse(rx, ry, rLen, 1.1 + u * 0.4, 0, 0, Math.PI * 2);
           ctx.fill();
         }
       }
+      ctx.restore();
 
       // 6. SPARKLING ARCHED SPRING WATERFALL POURING INTO THE ROMAN POOL (الشلال الصغير!)
       const wfStartX = archCx - 42;
       const wfStartY = 384;
-      const wfEndX = archCx - 66;
-      const wfEndY = poolTopY + 10;
-      // Translucent parabolic silver-white waterfall veil
+      const wfEndX = archCx - 72;
+      const wfEndY = pBackY + 18;
       const wfG = ctx.createLinearGradient(wfStartX, wfStartY, wfEndX, wfEndY);
       wfG.addColorStop(0.0, 'rgba(255, 255, 255, 0.92)');
       wfG.addColorStop(0.45, 'rgba(224, 247, 252, 0.72)');
@@ -27405,98 +27428,235 @@ window.Game = window.Game || {};
       ctx.fillStyle = wfG;
       ctx.beginPath();
       ctx.moveTo(wfStartX - 3, wfStartY);
-      ctx.lineTo(wfStartX + 5, wfStartY + 1);
-      ctx.quadraticCurveTo(wfStartX - 10, (wfStartY + wfEndY) * 0.45, wfEndX + 9, wfEndY);
-      ctx.lineTo(wfEndX - 8, wfEndY);
-      ctx.quadraticCurveTo(wfStartX - 20, (wfStartY + wfEndY) * 0.45, wfStartX - 3, wfStartY);
+      ctx.lineTo(wfStartX + 4.5, wfStartY + 1);
+      ctx.quadraticCurveTo(wfStartX - 12, (wfStartY + wfEndY) * 0.45, wfEndX + 8, wfEndY);
+      ctx.lineTo(wfEndX - 7, wfEndY);
+      ctx.quadraticCurveTo(wfStartX - 22, (wfStartY + wfEndY) * 0.45, wfStartX - 3, wfStartY);
       ctx.closePath();
       ctx.fill();
 
       // Animated sparkling falling water droplets & frothy spray along the waterfall arc
-      for (let d = 0; d < 12; d++) {
-        const u = ((time * 1.55 + d / 12) % 1);
+      for (let d = 0; d < 10; d++) {
+        const u = ((time * 1.55 + d / 10) % 1);
         const inv = 1 - u;
-        const ctrlX = wfStartX - 15;
+        const ctrlX = wfStartX - 17;
         const ctrlY = (wfStartY + wfEndY) * 0.45;
-        const dx = inv * inv * wfStartX + 2 * inv * u * ctrlX + u * u * wfEndX + Math.sin(time * 9 + d * 2.1) * 2.4;
+        const dx = inv * inv * wfStartX + 2 * inv * u * ctrlX + u * u * wfEndX + Math.sin(time * 9 + d * 2.1) * 2.0;
         const dy = inv * inv * wfStartY + 2 * inv * u * ctrlY + u * u * wfEndY;
         ctx.fillStyle = d % 2 === 0 ? 'rgba(255, 255, 255, 0.90)' : 'rgba(207, 250, 254, 0.72)';
         ctx.beginPath();
-        ctx.arc(dx, dy, 1.5 + u * 1.5, 0, Math.PI * 2);
+        ctx.arc(dx, dy, 1.3 + u * 1.3, 0, Math.PI * 2);
         ctx.fill();
       }
 
       // Bright frothy white splash crown & expanding ripple rings on the emerald pool!
-      const spGlow = ctx.createRadialGradient(wfEndX, wfEndY + 2, 2, wfEndX, wfEndY + 2, 34);
+      const spGlow = ctx.createRadialGradient(wfEndX, wfEndY + 2, 2, wfEndX, wfEndY + 2, 28);
       spGlow.addColorStop(0, 'rgba(255, 255, 255, 0.92)');
       spGlow.addColorStop(0.45, 'rgba(207, 250, 254, 0.48)');
       spGlow.addColorStop(1, 'rgba(207, 250, 254, 0)');
       ctx.fillStyle = spGlow;
       ctx.beginPath();
-      ctx.ellipse(wfEndX, wfEndY + 2, 34, 9, 0, 0, Math.PI * 2);
+      ctx.ellipse(wfEndX, wfEndY + 2, 28, 7.5, 0, 0, Math.PI * 2);
       ctx.fill();
       const ripFrac = (time * 0.7) % 1;
       ctx.strokeStyle = `rgba(240, 253, 250, ${((1 - ripFrac) * 0.55).toFixed(2)})`;
-      ctx.lineWidth = 1.4;
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
-      ctx.ellipse(wfEndX, wfEndY + 3, 14 + ripFrac * 42, 3.2 + ripFrac * 8, 0, 0, Math.PI * 2);
+      ctx.ellipse(wfEndX, wfEndY + 3, 12 + ripFrac * 34, 2.8 + ripFrac * 6.5, 0, 0, Math.PI * 2);
       ctx.stroke();
 
-      // 7. LOW SUBTLE PERIMETER STONE COPING WALL AROUND THE ROMAN POOL (جدار منخفض غير بارز حول البركة)
-      const rimY = poolTopY + 1;
-      const lowWallCol = ['#cfc5b4', '#c2b6a3', '#b8aa96', '#d6cdc0'];
-      // Low back-waterline stone curb along pool edge
-      for (let rx = wallLeft; rx < wallLeft + wallW; rx += 28) {
-        const rw = Math.min(27, wallLeft + wallW - rx);
-        ctx.fillStyle = lowWallCol[Math.abs(Math.floor(rx / 28) * 5) % lowWallCol.length];
-        ctx.strokeStyle = 'rgba(72, 52, 34, 0.45)';
+      // 7. REALISTIC 3D PERSPECTIVE DRESSED-LIMESTONE POOL WALL & COPING (جدار مائل واقعي حول البركة)
+      const capCols = ['#dfd5c5', '#d2c5b2', '#c7b8a2', '#e6ddd0'];
+      // 7a. Back low stone curb along back waterline
+      for (let rx = pBackL - 6; rx < pBackR + 6; rx += 24) {
+        const rw = Math.min(23, pBackR + 6 - rx);
+        ctx.fillStyle = capCols[Math.abs(Math.floor(rx / 24) * 5) % capCols.length];
+        ctx.strokeStyle = 'rgba(72, 54, 38, 0.52)';
         ctx.lineWidth = 0.9;
         ctx.beginPath();
-        ctx.roundRect(rx, rimY - 5, rw, 8, 1.5);
+        ctx.roundRect(rx, pBackY - 5, rw, 7, 1.5);
         ctx.fill();
         ctx.stroke();
       }
-      // Low subtle left & right flanking parapet walls sloping gently forward toward the foreground
-      for (const side of [-1, 1]) {
-        const edgeX = side < 0 ? wallLeft : wallLeft + wallW;
-        ctx.save();
+      // 7b. Slanted Left & Right Perspective Coping Walls (top cap face + angled outer wall face)
+      // Left slanted wall
+      ctx.fillStyle = '#d4c7b4';
+      ctx.strokeStyle = '#5c4632';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(pBackL - 10, pBackY - 5);
+      ctx.lineTo(pBackL + 1, pBackY - 5);
+      ctx.lineTo(pFrontL + 2, pFrontY + 1);
+      ctx.lineTo(pFrontL - 13, pFrontY + 1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Left outer side thickness (3D depth face)
+      ctx.fillStyle = '#8f7d69';
+      ctx.beginPath();
+      ctx.moveTo(pBackL - 10, pBackY - 5);
+      ctx.lineTo(pFrontL - 13, pFrontY + 1);
+      ctx.lineTo(pFrontL - 13, pFrontY + 23);
+      ctx.lineTo(pBackL - 10, pBackY + 14);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Right slanted wall
+      ctx.fillStyle = '#d8ccb9';
+      ctx.beginPath();
+      ctx.moveTo(pBackR - 1, pBackY - 5);
+      ctx.lineTo(pBackR + 10, pBackY - 5);
+      ctx.lineTo(pFrontR + 13, pFrontY + 1);
+      ctx.lineTo(pFrontR - 2, pFrontY + 1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Right outer side thickness
+      ctx.fillStyle = '#998773';
+      ctx.beginPath();
+      ctx.moveTo(pBackR + 10, pBackY - 5);
+      ctx.lineTo(pFrontR + 13, pFrontY + 1);
+      ctx.lineTo(pFrontR + 13, pFrontY + 23);
+      ctx.lineTo(pBackR + 10, pBackY + 14);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 7c. Front Low Dressed-Limestone Pool Coping & Retaining Wall (y = 545..569, clean & compact!)
+      const frontWallL = pFrontL - 13;
+      const frontWallW = (pFrontR + 13) - frontWallL;
+      const frontWallH = 22;
+      drawTerraceMasonry(frontWallL, pFrontY + 2, frontWallW, frontWallH, 11, 26, 107);
+      // Beveled front top coping cap stones
+      for (let fx = frontWallL; fx < frontWallL + frontWallW; fx += 28) {
+        const fw = Math.min(27, frontWallL + frontWallW - fx);
+        ctx.fillStyle = capCols[Math.abs(Math.floor(fx / 28) * 3 + 2) % capCols.length];
+        ctx.strokeStyle = 'rgba(72, 54, 38, 0.55)';
+        ctx.lineWidth = 0.9;
         ctx.beginPath();
-        ctx.moveTo(edgeX - (side < 0 ? 12 : 16), rimY - 6);
-        ctx.lineTo(edgeX + (side < 0 ? 16 : 12), rimY - 6);
-        ctx.lineTo(edgeX + (side < 0 ? 6 : 22), poolBotY);
-        ctx.lineTo(edgeX - (side < 0 ? 22 : 6), poolBotY);
-        ctx.closePath();
-        const swG = ctx.createLinearGradient(edgeX - 16, rimY, edgeX + 16, rimY);
-        swG.addColorStop(0, '#a89c8c');
-        swG.addColorStop(0.5, '#cec4b4');
-        swG.addColorStop(1, '#8c8070');
-        ctx.fillStyle = swG;
+        ctx.roundRect(fx, pFrontY - 3, fw, 7, 1.6);
         ctx.fill();
-        ctx.strokeStyle = 'rgba(68, 52, 38, 0.48)';
-        ctx.lineWidth = 1.0;
         ctx.stroke();
-        // Subtle horizontal stone course joints along the low side coping
-        ctx.strokeStyle = 'rgba(68, 52, 38, 0.30)';
-        for (let sy = rimY + 10; sy < poolBotY; sy += 16) {
-          ctx.beginPath();
-          ctx.moveTo(edgeX - 14, sy);
-          ctx.lineTo(edgeX + 14, sy);
-          ctx.stroke();
+        ctx.fillStyle = 'rgba(255, 252, 245, 0.25)';
+        ctx.fillRect(fx + 2, pFrontY - 2, Math.max(2, fw - 4), 1.5);
+      }
+
+      // 8. LOWER TERRACED BATTIR GARDEN (حديقة سفلية بشجر ليمون ومشاكب وزرع فوق النهر مباشرة!)
+      const gTopY = pFrontY + frontWallH + 2; // y = 570
+      const gBotY = 635; // meets the valley riverbank seamlessly at y = 635!
+      const gLeft = frontWallL - 18;
+      const gRight = frontWallL + frontWallW + 18;
+      const gW = gRight - gLeft;
+
+      // Fertile tilled brown Battir garden soil bed sloping gently down to the riverbank
+      const soilG = ctx.createLinearGradient(0, gTopY, 0, gBotY);
+      soilG.addColorStop(0.0, '#6b472b');
+      soilG.addColorStop(0.45, '#593a22');
+      soilG.addColorStop(0.85, '#46331e');
+      soilG.addColorStop(1.0, '#3a4a21');
+      ctx.fillStyle = soilG;
+      ctx.beginPath();
+      ctx.moveTo(frontWallL - 4, gTopY);
+      ctx.lineTo(frontWallL + frontWallW + 4, gTopY);
+      ctx.lineTo(gRight, gBotY);
+      ctx.lineTo(gLeft, gBotY);
+      ctx.closePath();
+      ctx.fill();
+
+      // Neat stone-bordered Battir agricultural mashaakeb (مشاكب الزراعة) with soil furrows & crops!
+      const beds = [
+        { x: gLeft + 26, y: gTopY + 12, w: 122, h: 38, crop: 'mint' },
+        { x: gLeft + 178, y: gTopY + 12, w: 132, h: 38, crop: 'tomato' },
+        { x: gLeft + 338, y: gTopY + 12, w: 126, h: 38, crop: 'eggplant' },
+      ];
+      for (const bd of beds) {
+        // Raised tilled brown soil plot with subtle earthen furrow ridges
+        ctx.fillStyle = '#4e311a';
+        ctx.strokeStyle = 'rgba(196, 176, 148, 0.55)';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.roundRect(bd.x, bd.y, bd.w, bd.h, 5);
+        ctx.fill();
+        ctx.stroke();
+        // Horizontal irrigation soil furrows
+        ctx.strokeStyle = 'rgba(34, 19, 9, 0.45)';
+        ctx.lineWidth = 1.1;
+        for (let fy = bd.y + 10; fy < bd.y + bd.h - 4; fy += 10) {
+          ctx.beginPath(); ctx.moveTo(bd.x + 6, fy); ctx.lineTo(bd.x + bd.w - 6, fy); ctx.stroke();
+        }
+        // Crops planted in neat rows inside each mashkab!
+        for (let row = 0; row < 3; row++) {
+          const py0 = bd.y + 8 + row * 11;
+          for (let px0 = bd.x + 12; px0 < bd.x + bd.w - 10; px0 += 18) {
+            // Lush green plant foliage tuft
+            ctx.fillStyle = bd.crop === 'mint' ? '#22c55e' : '#15803d';
+            ctx.beginPath();
+            ctx.ellipse(px0, py0, 5.2, 3.2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = bd.crop === 'mint' ? '#86efac' : '#4ade80';
+            ctx.beginPath();
+            ctx.ellipse(px0 - 1.2, py0 - 1.0, 2.8, 1.7, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Ripe red tomatoes or deep-purple Battiri eggplants
+            if (bd.crop === 'tomato') {
+              ctx.fillStyle = '#ef4444';
+              ctx.beginPath(); ctx.arc(px0 + 2.2, py0 + 0.5, 1.9, 0, Math.PI * 2); ctx.fill();
+            } else if (bd.crop === 'eggplant') {
+              ctx.fillStyle = '#581c87';
+              ctx.beginPath(); ctx.ellipse(px0 + 2.0, py0 + 1.0, 1.6, 2.6, 0.25, 0, Math.PI * 2); ctx.fill();
+            }
+          }
+        }
+      }
+
+      // 3 Fruiting Palestinian Lemon Trees (أشجار ليمون مثمرة) in the lower garden!
+      const drawGardenLemonTree = (lx, ly, sc) => {
+        ctx.save();
+        ctx.translate(lx, ly);
+        ctx.scale(sc, sc);
+        // Ground shadow
+        ctx.fillStyle = 'rgba(20, 14, 8, 0.30)';
+        ctx.beginPath(); ctx.ellipse(0, 1, 22, 4, 0, 0, Math.PI * 2); ctx.fill();
+        // Slender woody citrus trunk & forked branches
+        ctx.strokeStyle = '#5c3c22';
+        ctx.lineWidth = 4.2;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(0, 0); ctx.quadraticCurveTo(-2, -14, 0, -24);
+        ctx.moveTo(0, -18); ctx.lineTo(-10, -28);
+        ctx.moveTo(0, -18); ctx.lineTo(10, -27);
+        ctx.stroke();
+        // Glossy deep-emerald & sunlit citrus canopy clusters
+        const lPuffs = [
+          [-14, -30, 12, 9, '#1b4d24'], [14, -29, 12, 9, '#1b4d24'], [0, -34, 16, 11, '#225d29'],
+          [-9, -36, 11, 8, '#387d32'], [10, -35, 11, 8, '#387d32'], [0, -40, 13, 8, '#5a9b3c'],
+        ];
+        for (const [cx0, cy0, rx, ry, col] of lPuffs) {
+          ctx.fillStyle = col;
+          ctx.beginPath(); ctx.ellipse(cx0, cy0, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+        }
+        // Bright golden-yellow Palestinian lemons (ثمار الليمون الصفراء!)
+        for (const [fx, fy] of [[-13, -30], [-4, -36], [6, -32], [14, -28], [1, -41]]) {
+          ctx.fillStyle = '#facc15';
+          ctx.strokeStyle = '#a16207';
+          ctx.lineWidth = 0.6;
+          ctx.beginPath(); ctx.ellipse(fx, fy, 2.3, 3.0, 0.3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fef9c3';
+          ctx.beginPath(); ctx.arc(fx - 0.7, fy - 0.8, 0.7, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
-      }
-      // Low understated front stone curb framing the foreground edge of the pool
-      const frontCurbY = 602;
-      for (let fx = wallLeft - 14; fx < wallLeft + wallW + 14; fx += 34) {
-        ctx.fillStyle = lowWallCol[Math.abs(Math.floor(fx / 34) * 3 + 1) % lowWallCol.length];
-        ctx.strokeStyle = 'rgba(66, 52, 38, 0.42)';
-        ctx.lineWidth = 0.9;
+      };
+      drawGardenLemonTree(gLeft + 158, gTopY + 42, 0.98);
+      drawGardenLemonTree(gLeft + 322, gTopY + 46, 1.06);
+      drawGardenLemonTree(gRight - 22, gTopY + 40, 0.92);
+
+      // Soft grassy & stone riverbank border blending cleanly into the crystal-clear river at y = 635!
+      ctx.fillStyle = '#475c26';
+      for (let gx = gLeft + 14; gx < gRight - 10; gx += 34) {
         ctx.beginPath();
-        ctx.roundRect(fx, frontCurbY, 33, 12, 2);
+        ctx.ellipse(gx, gBotY - 1, 16, 4.2, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = 'rgba(255, 252, 244, 0.20)';
-        ctx.fillRect(fx + 2, frontCurbY + 1, 29, 1.8);
       }
 
       ctx.restore();
