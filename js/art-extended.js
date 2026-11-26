@@ -26887,7 +26887,13 @@ window.Game = window.Game || {};
     ctx.restore();
   }
 
-  function drawBattirMidground(ctx, camX, w, h, time) {
+  // Offscreen Canvas Tile Caches for 60fps Mobile Battir Background (v164)
+  let battirFarCache = null;
+  const battirSceneCache = {};
+
+  function drawBattirMidground(mainCtx, camX, w, h, time) {
+    let ctx = mainCtx;
+    const liveTime = time;
     // =========================================================================
     // 1. LIVING BATTIR TERRACED HILLSIDE PANORAMA (0.22x — NO VIADUCT BRIDGE!)
     //    Harmonious blend of terraced hills, old vaulted stone homes, modern
@@ -27503,8 +27509,13 @@ window.Game = window.Game || {};
       }
     };
 
-    for (let rep = -1; rep <= 1; rep++) {
-      const vx = off + rep * span;
+    const farPadX = 100;
+    if (!battirFarCache && typeof document !== "undefined" && document.createElement) {
+      battirFarCache = makeOffscreen(span + farPadX * 2, 640, (bCtx) => {
+        ctx = bCtx;
+        time = 0;
+        try {
+      const vx = farPadX;
 
       // Helper: Paint edge-to-edge curved & gently undulating agricultural terraces clipped to a distant hill!
       const paintDistantHillTerraces = (hillPathFn, xL, xR, tiers) => {
@@ -27646,6 +27657,18 @@ window.Game = window.Game || {};
       ]) {
         drawAncientOliveSunset(ctx, ox, oy, sc);
       }
+        } finally {
+          ctx = mainCtx;
+          time = liveTime;
+        }
+      });
+    }
+    if (battirFarCache) {
+      for (let rep = -1; rep <= 1; rep++) {
+        const vx = off + rep * span;
+        if (vx + span + farPadX < 0 || vx - farPadX > w) continue;
+        mainCtx.drawImage(battirFarCache, vx - farPadX, 0);
+      }
     }
 
     // =========================================================================
@@ -27672,11 +27695,8 @@ window.Game = window.Game || {};
     const worldStart = Math.floor((camX * p) / blockW) * blockW - blockW;
     const worldEnd = camX * p + w + blockW;
 
-    for (let bx = worldStart; bx <= worldEnd; bx += blockW) {
-      const sx = bx - camX * p;
-      const blockIdx = Math.round(bx / blockW);
-      const zoneIdx = ((blockIdx % 5) + 5) % 5;
-
+    const scenePadX = 120;
+    const renderBattirSceneStatic = (zoneIdx, sx, blockIdx) => {
       if (zoneIdx === 0) {
         // ---------------------------------------------------------------------
         // SCENE 0: 3-TIER STACKED CLIFFSIDE SEVEN WIDOWS QUARTER (حارة السبع أرامل!)
@@ -27695,12 +27715,9 @@ window.Game = window.Game || {};
         drawFieldstoneRetainingWall(ctx, sx + 30, 558, 620, 36, 3);
         drawPricklyPearCactus(ctx, sx + 635, 558, 0.96, blockIdx * 7 + 3);
         drawPomegranateTree(ctx, sx + 690, 560, 1.12);
-        drawTerraceFarmer(ctx, sx + 755, 562, 0.94, time, 'pick', 1, blockIdx * 7 + 1);
-        drawBlossomingAlmondTree(ctx, sx + 792, 558, 1.06, time, blockIdx * 3 + 2);
+        drawBlossomingAlmondTree(ctx, sx + 792, 558, 1.06, 0, blockIdx * 3 + 2);
         drawCypressSilhouette(ctx, sx + 835, 558, 162);
         drawAncientOliveSunset(ctx, sx + 985, 564, 1.22);
-        drawOliveHarvestScene(ctx, sx + 985, 564, 1.22, time, blockIdx * 13 + 1);
-        drawTerraceFarmer(ctx, sx + 1090, 562, 0.92, time, 'hoe', -1, blockIdx * 11 + 6);
         drawPomegranateTree(ctx, sx + 1155, 558, 1.04);
 
       } else if (zoneIdx === 1) {
@@ -28305,22 +28322,9 @@ window.Game = window.Game || {};
         }
         // Final organized stone spout pouring pure spring water from the lower terrace into the Roman Pool!
         drawPureStoneSpoutPour(plX - 4, plY + 52, plX + 14, plY + 62, 12);
-        // Swimming Ducks gliding across the Scene 1 Ain al-Balad Roman Pool!
-        for (let dk = 0; dk < 3; dk++) {
-          const ph = dk * 2.1 + blockIdx * 0.9;
-          const spd = 0.22 + dk * 0.04;
-          const wv = Math.sin(time * spd + ph);
-          const vl = Math.cos(time * spd + ph);
-          const dx = plX + plW * 0.52 + wv * (plW * 0.34);
-          const dy = plY + 57 + dk * 7.5 + Math.sin(time * 2.2 + dk) * 1.0;
-          drawSwimmingDuck(ctx, dx, dy, dk === 2 ? 0.62 : 0.80, vl >= 0 ? 1 : -1, time, blockIdx * 7 + dk, dk === 0 ? 'mallard' : (dk === 2 ? 'duckling' : 'white'));
-        }
-
-        drawBlossomingAlmondTree(ctx, sx + 860, 586, 1.02, time, blockIdx * 11 + 2);
+        drawBlossomingAlmondTree(ctx, sx + 860, 586, 1.02, 0, blockIdx * 11 + 2);
         drawPomegranateTree(ctx, sx + 945, 588, 1.1);
-        drawTerraceFarmer(ctx, sx + 1010, 590, 0.94, time, 'hoe', -1, blockIdx * 11 + 4);
         drawAncientOliveSunset(ctx, sx + 1115, 592, 1.2);
-        drawOliveHarvestScene(ctx, sx + 1115, 592, 1.2, time, blockIdx * 19 + 2);
         drawPricklyPearCactus(ctx, sx + 1218, 592, 0.92, blockIdx * 13 + 6);
 
       } else if (zoneIdx === 2) {
@@ -28786,11 +28790,8 @@ window.Game = window.Game || {};
         }
         drawPricklyPearCactus(ctx, sx + 590, 586, 0.95, blockIdx * 5 + 1);
         drawPomegranateTree(ctx, sx + 662, 588, 1.06);
-        drawBlossomingAlmondTree(ctx, sx + 748, 588, 1.06, time, blockIdx * 7 + 4);
-        drawTerraceFarmer(ctx, sx + 310, 488, 0.88, time, 'hoe', 1, blockIdx * 7 + 2);
-        drawTerraceFarmer(ctx, sx + 472, 540, 0.90, time, 'pick', -1, blockIdx * 9 + 5);
+        drawBlossomingAlmondTree(ctx, sx + 748, 588, 1.06, 0, blockIdx * 7 + 4);
         drawAncientOliveSunset(ctx, sx + 1072, 590, 1.12);
-        drawOliveHarvestScene(ctx, sx + 1072, 590, 1.12, time, blockIdx * 13 + 5);
         drawPricklyPearCactus(ctx, sx + 1175, 592, 0.90, blockIdx * 17 + 3);
 
       } else if (zoneIdx === 3) {
@@ -28826,10 +28827,8 @@ window.Game = window.Game || {};
 
         drawPricklyPearCactus(ctx, sx + 642, 560, 0.94, blockIdx * 13 + 4);
         drawCypressSilhouette(ctx, sx + 695, 558, 165);
-        drawBlossomingAlmondTree(ctx, sx + 758, 560, 1.08, time, blockIdx * 9 + 1);
+        drawBlossomingAlmondTree(ctx, sx + 758, 560, 1.08, 0, blockIdx * 9 + 1);
         drawAncientOliveSunset(ctx, sx + 855, 564, 1.24);
-        drawOliveHarvestScene(ctx, sx + 855, 564, 1.24, time, blockIdx * 11 + 3);
-        drawTerraceFarmer(ctx, sx + 962, 564, 0.94, time, 'pick', -1, blockIdx * 13 + 7);
         drawPomegranateTree(ctx, sx + 1045, 560, 1.14);
         drawCypressSilhouette(ctx, sx + 1190, 558, 148);
 
@@ -28905,11 +28904,66 @@ window.Game = window.Game || {};
         drawPricklyPearCactus(ctx, sx + 595, 558, 0.96, blockIdx * 7 + 2);
         drawSunsetVillageHouse(ctx, sx + 635, 558, 186, 122, { domeR: 58, mashrabiya: true, sideW: 18, topCol: '#f7d5a8' });
         drawCypressSilhouette(ctx, sx + 868, 558, 152);
-        drawBlossomingAlmondTree(ctx, sx + 942, 560, 1.06, time, blockIdx * 5 + 3);
+        drawBlossomingAlmondTree(ctx, sx + 942, 560, 1.06, 0, blockIdx * 5 + 3);
         drawPomegranateTree(ctx, sx + 1015, 560, 1.12);
-        drawTerraceFarmer(ctx, sx + 1085, 564, 0.96, time, 'hoe', 1, blockIdx * 17 + 9);
         drawAncientOliveSunset(ctx, sx + 1165, 564, 1.18);
         drawPricklyPearCactus(ctx, sx + 1238, 564, 0.88, blockIdx * 11 + 5);
+      }
+    };
+
+    for (let bx = worldStart; bx <= worldEnd; bx += blockW) {
+      const sx = bx - camX * p;
+      // Tight viewport culling: skip offscreen scenes completely
+      if (sx + blockW + scenePadX < 0 || sx - scenePadX > w) continue;
+      const blockIdx = Math.round(bx / blockW);
+      const zoneIdx = ((blockIdx % 5) + 5) % 5;
+
+      // Lazy-bake each static cliffside scene once into an Offscreen Canvas tile
+      if (!battirSceneCache[zoneIdx] && typeof document !== "undefined" && document.createElement) {
+        battirSceneCache[zoneIdx] = makeOffscreen(blockW + scenePadX * 2, 660, (sCtx) => {
+          ctx = sCtx;
+          time = 0;
+          try {
+            renderBattirSceneStatic(zoneIdx, scenePadX, zoneIdx);
+          } finally {
+            ctx = mainCtx;
+            time = liveTime;
+          }
+        });
+      }
+      if (battirSceneCache[zoneIdx]) {
+        mainCtx.drawImage(battirSceneCache[zoneIdx], sx - scenePadX, 0);
+      } else {
+        renderBattirSceneStatic(zoneIdx, sx, blockIdx);
+      }
+
+      // Lightweight Live Animated Overlay (farmers, olive harvest, swimming ducks)
+      if (zoneIdx === 0) {
+        drawTerraceFarmer(mainCtx, sx + 755, 562, 0.94, liveTime, 'pick', 1, blockIdx * 7 + 1);
+        drawOliveHarvestScene(mainCtx, sx + 985, 564, 1.22, liveTime, blockIdx * 13 + 1);
+        drawTerraceFarmer(mainCtx, sx + 1090, 562, 0.92, liveTime, 'hoe', -1, blockIdx * 11 + 6);
+      } else if (zoneIdx === 1) {
+        const plX = sx + 520, plY = 492, plW = 330;
+        for (let dk = 0; dk < 3; dk++) {
+          const ph = dk * 2.1 + blockIdx * 0.9;
+          const spd = 0.22 + dk * 0.04;
+          const wv = Math.sin(liveTime * spd + ph);
+          const vl = Math.cos(liveTime * spd + ph);
+          const dx = plX + plW * 0.52 + wv * (plW * 0.34);
+          const dy = plY + 57 + dk * 7.5 + Math.sin(liveTime * 2.2 + dk) * 1.0;
+          drawSwimmingDuck(mainCtx, dx, dy, dk === 2 ? 0.62 : 0.80, vl >= 0 ? 1 : -1, liveTime, blockIdx * 7 + dk, dk === 0 ? 'mallard' : (dk === 2 ? 'duckling' : 'white'));
+        }
+        drawTerraceFarmer(mainCtx, sx + 1010, 590, 0.94, liveTime, 'hoe', -1, blockIdx * 11 + 4);
+        drawOliveHarvestScene(mainCtx, sx + 1115, 592, 1.2, liveTime, blockIdx * 19 + 2);
+      } else if (zoneIdx === 2) {
+        drawTerraceFarmer(mainCtx, sx + 310, 488, 0.88, liveTime, 'hoe', 1, blockIdx * 7 + 2);
+        drawTerraceFarmer(mainCtx, sx + 472, 540, 0.90, liveTime, 'pick', -1, blockIdx * 9 + 5);
+        drawOliveHarvestScene(mainCtx, sx + 1072, 590, 1.12, liveTime, blockIdx * 13 + 5);
+      } else if (zoneIdx === 3) {
+        drawOliveHarvestScene(mainCtx, sx + 855, 564, 1.24, liveTime, blockIdx * 11 + 3);
+        drawTerraceFarmer(mainCtx, sx + 962, 564, 0.94, liveTime, 'pick', -1, blockIdx * 13 + 7);
+      } else {
+        drawTerraceFarmer(mainCtx, sx + 1085, 564, 0.96, liveTime, 'hoe', 1, blockIdx * 17 + 9);
       }
     }
 
@@ -28921,6 +28975,7 @@ window.Game = window.Game || {};
     const vOff = -((camX * 0.48) % vSpan);
     for (let rep = -1; rep <= 1; rep++) {
       const vx = vOff + rep * vSpan;
+      if (vx + 1420 < 0 || vx + 40 > w) continue;
       // Graceful valley rail arc curving in front of the terraced hillside right above the river!
       const valleyRailPt = (u) => {
         const rx = vx + 150 + u * 1160;
