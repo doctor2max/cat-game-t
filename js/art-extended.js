@@ -12751,39 +12751,334 @@ window.Game = window.Game || {};
     }
 
     if (p.type === 'battir_fig_canopy') {
-      // Elastic Broad-Leafed Palestinian Fig Tree Canopy (شجرة التين المباركة المرنة!)
+      // =====================================================================
+      // REALISTIC GNARLED PALESTINIAN FIG TREE (شجرة التين البتّيرية المعمرة)
+      // Crooked silver-grey trunk rooted deep into the valley floor, pruned
+      // branch stubs & healed knot scars, flexing gnarled boughs, 5-lobed
+      // palmate fig leaves, and pear-shaped ripe purple & green-gold figs!
+      // =====================================================================
       ctx.save();
-      const flex = (p.bounceAnim || 0) * 10;
+      const bounce = p.bounceAnim || 0;
+      const flex = bounce * 10;
       const by = py + flex;
       const cx = px + p.w * 0.5;
+      const seed = Math.abs(Math.floor((p.x || 0) * 0.13 + (p.y || 0) * 7));
+      const leanDir = (seed % 2 === 0) ? 1 : -1;
+      const bendAmp = 10 + (seed % 5) * 2.2;
+      const bottomY = Math.max(760, by + 260);
+      const trunkTopY = by + 18;
+      const trunkH = bottomY - trunkTopY;
 
-      // Smooth twisted silver-grey Palestinian fig trunk anchoring down to earth
-      const trG = ctx.createLinearGradient(cx - 18, by + 10, cx + 18, by + 115);
-      trG.addColorStop(0, '#cbd5e1'); trG.addColorStop(0.5, '#94a3b8'); trG.addColorStop(1, '#475569');
-      ctx.fillStyle = trG; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.5;
+      // Helper: Trunk centerline X at fraction t in [0..1] (0 = canopy crown, 1 = deep valley base)
+      const trunkCenterX = (t) => {
+        const sCurve = Math.sin(t * Math.PI * 1.35 + (seed % 3) * 0.4) * bendAmp * leanDir;
+        const drift = leanDir * t * 9;
+        return cx + sCurve + drift;
+      };
+      const trunkHalfW = (t) => 11.5 + t * 12.5 + Math.sin(t * Math.PI * 3.1) * 1.4;
+
+      // 1. CONTINUOUS GNARLED & CROOKED SILVER-GREY FIG TRUNK (Rooted all the way down!)
+      const steps = 16;
+      const leftPts = [];
+      const rightPts = [];
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const y = trunkTopY + t * trunkH;
+        const x = trunkCenterX(t);
+        const hw = trunkHalfW(t);
+        leftPts.push([x - hw, y]);
+        rightPts.push([x + hw, y]);
+      }
+
+      const traceTrunk = () => {
+        ctx.beginPath();
+        ctx.moveTo(leftPts[0][0], leftPts[0][1]);
+        for (let i = 1; i <= steps; i++) ctx.lineTo(leftPts[i][0], leftPts[i][1]);
+        for (let i = steps; i >= 0; i--) ctx.lineTo(rightPts[i][0], rightPts[i][1]);
+        ctx.closePath();
+      };
+
+      // Iconic smooth-yet-weathered silvery ash-taupe Palestinian fig bark gradient
+      const trG = ctx.createLinearGradient(cx - 28, trunkTopY, cx + 32, trunkTopY);
+      trG.addColorStop(0, '#5a5550');
+      trG.addColorStop(0.26, '#8f887f');
+      trG.addColorStop(0.58, '#b5ada1');
+      trG.addColorStop(0.84, '#928a7f');
+      trG.addColorStop(1, '#4f4a45');
+      traceTrunk();
+      ctx.fillStyle = trG;
+      ctx.fill();
+
+      // Clip natural bark texture, horizontal lenticels, longitudinal ridges & healed knot scars inside trunk
+      ctx.save();
+      traceTrunk();
+      ctx.clip();
+      // Longitudinal twisted bark grain creases following the trunk curve
+      ctx.strokeStyle = 'rgba(46, 40, 35, 0.30)';
+      ctx.lineWidth = 1.2;
+      for (const offsetFrac of [-0.45, -0.05, 0.38]) {
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          const x = trunkCenterX(t) + trunkHalfW(t) * offsetFrac;
+          const y = trunkTopY + t * trunkH;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      // Subtle sunlit warm sunset rim highlight along the sunlit side of the bark
+      ctx.strokeStyle = 'rgba(255, 240, 214, 0.28)';
+      ctx.lineWidth = 2.0;
       ctx.beginPath();
-      ctx.moveTo(cx - 14, by + 14); ctx.quadraticCurveTo(cx - 8, by + 58, cx - 20, by + 110);
-      ctx.lineTo(cx + 20, by + 110); ctx.quadraticCurveTo(cx + 8, by + 58, cx + 14, by + 14);
-      ctx.closePath(); ctx.fill(); ctx.stroke();
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const x = trunkCenterX(t) + trunkHalfW(t) * 0.62;
+        const y = trunkTopY + t * trunkH;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      // Horizontal fig-bark lenticel marks & subtle knots
+      ctx.strokeStyle = 'rgba(52, 46, 42, 0.32)';
+      ctx.lineWidth = 1.0;
+      for (let l = 1; l < 11; l++) {
+        const t = l / 11;
+        const lx = trunkCenterX(t) + (((l * 13 + seed) % 11) - 5);
+        const ly = trunkTopY + t * trunkH;
+        ctx.beginPath();
+        ctx.moveTo(lx - 4.5, ly);
+        ctx.quadraticCurveTo(lx, ly + 1.2, lx + 4.5, ly - 0.5);
+        ctx.stroke();
+      }
+      // Healed dark oval pruning-scar eye on the middle trunk (أثر غصن قديم ملتئم)
+      const scarT = 0.36;
+      const scarX = trunkCenterX(scarT) - leanDir * 3.5;
+      const scarY = trunkTopY + scarT * trunkH;
+      ctx.fillStyle = '#473d36';
+      ctx.strokeStyle = '#756c63';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.ellipse(scarX, scarY, 4.2, 6.2, leanDir * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#2e2621';
+      ctx.beginPath();
+      ctx.ellipse(scarX + 0.5, scarY + 0.4, 2.2, 3.6, leanDir * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
 
-      // Cushion of lush broad emerald-green fig foliage + ripe purple-crimson figs!
-      const lfCols = ['#14532d', '#15803d', '#22c55e', '#84cc16'];
-      const puffs = [[-52, 8, 26, 13], [52, 8, 26, 13], [-28, 3, 30, 14], [28, 3, 30, 14], [0, 0, 36, 15]];
-      for (let l = 0; l < 3; l++) {
-        ctx.fillStyle = lfCols[l];
-        for (const [dx, dy, rx, ry] of puffs) {
-          ctx.beginPath();
-          ctx.ellipse(cx + dx * (1 - l * 0.08), by + 11 + dy - l * 3, rx * (1 - l * 0.1), ry * (1 - l * 0.12), 0, 0, Math.PI * 2);
-          ctx.fill();
+      traceTrunk();
+      ctx.strokeStyle = '#3b3530';
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+
+      // 2. PRUNED / CUT BRANCH STUBS (آثار غصون مقطوعة بحلقات خشب مكشوفة)
+      const drawCutBranchStub = (tFrac, side, stubLen, stubW) => {
+        const baseX = trunkCenterX(tFrac) + side * (trunkHalfW(tFrac) - 3.5);
+        const baseY = trunkTopY + tFrac * trunkH;
+        const tipX = baseX + side * stubLen;
+        const tipY = baseY - stubLen * 0.52;
+        ctx.save();
+        // Bark collar & short woody stub
+        const stG = ctx.createLinearGradient(baseX, baseY - stubW, baseX, baseY + stubW);
+        stG.addColorStop(0, '#aba296');
+        stG.addColorStop(0.55, '#7e766d');
+        stG.addColorStop(1, '#4c4640');
+        ctx.fillStyle = stG;
+        ctx.strokeStyle = '#36302b';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(baseX - side * 2, baseY - stubW * 0.62);
+        ctx.quadraticCurveTo((baseX + tipX) * 0.5, baseY - stubW * 0.48, tipX, tipY - stubW * 0.44);
+        ctx.lineTo(tipX, tipY + stubW * 0.44);
+        ctx.quadraticCurveTo((baseX + tipX) * 0.5, baseY + stubW * 0.42, baseX - side * 2, baseY + stubW * 0.66);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Exposed pale-ochre cut heartwood cross-section with annual ring!
+        ctx.fillStyle = '#d9bc94';
+        ctx.strokeStyle = '#4c3e32';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.ellipse(tipX, tipY, 3.0, stubW * 0.44, side * -0.22, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(120, 82, 48, 0.55)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.ellipse(tipX, tipY, 1.5, stubW * 0.22, side * -0.22, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      };
+      drawCutBranchStub(0.22, -leanDir, 13, 8.5);
+      drawCutBranchStub(0.54, leanDir, 11, 9.2);
+
+      // 3. SPREADING GNARLED UPPER BOUGHS SUPPORTING THE ELASTIC CANOPY
+      const boughs = [
+        { tx: cx - 54, ty: by + 16, mx: cx - 26, my: by + 26, w0: 8.5, w1: 3.2 },
+        { tx: cx - 26, ty: by + 10, mx: cx - 14, my: by + 22, w0: 7.5, w1: 3.0 },
+        { tx: cx + 28, ty: by + 11, mx: cx + 14, my: by + 22, w0: 7.5, w1: 3.0 },
+        { tx: cx + 56, ty: by + 16, mx: cx + 28, my: by + 26, w0: 8.5, w1: 3.2 },
+      ];
+      for (const b of boughs) {
+        ctx.strokeStyle = '#3b3530';
+        ctx.lineWidth = b.w0 + 2.2;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(cx, trunkTopY + 8);
+        ctx.quadraticCurveTo(b.mx, b.my, b.tx, b.ty);
+        ctx.stroke();
+        ctx.strokeStyle = '#9c9489';
+        ctx.lineWidth = b.w0;
+        ctx.beginPath();
+        ctx.moveTo(cx, trunkTopY + 8);
+        ctx.quadraticCurveTo(b.mx, b.my, b.tx, b.ty);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(245, 232, 210, 0.28)';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(cx, trunkTopY + 6);
+        ctx.quadraticCurveTo(b.mx, b.my - 2, b.tx, b.ty - 1.5);
+        ctx.stroke();
+      }
+
+      // 4. REALISTIC 5-LOBED PALMATE PALESTINIAN FIG LEAVES (أوراق التين المفصّصة)
+      const drawFigLeaf = (lx, ly, sc, rot, fillCol, veinCol) => {
+        ctx.save();
+        ctx.translate(lx, ly);
+        ctx.rotate(rot);
+        ctx.scale(sc, sc);
+        ctx.fillStyle = fillCol;
+        ctx.strokeStyle = 'rgba(15, 42, 22, 0.55)';
+        ctx.lineWidth = 0.85;
+        ctx.beginPath();
+        ctx.moveTo(0, 7);
+        // Left lower lobe
+        ctx.bezierCurveTo(-6, 7, -11, 3, -9.5, -0.5);
+        ctx.quadraticCurveTo(-6.5, -1, -6.5, -2.5);
+        // Left upper lobe
+        ctx.bezierCurveTo(-11, -5, -9, -10.5, -4.5, -9.5);
+        ctx.quadraticCurveTo(-3, -7.5, -2.5, -9);
+        // Center main lobe
+        ctx.bezierCurveTo(-2, -14, 2, -14, 2.5, -9);
+        ctx.quadraticCurveTo(3, -7.5, 4.5, -9.5);
+        // Right upper lobe
+        ctx.bezierCurveTo(9, -10.5, 11, -5, 6.5, -2.5);
+        ctx.quadraticCurveTo(6.5, -1, 9.5, -0.5);
+        // Right lower lobe
+        ctx.bezierCurveTo(11, 3, 6, 7, 0, 7);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Delicate pale palmate leaf veins
+        ctx.strokeStyle = veinCol;
+        ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(0, 5.5); ctx.lineTo(0, -10.5);
+        ctx.moveTo(0, 1.5); ctx.lineTo(-5.8, -6.2);
+        ctx.moveTo(0, 1.5); ctx.lineTo(5.8, -6.2);
+        ctx.moveTo(0, 3.8); ctx.lineTo(-6.8, 1.2);
+        ctx.moveTo(0, 3.8); ctx.lineTo(6.8, 1.2);
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      const sway = Math.sin(time * 2.1 + seed) * 0.04;
+      // Back shaded canopy foliage bed (deep forest-olive cushion)
+      const backLeaves = [
+        [-60, 14, 1.28, -0.72], [-44, 9, 1.38, -0.45], [-24, 6, 1.42, -0.22],
+        [0, 5, 1.46, 0.02], [24, 6, 1.42, 0.24], [44, 9, 1.38, 0.48], [60, 14, 1.28, 0.72],
+        [-34, 17, 1.22, -0.58], [0, 16, 1.28, 0.08], [34, 17, 1.22, 0.55],
+      ];
+      for (const [dx, dy, sc, rot] of backLeaves) {
+        drawFigLeaf(cx + dx, by + dy, sc, rot + sway, '#1b4d2a', 'rgba(134, 239, 172, 0.20)');
+      }
+
+      // Mid-layer lush emerald Palestinian fig leaves
+      const midLeaves = [
+        [-54, 10, 1.18, -0.55], [-36, 5, 1.28, -0.32], [-16, 3, 1.32, -0.14],
+        [4, 2.5, 1.34, 0.08], [22, 4, 1.28, 0.26], [40, 6, 1.24, 0.46], [56, 11, 1.16, 0.64],
+        [-22, 13, 1.14, -0.36], [16, 13, 1.14, 0.34],
+      ];
+      for (const [dx, dy, sc, rot] of midLeaves) {
+        drawFigLeaf(cx + dx, by + dy, sc, rot + sway * 1.2, '#2d6a36', 'rgba(187, 247, 208, 0.28)');
+      }
+
+      // Top sunlit golden-olive crown leaves catching Battir's sunset glow
+      const topLeaves = [
+        [-42, 4, 1.05, -0.42], [-22, 1, 1.12, -0.18], [-2, 0, 1.16, 0.04],
+        [18, 1.5, 1.12, 0.20], [38, 4, 1.05, 0.40],
+      ];
+      for (const [dx, dy, sc, rot] of topLeaves) {
+        drawFigLeaf(cx + dx, by + dy, sc, rot + sway * 1.4, '#4d8b3b', 'rgba(254, 240, 138, 0.36)');
+      }
+
+      // 5. AUTHENTIC PEAR-SHAPED RIPE PALESTINIAN FIGS (ثمار التين الخروبي والبياضي)
+      const figs = [
+        { dx: -44, dy: 16, rot: 0.16, ripe: true },
+        { dx: -19, dy: 15, rot: -0.12, ripe: false },
+        { dx: 11, dy: 16, rot: 0.14, ripe: true },
+        { dx: 36, dy: 14, rot: -0.15, ripe: true },
+        { dx: 52, dy: 18, rot: 0.22, ripe: false },
+      ];
+      for (const f of figs) {
+        ctx.save();
+        ctx.translate(cx + f.dx, by + f.dy);
+        ctx.rotate(f.rot + sway * 1.6);
+        // Tiny green stem
+        ctx.strokeStyle = '#3f6212';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(0, -6); ctx.lineTo(0, -2.5);
+        ctx.stroke();
+        // Teardrop / pear-shaped fig fruit body
+        const fG = ctx.createRadialGradient(-1.5, 0.5, 0.8, 0, 1.5, 6.2);
+        if (f.ripe) {
+          fG.addColorStop(0, '#a855f7');
+          fG.addColorStop(0.45, '#581c87');
+          fG.addColorStop(1, '#2e1065');
+        } else {
+          fG.addColorStop(0, '#d9f99d');
+          fG.addColorStop(0.55, '#65a30d');
+          fG.addColorStop(1, '#365314');
+        }
+        ctx.fillStyle = fG;
+        ctx.strokeStyle = f.ripe ? '#1e0b36' : '#1a2e05';
+        ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(0, -3.2);
+        ctx.bezierCurveTo(2.4, -1.8, 4.8, 0.8, 4.4, 3.6);
+        ctx.bezierCurveTo(4.0, 6.2, -4.0, 6.2, -4.4, 3.6);
+        ctx.bezierCurveTo(-4.8, 0.8, -2.4, -1.8, 0, -3.2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Soft natural fruit bloom highlight + tiny pink-crimson fig eye (ostiole)
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.26)';
+        ctx.beginPath();
+        ctx.ellipse(-1.4, 1.8, 1.1, 2.0, -0.25, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = f.ripe ? '#f472b6' : '#a3e635';
+        ctx.beginPath();
+        ctx.arc(0, 5.2, 0.9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 6. SUBTLE FLUTTERING FIG LEAVES ON BOUNCE
+      if (bounce > 0.05) {
+        const sp = 1 - bounce;
+        for (let k = -1; k <= 1; k += 2) {
+          drawFigLeaf(
+            cx + k * (46 + sp * 24),
+            by - 4 - Math.sin(sp * Math.PI) * 14,
+            0.55,
+            k * (0.6 + sp * 1.4),
+            '#65a30d',
+            'rgba(254, 240, 138, 0.35)'
+          );
         }
       }
-      // Plump ripe purple-violet Palestinian figs (ثمار التين الناضجة)!
-      for (const fx of [cx - 38, cx - 12, cx + 16, cx + 42]) {
-        ctx.fillStyle = '#701a75'; ctx.strokeStyle = '#3b0764'; ctx.lineWidth = 1.0;
-        ctx.beginPath(); ctx.ellipse(fx, by + 15, 4.5, 5.8, 0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#e879f9';
-        ctx.beginPath(); ctx.arc(fx - 1.2, by + 14, 1.4, 0, Math.PI * 2); ctx.fill();
-      }
+
       ctx.restore();
       return;
     }
