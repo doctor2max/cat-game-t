@@ -12753,9 +12753,10 @@ window.Game = window.Game || {};
     if (p.type === 'battir_fig_canopy') {
       // =====================================================================
       // REALISTIC GNARLED PALESTINIAN FIG TREE (شجرة التين البتّيرية المعمرة)
-      // Crooked silver-grey trunk rooted deep into the valley floor, pruned
-      // branch stubs & healed knot scars, flexing gnarled boughs, 5-lobed
-      // palmate fig leaves, and pear-shaped ripe purple & green-gold figs!
+      // Sculpted crooked silver-ash trunk with organic wood-grain muscles,
+      // mossy root buttresses rooted deep into the valley, pruned branch
+      // stubs with radial heartwood rings, healed knothole eye, articulated
+      // tapered boughs, 5-lobed palmate fig leaves & pear-shaped ripe figs!
       // =====================================================================
       ctx.save();
       const bounce = p.bounceAnim || 0;
@@ -12764,21 +12765,28 @@ window.Game = window.Game || {};
       const cx = px + p.w * 0.5;
       const seed = Math.abs(Math.floor((p.x || 0) * 0.13 + (p.y || 0) * 7));
       const leanDir = (seed % 2 === 0) ? 1 : -1;
-      const bendAmp = 10 + (seed % 5) * 2.2;
-      const bottomY = Math.max(760, by + 260);
-      const trunkTopY = by + 18;
+      const bendAmp = 14 + (seed % 4) * 3.0;
+      const bottomY = Math.max(765, by + 265);
+      const trunkTopY = by + 22;
       const trunkH = bottomY - trunkTopY;
 
-      // Helper: Trunk centerline X at fraction t in [0..1] (0 = canopy crown, 1 = deep valley base)
+      // Helper: Organic S-curved gnarled trunk centerline & muscular knobby radius
       const trunkCenterX = (t) => {
-        const sCurve = Math.sin(t * Math.PI * 1.35 + (seed % 3) * 0.4) * bendAmp * leanDir;
-        const drift = leanDir * t * 9;
-        return cx + sCurve + drift;
+        const sCurve = Math.sin(t * Math.PI * 1.45 + 0.35) * bendAmp * leanDir;
+        const kink = Math.sin(t * Math.PI * 3.2 + (seed % 5)) * 3.2 * leanDir;
+        const drift = leanDir * t * 11;
+        return cx + sCurve + kink + drift;
       };
-      const trunkHalfW = (t) => 11.5 + t * 12.5 + Math.sin(t * Math.PI * 3.1) * 1.4;
+      const trunkHalfW = (t) => {
+        // Flared crown shoulder at top, knobby waist, widening root buttress at bottom
+        const crownFlare = Math.pow(Math.max(0, 1 - t * 4.5), 2) * 5.5;
+        const rootFlare = Math.pow(Math.max(0, (t - 0.62) / 0.38), 2) * 14;
+        const burls = Math.sin(t * Math.PI * 5.2 + 0.6) * 2.1;
+        return 12.5 + t * 10.5 + crownFlare + rootFlare + burls;
+      };
 
-      // 1. CONTINUOUS GNARLED & CROOKED SILVER-GREY FIG TRUNK (Rooted all the way down!)
-      const steps = 16;
+      // 1. CONTINUOUS SCULPTED & CROOKED SILVER-ASH FIG TRUNK (All the way down!)
+      const steps = 22;
       const leftPts = [];
       const rightPts = [];
       for (let i = 0; i <= steps; i++) {
@@ -12786,8 +12794,9 @@ window.Game = window.Game || {};
         const y = trunkTopY + t * trunkH;
         const x = trunkCenterX(t);
         const hw = trunkHalfW(t);
-        leftPts.push([x - hw, y]);
-        rightPts.push([x + hw, y]);
+        const asym = Math.sin(t * Math.PI * 3.7 + seed) * 1.8;
+        leftPts.push([x - hw - asym, y]);
+        rightPts.push([x + hw - asym * 0.4, y]);
       }
 
       const traceTrunk = () => {
@@ -12798,148 +12807,188 @@ window.Game = window.Game || {};
         ctx.closePath();
       };
 
-      // Iconic smooth-yet-weathered silvery ash-taupe Palestinian fig bark gradient
-      const trG = ctx.createLinearGradient(cx - 28, trunkTopY, cx + 32, trunkTopY);
-      trG.addColorStop(0, '#5a5550');
-      trG.addColorStop(0.26, '#8f887f');
-      trG.addColorStop(0.58, '#b5ada1');
-      trG.addColorStop(0.84, '#928a7f');
-      trG.addColorStop(1, '#4f4a45');
+      // True 3D cylindrical weathered Palestinian fig bark (cool shadow -> silver-ash -> warm sunset rim)
+      const trG = ctx.createLinearGradient(cx - 34, trunkTopY, cx + 38, trunkTopY);
+      trG.addColorStop(0.00, '#443e38');
+      trG.addColorStop(0.22, '#7c746b');
+      trG.addColorStop(0.52, '#b3aaa0');
+      trG.addColorStop(0.76, '#c7bfb3');
+      trG.addColorStop(0.92, '#8b7d6e');
+      trG.addColorStop(1.00, '#473e36');
       traceTrunk();
       ctx.fillStyle = trG;
       ctx.fill();
 
-      // Clip natural bark texture, horizontal lenticels, longitudinal ridges & healed knot scars inside trunk
+      // Clip 3D muscular bark sinews, canopy cast shadow, horizontal lenticels, moss & knothole
       ctx.save();
       traceTrunk();
       ctx.clip();
-      // Longitudinal twisted bark grain creases following the trunk curve
-      ctx.strokeStyle = 'rgba(46, 40, 35, 0.30)';
-      ctx.lineWidth = 1.2;
-      for (const offsetFrac of [-0.45, -0.05, 0.38]) {
+      // Cast shadow from the dense fig canopy onto the top of the trunk
+      const topShG = ctx.createLinearGradient(0, trunkTopY, 0, trunkTopY + 38);
+      topShG.addColorStop(0, 'rgba(22, 26, 18, 0.56)');
+      topShG.addColorStop(1, 'rgba(22, 26, 18, 0)');
+      ctx.fillStyle = topShG;
+      ctx.fillRect(cx - 60, trunkTopY, 120, 38);
+
+      // Twisted sculptural wood-grain sinew folds (paired dark crease + sunlit ridge highlight!)
+      for (const offsetFrac of [-0.56, -0.18, 0.22, 0.58]) {
+        ctx.strokeStyle = 'rgba(38, 32, 27, 0.38)';
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
         for (let i = 0; i <= steps; i++) {
           const t = i / steps;
-          const x = trunkCenterX(t) + trunkHalfW(t) * offsetFrac;
+          const twist = Math.sin(t * Math.PI * 2.1) * 0.14;
+          const x = trunkCenterX(t) + trunkHalfW(t) * (offsetFrac + twist);
+          const y = trunkTopY + t * trunkH;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(245, 236, 222, 0.24)';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          const twist = Math.sin(t * Math.PI * 2.1) * 0.14;
+          const x = trunkCenterX(t) + trunkHalfW(t) * (offsetFrac + twist) + 1.7;
           const y = trunkTopY + t * trunkH;
           if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
         ctx.stroke();
       }
-      // Subtle sunlit warm sunset rim highlight along the sunlit side of the bark
-      ctx.strokeStyle = 'rgba(255, 240, 214, 0.28)';
-      ctx.lineWidth = 2.0;
+
+      // Warm golden sunset bounce-light along the right bark edge
+      ctx.strokeStyle = 'rgba(255, 235, 198, 0.34)';
+      ctx.lineWidth = 2.4;
       ctx.beginPath();
       for (let i = 0; i <= steps; i++) {
         const t = i / steps;
-        const x = trunkCenterX(t) + trunkHalfW(t) * 0.62;
+        const x = trunkCenterX(t) + trunkHalfW(t) * 0.72;
         const y = trunkTopY + t * trunkH;
         if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       }
       ctx.stroke();
-      // Horizontal fig-bark lenticel marks & subtle knots
-      ctx.strokeStyle = 'rgba(52, 46, 42, 0.32)';
-      ctx.lineWidth = 1.0;
-      for (let l = 1; l < 11; l++) {
-        const t = l / 11;
-        const lx = trunkCenterX(t) + (((l * 13 + seed) % 11) - 5);
+
+      // Characteristic horizontal fig-bark lenticels & gnarled ring creases
+      ctx.strokeStyle = 'rgba(46, 40, 35, 0.36)';
+      ctx.lineWidth = 1.05;
+      for (let l = 1; l < 15; l++) {
+        const t = l / 15;
+        const lx = trunkCenterX(t) + (((l * 17 + seed) % 13) - 6);
         const ly = trunkTopY + t * trunkH;
         ctx.beginPath();
-        ctx.moveTo(lx - 4.5, ly);
-        ctx.quadraticCurveTo(lx, ly + 1.2, lx + 4.5, ly - 0.5);
+        ctx.moveTo(lx - 5.2, ly);
+        ctx.quadraticCurveTo(lx, ly + 1.4, lx + 5.2, ly - 0.6);
         ctx.stroke();
       }
-      // Healed dark oval pruning-scar eye on the middle trunk (أثر غصن قديم ملتئم)
-      const scarT = 0.36;
-      const scarX = trunkCenterX(scarT) - leanDir * 3.5;
+
+      // Subtle damp olive-green lichen & moss patches nestled in shaded trunk crooks
+      for (const mt of [0.28, 0.64, 0.82]) {
+        const mx = trunkCenterX(mt) - trunkHalfW(mt) * 0.45;
+        const my = trunkTopY + mt * trunkH;
+        ctx.fillStyle = 'rgba(77, 112, 42, 0.42)';
+        ctx.beginPath();
+        ctx.ellipse(mx, my, 5.5, 9.5, -0.15, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Deep Sculpted Healed Knothole / Old Pruned Branch Eye (أثر غصن قديم ملتئم بحافة لحاء بارزة)
+      const scarT = 0.38;
+      const scarX = trunkCenterX(scarT) - leanDir * 3.8;
       const scarY = trunkTopY + scarT * trunkH;
-      ctx.fillStyle = '#473d36';
-      ctx.strokeStyle = '#756c63';
-      ctx.lineWidth = 1.4;
+      ctx.fillStyle = '#8b8175';
       ctx.beginPath();
-      ctx.ellipse(scarX, scarY, 4.2, 6.2, leanDir * 0.18, 0, Math.PI * 2);
+      ctx.ellipse(scarX, scarY, 6.2, 8.4, leanDir * 0.16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#3b3129';
+      ctx.strokeStyle = '#241d17';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.ellipse(scarX, scarY, 4.2, 6.2, leanDir * 0.16, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = '#2e2621';
+      ctx.fillStyle = '#1f1813';
       ctx.beginPath();
-      ctx.ellipse(scarX + 0.5, scarY + 0.4, 2.2, 3.6, leanDir * 0.18, 0, Math.PI * 2);
+      ctx.ellipse(scarX + 0.6, scarY + 0.5, 2.2, 3.8, leanDir * 0.16, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
       traceTrunk();
-      ctx.strokeStyle = '#3b3530';
+      ctx.strokeStyle = '#332d28';
       ctx.lineWidth = 1.4;
       ctx.stroke();
 
-      // 2. PRUNED / CUT BRANCH STUBS (آثار غصون مقطوعة بحلقات خشب مكشوفة)
+      // 2. AUTHENTIC PRUNED / CUT BRANCH STUBS (آثار غصون مقطوعة بطوق لحاء وحلقات خشب مكشوفة)
       const drawCutBranchStub = (tFrac, side, stubLen, stubW) => {
-        const baseX = trunkCenterX(tFrac) + side * (trunkHalfW(tFrac) - 3.5);
+        const baseX = trunkCenterX(tFrac) + side * (trunkHalfW(tFrac) - 4.5);
         const baseY = trunkTopY + tFrac * trunkH;
         const tipX = baseX + side * stubLen;
-        const tipY = baseY - stubLen * 0.52;
+        const tipY = baseY - stubLen * 0.56;
         ctx.save();
-        // Bark collar & short woody stub
+        // Swollen bark collar ring at junction with main trunk
+        ctx.fillStyle = '#6f675e';
+        ctx.beginPath();
+        ctx.ellipse(baseX, baseY, 4.2, stubW * 0.72, side * -0.25, 0, Math.PI * 2);
+        ctx.fill();
+        // Short gnarled pruned wood stub
         const stG = ctx.createLinearGradient(baseX, baseY - stubW, baseX, baseY + stubW);
-        stG.addColorStop(0, '#aba296');
-        stG.addColorStop(0.55, '#7e766d');
-        stG.addColorStop(1, '#4c4640');
+        stG.addColorStop(0, '#bab1a5');
+        stG.addColorStop(0.55, '#817970');
+        stG.addColorStop(1, '#453f39');
         ctx.fillStyle = stG;
-        ctx.strokeStyle = '#36302b';
+        ctx.strokeStyle = '#302a25';
         ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.moveTo(baseX - side * 2, baseY - stubW * 0.62);
-        ctx.quadraticCurveTo((baseX + tipX) * 0.5, baseY - stubW * 0.48, tipX, tipY - stubW * 0.44);
+        ctx.moveTo(baseX - side * 2, baseY - stubW * 0.66);
+        ctx.quadraticCurveTo((baseX + tipX) * 0.5, baseY - stubW * 0.50, tipX, tipY - stubW * 0.42);
         ctx.lineTo(tipX, tipY + stubW * 0.44);
-        ctx.quadraticCurveTo((baseX + tipX) * 0.5, baseY + stubW * 0.42, baseX - side * 2, baseY + stubW * 0.66);
+        ctx.quadraticCurveTo((baseX + tipX) * 0.5, baseY + stubW * 0.46, baseX - side * 2, baseY + stubW * 0.70);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        // Exposed pale-ochre cut heartwood cross-section with annual ring!
-        ctx.fillStyle = '#d9bc94';
-        ctx.strokeStyle = '#4c3e32';
+        // Weathered pale-ochre cut heartwood cross-section with annual growth rings & check crack!
+        ctx.fillStyle = '#dcc199';
+        ctx.strokeStyle = '#4a3d31';
         ctx.lineWidth = 1.1;
         ctx.beginPath();
-        ctx.ellipse(tipX, tipY, 3.0, stubW * 0.44, side * -0.22, 0, Math.PI * 2);
+        ctx.ellipse(tipX, tipY, 3.3, stubW * 0.43, side * -0.24, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-        ctx.strokeStyle = 'rgba(120, 82, 48, 0.55)';
+        ctx.strokeStyle = 'rgba(112, 76, 44, 0.58)';
         ctx.lineWidth = 0.8;
         ctx.beginPath();
-        ctx.ellipse(tipX, tipY, 1.5, stubW * 0.22, side * -0.22, 0, Math.PI * 2);
+        ctx.ellipse(tipX, tipY, 1.7, stubW * 0.22, side * -0.24, 0, Math.PI * 2);
+        ctx.moveTo(tipX, tipY);
+        ctx.lineTo(tipX + side * 1.4, tipY + stubW * 0.28);
         ctx.stroke();
         ctx.restore();
       };
-      drawCutBranchStub(0.22, -leanDir, 13, 8.5);
-      drawCutBranchStub(0.54, leanDir, 11, 9.2);
+      drawCutBranchStub(0.20, -leanDir, 15, 9.2);
+      drawCutBranchStub(0.52, leanDir, 13, 10.0);
+      drawCutBranchStub(0.74, -leanDir, 10, 8.2);
 
-      // 3. SPREADING GNARLED UPPER BOUGHS SUPPORTING THE ELASTIC CANOPY
-      const boughs = [
-        { tx: cx - 54, ty: by + 16, mx: cx - 26, my: by + 26, w0: 8.5, w1: 3.2 },
-        { tx: cx - 26, ty: by + 10, mx: cx - 14, my: by + 22, w0: 7.5, w1: 3.0 },
-        { tx: cx + 28, ty: by + 11, mx: cx + 14, my: by + 22, w0: 7.5, w1: 3.0 },
-        { tx: cx + 56, ty: by + 16, mx: cx + 28, my: by + 26, w0: 8.5, w1: 3.2 },
-      ];
-      for (const b of boughs) {
-        ctx.strokeStyle = '#3b3530';
-        ctx.lineWidth = b.w0 + 2.2;
-        ctx.lineCap = 'round';
+      // 3. ARTICULATED TAPERED FORKING BOUGHS SUPPORTING THE ELASTIC FIG CANOPY
+      const drawTaperedBough = (x0, y0, mx, my, x1, y1, r0, r1) => {
+        const bG = ctx.createLinearGradient(x0, y0 - r0, x0, y0 + r0);
+        bG.addColorStop(0, '#bab2a6');
+        bG.addColorStop(0.55, '#867e74');
+        bG.addColorStop(1, '#48413a');
+        ctx.fillStyle = bG;
+        ctx.strokeStyle = '#332d28';
+        ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.moveTo(cx, trunkTopY + 8);
-        ctx.quadraticCurveTo(b.mx, b.my, b.tx, b.ty);
+        ctx.moveTo(x0, y0 - r0);
+        ctx.quadraticCurveTo(mx, my - (r0 + r1) * 0.5, x1, y1 - r1);
+        ctx.lineTo(x1, y1 + r1);
+        ctx.quadraticCurveTo(mx, my + (r0 + r1) * 0.5, x0, y0 + r0);
+        ctx.closePath();
+        ctx.fill();
         ctx.stroke();
-        ctx.strokeStyle = '#9c9489';
-        ctx.lineWidth = b.w0;
-        ctx.beginPath();
-        ctx.moveTo(cx, trunkTopY + 8);
-        ctx.quadraticCurveTo(b.mx, b.my, b.tx, b.ty);
-        ctx.stroke();
-        ctx.strokeStyle = 'rgba(245, 232, 210, 0.28)';
-        ctx.lineWidth = 1.6;
-        ctx.beginPath();
-        ctx.moveTo(cx, trunkTopY + 6);
-        ctx.quadraticCurveTo(b.mx, b.my - 2, b.tx, b.ty - 1.5);
-        ctx.stroke();
-      }
+      };
+      const shoulderX = trunkCenterX(0.04);
+      drawTaperedBough(shoulderX - 4, trunkTopY + 12, cx - 28, by + 27, cx - 58, by + 16, 7.2, 2.4);
+      drawTaperedBough(shoulderX - 2, trunkTopY + 9, cx - 15, by + 20, cx - 28, by + 10, 6.2, 2.2);
+      drawTaperedBough(shoulderX + 2, trunkTopY + 9, cx + 15, by + 20, cx + 30, by + 10, 6.2, 2.2);
+      drawTaperedBough(shoulderX + 4, trunkTopY + 12, cx + 30, by + 27, cx + 60, by + 16, 7.2, 2.4);
 
       // 4. REALISTIC 5-LOBED PALMATE PALESTINIAN FIG LEAVES (أوراق التين المفصّصة)
       const drawFigLeaf = (lx, ly, sc, rot, fillCol, veinCol) => {
@@ -25558,34 +25607,177 @@ window.Game = window.Game || {};
   }
 
   function drawAncientOliveSunset(ctx, x, groundY, scale) {
-    // Millennia-Old Twisted Rumi Olive Tree Lit by Warm Sunset Gold!
+    // =========================================================================
+    // BOTANICALLY REALISTIC ANCIENT PALESTINIAN RUMI OLIVE TREE
+    // (شجرة الزيتون الرومي الفلسطينية المعمّرة — جذع ملتوٍ متشقّق وأوراق رمحية فضية!)
+    // =========================================================================
     ctx.save();
     ctx.translate(x, groundY);
     ctx.scale(scale, scale);
-    ctx.fillStyle = 'rgba(28, 14, 8, 0.3)';
-    ctx.beginPath(); ctx.ellipse(2, 0, 38, 6, 0, 0, Math.PI * 2); ctx.fill();
-    const trG = ctx.createLinearGradient(-24, -88, 24, 0);
-    trG.addColorStop(0, '#c29b78'); trG.addColorStop(0.5, '#6e4e37'); trG.addColorStop(1, '#332014');
-    ctx.fillStyle = trG; ctx.strokeStyle = '#1f120a'; ctx.lineWidth = 1.5;
+
+    // Soft dappled ground shadow beneath the wide spreading crown
+    ctx.fillStyle = 'rgba(26, 18, 10, 0.30)';
     ctx.beginPath();
-    ctx.moveTo(-24, 0); ctx.quadraticCurveTo(-12, -22, -14, -46);
-    ctx.quadraticCurveTo(-28, -66, -38, -84); ctx.lineTo(-26, -89);
-    ctx.quadraticCurveTo(-10, -70, -2, -64); ctx.quadraticCurveTo(2, -80, 5, -94);
-    ctx.lineTo(15, -91); ctx.quadraticCurveTo(14, -72, 30, -86);
-    ctx.lineTo(38, -78); ctx.quadraticCurveTo(18, -56, 15, -34);
-    ctx.quadraticCurveTo(17, -14, 25, 0);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-    // Silvery-sage canopy with warm golden-apricot sunset rim-highlight!
-    for (const [col, pts] of [
-      ['#2d3f22', [[-42, -90, 26, 16], [40, -88, 25, 16], [0, -96, 30, 18]]],
-      ['#55713e', [[-32, -102, 24, 15], [30, -100, 23, 15], [0, -112, 28, 18]]],
-      ['#98b075', [[-20, -114, 17, 10], [18, -112, 17, 10], [0, -122, 21, 11]]],
-      ['#fde68a', [[6, -126, 14, 4.5], [24, -116, 10, 3.5]]],
-    ]) {
-      ctx.fillStyle = col;
-      for (const [px, py, rx, ry] of pts) {
-        ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.ellipse(2, 1, 56, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 1. CENTURIES-OLD TWISTED, KNOTTED RUMI OLIVE TRUNK WITH FLARED ROOTS & CENTRAL CLEFT
+    const traceOliveTrunk = () => {
+      ctx.beginPath();
+      ctx.moveTo(-30, 2);
+      ctx.bezierCurveTo(-22, -6, -18, -18, -17, -36);
+      ctx.bezierCurveTo(-16, -50, -24, -64, -44, -84);
+      ctx.lineTo(-34, -90);
+      ctx.bezierCurveTo(-20, -76, -11, -68, -6, -65);
+      ctx.bezierCurveTo(-6, -78, -2, -90, 4, -100);
+      ctx.lineTo(13, -97);
+      ctx.bezierCurveTo(10, -84, 10, -74, 14, -70);
+      ctx.bezierCurveTo(22, -78, 32, -84, 44, -88);
+      ctx.lineTo(48, -80);
+      ctx.bezierCurveTo(32, -70, 22, -56, 18, -38);
+      ctx.bezierCurveTo(16, -20, 22, -8, 32, 2);
+      ctx.quadraticCurveTo(14, 0, 6, 4);
+      ctx.quadraticCurveTo(-4, 0, -14, 3);
+      ctx.closePath();
+    };
+
+    // Weathered driftwood-grey & warm umber Rumi olive bark
+    const trG = ctx.createLinearGradient(-28, -50, 30, -40);
+    trG.addColorStop(0.00, '#44382d');
+    trG.addColorStop(0.28, '#7b6c5c');
+    trG.addColorStop(0.58, '#a49582');
+    trG.addColorStop(0.82, '#786858');
+    trG.addColorStop(1.00, '#3d3025');
+    traceOliveTrunk();
+    ctx.fillStyle = trG;
+    ctx.fill();
+
+    // Clip rope-like spiraling sinew ridges, deep weathered bark cleft & sunlit rim
+    ctx.save();
+    traceOliveTrunk();
+    ctx.clip();
+    // Iconic ancient olive central dark hollow / cleft
+    ctx.fillStyle = 'rgba(28, 19, 12, 0.72)';
+    ctx.beginPath();
+    ctx.moveTo(-4, -12);
+    ctx.quadraticCurveTo(-8, -34, -1, -54);
+    ctx.quadraticCurveTo(5, -34, 2, -12);
+    ctx.closePath();
+    ctx.fill();
+    // Spiraling rope-like twisted bark folds (dark shadow groove + silver-beige ridge)
+    const ridges = [
+      [[-18, 0], [-10, -28], [-18, -58], [-34, -84]],
+      [[-8, 2], [-3, -24], [6, -54], [8, -94]],
+      [[8, 2], [11, -24], [15, -52], [38, -82]],
+      [[19, 2], [14, -22], [12, -46], [28, -74]],
+    ];
+    for (const rPts of ridges) {
+      ctx.strokeStyle = 'rgba(36, 26, 18, 0.48)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(rPts[0][0], rPts[0][1]);
+      ctx.bezierCurveTo(rPts[1][0], rPts[1][1], rPts[2][0], rPts[2][1], rPts[3][0], rPts[3][1]);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(232, 220, 200, 0.30)';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(rPts[0][0] + 1.8, rPts[0][1]);
+      ctx.bezierCurveTo(rPts[1][0] + 1.8, rPts[1][1], rPts[2][0] + 1.8, rPts[2][1], rPts[3][0] + 1.8, rPts[3][1]);
+      ctx.stroke();
+    }
+    ctx.restore();
+    traceOliveTrunk();
+    ctx.strokeStyle = '#2d2219';
+    ctx.lineWidth = 1.3;
+    ctx.stroke();
+
+    // 2. SPREADING SECONDARY GNARLED LIMBS & TWIGS THREADING INTO THE CROWN
+    ctx.strokeStyle = '#5c4e41';
+    ctx.lineCap = 'round';
+    const limbs = [[-38, -84, -56, -104, 3.2], [-32, -84, -24, -110, 2.8], [6, -96, -8, -118, 2.8], [10, -94, 24, -118, 2.8], [42, -82, 58, -102, 3.0], [36, -82, 24, -104, 2.4]];
+    for (const [x0, y0, x1, y1, lw] of limbs) {
+      ctx.lineWidth = lw;
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.quadraticCurveTo((x0 + x1) * 0.5, (y0 + y1) * 0.5 - 5, x1, y1);
+      ctx.stroke();
+    }
+
+    // 3. BOTANICAL SILVERY-SAGE OLIVE FOLIAGE (Sprigs of Slender Lanceolate Olive Leaves — ZERO Cartoon Ovals!)
+    const drawOliveSprig = (sx, sy, sc, baseAng, colDark, colSilver) => {
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.rotate(baseAng);
+      ctx.scale(sc, sc);
+      // 7 slender lance-shaped olive leaves radiating in an airy Mediterranean fan
+      const leafSpec = [
+        [-12, -2, -0.85, 9.5, 2.4, true],
+        [-7, -7, -0.50, 10.5, 2.5, false],
+        [-2, -10, -0.18, 11.0, 2.5, true],
+        [3, -10, 0.16, 11.0, 2.4, false],
+        [8, -7, 0.52, 10.2, 2.5, true],
+        [12, -2, 0.88, 9.2, 2.3, false],
+        [0, -4, 0.02, 8.8, 2.4, true],
+      ];
+      for (const [lx, ly, la, len, wid, isSilver] of leafSpec) {
+        ctx.save();
+        ctx.translate(lx, ly);
+        ctx.rotate(la);
+        ctx.fillStyle = isSilver ? colSilver : colDark;
+        ctx.beginPath();
+        ctx.moveTo(-len * 0.5, 0);
+        ctx.quadraticCurveTo(0, -wid, len * 0.5, 0);
+        ctx.quadraticCurveTo(0, wid, -len * 0.5, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
       }
+      ctx.restore();
+    };
+
+    // Layer A: Deep shaded inner-crown foliage base (gives natural depth & silhouette)
+    const deepSprigs = [
+      [-54, -92, 1.35, -0.5], [-38, -104, 1.45, -0.25], [-16, -112, 1.5, -0.1],
+      [10, -114, 1.5, 0.1], [34, -106, 1.45, 0.25], [54, -94, 1.35, 0.45],
+      [-26, -88, 1.25, -0.35], [26, -88, 1.25, 0.35], [0, -96, 1.35, 0.0],
+    ];
+    for (const [sx, sy, sc, a] of deepSprigs) {
+      drawOliveSprig(sx, sy, sc, a, '#263820', '#3a4f2f');
+    }
+
+    // Layer B: Rich Mediterranean olive-green & classic silvery-sage underside shimmer
+    const midSprigs = [
+      [-58, -98, 1.15, -0.6], [-44, -110, 1.25, -0.35], [-24, -118, 1.32, -0.15],
+      [-2, -124, 1.36, 0.02], [20, -120, 1.32, 0.18], [42, -112, 1.25, 0.36], [58, -100, 1.15, 0.58],
+      [-42, -92, 1.12, -0.45], [-14, -102, 1.20, -0.12], [16, -102, 1.20, 0.14], [42, -92, 1.12, 0.45],
+    ];
+    for (const [sx, sy, sc, a] of midSprigs) {
+      drawOliveSprig(sx, sy, sc, a, '#4c6538', '#8aa17b');
+    }
+
+    // Layer C: Sunlit upper-crown silvery-sage & warm sunset-gold leaf tips!
+    const topSprigs = [
+      [-32, -120, 1.02, -0.25], [-10, -130, 1.10, -0.05], [14, -128, 1.12, 0.12],
+      [36, -118, 1.05, 0.28], [50, -106, 0.96, 0.45], [-48, -106, 0.94, -0.42],
+    ];
+    for (const [sx, sy, sc, a] of topSprigs) {
+      drawOliveSprig(sx, sy, sc, a, '#7e9669', '#cad4a4');
+    }
+    // Delicate golden sunset rim glints on the sun-facing upper-right leaves
+    drawOliveSprig(16, -133, 0.85, 0.18, '#b5bf7e', '#e9d89c');
+    drawOliveSprig(38, -123, 0.82, 0.34, '#b5bf7e', '#e9d89c');
+
+    // 4. Tiny Hanging Green & Ripe Dark-Violet Palestinian Olives tucked among the lower twigs
+    const olives = [[-44, -92, true], [-22, -98, false], [-6, -104, true], [18, -100, false], [38, -94, true], [48, -90, false]];
+    for (const [ox, oy, dark] of olives) {
+      ctx.fillStyle = dark ? '#31233a' : '#738c38';
+      ctx.beginPath();
+      ctx.ellipse(ox, oy, 1.9, 2.7, 0.18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.32)';
+      ctx.beginPath();
+      ctx.arc(ox - 0.6, oy - 0.8, 0.6, 0, Math.PI * 2);
+      ctx.fill();
     }
     ctx.restore();
   }
