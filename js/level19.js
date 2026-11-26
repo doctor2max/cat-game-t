@@ -58,11 +58,11 @@ window.Game.createLevel19 = function () {
     { x: 2150, y: 465, w: 140, h: 24, type: 'shoji_tile_roof', oneWay: true },
     { x: 2350, y: 445, w: 88, h: 76, type: 'crushing_lantern', restY: 445, dropY: 554 },
     // Canal 2 (2640..2920): Tilted 45° Wagasa Pinball Ricochet right across the canal!
-    { x: 2610, y: 555, w: 84, h: 36, type: 'wagasa_ricochet', launchDir: 1, launchVx: 505, launchVy: 605 },
+    { x: 2610, y: 555, w: 84, h: 36, type: 'wagasa_ricochet', launchDir: 1, launchVx: 530, launchVy: 715 },
 
     // === ZONE 3 (2920..4460): Wagasa Pinball Chain, Pendulum Plaza & Jump-Flip Canal ===
-    { x: 3170, y: 555, w: 84, h: 36, type: 'wagasa_ricochet', launchDir: 1, launchVx: 485, launchVy: 590 },
-    { x: 3440, y: 495, w: 84, h: 36, type: 'wagasa_ricochet', launchDir: 1, launchVx: 485, launchVy: 585 },
+    { x: 3170, y: 555, w: 84, h: 36, type: 'wagasa_ricochet', launchDir: 1, launchVx: 430, launchVy: 715 },
+    { x: 3440, y: 495, w: 84, h: 36, type: 'wagasa_ricochet', launchDir: 1, launchVx: 445, launchVy: 725 },
     { x: 3710, y: 455, w: 155, h: 24, type: 'shoji_tile_roof', oneWay: true },
     { x: 3940, y: 390, w: 80, h: 20, type: 'pendulum_censer', pivotX: 3980, pivotY: 390, chainLen: 185, maxAngle: 0.88, swingSpeed: 2.05, phase: 1.4, bobR: 22 },
     // Canal 3 (4180..4460): Alternating Jump-Flip Canal Bridge
@@ -88,7 +88,7 @@ window.Game.createLevel19 = function () {
     { x: 6980, y: 345, w: 42, h: 285, type: 'pinch_wall', climbable: true, canCrush: false, baseX: 6980, slideDir: -1, slideDist: 50, phase: 1.0 },
     { x: 6810, y: 315, w: 170, h: 24, type: 'shoji_tile_roof', oneWay: true }, // Secret Treat 2 balcony!
     // Canal 5 (7180..7460): Wagasa Ricochet Launch
-    { x: 7150, y: 555, w: 84, h: 36, type: 'wagasa_ricochet', launchDir: 1, launchVx: 505, launchVy: 605 },
+    { x: 7150, y: 555, w: 84, h: 36, type: 'wagasa_ricochet', launchDir: 1, launchVx: 530, launchVy: 715 },
 
     // === ZONE 6 (7460..8980): Crushing Gauntlet, Pinch Gate, Jump-Flip & Reverse Waterwheel ===
     { x: 7710, y: 445, w: 88, h: 76, type: 'crushing_lantern', restY: 445, dropY: 554 },
@@ -101,8 +101,8 @@ window.Game.createLevel19 = function () {
     ...makeWaterwheel(8840, 535, 94, -0.94, 86),
 
     // === ZONE 7 (8980..10280): Kyoto Finale Mix — Wagasa Spire (Secret Treat 3!), Crusher & Pendulum ===
-    { x: 9200, y: 555, w: 84, h: 36, type: 'wagasa_ricochet', launchDir: 1, launchVx: 485, launchVy: 615 },
-    { x: 9465, y: 445, w: 84, h: 36, type: 'wagasa_ricochet', launchDir: 1, launchVx: 480, launchVy: 600 },
+    { x: 9200, y: 555, w: 84, h: 36, type: 'wagasa_ricochet', launchDir: 1, launchVx: 415, launchVy: 760 },
+    { x: 9465, y: 445, w: 84, h: 36, type: 'wagasa_ricochet', launchDir: 1, launchVx: 425, launchVy: 775 },
     { x: 9710, y: 315, w: 175, h: 24, type: 'shoji_tile_roof', oneWay: true }, // Secret Treat 3 festival spire!
     // Lower street challenge path
     { x: 9540, y: 445, w: 88, h: 76, type: 'crushing_lantern', restY: 445, dropY: 554 },

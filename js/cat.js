@@ -44,6 +44,7 @@ window.Game.Cat = function (startX, startY) {
     respawnLockTimer: 0,
     coyoteTimer: 0,
     jumpBufferTimer: 0,
+    wagasaBoostTimer: 0,
     meowCooldown: 0,
     animTime: 0,
     walkTime: 0,
@@ -493,9 +494,24 @@ window.Game.Cat = function (startX, startY) {
       targetSpeed += Math.sin(cat.balancePhase) * 65;
     }
 
+    if (cat.onGround) {
+      cat.wagasaBoostTimer = 0;
+    } else if (cat.wagasaBoostTimer > 0) {
+      cat.wagasaBoostTimer = Math.max(0, cat.wagasaBoostTimer - dt);
+    }
+
     const accel = cat.onGround ? (cat.onSlippery ? 3.8 : 18) : 13;
     if (lockedByRespawn) {
       cat.vx = 0;
+    } else if (!cat.onGround && cat.wagasaBoostTimer > 0) {
+      const boostDir = Math.sign(cat.vx) || cat.facing;
+      if (moveDir === -boostDir) {
+        cat.vx += (targetSpeed - cat.vx) * Math.min(1, dt * 4.5);
+      } else if (moveDir === boostDir && Math.abs(targetSpeed) > Math.abs(cat.vx)) {
+        cat.vx += (targetSpeed - cat.vx) * Math.min(1, dt * 6);
+      } else {
+        cat.vx *= Math.max(0.85, 1 - dt * 0.45);
+      }
     } else {
       cat.vx += (targetSpeed - cat.vx) * Math.min(1, dt * accel);
     }
@@ -589,7 +605,7 @@ window.Game.Cat = function (startX, startY) {
       }
     }
 
-    if (!input.jumpHeld && cat.vy < -220) {
+    if (!input.jumpHeld && cat.vy < -220 && !(cat.wagasaBoostTimer > 0)) {
       cat.vy += cat.physics.gravity * 1.45 * dt;
     }
 
@@ -812,19 +828,27 @@ window.Game.Cat = function (startX, startY) {
       } else if (p.type === 'wagasa_ricochet') {
         if (p.launchCd > 0) p.launchCd = Math.max(0, p.launchCd - dt);
         if (p.spinAnim > 0) p.spinAnim = Math.max(0, p.spinAnim - dt * 2.4);
-        if (!(p.launchCd > 0) && cat.x + cat.w > p.x + 2 && cat.x < p.x + p.w - 2 && cat.y + cat.h > p.y && cat.y < p.y + p.h + 8 && cat.vy >= -140) {
+        const catchHit =
+          cat.x + cat.w > p.x - 16 &&
+          cat.x < p.x + p.w + 16 &&
+          cat.y + cat.h > p.y - 14 &&
+          cat.y < p.y + p.h + 20 &&
+          cat.vy >= -280;
+        if (!(p.launchCd > 0) && catchHit) {
           const lDir = p.launchDir || 1;
-          cat.vx = lDir * (p.launchVx || 515);
-          cat.vy = -(p.launchVy || 595);
+          cat.vx = lDir * (p.launchVx || 520);
+          cat.vy = -(p.launchVy || 720);
           cat.facing = lDir;
           cat.onGround = false;
+          cat.coyoteTimer = 0;
+          cat.wagasaBoostTimer = 0.72;
           cat.scaleX = 0.78;
           cat.scaleY = 1.24;
           p.spinAnim = 1;
-          p.launchCd = 0.22;
+          p.launchCd = 0.24;
           if (Audio.playBambooClack) Audio.playBambooClack();
           else Audio.playJump();
-          Particles.spawnDust(p.x + p.w / 2, p.y + 6, 10, '#f472b6');
+          Particles.spawnDust(p.x + p.w / 2, p.y + 6, 12, '#f472b6');
         }
       } else if (p.type === 'crushing_lantern') {
         if (p.restY === undefined) p.restY = p.y;

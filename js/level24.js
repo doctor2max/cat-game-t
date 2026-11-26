@@ -74,7 +74,7 @@
       // Sky Shrine above Serpent Bridge (reachable via Golden Equinox Solar Crest Super-Leap!)
       { x: 7980, y: 345, w: 190, h: 24, type: 'maya_stone_terrace', oneWay: true },
       { x: 8460, y: groundY, w: 1920, h: groundH, type: 'maya_stone_terrace' },
-      { x: 9240, y: 495, w: 180, h: 24, type: 'maya_stone_terrace', oneWay: true },
+      { x: 9240, y: 508, w: 180, h: 24, type: 'maya_stone_terrace', oneWay: true },
       { x: 9540, y: groundY - 86, w: 46, h: 86, type: 'maya_dart_totem', nonSolid: true, fireDir: -1, dartMode: 'alternate', period: 2.20, dartSpeed: 312, maxRange: 430, phase: 1.5 },
 
       // =====================================================================
