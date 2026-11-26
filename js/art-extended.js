@@ -25812,7 +25812,9 @@ window.Game = window.Game || {};
           c.stroke();
         };
 
+        // 24 Dense Crooked Primary, Secondary & Forked Tertiary Olive Boughs (كثافة عالية للأغصان المتفرّعة!)
         const oliveBoughs = [
+          // Main primary arched boughs
           [-38, -78, -56, -88, -68, -76, 3.6],
           [-35, -80, -52, -104, -64, -98, 3.0],
           [-26, -74, -36, -102, -46, -112, 2.8],
@@ -25822,8 +25824,22 @@ window.Game = window.Game || {};
           [16, -76, 32, -108, 44, -116, 2.8],
           [38, -78, 52, -102, 64, -96, 3.0],
           [44, -76, 60, -84, 70, -72, 3.4],
-          [-18, -90, -8, -104, 2, -110, 2.0],
-          [22, -88, 12, -102, 4, -108, 2.0],
+          // Dense secondary & forked interior crooked twigs weaving through the entire crown!
+          [-32, -74, -44, -84, -56, -84, 2.2],
+          [-46, -86, -58, -94, -68, -88, 1.8],
+          [-38, -94, -48, -108, -54, -106, 1.8],
+          [-24, -88, -32, -100, -40, -102, 2.0],
+          [-18, -90, -8, -106, 2, -112, 2.1],
+          [-14, -98, -22, -114, -26, -122, 1.7],
+          [-2, -96, -2, -116, 4, -126, 1.9],
+          [6, -102, -2, -116, -10, -124, 1.7],
+          [10, -96, 20, -112, 32, -120, 1.9],
+          [22, -88, 12, -104, 4, -110, 2.0],
+          [26, -86, 38, -98, 50, -104, 2.0],
+          [34, -94, 44, -108, 56, -106, 1.8],
+          [46, -84, 58, -92, 68, -84, 1.8],
+          [-22, -68, -32, -76, -44, -72, 2.0],
+          [24, -68, 36, -74, 48, -68, 2.0],
         ];
         for (const [x0, y0, mx, my, x1, y1, lw] of oliveBoughs) {
           drawArchLimb(x0, y0, mx, my, x1, y1, lw);
@@ -25831,7 +25847,7 @@ window.Game = window.Game || {};
 
         const drawCurvedOliveCluster = (x0, y0, mx, my, x1, y1, count, palette, spread, droop, rightSunOnly = false) => {
           for (let i = 0; i < count; i++) {
-            const u = 0.22 + rand() * 0.78;
+            const u = 0.20 + rand() * 0.80;
             const inv = 1 - u;
             const bx = inv * inv * x0 + 2 * inv * u * mx + u * u * x1;
             const by = inv * inv * y0 + 2 * inv * u * my + u * u * y1;
@@ -25860,22 +25876,32 @@ window.Game = window.Game || {};
           }
         };
 
-        for (let bi = 0; bi < 9; bi++) {
+        // Pass A: Deep shaded underside leaves along all primary & secondary boughs
+        for (let bi = 0; bi < 16; bi++) {
           const [x0, y0, mx, my, x1, y1] = oliveBoughs[bi];
-          drawCurvedOliveCluster(x0, y0 + 3, mx, my + 3, x1, y1 + 4, 20, ['#21311b', '#293d21', '#314728'], 11, 5);
+          drawCurvedOliveCluster(x0, y0 + 3, mx, my + 3, x1, y1 + 4, 16, ['#21311b', '#293d21', '#314728'], 10, 4.5);
         }
+        // Dense crooked woody skeleton & fine twigs clearly visible between the leafy bough layers!
         for (const [x0, y0, mx, my, x1, y1, lw] of oliveBoughs) {
-          drawArchLimb(x0, y0, mx, my, x1, y1, lw * 0.58);
+          drawArchLimb(x0, y0, mx, my, x1, y1, lw * 0.68);
         }
-        for (let bi = 0; bi < 9; bi++) {
+        // Pass B: Rich Mediterranean olive-green mid-crown cascading along the dense arched limbs
+        for (let bi = 0; bi < 16; bi++) {
           const [x0, y0, mx, my, x1, y1] = oliveBoughs[bi];
-          drawCurvedOliveCluster(x0, y0, mx, my, x1, y1, 24, ['#425831', '#51693c', '#637c4d', '#7b916a'], 10, 3);
+          drawCurvedOliveCluster(x0, y0, mx, my, x1, y1, 18, ['#425831', '#51693c', '#637c4d', '#7b916a'], 9.5, 2.8);
         }
-        for (let bi = 0; bi < 9; bi++) {
+        // Fine foreground tertiary twigs peeking through the upper-mid olive leaves
+        for (let bi = 9; bi < oliveBoughs.length; bi++) {
+          const [x0, y0, mx, my, x1, y1, lw] = oliveBoughs[bi];
+          drawArchLimb(x0, y0, mx, my, x1, y1, lw * 0.55);
+        }
+        // Pass C: Silvery-sage shimmering outer leaves curving gracefully over the bough crowns
+        for (let bi = 0; bi < 14; bi++) {
           const [x0, y0, mx, my, x1, y1] = oliveBoughs[bi];
-          drawCurvedOliveCluster(x0, y0 - 3, mx, my - 4, x1, y1 - 2, 16, ['#8ea37e', '#a6b896', '#bfcca9', '#778d65'], 8.5, 1.5);
+          drawCurvedOliveCluster(x0, y0 - 3, mx, my - 4, x1, y1 - 2, 13, ['#8ea37e', '#a6b896', '#bfcca9', '#778d65'], 8.0, 1.5);
         }
-        for (let bi = 4; bi < 9; bi++) {
+        // Pass D: Subtle golden sunset rim-light kissing the upper-right arched leaves
+        for (let bi = 4; bi < 10; bi++) {
           const [x0, y0, mx, my, x1, y1] = oliveBoughs[bi];
           drawCurvedOliveCluster(x0, y0 - 5, mx, my - 6, x1, y1 - 4, 9, ['#c9cd90', '#e0d597', '#ecdaa2'], 6.5, 0, true);
         }
@@ -27530,92 +27556,151 @@ window.Game = window.Game || {};
         ctx.fillRect(fx + 2, pFrontY - 2, Math.max(2, fw - 4), 1.5);
       }
 
-      // 8. LOWER TERRACED BATTIR GARDEN (حديقة سفلية بشجر ليمون ومشاكب وزرع فوق النهر مباشرة!)
+      // 8. LOWER FLOWING TERRACED BATTIR GARDEN (مدرّجات ومشاكب انسيابية طبيعية فوق النهر مباشرة!)
       const gTopY = pFrontY + frontWallH + 2; // y = 570
       const gBotY = 635; // meets the valley riverbank seamlessly at y = 635!
       const gLeft = frontWallL - 18;
       const gRight = frontWallL + frontWallW + 18;
       const gW = gRight - gLeft;
 
-      // Fertile tilled brown Battir garden soil bed sloping gently down to the riverbank
-      const soilG = ctx.createLinearGradient(0, gTopY, 0, gBotY);
-      soilG.addColorStop(0.0, '#6b472b');
-      soilG.addColorStop(0.45, '#593a22');
-      soilG.addColorStop(0.85, '#46331e');
-      soilG.addColorStop(1.0, '#3a4a21');
-      ctx.fillStyle = soilG;
+      // Helper: Gentle horizontal terrace contour Y across the lower garden
+      const gardenCurveY = (u, baseY, amp) => baseY + Math.sin(u * Math.PI) * amp;
+
+      // 8a. Upper Flowing Terrace Bed (y = 570..601) — natural side-perspective fertile brown soil
+      const soilG1 = ctx.createLinearGradient(0, gTopY, 0, gTopY + 32);
+      soilG1.addColorStop(0.0, '#5a3b22');
+      soilG1.addColorStop(0.45, '#714c2d');
+      soilG1.addColorStop(1.0, '#4f331d');
+      ctx.fillStyle = soilG1;
       ctx.beginPath();
       ctx.moveTo(frontWallL - 4, gTopY);
       ctx.lineTo(frontWallL + frontWallW + 4, gTopY);
+      for (let s = 14; s >= 0; s--) {
+        const u = s / 14;
+        ctx.lineTo(gLeft + 6 + u * (gW - 12), gardenCurveY(u, 600, 4.5));
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // Subtle flowing horizontal irrigation soil furrows on Upper Terrace
+      ctx.strokeStyle = 'rgba(36, 20, 10, 0.34)';
+      ctx.lineWidth = 1.0;
+      for (const fOff of [8, 16, 24]) {
+        ctx.beginPath();
+        for (let s = 0; s <= 14; s++) {
+          const u = s / 14;
+          const fx = gLeft + 12 + u * (gW - 24);
+          const fy = gardenCurveY(u, gTopY + fOff, 3.2);
+          if (s === 0) ctx.moveTo(fx, fy); else ctx.lineTo(fx, fy);
+        }
+        ctx.stroke();
+      }
+
+      // Flowing planted rows of Mint, Tomatoes & Battiri Eggplants along Upper Terrace
+      for (let i = 0; i < 20; i++) {
+        const u = (i + 0.5) / 20;
+        const px0 = gLeft + 18 + u * (gW - 36);
+        const py0 = gardenCurveY(u, gTopY + 18, 3.5) + ((i % 2) * 3 - 1.5);
+        const crop = i < 7 ? 'mint' : (i < 13 ? 'tomato' : 'eggplant');
+        ctx.fillStyle = crop === 'mint' ? '#22c55e' : '#1e6b34';
+        ctx.beginPath(); ctx.ellipse(px0, py0, 7.5, 3.0, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = crop === 'mint' ? '#86efac' : '#4ade80';
+        ctx.beginPath(); ctx.ellipse(px0 - 1.5, py0 - 1.0, 4.0, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+        if (crop === 'tomato') {
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath(); ctx.arc(px0 + 2.4, py0, 1.8, 0, Math.PI * 2); ctx.fill();
+        } else if (crop === 'eggplant') {
+          ctx.fillStyle = '#581c87';
+          ctx.beginPath(); ctx.ellipse(px0 + 2.2, py0 + 0.6, 1.5, 2.3, 0.2, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      // 8b. Low Rustic Hand-Stacked Dry-Stone Sanasel Retaining Edge separating Upper & Lower Garden Terraces!
+      const stepCols = ['#c7b7a0', '#b8a58c', '#d4c6b1', '#a6937a', '#cfc0aa'];
+      let stX = gLeft + 4;
+      let stIdx = 0;
+      while (stX < gRight - 6) {
+        const h = Math.abs(83 + stIdx * 13);
+        const rx = 5.5 + (h % 5) * 1.1;
+        const ry = 3.2 + (h % 3) * 0.45;
+        const u = Math.max(0, Math.min(1, (stX + rx - gLeft) / gW));
+        const sy0 = gardenCurveY(u, 602, 4.5);
+        ctx.fillStyle = stepCols[h % stepCols.length];
+        ctx.strokeStyle = 'rgba(38, 25, 14, 0.62)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.ellipse(stX + rx, sy0, rx, ry, ((h % 5) - 2) * 0.04, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        stX += rx * 1.82;
+        stIdx++;
+      }
+
+      // 8c. Lower Riverbank Garden Terrace Bed (y = 605..635) flowing smoothly down to the river!
+      const soilG2 = ctx.createLinearGradient(0, 604, 0, gBotY);
+      soilG2.addColorStop(0.0, '#4f331c');
+      soilG2.addColorStop(0.55, '#664326');
+      soilG2.addColorStop(0.88, '#46381e');
+      soilG2.addColorStop(1.0, '#3a4a21');
+      ctx.fillStyle = soilG2;
+      ctx.beginPath();
+      for (let s = 0; s <= 14; s++) {
+        const u = s / 14;
+        const fx = gLeft + 4 + u * (gW - 8);
+        const fy = gardenCurveY(u, 605, 4.5);
+        if (s === 0) ctx.moveTo(fx, fy); else ctx.lineTo(fx, fy);
+      }
       ctx.lineTo(gRight, gBotY);
       ctx.lineTo(gLeft, gBotY);
       ctx.closePath();
       ctx.fill();
 
-      // Neat stone-bordered Battir agricultural mashaakeb (مشاكب الزراعة) with soil furrows & crops!
-      const beds = [
-        { x: gLeft + 26, y: gTopY + 12, w: 122, h: 38, crop: 'mint' },
-        { x: gLeft + 178, y: gTopY + 12, w: 132, h: 38, crop: 'tomato' },
-        { x: gLeft + 338, y: gTopY + 12, w: 126, h: 38, crop: 'eggplant' },
-      ];
-      for (const bd of beds) {
-        // Raised tilled brown soil plot with subtle earthen furrow ridges
-        ctx.fillStyle = '#4e311a';
-        ctx.strokeStyle = 'rgba(196, 176, 148, 0.55)';
-        ctx.lineWidth = 1.4;
+      // Gentle curved furrows & lush herb/vegetable tufts along the Lower Terrace
+      ctx.strokeStyle = 'rgba(34, 18, 8, 0.32)';
+      ctx.lineWidth = 1.0;
+      for (const fOff of [9, 18]) {
         ctx.beginPath();
-        ctx.roundRect(bd.x, bd.y, bd.w, bd.h, 5);
-        ctx.fill();
-        ctx.stroke();
-        // Horizontal irrigation soil furrows
-        ctx.strokeStyle = 'rgba(34, 19, 9, 0.45)';
-        ctx.lineWidth = 1.1;
-        for (let fy = bd.y + 10; fy < bd.y + bd.h - 4; fy += 10) {
-          ctx.beginPath(); ctx.moveTo(bd.x + 6, fy); ctx.lineTo(bd.x + bd.w - 6, fy); ctx.stroke();
+        for (let s = 0; s <= 14; s++) {
+          const u = s / 14;
+          const fx = gLeft + 10 + u * (gW - 20);
+          const fy = gardenCurveY(u, 606 + fOff, 3.0);
+          if (s === 0) ctx.moveTo(fx, fy); else ctx.lineTo(fx, fy);
         }
-        // Crops planted in neat rows inside each mashkab!
-        for (let row = 0; row < 3; row++) {
-          const py0 = bd.y + 8 + row * 11;
-          for (let px0 = bd.x + 12; px0 < bd.x + bd.w - 10; px0 += 18) {
-            // Lush green plant foliage tuft
-            ctx.fillStyle = bd.crop === 'mint' ? '#22c55e' : '#15803d';
-            ctx.beginPath();
-            ctx.ellipse(px0, py0, 5.2, 3.2, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = bd.crop === 'mint' ? '#86efac' : '#4ade80';
-            ctx.beginPath();
-            ctx.ellipse(px0 - 1.2, py0 - 1.0, 2.8, 1.7, 0, 0, Math.PI * 2);
-            ctx.fill();
-            // Ripe red tomatoes or deep-purple Battiri eggplants
-            if (bd.crop === 'tomato') {
-              ctx.fillStyle = '#ef4444';
-              ctx.beginPath(); ctx.arc(px0 + 2.2, py0 + 0.5, 1.9, 0, Math.PI * 2); ctx.fill();
-            } else if (bd.crop === 'eggplant') {
-              ctx.fillStyle = '#581c87';
-              ctx.beginPath(); ctx.ellipse(px0 + 2.0, py0 + 1.0, 1.6, 2.6, 0.25, 0, Math.PI * 2); ctx.fill();
-            }
-          }
+        ctx.stroke();
+      }
+      for (let i = 0; i < 18; i++) {
+        const u = (i + 0.5) / 18;
+        const px0 = gLeft + 16 + u * (gW - 32);
+        const py0 = gardenCurveY(u, 621, 3.2) + ((i % 2) * 2.5 - 1.2);
+        const crop = i % 3 === 0 ? 'mint' : (i % 3 === 1 ? 'eggplant' : 'tomato');
+        ctx.fillStyle = crop === 'mint' ? '#22c55e' : '#1b6430';
+        ctx.beginPath(); ctx.ellipse(px0, py0, 8.2, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = crop === 'mint' ? '#86efac' : '#4ade80';
+        ctx.beginPath(); ctx.ellipse(px0 - 1.5, py0 - 1.0, 4.2, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+        if (crop === 'tomato') {
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath(); ctx.arc(px0 + 2.5, py0, 1.8, 0, Math.PI * 2); ctx.fill();
+        } else if (crop === 'eggplant') {
+          ctx.fillStyle = '#581c87';
+          ctx.beginPath(); ctx.ellipse(px0 + 2.2, py0 + 0.6, 1.5, 2.3, 0.2, 0, Math.PI * 2); ctx.fill();
         }
       }
 
-      // 3 Fruiting Palestinian Lemon Trees (أشجار ليمون مثمرة) in the lower garden!
+      // 8d. 3 Fruiting Palestinian Lemon Trees (أشجار ليمون مثمرة) rooted naturally along the stepped terraces!
       const drawGardenLemonTree = (lx, ly, sc) => {
         ctx.save();
         ctx.translate(lx, ly);
         ctx.scale(sc, sc);
-        // Ground shadow
-        ctx.fillStyle = 'rgba(20, 14, 8, 0.30)';
-        ctx.beginPath(); ctx.ellipse(0, 1, 22, 4, 0, 0, Math.PI * 2); ctx.fill();
-        // Slender woody citrus trunk & forked branches
+        ctx.fillStyle = 'rgba(20, 14, 8, 0.28)';
+        ctx.beginPath(); ctx.ellipse(0, 1, 20, 3.8, 0, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = '#5c3c22';
-        ctx.lineWidth = 4.2;
+        ctx.lineWidth = 4.0;
         ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.moveTo(0, 0); ctx.quadraticCurveTo(-2, -14, 0, -24);
         ctx.moveTo(0, -18); ctx.lineTo(-10, -28);
         ctx.moveTo(0, -18); ctx.lineTo(10, -27);
         ctx.stroke();
-        // Glossy deep-emerald & sunlit citrus canopy clusters
         const lPuffs = [
           [-14, -30, 12, 9, '#1b4d24'], [14, -29, 12, 9, '#1b4d24'], [0, -34, 16, 11, '#225d29'],
           [-9, -36, 11, 8, '#387d32'], [10, -35, 11, 8, '#387d32'], [0, -40, 13, 8, '#5a9b3c'],
@@ -27624,7 +27709,6 @@ window.Game = window.Game || {};
           ctx.fillStyle = col;
           ctx.beginPath(); ctx.ellipse(cx0, cy0, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
         }
-        // Bright golden-yellow Palestinian lemons (ثمار الليمون الصفراء!)
         for (const [fx, fy] of [[-13, -30], [-4, -36], [6, -32], [14, -28], [1, -41]]) {
           ctx.fillStyle = '#facc15';
           ctx.strokeStyle = '#a16207';
@@ -27635,9 +27719,9 @@ window.Game = window.Game || {};
         }
         ctx.restore();
       };
-      drawGardenLemonTree(gLeft + 158, gTopY + 42, 0.98);
-      drawGardenLemonTree(gLeft + 322, gTopY + 46, 1.06);
-      drawGardenLemonTree(gRight - 22, gTopY + 40, 0.92);
+      drawGardenLemonTree(gLeft + 88, 599, 0.94);
+      drawGardenLemonTree(gLeft + 258, 603, 1.02);
+      drawGardenLemonTree(gRight - 46, 622, 0.96);
 
       // Soft grassy & stone riverbank border blending cleanly into the crystal-clear river at y = 635!
       ctx.fillStyle = '#475c26';
