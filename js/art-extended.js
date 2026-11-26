@@ -12012,68 +12012,160 @@ window.Game = window.Game || {};
     }
 
     if (p.type === 'battir_qantara_arcade') {
-      // Warm Sunset-Lit Aged Terracotta-Ochre Village Arcade with Marseilles Tile Eaves & Woven Straw Plates!
+      // =====================================================================
+      // HERITAGE PALESTINIAN DRESSED-STONE QANTARA ARCHED BRIDGE & WALKWAY
+      // (جسر قنطرة بتير الحجري — حجارة منحوتة، عقود مقوسة، فوانيس نحاسية، وأطباق قش!)
+      // =====================================================================
       ctx.save();
       const isGround = p.h >= 60;
-      const aG = ctx.createLinearGradient(px, py, px, py + p.h);
-      aG.addColorStop(0.0, '#e3b685');
-      aG.addColorStop(0.42, '#b88456');
-      aG.addColorStop(1.0, '#613c20');
-      ctx.fillStyle = aG;
-      ctx.strokeStyle = '#3b210e';
-      ctx.lineWidth = 1.6;
-      ctx.beginPath(); ctx.roundRect(px, py + 7, p.w, p.h - 7, 4); ctx.fill(); ctx.stroke();
+      const seed = Math.abs(Math.floor((p.x || 0) * 0.13 + (p.y || 0) * 3));
+
+      // 1. Softly Rounded Dressed-Limestone Bridge Body (Zero-Flicker World-Seeded Masonry!)
+      const bodyPath = () => {
+        ctx.beginPath(); ctx.roundRect(px, py + 9, p.w, p.h - 9, [4, 4, 3, 3]);
+      };
+      ctx.fillStyle = '#92704e'; // Soft warm limestone mortar
+      bodyPath(); ctx.fill();
+
+      ctx.save();
+      bodyPath(); ctx.clip();
+      const stPal = ['#e6cca4', '#dcc096', '#d1b388', '#d9bc92', '#c8a87d', '#ebd4b0'];
+      const rowH = isGround ? 13 : 10;
+      const stW = isGround ? 28 : 22;
+      let rIdx = 0;
+      for (let sy = py + 9; sy < py + p.h; sy += rowH) {
+        const xOff = (rIdx % 2) * (stW * 0.5);
+        let cIdx = 0;
+        for (let sx0 = px - xOff; sx0 < px + p.w; sx0 += stW) {
+          const sw = stW - 1.2 + ((seed + rIdx * 5 + cIdx * 3) % 3 - 1) * 1.0;
+          const pIdx = (seed + rIdx * 7 + cIdx * 11) % stPal.length;
+          ctx.fillStyle = stPal[pIdx];
+          ctx.beginPath(); ctx.roundRect(sx0 + 0.6, sy + 0.6, sw, rowH - 1.2, 2.0); ctx.fill();
+          ctx.fillStyle = 'rgba(255, 249, 234, 0.18)';
+          ctx.fillRect(sx0 + 1.2, sy + 0.8, sw - 1.4, 1.4);
+          ctx.fillStyle = 'rgba(62, 38, 18, 0.16)';
+          ctx.fillRect(sx0 + 1.2, sy + rowH - 1.6, sw - 1.4, 1.1);
+          cIdx++;
+        }
+        rIdx++;
+      }
+      // Warm depth shading from sunlit bridge deck to cool lower stone piers
+      const depthG = ctx.createLinearGradient(px, py + 9, px, py + p.h);
+      depthG.addColorStop(0.0, 'rgba(68, 40, 18, 0.24)'); // Cast shadow directly under projecting deck cornice
+      depthG.addColorStop(0.14, 'rgba(255, 244, 222, 0.06)');
+      depthG.addColorStop(0.7, 'rgba(0, 0, 0, 0)');
+      depthG.addColorStop(1.0, 'rgba(46, 26, 10, 0.34)');
+      ctx.fillStyle = depthG; ctx.fillRect(px, py + 9, p.w, p.h - 9);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(68, 42, 22, 0.55)'; ctx.lineWidth = 1.2; bodyPath(); ctx.stroke();
 
       if (isGround) {
-        // Deep Open Vaulted Riwaq Stone Colonnades glowing with warm evening copper oil lamps!
-        for (let ax = px + 80; ax < px + p.w - 75; ax += 155) {
-          ctx.fillStyle = '#f2cca0'; ctx.strokeStyle = '#452712'; ctx.lineWidth = 1.4;
+        // 2. Sculpted Pointed Stone Qantara Arches with Voussoir Stones, Keystones & Hanging Brass Lanterns!
+        for (let ax = px + 84; ax < px + p.w - 76; ax += 160) {
+          // Outer carved stone arch surround (أحجار عقد القنطرة)
+          ctx.fillStyle = '#ebd4b0'; ctx.strokeStyle = 'rgba(68, 42, 22, 0.62)'; ctx.lineWidth = 1.1;
           ctx.beginPath();
-          ctx.moveTo(ax - 28, py + p.h); ctx.lineTo(ax - 28, py + 44);
-          ctx.quadraticCurveTo(ax, py + 14, ax + 28, py + 44);
-          ctx.lineTo(ax + 28, py + p.h); ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.moveTo(ax - 33, py + p.h); ctx.lineTo(ax - 33, py + 50);
+          ctx.quadraticCurveTo(ax - 32, py + 24, ax, py + 17);
+          ctx.quadraticCurveTo(ax + 32, py + 24, ax + 33, py + 50);
+          ctx.lineTo(ax + 33, py + p.h); ctx.closePath(); ctx.fill(); ctx.stroke();
 
-          const vG = ctx.createLinearGradient(ax, py + 20, ax, py + p.h);
-          vG.addColorStop(0, '#241208'); vG.addColorStop(0.55, '#472411'); vG.addColorStop(1, '#6e3a1c');
+          // Subtle radial voussoir joint marks & projecting keystone (حجر المفتاح)
+          ctx.strokeStyle = 'rgba(74, 46, 22, 0.35)'; ctx.lineWidth = 0.9;
+          for (let v = -3; v <= 3; v++) {
+            const ang = -Math.PI * 0.5 + v * 0.32;
+            ctx.beginPath();
+            ctx.moveTo(ax + Math.cos(ang) * 24, py + 48 + Math.sin(ang) * 24);
+            ctx.lineTo(ax + Math.cos(ang) * 32, py + 48 + Math.sin(ang) * 32);
+            ctx.stroke();
+          }
+          ctx.fillStyle = '#f5e2c2'; ctx.strokeStyle = 'rgba(68, 42, 22, 0.55)'; ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.roundRect(ax - 4, py + 15, 8, 9, 1.5); ctx.fill(); ctx.stroke();
+
+          // Deep vaulted bridge archway interior with warm sunset shadow
+          const vG = ctx.createLinearGradient(ax, py + 22, ax, py + p.h);
+          vG.addColorStop(0.0, '#29170b'); vG.addColorStop(0.55, '#4a2a15'); vG.addColorStop(1.0, '#6e4224');
           ctx.fillStyle = vG;
           ctx.beginPath();
-          ctx.moveTo(ax - 21, py + p.h); ctx.lineTo(ax - 21, py + 46);
-          ctx.quadraticCurveTo(ax, py + 22, ax + 21, py + 46);
-          ctx.lineTo(ax + 21, py + p.h); ctx.closePath(); ctx.fill();
+          ctx.moveTo(ax - 24, py + p.h); ctx.lineTo(ax - 24, py + 50);
+          ctx.quadraticCurveTo(ax - 23, py + 31, ax, py + 24);
+          ctx.quadraticCurveTo(ax + 23, py + 31, ax + 24, py + 50);
+          ctx.lineTo(ax + 24, py + p.h); ctx.closePath(); ctx.fill();
 
-          const lg = ctx.createRadialGradient(ax, py + 44, 2, ax, py + 44, 24);
-          lg.addColorStop(0, 'rgba(253, 224, 71, 0.92)');
-          lg.addColorStop(0.55, 'rgba(249, 115, 22, 0.42)');
-          lg.addColorStop(1, 'rgba(249, 115, 22, 0)');
+          // Hanging forged-brass Arabic lantern swaying gently inside the stone arch!
+          const lSway = Math.sin(time * 1.6 + ax * 0.02) * 1.4;
+          const lx = ax + lSway, ly = py + 44;
+          ctx.strokeStyle = '#331c0e'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(ax, py + 24); ctx.lineTo(lx, ly - 5); ctx.stroke();
+          const lg = ctx.createRadialGradient(lx, ly, 2, lx, ly, 25);
+          lg.addColorStop(0.0, 'rgba(254, 240, 138, 0.85)');
+          lg.addColorStop(0.5, 'rgba(249, 115, 22, 0.34)');
+          lg.addColorStop(1.0, 'rgba(249, 115, 22, 0)');
           ctx.fillStyle = lg;
-          ctx.beginPath(); ctx.arc(ax, py + 44, 24, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(lx, ly, 25, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#92400e';
+          ctx.beginPath(); ctx.moveTo(lx - 4.5, ly - 3); ctx.lineTo(lx, ly - 7); ctx.lineTo(lx + 4.5, ly - 3); ctx.closePath(); ctx.fill();
           ctx.fillStyle = '#fef08a';
-          ctx.beginPath(); ctx.arc(ax, py + 44, 3.6, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.roundRect(lx - 3.2, ly - 3, 6.4, 7.5, 1.5); ctx.fill();
+          ctx.fillStyle = '#78350f';
+          ctx.fillRect(lx - 4, ly + 4.2, 8, 1.8);
 
-          // Colorful Traditional Palestinian Woven Straw Wall-Tray (طبق القش التراثي الملون) between arches!
-          if (ax + 78 < px + p.w - 30) {
-            const wx = ax + 77, wy = py + 38;
-            ctx.fillStyle = '#fde047'; ctx.strokeStyle = '#991b1b'; ctx.lineWidth = 2.0;
-            ctx.beginPath(); ctx.arc(wx, wy, 9, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-            ctx.strokeStyle = '#15803d'; ctx.lineWidth = 1.4;
-            ctx.beginPath(); ctx.arc(wx, wy, 5, 0, Math.PI * 2); ctx.stroke();
+          // Traditional Palestinian Woven Straw Wall-Tray (طبق القش التراثي) & Olive/Jasmine Sprig between arches!
+          if (ax + 80 < px + p.w - 30) {
+            const wx = ax + 80, wy = py + 44;
+            ctx.fillStyle = '#f3d078'; ctx.strokeStyle = '#991b1b'; ctx.lineWidth = 1.8;
+            ctx.beginPath(); ctx.arc(wx, wy, 10.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#15803d'; ctx.lineWidth = 1.3;
+            ctx.beginPath(); ctx.arc(wx, wy, 6.5, 0, Math.PI * 2); ctx.stroke();
+            ctx.fillStyle = '#991b1b';
+            ctx.beginPath(); ctx.arc(wx, wy, 2.4, 0, Math.PI * 2); ctx.fill();
           }
+        }
+      } else {
+        // Sculpted stone corbel brackets (كوابيل حجرية) supporting elevated walkway balconies
+        for (let cx0 = px + 20; cx0 < px + p.w - 16; cx0 += 48) {
+          ctx.fillStyle = '#c9a67d'; ctx.strokeStyle = 'rgba(68, 42, 22, 0.55)'; ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.moveTo(cx0 - 6, py + p.h); ctx.lineTo(cx0 + 6, py + p.h);
+          ctx.quadraticCurveTo(cx0 + 4, py + p.h + 7, cx0, py + p.h + 9);
+          ctx.quadraticCurveTo(cx0 - 4, py + p.h + 7, cx0 - 6, py + p.h);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
         }
       }
 
-      // Scalloped Red-Terracotta Marseilles Roof Tile Eave Along Top!
-      const tlG = ctx.createLinearGradient(px, py, px, py + 10);
-      tlG.addColorStop(0, '#ea580c');
-      tlG.addColorStop(0.55, '#b91c1c');
-      tlG.addColorStop(1, '#7f1d1d');
-      ctx.fillStyle = tlG;
-      ctx.strokeStyle = '#450a0a';
-      ctx.lineWidth = 1.3;
-      ctx.beginPath(); ctx.roundRect(px - 3, py, p.w + 6, 9, 4); ctx.fill(); ctx.stroke();
-      ctx.strokeStyle = 'rgba(254, 215, 170, 0.55)';
+      // 3. Sunlit Chiseled Jerusalem-Stone Paving Slab Deck & Molded Cornice Lip (السطح الحجري الجميل الذي تسير عليه القطة!)
+      const capG = ctx.createLinearGradient(px, py, px, py + 11);
+      capG.addColorStop(0.0, '#f7e5c6');
+      capG.addColorStop(0.55, '#dfc196');
+      capG.addColorStop(1.0, '#b58d60');
+      ctx.fillStyle = capG;
+      ctx.strokeStyle = 'rgba(68, 42, 22, 0.62)';
       ctx.lineWidth = 1.1;
-      for (let tx = px + 8; tx < px + p.w - 6; tx += 14) {
-        ctx.beginPath(); ctx.arc(tx, py + 7, 5, Math.PI, 0); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(px - 3, py, p.w + 6, 10.5, [4, 4, 2, 2]); ctx.fill(); ctx.stroke();
+      // Individual dressed paving flagstone seams & sunlit top rim gleam
+      ctx.strokeStyle = 'rgba(92, 62, 34, 0.34)'; ctx.lineWidth = 0.95;
+      for (let tx = px + 22; tx < px + p.w - 12; tx += 26) {
+        ctx.beginPath(); ctx.moveTo(tx, py + 1); ctx.lineTo(tx, py + 10); ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(255, 252, 240, 0.45)';
+      ctx.fillRect(px, py + 1, p.w, 1.8);
+      // Decorative carved stone dentil molding directly beneath the bridge cornice
+      ctx.fillStyle = 'rgba(122, 86, 52, 0.42)';
+      for (let dx = px + 6; dx < px + p.w - 8; dx += 14) {
+        ctx.fillRect(dx, py + 10.5, 6, 3);
+      }
+
+      // Subtle trailing green olive/ivy leaf sprigs accenting the upper cornice of ground bridges
+      if (isGround) {
+        for (let vx = px + 46; vx < px + p.w - 40; vx += 195) {
+          ctx.fillStyle = '#3f6e18';
+          ctx.beginPath();
+          ctx.ellipse(vx, py + 12, 6.5, 2.8, 0.25, 0, Math.PI * 2);
+          ctx.ellipse(vx + 7, py + 15, 5.2, 2.4, 0.55, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#65a30d';
+          ctx.beginPath(); ctx.ellipse(vx - 3, py + 11, 4.2, 2.0, -0.2, 0, Math.PI * 2); ctx.fill();
+        }
       }
       ctx.restore();
       return;
@@ -12280,90 +12372,195 @@ window.Game = window.Game || {};
 
     if (p.type === 'battir_taboon_oven') {
       // =====================================================================
-      // NEW OBSTACLE #1: TRADITIONAL PALESTINIAN CLAY TABOON BREAD OVEN
-      // (فرن الطابون الفلاحي المشتعل — قبة طينية، أرغفة طابون وجمر متطاير!)
+      // TRADITIONAL PALESTINIAN CLAY TABOON BREAD OVEN (الطابون الفلاحي التراثي)
       // =====================================================================
       ctx.save();
       const floorY = py + p.h;
       const cx = px + p.w * 0.5;
       const state = p.ovenState || 'bake';
       const pwr = p.emberPower || 0;
-      const rattle = state === 'warn' ? Math.sin(time * 48) * 2.2 : 0;
+      const rattle = state === 'warn' ? Math.sin(time * 48) * 2.0 : 0;
 
-      // 1. Stone Hearth Ring & Glowing Red Coals Base
-      ctx.fillStyle = '#573a28'; ctx.strokeStyle = '#29180e'; ctx.lineWidth = 1.4;
-      ctx.beginPath(); ctx.roundRect(px + 6, floorY - 12, p.w - 12, 12, 4); ctx.fill(); ctx.stroke();
-
-      // 2. Sculpted Sun-Baked Terracotta Clay Taboon Dome!
-      const dmG = ctx.createRadialGradient(cx - 8, floorY - 28, 4, cx, floorY - 14, 38);
-      dmG.addColorStop(0.0, '#ea580c');
-      dmG.addColorStop(0.45, '#b45309');
-      dmG.addColorStop(0.85, '#78350f');
-      dmG.addColorStop(1.0, '#451a03');
-      ctx.fillStyle = dmG;
-      ctx.strokeStyle = '#271105';
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.moveTo(cx - 34, floorY - 10);
-      ctx.bezierCurveTo(cx - 34, floorY - 42, cx - 16, floorY - 46, cx, floorY - 46);
-      ctx.bezierCurveTo(cx + 16, floorY - 46, cx + 34, floorY - 42, cx + 34, floorY - 10);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      // Glowing arched firebox mouth at front of Taboon dome
-      const fireGlow = ctx.createRadialGradient(cx, floorY - 16, 2, cx, floorY - 16, 18);
-      fireGlow.addColorStop(0, '#fef08a');
-      fireGlow.addColorStop(0.55, '#f97316');
-      fireGlow.addColorStop(1, 'rgba(220, 38, 38, 0)');
-      ctx.fillStyle = fireGlow;
-      ctx.beginPath(); ctx.arc(cx, floorY - 16, 18, Math.PI, 0); ctx.fill();
-      ctx.fillStyle = state === 'damped' ? '#44403c' : '#ef4444';
-      ctx.beginPath(); ctx.arc(cx, floorY - 10, 11, Math.PI, 0); ctx.fill();
-
-      // Freshly baked golden-dimpled Palestinian Taboon Flatbreads resting beside oven!
-      for (let b = 0; b < 2; b++) {
-        ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.0;
-        ctx.beginPath(); ctx.ellipse(px + p.w - 14, floorY - 13 - b * 4, 10, 3.5, -0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Soft warm ground contact shadow & hearth glow spill on the stone bridge
+      ctx.fillStyle = 'rgba(28, 14, 6, 0.36)';
+      ctx.beginPath(); ctx.ellipse(cx, floorY - 1, 44, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+      if (state !== 'damped') {
+        const spillG = ctx.createRadialGradient(cx, floorY - 6, 4, cx, floorY - 4, 42);
+        spillG.addColorStop(0, 'rgba(251, 146, 60, 0.28)');
+        spillG.addColorStop(1, 'rgba(251, 146, 60, 0)');
+        ctx.fillStyle = spillG;
+        ctx.beginPath(); ctx.ellipse(cx, floorY - 4, 42, 10, 0, 0, Math.PI * 2); ctx.fill();
       }
 
-      // 3. Cast-Iron Top Damper Lid (rattles on warn, lifts high on erupt!)
+      // 1. Stacked Olive-Wood Firewood Bundle (حطب زيتون) resting neatly on the left side
+      for (let lg = 0; lg < 3; lg++) {
+        const lx = px + 4 + lg * 4.5, ly = floorY - 4 - (lg === 1 ? 4.5 : 0);
+        ctx.fillStyle = '#6b4226'; ctx.strokeStyle = '#331c0e'; ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.ellipse(lx + 4, ly, 6.5, 2.8, -0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#d4a674';
+        ctx.beginPath(); ctx.arc(lx + 9.5, ly - 0.5, 2.0, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // 2. Curved Fieldstone Hearth Base Ring (مصطبة حجرية دائرية) with individual weathered stones
+      const baseW = p.w - 14;
+      const baseX = px + 7;
+      ctx.fillStyle = '#6b4d34'; ctx.strokeStyle = '#3b2414'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.roundRect(baseX, floorY - 14, baseW, 13, 5); ctx.fill(); ctx.stroke();
+      const baseStones = ['#b8946e', '#9e7a56', '#c9a882', '#8c6a48', '#b08b65'];
+      for (let i = 0; i < 5; i++) {
+        const sx0 = baseX + 2 + i * ((baseW - 4) / 5);
+        const sw = (baseW - 4) / 5 - 1.5;
+        ctx.fillStyle = baseStones[i];
+        ctx.beginPath(); ctx.roundRect(sx0, floorY - 12.5, sw, 9.5, 2.8); ctx.fill();
+        ctx.fillStyle = 'rgba(255, 245, 224, 0.22)';
+        ctx.fillRect(sx0 + 1, floorY - 12, sw - 2, 1.4);
+      }
+
+      // 3. Hand-Molded Straw-Mixed Terracotta Clay Taboon Dome (قبة طينية مخلوطة بالتبن)
+      const domePath = () => {
+        ctx.beginPath();
+        ctx.moveTo(cx - 33, floorY - 12);
+        ctx.bezierCurveTo(cx - 34, floorY - 34, cx - 24, floorY - 46, cx - 15, floorY - 48);
+        ctx.lineTo(cx + 15, floorY - 48);
+        ctx.bezierCurveTo(cx + 24, floorY - 46, cx + 34, floorY - 34, cx + 33, floorY - 12);
+        ctx.closePath();
+      };
+      const dmG = ctx.createRadialGradient(cx - 10, floorY - 32, 3, cx, floorY - 22, 38);
+      dmG.addColorStop(0.0, '#e3965c');
+      dmG.addColorStop(0.38, '#c26d38');
+      dmG.addColorStop(0.75, '#8f4420');
+      dmG.addColorStop(1.0, '#592710');
+      ctx.fillStyle = dmG;
+      domePath(); ctx.fill();
+
+      // Tactile earthen clay hand-molded bands, golden straw flecks (تبن) & soot patina near top!
+      ctx.save();
+      domePath(); ctx.clip();
+      // Subtle horizontal hand-coiled clay ridges
+      ctx.strokeStyle = 'rgba(255, 232, 200, 0.14)'; ctx.lineWidth = 1.4;
+      for (const ry of [floorY - 22, floorY - 32, floorY - 41]) {
+        ctx.beginPath(); ctx.moveTo(cx - 34, ry); ctx.quadraticCurveTo(cx, ry + 3, cx + 34, ry); ctx.stroke();
+      }
+      // Subtle golden-straw flecks embedded in sun-baked clay
+      ctx.strokeStyle = 'rgba(253, 224, 155, 0.48)'; ctx.lineWidth = 0.85;
+      const strawPts = [
+        [-22, -20, 0.3], [-14, -34, -0.4], [-25, -30, 0.1], [16, -24, -0.2],
+        [22, -33, 0.5], [10, -39, -0.3], [-6, -42, 0.2], [24, -18, -0.4]
+      ];
+      for (const [ox, oy, ang] of strawPts) {
+        ctx.beginPath();
+        ctx.moveTo(cx + ox - Math.cos(ang) * 2.5, floorY + oy - Math.sin(ang) * 2.5);
+        ctx.lineTo(cx + ox + Math.cos(ang) * 2.5, floorY + oy + Math.sin(ang) * 2.5);
+        ctx.stroke();
+      }
+      // Gentle dark wood-smoke soot patina around top mouth
+      const sootG = ctx.createLinearGradient(cx, floorY - 50, cx, floorY - 34);
+      sootG.addColorStop(0.0, 'rgba(28, 16, 10, 0.58)');
+      sootG.addColorStop(1.0, 'rgba(28, 16, 10, 0)');
+      ctx.fillStyle = sootG;
+      ctx.fillRect(cx - 35, floorY - 50, 70, 16);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(54, 24, 10, 0.72)'; ctx.lineWidth = 1.3; domePath(); ctx.stroke();
+
+      // Molded thick clay top collar rim around the oven opening
+      ctx.fillStyle = '#a85b30'; ctx.strokeStyle = '#3d1c0c'; ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.ellipse(cx, floorY - 47.5, 16.5, 3.8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      // 4. Recessed Arched Firebox Mouth with Glowing River Pebbles (الرضف) & Flickering Embers!
+      ctx.fillStyle = '#8c4b26'; ctx.strokeStyle = '#3d1c0c'; ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.arc(cx, floorY - 12, 13.5, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = state === 'damped' ? '#292524' : '#3b0c06';
+      ctx.beginPath(); ctx.arc(cx, floorY - 12, 11, Math.PI, 0); ctx.closePath(); ctx.fill();
+      if (state !== 'damped') {
+        const fPulse = 0.85 + 0.15 * Math.sin(time * 9);
+        const fireGlow = ctx.createRadialGradient(cx, floorY - 15, 1.5, cx, floorY - 15, 16 * fPulse);
+        fireGlow.addColorStop(0.0, 'rgba(254, 249, 195, 0.95)');
+        fireGlow.addColorStop(0.45, 'rgba(249, 115, 22, 0.75)');
+        fireGlow.addColorStop(1.0, 'rgba(220, 38, 38, 0)');
+        ctx.fillStyle = fireGlow;
+        ctx.beginPath(); ctx.arc(cx, floorY - 14, 16 * fPulse, Math.PI, 0); ctx.fill();
+        // Glowing heated Taboon river pebbles (الرضف) nestled along the firebox floor
+        for (let r = -2; r <= 2; r++) {
+          ctx.fillStyle = r % 2 === 0 ? '#f97316' : '#dc2626';
+          ctx.beginPath(); ctx.ellipse(cx + r * 3.8, floorY - 13.2, 2.2, 1.3, 0, 0, Math.PI * 2); ctx.fill();
+        }
+        // Tiny dancing inner flame lick
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.moveTo(cx - 3.5, floorY - 13);
+        ctx.quadraticCurveTo(cx + Math.sin(time * 14) * 2.2, floorY - 22, cx + 3.5, floorY - 13);
+        ctx.closePath(); ctx.fill();
+      }
+
+      // 5. Woven Straw Serving Tray (طبق القش) with Stacked Dimpled Golden Taboon Flatbreads (خبز الطابون)!
+      const bx0 = px + p.w - 13, by0 = floorY - 12;
+      ctx.fillStyle = '#d9a441'; ctx.strokeStyle = '#784812'; ctx.lineWidth = 0.9;
+      ctx.beginPath(); ctx.ellipse(bx0, by0 + 1, 13, 3.6, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      for (let b = 0; b < 3; b++) {
+        const ly = by0 - 1.5 - b * 3.6;
+        const brG = ctx.createLinearGradient(bx0 - 10, ly - 3, bx0 + 10, ly + 3);
+        brG.addColorStop(0.0, '#f7c566'); brG.addColorStop(0.55, '#d98a2b'); brG.addColorStop(1.0, '#9a5414');
+        ctx.fillStyle = brG; ctx.strokeStyle = '#6b360c'; ctx.lineWidth = 0.85;
+        ctx.beginPath(); ctx.ellipse(bx0, ly, 10.5 - b * 0.4, 3.1, -0.06, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Authentic toasted Taboon pebble dimples on the top loaf
+        if (b === 2) {
+          ctx.fillStyle = 'rgba(107, 46, 10, 0.55)';
+          for (const [dx, dy] of [[-4.5, -0.4], [-1.2, 0.6], [2.4, -0.5], [5.2, 0.3]]) {
+            ctx.beginPath(); ctx.arc(bx0 + dx, ly + dy, 0.95, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+      }
+      // Delicate rising warm bread steam wisps
+      ctx.strokeStyle = 'rgba(255, 250, 240, 0.36)'; ctx.lineWidth = 1.0; ctx.lineCap = 'round';
+      for (let st = 0; st < 2; st++) {
+        const sxw = bx0 - 3 + st * 6;
+        const drift = Math.sin(time * 2.5 + st * 2) * 2.2;
+        ctx.beginPath(); ctx.moveTo(sxw, by0 - 12); ctx.quadraticCurveTo(sxw + drift, by0 - 19, sxw - drift * 0.6, by0 - 25); ctx.stroke();
+      }
+
+      // 6. Hammered Cast-Iron Top Damper Lid with Forged Ring Handle (غطاء الطابون الحديدي)
       const lidLift = state === 'erupt' ? pwr * 26 : (state === 'warn' ? 3 : 0);
       ctx.save();
-      ctx.translate(cx + rattle, floorY - 47 - lidLift);
-      ctx.rotate(state === 'erupt' ? 0.18 : (rattle * 0.04));
-      ctx.fillStyle = '#334155'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.ellipse(0, 0, 18, 4.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2.0;
-      ctx.beginPath(); ctx.arc(0, -4, 4.5, Math.PI, 0); ctx.stroke();
+      ctx.translate(cx + rattle, floorY - 48.5 - lidLift);
+      ctx.rotate(state === 'erupt' ? 0.16 : (rattle * 0.035));
+      const lidG = ctx.createLinearGradient(-17, -4, 17, 4);
+      lidG.addColorStop(0.0, '#1e293b'); lidG.addColorStop(0.45, '#475569'); lidG.addColorStop(1.0, '#0f172a');
+      ctx.fillStyle = lidG; ctx.strokeStyle = '#090d16'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.ellipse(0, 0, 17.5, 4.4, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Metallic highlight rim & tiny rivets
+      ctx.strokeStyle = 'rgba(203, 213, 225, 0.45)'; ctx.lineWidth = 0.9;
+      ctx.beginPath(); ctx.ellipse(0, -1, 14.5, 2.4, 0, Math.PI, 0); ctx.stroke();
+      // Forged iron lifting handle arch
+      ctx.strokeStyle = '#64748b'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.arc(0, -3.5, 4.5, Math.PI, 0); ctx.stroke();
       ctx.restore();
 
-      // 4. Rising Swirling Column of Blazing Hearth Embers & Flame Sparks!
+      // 7. Rising Swirling Column of Warm Hearth Embers & Flame Sparks!
       if (state === 'warn') {
         ctx.fillStyle = '#fb923c';
         for (let s = 0; s < 5; s++) {
-          const sy0 = floorY - 52 - ((time * 55 + s * 8) % 20);
-          ctx.beginPath(); ctx.arc(cx - 10 + s * 5, sy0, 2.5, 0, Math.PI * 2); ctx.fill();
+          const sy0 = floorY - 53 - ((time * 55 + s * 8) % 20);
+          ctx.beginPath(); ctx.arc(cx - 10 + s * 5, sy0, 2.2, 0, Math.PI * 2); ctx.fill();
         }
       } else if (pwr > 0.15 && state !== 'damped') {
         const colH = 68 * pwr;
-        const flmG = ctx.createLinearGradient(cx, floorY - 44, cx, floorY - 44 - colH);
+        const flmG = ctx.createLinearGradient(cx, floorY - 46, cx, floorY - 46 - colH);
         flmG.addColorStop(0, 'rgba(254, 240, 138, 0.92)');
         flmG.addColorStop(0.45, 'rgba(249, 115, 22, 0.78)');
         flmG.addColorStop(1, 'rgba(220, 38, 38, 0)');
         ctx.fillStyle = flmG;
         ctx.beginPath();
-        ctx.moveTo(cx - 15, floorY - 44);
-        ctx.quadraticCurveTo(cx - 22 + Math.sin(time * 18) * 5, floorY - 44 - colH * 0.5, cx, floorY - 48 - colH);
-        ctx.quadraticCurveTo(cx + 22 - Math.sin(time * 18) * 5, floorY - 44 - colH * 0.5, cx + 15, floorY - 44);
+        ctx.moveTo(cx - 14, floorY - 46);
+        ctx.quadraticCurveTo(cx - 20 + Math.sin(time * 18) * 4.5, floorY - 46 - colH * 0.5, cx, floorY - 50 - colH);
+        ctx.quadraticCurveTo(cx + 20 - Math.sin(time * 18) * 4.5, floorY - 46 - colH * 0.5, cx + 14, floorY - 46);
         ctx.closePath();
         ctx.fill();
         for (let e = 0; e < 9; e++) {
           const u = ((time * 1.9 + e * 0.11) % 1);
-          const ex = cx + Math.sin(u * 9 + e) * 14;
-          const ey = floorY - 46 - u * colH;
+          const ex = cx + Math.sin(u * 9 + e) * 13;
+          const ey = floorY - 48 - u * colH;
           ctx.fillStyle = e % 2 === 0 ? '#fef08a' : '#ef4444';
-          ctx.beginPath(); ctx.arc(ex, ey, Math.max(1.4, 3.8 * (1 - u)), 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(ex, ey, Math.max(1.3, 3.5 * (1 - u)), 0, Math.PI * 2); ctx.fill();
         }
       }
       ctx.restore();
