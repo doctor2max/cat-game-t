@@ -24108,55 +24108,81 @@ window.Game = window.Game || {};
     for (let rep = -1; rep <= 1; rep++) {
       const vx = off + rep * span;
 
+      // Helper: Paint edge-to-edge curved & gently undulating agricultural terraces clipped to a distant hill!
+      const paintDistantHillTerraces = (hillPathFn, xL, xR, tiers) => {
+        ctx.save();
+        hillPathFn();
+        ctx.clip();
+        const segs = 20;
+        for (let k = 0; k < tiers.length; k++) {
+          const [baseY, bulge, waveAmp, ph] = tiers[k];
+          const pts = [];
+          for (let s = 0; s <= segs; s++) {
+            const u = s / segs;
+            const px = xL + u * (xR - xL);
+            const py = baseY + Math.sin(u * Math.PI) * bulge + Math.sin(u * Math.PI * 2.3 + ph) * waveAmp;
+            pts.push([px, py]);
+          }
+          // Sunlit green garden terrace strip
+          const gCol = ctx.createLinearGradient(xL, baseY, xR, baseY);
+          gCol.addColorStop(0.0, '#365215'); gCol.addColorStop(0.5, '#658f22'); gCol.addColorStop(1.0, '#2a4010');
+          ctx.fillStyle = gCol;
+          ctx.beginPath();
+          pts.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py - 7); else ctx.lineTo(px, py - 7); });
+          for (let s = segs; s >= 0; s--) ctx.lineTo(pts[s][0], pts[s][1] + 2);
+          ctx.closePath(); ctx.fill();
+
+          // Soft shadow beneath stone wall
+          ctx.fillStyle = 'rgba(20, 30, 10, 0.28)';
+          ctx.beginPath();
+          pts.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py + 11); else ctx.lineTo(px, py + 11); });
+          for (let s = segs; s >= 0; s--) ctx.lineTo(pts[s][0], pts[s][1] + 15);
+          ctx.closePath(); ctx.fill();
+
+          // Weathered cylindrically shaded dry-stone wall spanning edge-to-edge
+          const wCol = ctx.createLinearGradient(xL, baseY, xR, baseY);
+          wCol.addColorStop(0.0, '#6a4b2d'); wCol.addColorStop(0.22, '#b58d62');
+          wCol.addColorStop(0.5, '#d6b387'); wCol.addColorStop(0.78, '#ae865b'); wCol.addColorStop(1.0, '#5a3e23');
+          ctx.fillStyle = wCol; ctx.strokeStyle = 'rgba(54, 32, 14, 0.45)'; ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          pts.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py); });
+          for (let s = segs; s >= 0; s--) ctx.lineTo(pts[s][0], pts[s][1] + 11);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+        }
+        ctx.restore();
+      };
+
       // Hill A (Left-Center Lush Terraced Village Hill)
+      const hillAPath = () => {
+        ctx.beginPath();
+        ctx.moveTo(vx - 40, 625);
+        ctx.bezierCurveTo(vx + 110, 390, vx + 310, 292, vx + 540, 314);
+        ctx.bezierCurveTo(vx + 760, 336, vx + 910, 448, vx + 1040, 625);
+        ctx.closePath();
+      };
       const hAG = ctx.createLinearGradient(0, 290, 0, 620);
       hAG.addColorStop(0.0, '#6a8238'); hAG.addColorStop(0.45, '#4b6626'); hAG.addColorStop(1.0, '#293b14');
       ctx.fillStyle = hAG;
-      ctx.beginPath();
-      ctx.moveTo(vx - 40, 625);
-      ctx.bezierCurveTo(vx + 110, 390, vx + 310, 292, vx + 540, 314);
-      ctx.bezierCurveTo(vx + 760, 336, vx + 910, 448, vx + 1040, 625);
-      ctx.closePath(); ctx.fill();
+      hillAPath(); ctx.fill();
+      paintDistantHillTerraces(hillAPath, vx - 50, vx + 1050, [
+        [348, 22, 5, 0.3], [392, 26, 6, 1.1], [438, 30, 7, 1.9], [488, 32, 6, 2.7], [540, 28, 5, 3.4]
+      ]);
 
       // Hill B (Right-Center Overlapping Terraced Orchard & Modern/Old Village Hill)
+      const hillBPath = () => {
+        ctx.beginPath();
+        ctx.moveTo(vx + 680, 625);
+        ctx.bezierCurveTo(vx + 835, 405, vx + 1055, 305, vx + 1285, 326);
+        ctx.bezierCurveTo(vx + 1485, 344, vx + 1585, 445, vx + span + 80, 625);
+        ctx.closePath();
+      };
       const hBG = ctx.createLinearGradient(0, 308, 0, 625);
       hBG.addColorStop(0.0, '#5e7a30'); hBG.addColorStop(0.5, '#3f5a1e'); hBG.addColorStop(1.0, '#223310');
       ctx.fillStyle = hBG;
-      ctx.beginPath();
-      ctx.moveTo(vx + 680, 625);
-      ctx.bezierCurveTo(vx + 835, 405, vx + 1055, 305, vx + 1285, 326);
-      ctx.bezierCurveTo(vx + 1485, 344, vx + 1585, 445, vx + span + 80, 625);
-      ctx.closePath(); ctx.fill();
-
-      // Curved Contour-Wrapping Dry-Stone Agricultural Terraces & Lush Green Gardens across both hills!
-      for (const [tx, ty, tw, bulge] of [
-        [vx + 220, 384, 380, 18], [vx + 155, 434, 520, 24], [vx + 105, 488, 640, 28],
-        [vx + 960, 398, 410, 18], [vx + 890, 448, 540, 24], [vx + 840, 502, 620, 28],
-      ]) {
-        const midX = tx + tw * 0.5;
-        // Curved lush garden bed greenery crowning each contour-hugging terrace
-        const gCol = ctx.createLinearGradient(tx, ty, tx + tw, ty);
-        gCol.addColorStop(0.0, '#365314'); gCol.addColorStop(0.5, '#65a30d'); gCol.addColorStop(1.0, '#2c4610');
-        ctx.fillStyle = gCol;
-        ctx.beginPath();
-        ctx.moveTo(tx + 2, ty - 1);
-        ctx.quadraticCurveTo(midX, ty - 7 + bulge, tx + tw - 2, ty - 1);
-        ctx.lineTo(tx + tw - 2, ty + 5);
-        ctx.quadraticCurveTo(midX, ty + 2 + bulge, tx + 2, ty + 5);
-        ctx.closePath(); ctx.fill();
-
-        // Cylindrically shaded curved stone retaining wall wrapping around the hill belly
-        const wCol = ctx.createLinearGradient(tx, ty, tx + tw, ty);
-        wCol.addColorStop(0.0, '#6e4c2c'); wCol.addColorStop(0.22, '#b88c5e');
-        wCol.addColorStop(0.5, '#d9b282'); wCol.addColorStop(0.78, '#b08456'); wCol.addColorStop(1.0, '#5e3f22');
-        ctx.fillStyle = wCol; ctx.strokeStyle = 'rgba(59, 33, 14, 0.55)'; ctx.lineWidth = 1.0;
-        ctx.beginPath();
-        ctx.moveTo(tx, ty + 2);
-        ctx.quadraticCurveTo(midX, ty + 2 + bulge, tx + tw, ty + 2);
-        ctx.lineTo(tx + tw - 2, ty + 14);
-        ctx.quadraticCurveTo(midX, ty + 14 + bulge * 0.94, tx + 2, ty + 14);
-        ctx.closePath(); ctx.fill(); ctx.stroke();
-      }
+      hillBPath(); ctx.fill();
+      paintDistantHillTerraces(hillBPath, vx + 670, vx + span + 90, [
+        [360, 22, 5, 0.6], [404, 26, 6, 1.4], [450, 30, 7, 2.2], [500, 32, 6, 3.0], [552, 28, 5, 3.8]
+      ]);
 
       // Harmonious Blend of Old Heritage Stone Houses & Modern Palestinian Villas + Trees & Gardens!
       // Hill A Village Cluster
@@ -24246,170 +24272,209 @@ window.Game = window.Game || {};
         // ---------------------------------------------------------------------
         const cx0 = sx + 45;
         // Grounded lush green tree-covered Judean hillside descending all the way to the river bank!
+        const hill1Path = () => {
+          ctx.beginPath();
+          ctx.moveTo(cx0 - 65, 648);
+          ctx.bezierCurveTo(cx0 + 10, 420, cx0 + 135, 342, cx0 + 295, 354);
+          ctx.bezierCurveTo(cx0 + 445, 366, cx0 + 530, 458, cx0 + 595, 648);
+          ctx.closePath();
+        };
         const hill1G = ctx.createLinearGradient(cx0, 345, cx0, 646);
-        hill1G.addColorStop(0.0, '#4d7c0f'); hill1G.addColorStop(0.5, '#365314'); hill1G.addColorStop(1.0, '#1a2e05');
+        hill1G.addColorStop(0.0, '#4f7a18'); hill1G.addColorStop(0.5, '#375415'); hill1G.addColorStop(1.0, '#1c3008');
         ctx.fillStyle = hill1G;
-        ctx.beginPath();
-        ctx.moveTo(cx0 - 65, 648);
-        ctx.bezierCurveTo(cx0 + 10, 420, cx0 + 135, 342, cx0 + 295, 354);
-        ctx.bezierCurveTo(cx0 + 445, 366, cx0 + 530, 458, cx0 + 595, 648);
-        ctx.closePath(); ctx.fill();
-        // Dense Mediterranean olive, pomegranate & cypress forest crowning the hillside behind the terraces!
-        drawCypressSilhouette(ctx, cx0 + 82, 438, 108);
-        drawAncientOliveSunset(ctx, cx0 + 165, 412, 0.88);
-        drawPomegranateTree(ctx, cx0 + 265, 402, 0.85);
-        drawAncientOliveSunset(ctx, cx0 + 365, 418, 0.92);
-        drawCypressSilhouette(ctx, cx0 + 452, 456, 114);
+        hill1Path(); ctx.fill();
 
-        // Helper: 3D Contour-Wrapping Curved Dry-Stone Terrace hugging the rounded hill slope!
-        const drawCurvedHillTerrace = (tx, ty, tw, th, bulge, seed) => {
-          const midX = tx + tw * 0.5;
-          // 1. Curved lush green agricultural garden bed crowning the terrace arc
-          const gBed = ctx.createLinearGradient(tx, ty - 6, tx + tw, ty - 6);
-          gBed.addColorStop(0.0, '#2c4610');
-          gBed.addColorStop(0.25, '#4d7c0f');
-          gBed.addColorStop(0.55, '#65a30d');
-          gBed.addColorStop(0.85, '#3f6212');
-          gBed.addColorStop(1.0, '#1f3309');
+        // Helper: Evaluate organic curved & gently undulating terrace contour Y(x)
+        const evalContourY = (x, xL, xR, baseY, bulge, waveAmp, phase) => {
+          const u = Math.max(0, Math.min(1, (x - xL) / (xR - xL)));
+          return baseY + Math.sin(u * Math.PI) * bulge + Math.sin(u * Math.PI * 2.4 + phase) * waveAmp;
+        };
+
+        // Helper: Paint an edge-to-edge undulating dry-stone terrace + integrated carved-stone Sawaqi channel
+        const paintEdgeToEdgeTerrace = (xL, xR, baseY, wallH, bulge, waveAmp, phase, seed, withChannel, chStartU, chEndU) => {
+          const segs = 22;
+          const ptsTop = [];
+          for (let s = 0; s <= segs; s++) {
+            const u = s / segs;
+            const px = xL + u * (xR - xL);
+            const py = evalContourY(px, xL, xR, baseY, bulge, waveAmp, phase);
+            ptsTop.push([px, py]);
+          }
+          // 1. Soft sunlit terraced garden ledge above the stone wall
+          const gBed = ctx.createLinearGradient(xL, baseY, xR, baseY);
+          gBed.addColorStop(0.0, '#2a420f'); gBed.addColorStop(0.25, '#4c7519');
+          gBed.addColorStop(0.52, '#648f22'); gBed.addColorStop(0.8, '#416615'); gBed.addColorStop(1.0, '#22360b');
           ctx.fillStyle = gBed;
           ctx.beginPath();
-          ctx.moveTo(tx - 4, ty + 2);
-          ctx.quadraticCurveTo(midX, ty - 9 + bulge, tx + tw + 4, ty + 2);
-          ctx.lineTo(tx + tw + 2, ty + 10);
-          ctx.quadraticCurveTo(midX, ty + 6 + bulge, tx - 2, ty + 10);
-          ctx.closePath();
-          ctx.fill();
+          ptsTop.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py - 9); else ctx.lineTo(px, py - 9); });
+          for (let s = segs; s >= 0; s--) ctx.lineTo(ptsTop[s][0], ptsTop[s][1] + 2);
+          ctx.closePath(); ctx.fill();
 
-          // 2. Curved 3D dry-stone retaining wall body (cylindrically shaded darker on both flanks!)
-          const wallPath = () => {
+          // 2. Soft cast ground shadow beneath the stone retaining wall onto the terrace garden below
+          ctx.fillStyle = 'rgba(18, 28, 8, 0.34)';
+          ctx.beginPath();
+          ptsTop.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py + wallH - 1); else ctx.lineTo(px, py + wallH - 1); });
+          for (let s = segs; s >= 0; s--) ctx.lineTo(ptsTop[s][0], ptsTop[s][1] + wallH + 6);
+          ctx.closePath(); ctx.fill();
+
+          // 3. Organic undulating 3D weathered dry-stone retaining wall (cylindrically shaded across the hill!)
+          const wPath = () => {
             ctx.beginPath();
-            ctx.moveTo(tx, ty + 4);
-            ctx.quadraticCurveTo(midX, ty + 4 + bulge, tx + tw, ty + 4);
-            ctx.lineTo(tx + tw - 3, ty + th);
-            ctx.quadraticCurveTo(midX, ty + th + bulge * 0.92, tx + 3, ty + th);
+            ptsTop.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py); });
+            for (let s = segs; s >= 0; s--) ctx.lineTo(ptsTop[s][0], ptsTop[s][1] + wallH);
             ctx.closePath();
           };
-          const stoneG = ctx.createLinearGradient(tx, ty, tx + tw, ty);
-          stoneG.addColorStop(0.0, '#5a3b20');
-          stoneG.addColorStop(0.18, '#a67b50');
-          stoneG.addColorStop(0.48, '#e3ba88');
-          stoneG.addColorStop(0.78, '#b58759');
-          stoneG.addColorStop(1.0, '#4f331b');
-          ctx.fillStyle = stoneG;
-          wallPath();
-          ctx.fill();
+          const stG = ctx.createLinearGradient(xL, baseY, xR, baseY);
+          stG.addColorStop(0.0, '#5a3f26'); stG.addColorStop(0.18, '#a4805a');
+          stG.addColorStop(0.46, '#d9ba91'); stG.addColorStop(0.75, '#b69066'); stG.addColorStop(1.0, '#4f3720');
+          ctx.fillStyle = stG;
+          wPath(); ctx.fill();
 
-          // Clip curved dry-stone courses & sunlit stone cap inside the contoured wall
+          // Interlocking dry-stone courses & sunlit top limestone cap
           ctx.save();
-          wallPath();
-          ctx.clip();
+          wPath(); ctx.clip();
           const rows = 3;
-          for (let r = 0; r < rows; r++) {
-            const ry = ty + 6 + r * ((th - 6) / rows);
-            const rBulge = bulge * (1 - r * 0.03);
-            ctx.strokeStyle = 'rgba(46, 25, 10, 0.42)';
-            ctx.lineWidth = 1.1;
+          for (let r = 1; r < rows; r++) {
+            const ryOff = (wallH / rows) * r;
+            ctx.strokeStyle = 'rgba(46, 28, 14, 0.36)'; ctx.lineWidth = 0.95;
             ctx.beginPath();
-            ctx.moveTo(tx, ry);
-            ctx.quadraticCurveTo(midX, ry + rBulge, tx + tw, ry);
+            ptsTop.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py + ryOff); else ctx.lineTo(px, py + ryOff); });
             ctx.stroke();
-            const cols = Math.max(6, Math.floor(tw / 28));
-            for (let c = 0; c < cols; c++) {
-              const u = (c + ((r % 2) * 0.5)) / cols;
-              const bx = tx + u * tw;
-              const by = ry + 4 * u * (1 - u) * rBulge;
-              ctx.strokeStyle = 'rgba(46, 25, 10, 0.36)';
-              ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + ((seed + c) % 3 - 1) * 1.5, by + (th - 6) / rows); ctx.stroke();
-              if ((c + r + seed) % 3 === 0) {
-                ctx.fillStyle = 'rgba(255, 240, 210, 0.16)';
-                ctx.fillRect(bx + 2, by + 2, 14, 5);
+          }
+          const numStones = Math.floor((xR - xL) / 22);
+          for (let r = 0; r < rows; r++) {
+            const y0Off = (wallH / rows) * r;
+            const rh = wallH / rows;
+            for (let c = 0; c < numStones; c++) {
+              const u = (c + (r % 2) * 0.48) / numStones;
+              const bx = xL + u * (xR - xL);
+              const by = evalContourY(bx, xL, xR, baseY, bulge, waveAmp, phase) + y0Off;
+              ctx.strokeStyle = 'rgba(42, 24, 10, 0.32)'; ctx.lineWidth = 0.85;
+              ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + ((seed + c + r) % 3 - 1) * 1.2, by + rh); ctx.stroke();
+              if ((c * 3 + r + seed) % 5 === 0) {
+                ctx.fillStyle = 'rgba(255, 246, 224, 0.14)';
+                ctx.fillRect(bx + 2, by + 1.5, 11, rh - 3);
               }
             }
           }
           ctx.restore();
-          ctx.strokeStyle = 'rgba(46, 25, 10, 0.65)';
-          ctx.lineWidth = 1.25;
-          wallPath();
-          ctx.stroke();
-
-          // Sunlit curved coping stone rim along the top arc of the terrace
-          ctx.strokeStyle = 'rgba(254, 240, 200, 0.42)';
-          ctx.lineWidth = 1.8;
+          ctx.strokeStyle = 'rgba(46, 28, 14, 0.52)'; ctx.lineWidth = 1.0;
+          wPath(); ctx.stroke();
+          // Crisp sunlit limestone coping rim along the terrace curve
+          ctx.strokeStyle = 'rgba(255, 246, 224, 0.38)'; ctx.lineWidth = 1.3;
           ctx.beginPath();
-          ctx.moveTo(tx + 4, ty + 5.5);
-          ctx.quadraticCurveTo(midX, ty + 5.5 + bulge, tx + tw - 4, ty + 5.5);
+          ptsTop.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py + 1.0); else ctx.lineTo(px, py + 1.0); });
           ctx.stroke();
-        };
 
-        // Helper: Realistic Multi-Layer Water Channel / Stone Spout (المزاريب) with Wet Stone, Deep Teal Core, Sheen, Foam & Ripples!
-        const drawRealisticChannel = (pts, dropPoints) => {
-          const trace = () => {
-            ctx.beginPath();
-            for (let k = 0; k < pts.length; k++) {
-              const [px, py] = pts[k];
-              if (k === 0) ctx.moveTo(px, py);
-              else if (k < pts.length - 1) {
-                const [nx, ny] = pts[k + 1];
-                ctx.quadraticCurveTo(px, py, (px + nx) * 0.5, (py + ny) * 0.5);
-              } else {
-                ctx.lineTo(px, py);
+          // 4. Organized Built-In Stone Sawaqi Channel (ساقية حجرية منظمة بمياه نقية شفافة)
+          if (withChannel) {
+            const s0 = Math.max(0, Math.floor(chStartU * segs));
+            const s1 = Math.min(segs, Math.ceil(chEndU * segs));
+            const traceCh = (yOff) => {
+              ctx.beginPath();
+              for (let s = s0; s <= s1; s++) {
+                const [px, py] = ptsTop[s];
+                if (s === s0) ctx.moveTo(px, py + yOff); else ctx.lineTo(px, py + yOff);
               }
+            };
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            // Carved pale limestone trough lip (clean architectural stone, no ugly brown border)
+            ctx.strokeStyle = 'rgba(92, 68, 44, 0.62)'; ctx.lineWidth = 5.4; traceCh(2.8); ctx.stroke();
+            ctx.strokeStyle = '#d4bc98'; ctx.lineWidth = 4.4; traceCh(2.4); ctx.stroke();
+            // Pure translucent crystal-clear aqua water body inside the saqiya
+            ctx.strokeStyle = 'rgba(24, 134, 152, 0.82)'; ctx.lineWidth = 2.8; traceCh(2.5); ctx.stroke();
+            ctx.strokeStyle = 'rgba(138, 224, 240, 0.72)'; ctx.lineWidth = 1.6; traceCh(2.2); ctx.stroke();
+            // Delicate continuous glass-light shimmer flowing smoothly along the water surface
+            ctx.strokeStyle = 'rgba(245, 252, 255, 0.65)'; ctx.lineWidth = 0.85;
+            ctx.beginPath();
+            for (let s = s0; s <= s1; s++) {
+              const [px, py] = ptsTop[s];
+              const gl = Math.sin(time * 2.6 + s * 0.7 + seed) * 0.55;
+              if (s === s0) ctx.moveTo(px, py + 1.8 + gl); else ctx.lineTo(px, py + 1.8 + gl);
             }
-          };
-          ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-          // 1. Damp dark-limestone outer carved stone trough (المزراب الحجري)
-          ctx.strokeStyle = '#4a3520'; ctx.lineWidth = 11.5; trace(); ctx.stroke();
-          ctx.strokeStyle = '#9c7852'; ctx.lineWidth = 9.0; trace(); ctx.stroke();
-          // 2. Deep translucent teal water bed
-          ctx.strokeStyle = '#0e6b78'; ctx.lineWidth = 5.8; trace(); ctx.stroke();
-          // 3. Bright luminous cyan-sky surface reflection core
-          ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3.2; trace(); ctx.stroke();
-          // 4. Animated flowing ivory-gold water highlights & frothy current threads
-          ctx.strokeStyle = 'rgba(240, 249, 255, 0.88)'; ctx.lineWidth = 1.6;
-          ctx.setLineDash([8, 16]); ctx.lineDashOffset = -time * 46; trace(); ctx.stroke();
-          ctx.strokeStyle = 'rgba(254, 240, 138, 0.65)'; ctx.lineWidth = 1.1;
-          ctx.setLineDash([4, 20]); ctx.lineDashOffset = -time * 62 - 7; trace(); ctx.stroke();
-          ctx.setLineDash([]);
-          // 5. Concentric animated splash ripples & white foam beads at each spout landing
-          if (dropPoints) {
-            for (let d = 0; d < dropPoints.length; d++) {
-              const [dx, dy] = dropPoints[d];
-              const p1 = ((time * 1.9 + d * 0.37) % 1);
-              ctx.strokeStyle = `rgba(224, 242, 254, ${(0.72 * (1 - p1)).toFixed(2)})`;
-              ctx.lineWidth = 1.2;
-              ctx.beginPath(); ctx.ellipse(dx, dy, 4 + p1 * 11, 1.8 + p1 * 3.2, 0, 0, Math.PI * 2); ctx.stroke();
-              ctx.fillStyle = 'rgba(255, 255, 255, 0.82)';
-              ctx.beginPath(); ctx.ellipse(dx, dy, 3.6, 1.5, 0, 0, Math.PI * 2); ctx.fill();
-            }
+            ctx.stroke();
           }
         };
 
-        // 4 Curved Contour-Wrapping Agricultural Terraces hugging the wooded Ain al-Balad hill!
-        for (let tier = 0; tier < 4; tier++) {
-          const tx = cx0 + 18 + (3 - tier) * 24;
-          const ty = 420 + tier * 41;
-          const tw = 425 - (3 - tier) * 34;
-          const bulge = 18 + tier * 4.5;
-          drawCurvedHillTerrace(tx, ty, tw, 36, bulge, tier + 21);
-        }
-        // Authentic Vaulted Ain al-Balad Spring Arch (عين البلد) nestled into the wooded slope
-        ctx.fillStyle = '#dcb080'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.roundRect(cx0 + 148, 382, 60, 44, [24, 24, 2, 2]); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#140c08';
-        ctx.beginPath(); ctx.arc(cx0 + 178, 410, 14, Math.PI, 0); ctx.lineTo(cx0 + 192, 426); ctx.lineTo(cx0 + 164, 426); ctx.closePath(); ctx.fill();
-        // Wet glistening stone lip at spring mouth
-        ctx.fillStyle = '#0c4a6e';
-        ctx.fillRect(cx0 + 167, 422, 22, 5);
-        // Narrow Winding Carved-Stone Irrigation Channels (المزاريب) curving along terraces -> Roman Pool
-        drawRealisticChannel([
-          [cx0 + 178, 426], [cx0 + 242, 437], [cx0 + 298, 434], [cx0 + 308, 474],
-          [cx0 + 252, 483], [cx0 + 198, 478], [cx0 + 208, 518], [cx0 + 290, 529],
-          [cx0 + 374, 522], [cx0 + 384, 562], [sx + 532, 564]
-        ], [
-          [cx0 + 178, 427], [cx0 + 308, 474], [cx0 + 208, 518], [cx0 + 384, 562], [sx + 532, 564]
-        ]);
+        // Helper: Slender Crystal-Clear Parabolic Water Pour from a Carved Stone Spout (مزراب حجري حقيقي)
+        const drawPureStoneSpoutPour = (x0, y0, x1, y1, seed) => {
+          const dir = x1 >= x0 ? 1 : -1;
+          // Projecting carved limestone spout block embedded in the terrace wall
+          ctx.fillStyle = '#c8aa82'; ctx.strokeStyle = 'rgba(56, 36, 18, 0.65)'; ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.roundRect(x0 - 4, y0 - 2.5, 8, 5.5, 1.5); ctx.fill(); ctx.stroke();
+          // Translucent crystal-clear falling water veil (filled parabolic ribbon, zero dashes!)
+          const ctrlX = x0 + dir * 7;
+          const ctrlY = y0 + (y1 - y0) * 0.36;
+          const wGrad = ctx.createLinearGradient(x0, y0, x1, y1);
+          wGrad.addColorStop(0.0, 'rgba(165, 236, 248, 0.86)');
+          wGrad.addColorStop(0.45, 'rgba(72, 188, 210, 0.72)');
+          wGrad.addColorStop(1.0, 'rgba(232, 250, 255, 0.56)');
+          ctx.fillStyle = wGrad;
+          ctx.beginPath();
+          ctx.moveTo(x0 - 1.6, y0 + 1);
+          ctx.quadraticCurveTo(ctrlX - 1.4, ctrlY, x1 - 2.6, y1);
+          ctx.lineTo(x1 + 2.6, y1);
+          ctx.quadraticCurveTo(ctrlX + 1.6, ctrlY, x0 + 1.6, y0 + 1);
+          ctx.closePath();
+          ctx.fill();
+          // Hair-thin silky glass specular edge catching sunset light
+          ctx.strokeStyle = 'rgba(255, 254, 248, 0.78)'; ctx.lineWidth = 0.85;
+          ctx.beginPath(); ctx.moveTo(x0 + dir * 0.5, y0 + 1); ctx.quadraticCurveTo(ctrlX + dir * 0.6, ctrlY, x1, y1); ctx.stroke();
+          // Soft misty splash glow & whisper-thin concentric translucent water ring at catch-basin
+          const mistG = ctx.createRadialGradient(x1, y1, 1, x1, y1, 9);
+          mistG.addColorStop(0.0, 'rgba(240, 252, 255, 0.62)');
+          mistG.addColorStop(1.0, 'rgba(240, 252, 255, 0)');
+          ctx.fillStyle = mistG;
+          ctx.beginPath(); ctx.ellipse(x1, y1, 9, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+          const rip = ((time * 1.45 + seed * 0.31) % 1);
+          ctx.strokeStyle = `rgba(232, 250, 255, ${(0.52 * (1 - rip)).toFixed(2)})`;
+          ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.ellipse(x1, y1, 3 + rip * 8.5, 1.1 + rip * 2.4, 0, 0, Math.PI * 2); ctx.stroke();
+        };
 
-        // Recessed Roman 4-Column Stone Colonnade & Stepped Emerald-Turquoise Roman Pool close to river
+        // Dense Mediterranean olive, pomegranate & cypress forest crowning the hilltop
+        drawCypressSilhouette(ctx, cx0 + 82, 424, 108);
+        drawAncientOliveSunset(ctx, cx0 + 165, 398, 0.88);
+        drawPomegranateTree(ctx, cx0 + 265, 388, 0.85);
+        drawAncientOliveSunset(ctx, cx0 + 365, 404, 0.92);
+        drawCypressSilhouette(ctx, cx0 + 452, 442, 114);
+
+        // CLIPPED EDGE-TO-EDGE CURVED & GENTLY UNDULATING TERRACES ACROSS THE ENTIRE HILL!
+        const s1L = cx0 - 70, s1R = cx0 + 600;
+        ctx.save();
+        hill1Path();
+        ctx.clip();
+        const s1Tiers = [
+          { y: 406, h: 20, bulge: 24, wave: 5.5, ph: 0.2, ch: true, u0: 0.36, u1: 0.62 },
+          { y: 448, h: 22, bulge: 28, wave: 6.5, ph: 1.0, ch: true, u0: 0.42, u1: 0.72 },
+          { y: 494, h: 24, bulge: 30, wave: 7.0, ph: 1.8, ch: true, u0: 0.50, u1: 0.82 },
+          { y: 542, h: 26, bulge: 32, wave: 6.0, ph: 2.5, ch: true, u0: 0.60, u1: 0.96 },
+          { y: 592, h: 26, bulge: 26, wave: 5.0, ph: 3.1, ch: false, u0: 0, u1: 0 },
+        ];
+        s1Tiers.forEach((t, idx) => {
+          paintEdgeToEdgeTerrace(s1L, s1R, t.y, t.h, t.bulge, t.wave, t.ph, idx + 21, t.ch, t.u0, t.u1);
+        });
+        // Organized carved-stone spouts stepping gracefully down from terrace to terrace toward the Roman Pool!
+        for (let idx = 0; idx < 3; idx++) {
+          const cur = s1Tiers[idx], nxt = s1Tiers[idx + 1];
+          const sx0 = s1L + cur.u1 * (s1R - s1L);
+          const sy0 = evalContourY(sx0, s1L, s1R, cur.y, cur.bulge, cur.wave, cur.ph) + 2;
+          const sx1 = sx0 + 10;
+          const sy1 = evalContourY(sx1, s1L, s1R, nxt.y, nxt.bulge, nxt.wave, nxt.ph) + 2;
+          drawPureStoneSpoutPour(sx0, sy0, sx1, sy1, idx + 1);
+        }
+        ctx.restore();
+
+        // Authentic Vaulted Ain al-Balad Spring Arch (عين البلد) feeding the top organized channel!
+        const spX = cx0 + 178;
+        const spY = evalContourY(spX, s1L, s1R, 406, 24, 5.5, 0.2);
+        ctx.fillStyle = '#dcb080'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.roundRect(spX - 28, spY - 40, 56, 42, [22, 22, 2, 2]); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#18110c';
+        ctx.beginPath(); ctx.arc(spX, spY - 14, 12, Math.PI, 0); ctx.lineTo(spX + 12, spY + 1); ctx.lineTo(spX - 12, spY + 1); ctx.closePath(); ctx.fill();
+        drawPureStoneSpoutPour(spX, spY - 5, spX + 4, spY + 3, 9);
+
+        // Recessed Roman 4-Column Stone Colonnade & Crystal-Clear Emerald-Turquoise Roman Pool
         const plX = sx + 520, plY = 492, plW = 330;
         drawFieldstoneRetainingWall(ctx, plX - 10, plY + 42, plW + 20, 56, 5, time);
         for (let c = 0; c < 4; c++) {
@@ -24420,138 +24485,196 @@ window.Game = window.Game || {};
         }
         ctx.fillStyle = '#e6b885'; ctx.strokeStyle = '#3b210e';
         ctx.fillRect(plX + 8, plY - 72, plW - 16, 13); ctx.strokeRect(plX + 8, plY - 72, plW - 16, 13);
-        const poolG = ctx.createLinearGradient(plX, plY + 44, plX, plY + 86);
-        poolG.addColorStop(0, '#0c4a6e'); poolG.addColorStop(0.32, '#0284c7'); poolG.addColorStop(0.68, '#0d9488'); poolG.addColorStop(1, '#115e59');
+        // Crystal-clear Roman Pool water with submerged limestone steps & soft column reflections!
+        const poolG = ctx.createLinearGradient(plX, plY + 46, plX, plY + 84);
+        poolG.addColorStop(0.0, '#1e7682'); poolG.addColorStop(0.45, '#198b96'); poolG.addColorStop(1.0, '#115863');
         ctx.fillStyle = poolG;
         ctx.fillRect(plX + 6, plY + 46, plW - 12, 38);
-        // Shimmering sunset caustics & gentle water ripples inside the Roman Pool
-        ctx.strokeStyle = 'rgba(254, 240, 138, 0.52)'; ctx.lineWidth = 1.3;
-        for (let pr = 0; pr < 3; pr++) {
-          const pry = plY + 54 + pr * 10;
-          const pOff = Math.sin(time * 2.2 + pr * 1.6) * 8;
-          ctx.beginPath();
-          ctx.moveTo(plX + 24 + pOff, pry);
-          ctx.quadraticCurveTo(plX + plW * 0.5, pry - 2.5, plX + plW - 28 + pOff, pry);
-          ctx.stroke();
+        // Submerged pale limestone step visible through the pure shallow water
+        ctx.fillStyle = 'rgba(218, 198, 164, 0.22)';
+        ctx.fillRect(plX + 8, plY + 47, plW - 16, 7);
+        // Soft reflected limestone columns shimmering gently on the pool surface
+        ctx.fillStyle = 'rgba(248, 224, 186, 0.16)';
+        for (let c = 0; c < 4; c++) {
+          const colX = plX + 28 + c * 90;
+          ctx.fillRect(colX - 7, plY + 48, 14, 32);
         }
-        // Soft ripple where the Ain al-Balad stone spout enters the Roman Pool
-        const poolRip = (time * 1.7) % 1;
-        ctx.strokeStyle = `rgba(224, 242, 254, ${(0.75 * (1 - poolRip)).toFixed(2)})`;
-        ctx.lineWidth = 1.3;
-        ctx.beginPath(); ctx.ellipse(plX + 18, plY + 64, 5 + poolRip * 18, 2 + poolRip * 5, 0, 0, Math.PI * 2); ctx.stroke();
+        // Silky translucent horizontal light bands across the tranquil pool
+        for (let pr = 0; pr < 4; pr++) {
+          const pry = plY + 53 + pr * 8;
+          const pOff = Math.sin(time * 1.4 + pr * 1.5) * 6;
+          ctx.fillStyle = pr === 0 ? 'rgba(255, 246, 220, 0.22)' : 'rgba(214, 246, 255, 0.16)';
+          ctx.beginPath(); ctx.ellipse(plX + plW * 0.5 + pOff, pry, plW * (0.34 - pr * 0.04), 1.1, 0, 0, Math.PI * 2); ctx.fill();
+        }
+        // Final organized stone spout pouring pure spring water from the lower terrace into the Roman Pool!
+        drawPureStoneSpoutPour(plX - 4, plY + 52, plX + 14, plY + 62, 12);
 
         drawPomegranateTree(ctx, sx + 945, 588, 1.1);
         drawAncientOliveSunset(ctx, sx + 1115, 592, 1.2);
 
       } else if (zoneIdx === 2) {
         // ---------------------------------------------------------------------
-        // SCENE 2: WOODED VALLEY HILL WITH 5-LEVEL CURVED SANASEL TERRACES CLOSE TO RIVER
+        // SCENE 2: WOODED VALLEY HILL WITH EDGE-TO-EDGE CURVED & UNDULATING SANASEL TERRACES
         // ---------------------------------------------------------------------
         const h2x = sx + 15;
+        const hill2Path = () => {
+          ctx.beginPath();
+          ctx.moveTo(h2x - 55, 648);
+          ctx.bezierCurveTo(h2x + 30, 412, h2x + 175, 342, h2x + 365, 356);
+          ctx.bezierCurveTo(h2x + 540, 368, h2x + 635, 454, h2x + 715, 648);
+          ctx.closePath();
+        };
         const hill2G = ctx.createLinearGradient(h2x, 348, h2x, 648);
-        hill2G.addColorStop(0.0, '#4d7c0f'); hill2G.addColorStop(0.52, '#365314'); hill2G.addColorStop(1.0, '#1a2e05');
+        hill2G.addColorStop(0.0, '#4f7a18'); hill2G.addColorStop(0.52, '#375415'); hill2G.addColorStop(1.0, '#1c3008');
         ctx.fillStyle = hill2G;
-        ctx.beginPath();
-        ctx.moveTo(h2x - 55, 648);
-        ctx.bezierCurveTo(h2x + 30, 412, h2x + 175, 342, h2x + 365, 356);
-        ctx.bezierCurveTo(h2x + 540, 368, h2x + 635, 454, h2x + 715, 648);
-        ctx.closePath(); ctx.fill();
+        hill2Path(); ctx.fill();
+
         // Dense tree canopy crowning the terraced valley hillside
-        drawCypressSilhouette(ctx, h2x + 75, 434, 114);
-        drawAncientOliveSunset(ctx, h2x + 185, 414, 0.96);
-        drawPomegranateTree(ctx, h2x + 315, 404, 0.94);
-        drawAncientOliveSunset(ctx, h2x + 445, 416, 0.98);
-        drawCypressSilhouette(ctx, h2x + 560, 452, 118);
+        drawCypressSilhouette(ctx, h2x + 75, 422, 114);
+        drawAncientOliveSunset(ctx, h2x + 185, 402, 0.96);
+        drawPomegranateTree(ctx, h2x + 315, 392, 0.94);
+        drawAncientOliveSunset(ctx, h2x + 445, 404, 0.98);
+        drawCypressSilhouette(ctx, h2x + 560, 440, 118);
 
-        for (let st = 0; st < 5; st++) {
-          const tx = sx + 40 + st * 26;
-          const ty = 414 + st * 38;
-          const tw = 560 - st * 52;
-          const bulge = 22 + st * 3.5;
-          const midX = tx + tw * 0.5;
+        // CLIPPED EDGE-TO-EDGE CURVED & UNDULATING TERRACES + ORGANIZED SAWAQI CHANNELS ACROSS THE ENTIRE HILL!
+        const s2L = h2x - 60, s2R = h2x + 720;
+        const evalY2 = (x, baseY, bulge, waveAmp, phase) => {
+          const u = Math.max(0, Math.min(1, (x - s2L) / (s2R - s2L)));
+          return baseY + Math.sin(u * Math.PI) * bulge + Math.sin(u * Math.PI * 2.5 + phase) * waveAmp;
+        };
+        const drawSpout2 = (x0, y0, x1, y1, seed) => {
+          const dir = x1 >= x0 ? 1 : -1;
+          ctx.fillStyle = '#c8aa82'; ctx.strokeStyle = 'rgba(56, 36, 18, 0.65)'; ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.roundRect(x0 - 4, y0 - 2.5, 8, 5.5, 1.5); ctx.fill(); ctx.stroke();
+          const ctrlX = x0 + dir * 7, ctrlY = y0 + (y1 - y0) * 0.36;
+          const wGrad = ctx.createLinearGradient(x0, y0, x1, y1);
+          wGrad.addColorStop(0.0, 'rgba(165, 236, 248, 0.86)');
+          wGrad.addColorStop(0.5, 'rgba(72, 188, 210, 0.72)');
+          wGrad.addColorStop(1.0, 'rgba(232, 250, 255, 0.56)');
+          ctx.fillStyle = wGrad;
+          ctx.beginPath();
+          ctx.moveTo(x0 - 1.5, y0 + 1);
+          ctx.quadraticCurveTo(ctrlX - 1.3, ctrlY, x1 - 2.4, y1);
+          ctx.lineTo(x1 + 2.4, y1);
+          ctx.quadraticCurveTo(ctrlX + 1.5, ctrlY, x0 + 1.5, y0 + 1);
+          ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = 'rgba(255, 254, 248, 0.78)'; ctx.lineWidth = 0.85;
+          ctx.beginPath(); ctx.moveTo(x0 + dir * 0.4, y0 + 1); ctx.quadraticCurveTo(ctrlX + dir * 0.5, ctrlY, x1, y1); ctx.stroke();
+          const rip = ((time * 1.45 + seed * 0.33) % 1);
+          ctx.strokeStyle = `rgba(232, 250, 255, ${(0.5 * (1 - rip)).toFixed(2)})`;
+          ctx.lineWidth = 0.85;
+          ctx.beginPath(); ctx.ellipse(x1, y1, 2.8 + rip * 8, 1.0 + rip * 2.2, 0, 0, Math.PI * 2); ctx.stroke();
+        };
 
-          // Curved green garden bed crowning each hillside terrace
-          const gBed = ctx.createLinearGradient(tx, ty - 6, tx + tw, ty - 6);
-          gBed.addColorStop(0.0, '#2c4610'); gBed.addColorStop(0.3, '#4d7c0f');
-          gBed.addColorStop(0.6, '#65a30d'); gBed.addColorStop(1.0, '#1f3309');
+        ctx.save();
+        hill2Path();
+        ctx.clip();
+        const s2Tiers = [
+          { y: 396, h: 19, bulge: 26, wave: 6.0, ph: 0.4, u0: 0.30, u1: 0.64 },
+          { y: 436, h: 21, bulge: 30, wave: 7.0, ph: 1.2, u0: 0.34, u1: 0.68 },
+          { y: 478, h: 22, bulge: 33, wave: 7.5, ph: 2.0, u0: 0.28, u1: 0.72 },
+          { y: 522, h: 24, bulge: 34, wave: 6.5, ph: 2.8, u0: 0.24, u1: 0.76 },
+          { y: 568, h: 25, bulge: 32, wave: 5.5, ph: 3.5, u0: 0.20, u1: 0.80 },
+          { y: 614, h: 26, bulge: 24, wave: 4.5, ph: 4.1, u0: 0, u1: 0 },
+        ];
+        const segs = 24;
+        for (let st = 0; st < s2Tiers.length; st++) {
+          const t = s2Tiers[st];
+          const pts = [];
+          for (let s = 0; s <= segs; s++) {
+            const px = s2L + (s / segs) * (s2R - s2L);
+            pts.push([px, evalY2(px, t.y, t.bulge, t.wave, t.ph)]);
+          }
+          // Lush terraced garden bed above wall
+          const gBed = ctx.createLinearGradient(s2L, t.y, s2R, t.y);
+          gBed.addColorStop(0.0, '#2a420f'); gBed.addColorStop(0.28, '#4c7519');
+          gBed.addColorStop(0.54, '#648f22'); gBed.addColorStop(0.82, '#416615'); gBed.addColorStop(1.0, '#22360b');
           ctx.fillStyle = gBed;
           ctx.beginPath();
-          ctx.moveTo(tx - 4, ty + 2);
-          ctx.quadraticCurveTo(midX, ty - 8 + bulge, tx + tw + 4, ty + 2);
-          ctx.lineTo(tx + tw + 2, ty + 10);
-          ctx.quadraticCurveTo(midX, ty + 6 + bulge, tx - 2, ty + 10);
+          pts.forEach(([px, py], i) => { if (i === 0) ctx.moveTo(px, py - 9); else ctx.lineTo(px, py - 9); });
+          for (let s = segs; s >= 0; s--) ctx.lineTo(pts[s][0], pts[s][1] + 2);
           ctx.closePath(); ctx.fill();
 
-          // Curved contour-wrapping 3D dry-stone terrace wall
+          // Soft cast shadow under retaining wall
+          ctx.fillStyle = 'rgba(18, 28, 8, 0.34)';
+          ctx.beginPath();
+          pts.forEach(([px, py], i) => { if (i === 0) ctx.moveTo(px, py + t.h - 1); else ctx.lineTo(px, py + t.h - 1); });
+          for (let s = segs; s >= 0; s--) ctx.lineTo(pts[s][0], pts[s][1] + t.h + 6);
+          ctx.closePath(); ctx.fill();
+
+          // Undulating 3D weathered dry-stone retaining wall
           const wPath = () => {
             ctx.beginPath();
-            ctx.moveTo(tx, ty + 4);
-            ctx.quadraticCurveTo(midX, ty + 4 + bulge, tx + tw, ty + 4);
-            ctx.lineTo(tx + tw - 3, ty + 36);
-            ctx.quadraticCurveTo(midX, ty + 36 + bulge * 0.92, tx + 3, ty + 36);
+            pts.forEach(([px, py], i) => { if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py); });
+            for (let s = segs; s >= 0; s--) ctx.lineTo(pts[s][0], pts[s][1] + t.h);
             ctx.closePath();
           };
-          const sG = ctx.createLinearGradient(tx, ty, tx + tw, ty);
-          sG.addColorStop(0.0, '#5a3b20'); sG.addColorStop(0.18, '#a67b50');
-          sG.addColorStop(0.5, '#e3ba88'); sG.addColorStop(0.82, '#b58759'); sG.addColorStop(1.0, '#4f331b');
+          const sG = ctx.createLinearGradient(s2L, t.y, s2R, t.y);
+          sG.addColorStop(0.0, '#5a3f26'); sG.addColorStop(0.18, '#a4805a');
+          sG.addColorStop(0.48, '#d9ba91'); sG.addColorStop(0.78, '#b69066'); sG.addColorStop(1.0, '#4f3720');
           ctx.fillStyle = sG; wPath(); ctx.fill();
 
           ctx.save();
           wPath(); ctx.clip();
+          for (let r = 1; r < 3; r++) {
+            const ryOff = (t.h / 3) * r;
+            ctx.strokeStyle = 'rgba(46, 28, 14, 0.35)'; ctx.lineWidth = 0.9;
+            ctx.beginPath();
+            pts.forEach(([px, py], i) => { if (i === 0) ctx.moveTo(px, py + ryOff); else ctx.lineTo(px, py + ryOff); });
+            ctx.stroke();
+          }
+          const cols = Math.floor((s2R - s2L) / 24);
           for (let r = 0; r < 3; r++) {
-            const ry = ty + 6 + r * 10;
-            const rb = bulge * (1 - r * 0.03);
-            ctx.strokeStyle = 'rgba(46, 25, 10, 0.42)'; ctx.lineWidth = 1.05;
-            ctx.beginPath(); ctx.moveTo(tx, ry); ctx.quadraticCurveTo(midX, ry + rb, tx + tw, ry); ctx.stroke();
-            const cols = Math.max(6, Math.floor(tw / 28));
+            const y0Off = (t.h / 3) * r;
             for (let c = 0; c < cols; c++) {
-              const u = (c + ((r % 2) * 0.5)) / cols;
-              const bx = tx + u * tw;
-              const by = ry + 4 * u * (1 - u) * rb;
-              ctx.strokeStyle = 'rgba(46, 25, 10, 0.34)';
-              ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx, by + 10); ctx.stroke();
+              const u = (c + (r % 2) * 0.5) / cols;
+              const bx = s2L + u * (s2R - s2L);
+              const by = evalY2(bx, t.y, t.bulge, t.wave, t.ph) + y0Off;
+              ctx.strokeStyle = 'rgba(42, 24, 10, 0.32)'; ctx.lineWidth = 0.85;
+              ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx, by + t.h / 3); ctx.stroke();
             }
           }
           ctx.restore();
-          ctx.strokeStyle = 'rgba(46, 25, 10, 0.62)'; ctx.lineWidth = 1.2; wPath(); ctx.stroke();
+          ctx.strokeStyle = 'rgba(46, 28, 14, 0.52)'; ctx.lineWidth = 1.0; wPath(); ctx.stroke();
 
-          // Narrow curved stone irrigation channel (مزراب) running along the terrace arc
-          ctx.strokeStyle = '#5c4329'; ctx.lineWidth = 6.5; ctx.lineCap = 'round';
-          ctx.beginPath(); ctx.moveTo(tx + 18, ty + 9); ctx.quadraticCurveTo(midX, ty + 9 + bulge * 0.96, tx + tw - 18, ty + 9); ctx.stroke();
-          ctx.strokeStyle = '#0e7490'; ctx.lineWidth = 3.8;
-          ctx.beginPath(); ctx.moveTo(tx + 18, ty + 9); ctx.quadraticCurveTo(midX, ty + 9 + bulge * 0.96, tx + tw - 18, ty + 9); ctx.stroke();
-          ctx.strokeStyle = 'rgba(186, 230, 253, 0.82)'; ctx.lineWidth = 1.4;
-          ctx.setLineDash([7, 15]); ctx.lineDashOffset = (st % 2 === 0 ? -1 : 1) * time * 40;
-          ctx.beginPath(); ctx.moveTo(tx + 18, ty + 9); ctx.quadraticCurveTo(midX, ty + 9 + bulge * 0.96, tx + tw - 18, ty + 9); ctx.stroke();
-          ctx.setLineDash([]);
+          // Organized built-in carved-stone Saqiya channel with pure translucent flowing water!
+          if (t.u1 > t.u0) {
+            const s0 = Math.floor(t.u0 * segs), s1 = Math.ceil(t.u1 * segs);
+            const traceCh = (yOff) => {
+              ctx.beginPath();
+              for (let s = s0; s <= s1; s++) {
+                if (s === s0) ctx.moveTo(pts[s][0], pts[s][1] + yOff);
+                else ctx.lineTo(pts[s][0], pts[s][1] + yOff);
+              }
+            };
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.strokeStyle = 'rgba(92, 68, 44, 0.58)'; ctx.lineWidth = 5.0; traceCh(2.6); ctx.stroke();
+            ctx.strokeStyle = '#d4bc98'; ctx.lineWidth = 4.0; traceCh(2.2); ctx.stroke();
+            ctx.strokeStyle = 'rgba(24, 134, 152, 0.82)'; ctx.lineWidth = 2.6; traceCh(2.3); ctx.stroke();
+            ctx.strokeStyle = 'rgba(138, 224, 240, 0.72)'; ctx.lineWidth = 1.5; traceCh(2.0); ctx.stroke();
+            ctx.strokeStyle = 'rgba(245, 252, 255, 0.65)'; ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            for (let s = s0; s <= s1; s++) {
+              const gl = Math.sin(time * 2.4 + s * 0.65 + st) * 0.5;
+              if (s === s0) ctx.moveTo(pts[s][0], pts[s][1] + 1.7 + gl);
+              else ctx.lineTo(pts[s][0], pts[s][1] + 1.7 + gl);
+            }
+            ctx.stroke();
 
-          // Realistic carved-stone water spout (مزراب) stepping down to the next curved terrace with foam & ripple!
-          if (st < 4) {
-            const rightSide = (st % 2 === 0);
-            const dropX = rightSide ? (tx + tw - 26) : (tx + 26);
-            const endX = dropX + (rightSide ? -14 : 14);
-            const y0 = ty + 8, y1 = ty + 46;
-            ctx.strokeStyle = '#4a3520'; ctx.lineWidth = 9.5;
-            ctx.beginPath(); ctx.moveTo(dropX, y0); ctx.quadraticCurveTo(dropX, y0 + 22, endX, y1); ctx.stroke();
-            ctx.strokeStyle = '#9c7852'; ctx.lineWidth = 7.2;
-            ctx.beginPath(); ctx.moveTo(dropX, y0); ctx.quadraticCurveTo(dropX, y0 + 22, endX, y1); ctx.stroke();
-            ctx.strokeStyle = '#0e7490'; ctx.lineWidth = 4.6;
-            ctx.beginPath(); ctx.moveTo(dropX, y0); ctx.quadraticCurveTo(dropX, y0 + 22, endX, y1); ctx.stroke();
-            ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.4;
-            ctx.beginPath(); ctx.moveTo(dropX, y0); ctx.quadraticCurveTo(dropX, y0 + 22, endX, y1); ctx.stroke();
-            ctx.strokeStyle = 'rgba(255, 251, 235, 0.9)'; ctx.lineWidth = 1.3;
-            ctx.setLineDash([5, 11]); ctx.lineDashOffset = -time * 48;
-            ctx.beginPath(); ctx.moveTo(dropX, y0); ctx.quadraticCurveTo(dropX, y0 + 22, endX, y1); ctx.stroke();
-            ctx.setLineDash([]);
-            // Splash ripple & white foam bead where the spout lands
-            const rip = ((time * 2.1 + st * 0.29) % 1);
-            ctx.strokeStyle = `rgba(224, 242, 254, ${(0.72 * (1 - rip)).toFixed(2)})`;
-            ctx.lineWidth = 1.1;
-            ctx.beginPath(); ctx.ellipse(endX, y1, 3.5 + rip * 9, 1.5 + rip * 2.8, 0, 0, Math.PI * 2); ctx.stroke();
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.84)';
-            ctx.beginPath(); ctx.ellipse(endX, y1, 3.2, 1.3, 0, 0, Math.PI * 2); ctx.fill();
+            // Neat alternating stone spout pouring smoothly onto the next terrace channel below
+            if (st < 4) {
+              const nxt = s2Tiers[st + 1];
+              const rightSide = (st % 2 === 0);
+              const sx0 = s2L + (rightSide ? t.u1 : t.u0) * (s2R - s2L);
+              const sy0 = evalY2(sx0, t.y, t.bulge, t.wave, t.ph) + 2;
+              const sx1 = sx0 + (rightSide ? 8 : -8);
+              const sy1 = evalY2(sx1, nxt.y, nxt.bulge, nxt.wave, nxt.ph) + 2;
+              drawSpout2(sx0, sy0, sx1, sy1, st + 1);
+            }
           }
         }
+        ctx.restore();
+
         drawRuggedMintar(ctx, sx + 715, 588, 1.12);
         drawPomegranateTree(ctx, sx + 875, 586, 1.14);
         drawRuggedMintar(ctx, sx + 1035, 582, 0.86);
@@ -24721,88 +24844,96 @@ window.Game = window.Game || {};
     // =========================================================================
     // 3. SUNSET-REFLECTING EMERALD-AMBER GORGE STREAM & WARM FIREFLY MOTES
     // =========================================================================
-    // Organic mossy limestone riverbank & wet-stone shoreline along the valley water's edge
-    ctx.fillStyle = '#2d2419';
-    ctx.fillRect(0, 636, w, 8);
-    ctx.fillStyle = '#3f5222';
-    for (let bx = -((camX * 0.48) % 68); bx < w + 68; bx += 68) {
-      ctx.beginPath();
-      ctx.ellipse(bx + 18, 639, 26, 4.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#78634a';
-      ctx.beginPath();
-      ctx.ellipse(bx + 46, 640, 14, 3.8, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#3f5222';
+    // Organic natural riverbank: weathered river pebbles, mossy earth & gentle reeds
+    const bankG = ctx.createLinearGradient(0, 634, 0, 643);
+    bankG.addColorStop(0.0, '#3a4a21');
+    bankG.addColorStop(0.55, '#4b3b28');
+    bankG.addColorStop(1.0, '#261e15');
+    ctx.fillStyle = bankG;
+    ctx.fillRect(0, 635, w, 8);
+    const bankOff = ((camX * 0.48) % 96 + 96) % 96;
+    for (let bx = -bankOff - 96; bx < w + 96; bx += 96) {
+      // Smooth rounded river stones & mossy cushions along the water's edge
+      ctx.fillStyle = '#475c26';
+      ctx.beginPath(); ctx.ellipse(bx + 20, 638, 22, 3.6, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#8b775c';
+      ctx.beginPath(); ctx.ellipse(bx + 54, 640, 12, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#a69274';
+      ctx.beginPath(); ctx.ellipse(bx + 52, 639.2, 7, 1.8, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#6e5c45';
+      ctx.beginPath(); ctx.ellipse(bx + 78, 640.5, 8.5, 2.5, 0, 0, Math.PI * 2); ctx.fill();
     }
 
-    // Multi-depth valley river body (shallow mossy teal -> luminous mid-stream -> deep gorge bottom)
+    // Pure, crystal-clear valley river body (translucent alpine teal-emerald reflecting golden hour sky)
     const streamG = ctx.createLinearGradient(0, 641, 0, h);
-    streamG.addColorStop(0.0, '#0b4f54');
-    streamG.addColorStop(0.18, '#0f766e');
-    streamG.addColorStop(0.48, '#0e7490');
-    streamG.addColorStop(0.78, '#134e4a');
-    streamG.addColorStop(1.0, '#0a2936');
+    streamG.addColorStop(0.0, '#1e5c63');
+    streamG.addColorStop(0.16, '#277a82');
+    streamG.addColorStop(0.42, '#1d6978');
+    streamG.addColorStop(0.74, '#134d5c');
+    streamG.addColorStop(1.0, '#0a2d3a');
     ctx.fillStyle = streamG;
     ctx.fillRect(0, 641, w, h - 641);
 
-    // Subtle dark shoreline under-shadow where the riverbank overhangs the water
-    const shoreShade = ctx.createLinearGradient(0, 641, 0, 654);
-    shoreShade.addColorStop(0.0, 'rgba(6, 28, 32, 0.58)');
-    shoreShade.addColorStop(1.0, 'rgba(6, 28, 32, 0)');
-    ctx.fillStyle = shoreShade;
-    ctx.fillRect(0, 641, w, 13);
+    // Subtle submerged riverbed pebbles visible through the pure shallow water near the bank
+    const pebOff = ((camX * 0.48) % 84 + 84) % 84;
+    for (let px = -pebOff - 84; px < w + 84; px += 84) {
+      ctx.fillStyle = 'rgba(182, 162, 128, 0.16)';
+      ctx.beginPath(); ctx.ellipse(px + 22, 648, 9, 2.6, 0.1, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(15, 42, 46, 0.22)';
+      ctx.beginPath(); ctx.ellipse(px + 58, 651, 12, 3.0, -0.05, 0, Math.PI * 2); ctx.fill();
+    }
 
-    // Warm sunset sky reflection pool glowing across the center of the river
-    const sunRefX = w * 0.56 + Math.sin(time * 0.45) * 18;
-    const sunRefG = ctx.createRadialGradient(sunRefX, 668, 18, sunRefX, 668, 280);
-    sunRefG.addColorStop(0.0, 'rgba(253, 224, 71, 0.34)');
-    sunRefG.addColorStop(0.45, 'rgba(251, 146, 60, 0.18)');
-    sunRefG.addColorStop(1.0, 'rgba(14, 116, 144, 0)');
+    // Soft reflected olive hillside shadow & wet contact line along the far bank
+    const bankRefG = ctx.createLinearGradient(0, 641, 0, 658);
+    bankRefG.addColorStop(0.0, 'rgba(18, 36, 22, 0.42)');
+    bankRefG.addColorStop(0.45, 'rgba(26, 56, 36, 0.18)');
+    bankRefG.addColorStop(1.0, 'rgba(26, 56, 36, 0)');
+    ctx.fillStyle = bankRefG;
+    ctx.fillRect(0, 641, w, 17);
+
+    // Velvety sunset sky mirror reflection gliding smoothly across the clear water
+    const sunRefX = w * 0.56 + Math.sin(time * 0.35) * 14;
+    const skyWashG = ctx.createLinearGradient(0, 643, 0, h - 6);
+    skyWashG.addColorStop(0.0, 'rgba(253, 214, 154, 0.22)');
+    skyWashG.addColorStop(0.45, 'rgba(186, 232, 245, 0.14)');
+    skyWashG.addColorStop(1.0, 'rgba(14, 68, 84, 0)');
+    ctx.fillStyle = skyWashG;
+    ctx.fillRect(0, 643, w, h - 643);
+
+    const sunRefG = ctx.createRadialGradient(sunRefX, 664, 16, sunRefX, 664, 300);
+    sunRefG.addColorStop(0.0, 'rgba(255, 238, 190, 0.32)');
+    sunRefG.addColorStop(0.42, 'rgba(251, 182, 122, 0.16)');
+    sunRefG.addColorStop(1.0, 'rgba(29, 105, 120, 0)');
     ctx.fillStyle = sunRefG;
     ctx.fillRect(0, 641, w, h - 641);
 
-    // 5 Layered Realistic Bezier Water Currents, Foam Threads & Specular Sun Sparkles!
-    ctx.lineCap = 'round';
-    for (let r = 0; r < 5; r++) {
-      const ry = 648 + r * 14;
-      const spd = 38 + r * 12;
-      const stepW = 104 + r * 16;
-      const off = ((camX * (0.48 + r * 0.06) + time * spd) % stepW + stepW) % stepW;
-      // Soft dark-teal current trough underneath each wave ribbon
-      ctx.strokeStyle = 'rgba(7, 44, 52, 0.34)';
-      ctx.lineWidth = 3.2 - r * 0.3;
+    // Serene glassy horizontal water-surface reflection bands (silky realism, zero cartoon squiggles!)
+    for (let r = 0; r < 7; r++) {
+      const ry = 645 + r * 10.5;
+      const spd = 16 + r * 4.5;
+      const stepW = 148 + (r % 3) * 34;
+      const off = ((camX * (0.48 + r * 0.04) + time * spd) % stepW + stepW) % stepW;
       for (let wx = -off - stepW; wx < w + stepW; wx += stepW) {
-        const waveY = Math.sin(time * 2.4 + wx * 0.02 + r) * 2.2;
+        const len = 42 + ((Math.abs(Math.floor(wx / 29)) + r * 7) % 52);
+        const driftY = Math.sin(time * 1.4 + wx * 0.012 + r * 1.1) * 1.0;
+        const distToSun = Math.abs((wx + len * 0.5) - sunRefX);
+        const warmFactor = Math.max(0, 1 - distToSun / 320);
+        // Subtle glassy highlight ribbon
+        ctx.fillStyle = warmFactor > 0.35
+          ? `rgba(255, 242, 206, ${(0.11 + warmFactor * 0.14).toFixed(2)})`
+          : `rgba(204, 242, 252, ${(0.08 + (1 - r / 8) * 0.08).toFixed(2)})`;
         ctx.beginPath();
-        ctx.moveTo(wx, ry + 2.5);
-        ctx.bezierCurveTo(wx + stepW * 0.25, ry - 2.5 + waveY, wx + stepW * 0.55, ry + 5.5 - waveY, wx + stepW * 0.78, ry + 2);
-        ctx.stroke();
-      }
-      // Translucent cyan-turquoise & golden-sunset water sheen crest
-      ctx.strokeStyle = r === 0
-        ? 'rgba(186, 230, 253, 0.42)'
-        : r === 1
-          ? 'rgba(253, 224, 71, 0.62)'
-          : r === 2
-            ? 'rgba(103, 232, 249, 0.44)'
-            : r === 3
-              ? 'rgba(251, 146, 60, 0.46)'
-              : 'rgba(125, 211, 252, 0.34)';
-      ctx.lineWidth = r % 2 === 1 ? 1.8 : 1.4;
-      for (let wx = -off - stepW; wx < w + stepW; wx += stepW) {
-        const waveY = Math.sin(time * 2.6 + wx * 0.022 + r * 1.4) * 2.4;
-        ctx.beginPath();
-        ctx.moveTo(wx + 6, ry);
-        ctx.bezierCurveTo(wx + stepW * 0.24, ry - 3.2 + waveY, wx + stepW * 0.52, ry + 2.8 - waveY, wx + stepW * 0.72, ry - 0.5);
-        ctx.stroke();
-        // Glittering sun-sparkle bead dancing on sunlit wave crests
-        const gl = 0.35 + 0.65 * Math.abs(Math.sin(time * 4.2 + wx * 0.07 + r * 2.1));
-        if (gl > 0.72) {
-          ctx.fillStyle = `rgba(255, 251, 235, ${(gl * 0.85).toFixed(2)})`;
-          ctx.beginPath();
-          ctx.ellipse(wx + stepW * 0.36, ry - 1.2 + waveY * 0.5, 4.5, 1.3, 0, 0, Math.PI * 2);
-          ctx.fill();
+        ctx.ellipse(wx + len * 0.5, ry + driftY, len * 0.5, 1.05 + (r % 2) * 0.35, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Delicate pinpoint crystal sun-glint near golden reflection path
+        if (warmFactor > 0.48) {
+          const tw = 0.5 + 0.5 * Math.sin(time * 3.1 + wx * 0.08 + r * 1.9);
+          if (tw > 0.78) {
+            ctx.fillStyle = `rgba(255, 253, 242, ${(tw * 0.58).toFixed(2)})`;
+            ctx.beginPath();
+            ctx.ellipse(wx + len * 0.45, ry + driftY, 3.6, 0.85, 0, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
       }
     }
