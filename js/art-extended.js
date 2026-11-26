@@ -13770,6 +13770,307 @@ window.Game = window.Game || {};
       return;
     }
 
+    if (p.type === 'battir_beehive_swarm') {
+      // =====================================================================
+      // BATTIR WOODEN MOUNTAIN BEEHIVES & CIRCLING SWARM + BRASS SMOKER
+      // (خلايا النحل الخشبية الجبلية وسرب النحل الدوّار ومدخنة النحّال النحاسية)
+      // =====================================================================
+      ctx.save();
+      const floorY = py + p.h;
+      const state = p.hiveState || 'buzz';
+      const calm = p.swarmCalm || 0;
+      const smoked = state === 'smoked' || calm > 0.45;
+      const phase = p.phase || 0;
+
+      // Soft ground contact shadow under smoker stand & 3 wooden hives
+      ctx.fillStyle = 'rgba(28, 16, 8, 0.30)';
+      ctx.beginPath();
+      ctx.ellipse(px + 28, floorY - 1, 20, 3.8, 0, 0, Math.PI * 2);
+      ctx.ellipse(px + 184, floorY - 1, 118, 5.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 1. WILD PALESTINIAN THYME & PURPLE SAGE BLOSSOMS AROUND THE APIARY
+      const herbXs = [px + 62, px + 140, px + 224, px + 296];
+      for (let h = 0; h < herbXs.length; h++) {
+        const hx = herbXs[h];
+        const hSway = Math.sin(time * 2.2 + h * 1.4 + phase) * 1.8;
+        ctx.strokeStyle = '#3f6212';
+        ctx.lineWidth = 1.4;
+        for (let s = -1; s <= 1; s++) {
+          ctx.beginPath();
+          ctx.moveTo(hx + s * 4, floorY - 1);
+          ctx.quadraticCurveTo(hx + s * 7 + hSway * 0.5, floorY - 9, hx + s * 9 + hSway, floorY - 15 - (s === 0 ? 4 : 0));
+          ctx.stroke();
+          // Tiny purple sage / wild thyme blossoms
+          ctx.fillStyle = (h + s) % 2 === 0 ? '#a855f7' : '#fde047';
+          ctx.beginPath();
+          ctx.arc(hx + s * 9 + hSway, floorY - 16 - (s === 0 ? 4 : 0), 2.1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // 2. THREE RUSTIC PALESTINIAN WOODEN LANGSTROTH BEEHIVES ON STONE BLOCKS
+      const hives = [
+        { cx: px + 102, w: 54, h: 52, body1: '#d8b778', body2: '#b89052', lid: '#94a3b8', stone: false },
+        { cx: px + 184, w: 58, h: 60, body1: '#86a697', body2: '#618273', lid: '#cbd5e1', stone: true },
+        { cx: px + 264, w: 54, h: 50, body1: '#8ab0c8', body2: '#638aa3', lid: '#94a3b8', stone: false },
+      ];
+      for (let hi = 0; hi < hives.length; hi++) {
+        const hv = hives[hi];
+        const hx = hv.cx - hv.w * 0.5;
+        const standH = 9;
+        const hy = floorY - standH - hv.h;
+        // Subtle hive vibration when bees are actively swarming
+        const vib = smoked ? 0 : Math.sin(time * 32 + hi * 2.1) * 0.35;
+
+        // Twin low chiseled limestone support blocks
+        ctx.fillStyle = '#d4bc9c';
+        ctx.strokeStyle = '#4e331f';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.roundRect(hx + 4, floorY - standH, 14, standH, 2);
+        ctx.roundRect(hx + hv.w - 18, floorY - standH, 14, standH, 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Double-stacked wooden hive box body (super + brood chamber)
+        const boxG = ctx.createLinearGradient(hx, hy, hx + hv.w, hy + hv.h);
+        boxG.addColorStop(0, hv.body1);
+        boxG.addColorStop(0.65, hv.body2);
+        boxG.addColorStop(1, '#5c4632');
+        ctx.fillStyle = boxG;
+        ctx.strokeStyle = '#3b2818';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.roundRect(hx + vib, hy, hv.w, hv.h, 3);
+        ctx.fill();
+        ctx.stroke();
+
+        // Horizontal seam separating upper honey super & lower brood box
+        const midY = hy + hv.h * 0.48;
+        ctx.strokeStyle = 'rgba(42, 24, 12, 0.55)';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(hx + 1 + vib, midY);
+        ctx.lineTo(hx + hv.w - 1 + vib, midY);
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(255, 248, 228, 0.28)';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(hx + 2 + vib, midY + 1.4);
+        ctx.lineTo(hx + hv.w - 2 + vib, midY + 1.4);
+        ctx.stroke();
+
+        // Subtle horizontal wood plank grain & recessed wooden hand-grip cleats
+        ctx.fillStyle = 'rgba(42, 24, 12, 0.24)';
+        ctx.beginPath();
+        ctx.roundRect(hv.cx - 10 + vib, hy + 10, 20, 4, 1.5);
+        ctx.roundRect(hv.cx - 10 + vib, midY + 9, 20, 4, 1.5);
+        ctx.fill();
+
+        // Protruding wooden landing board & dark entrance slit with warm honey glow
+        const entY = hy + hv.h - 7;
+        ctx.fillStyle = '#7c4d25';
+        ctx.strokeStyle = '#361e0c';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.roundRect(hx - 2 + vib, entY + 3, hv.w + 4, 5, 1.5);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#1c1008';
+        ctx.fillRect(hv.cx - 14 + vib, entY - 1, 28, 4.5);
+        // Subtle warm amber-honey gleam inside hive entrance
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.45)';
+        ctx.fillRect(hv.cx - 10 + vib, entY + 0.5, 20, 1.8);
+
+        // Overhanging sloped galvanized-tin & timber hive roof lid
+        const lidG = ctx.createLinearGradient(hx - 4, hy - 7, hx - 4, hy + 4);
+        lidG.addColorStop(0, '#e2e8f0');
+        lidG.addColorStop(0.5, hv.lid);
+        lidG.addColorStop(1, '#475569');
+        ctx.fillStyle = lidG;
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(hx - 5 + vib, hy + 2);
+        ctx.lineTo(hx - 3 + vib, hy - 6);
+        ctx.lineTo(hx + hv.w + 3 + vib, hy - 4);
+        ctx.lineTo(hx + hv.w + 5 + vib, hy + 3);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Iconic rural fieldstone weight resting on middle hive roof against mountain wind
+        if (hv.stone) {
+          ctx.fillStyle = '#cbb392';
+          ctx.strokeStyle = '#5c432c';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.ellipse(hv.cx + 2 + vib, hy - 8, 9.5, 4.5, -0.06, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+
+      // 3. FORGED BRASS & LEATHER BEEKEEPER SMOKER (مدخنة النحّال النحاسية) AT SAFE LEFT EDGE
+      const smX = px + 28;
+      const smBaseY = floorY - 14;
+      // Low carved olive-wood smoker stand
+      ctx.fillStyle = '#7c4a22';
+      ctx.strokeStyle = '#331c0b';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(smX - 14, smBaseY, 28, 5, 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillRect(smX - 11, smBaseY + 5, 4, 9);
+      ctx.fillRect(smX + 7, smBaseY + 5, 4, 9);
+
+      // Subtle glowing interactive aura around smoker so player notices they can trigger it
+      if (!smoked) {
+        const pulse = 0.20 + Math.sin(time * 4.2 + phase) * 0.10;
+        const cueG = ctx.createRadialGradient(smX, smBaseY - 13, 3, smX, smBaseY - 13, 24);
+        cueG.addColorStop(0, `rgba(254, 240, 138, ${pulse.toFixed(2)})`);
+        cueG.addColorStop(1, 'rgba(254, 240, 138, 0)');
+        ctx.fillStyle = cueG;
+        ctx.beginPath();
+        ctx.arc(smX, smBaseY - 13, 24, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Leather accordion bellows attached to left side of brass fire pot
+      const puffSqueeze = smoked ? Math.sin(time * 12) * 2.2 : 0;
+      ctx.fillStyle = '#7f1d1d';
+      ctx.strokeStyle = '#3b0a0a';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(smX - 6, smBaseY - 2);
+      ctx.lineTo(smX - 15 + puffSqueeze, smBaseY - 5);
+      ctx.lineTo(smX - 13 + puffSqueeze, smBaseY - 18);
+      ctx.lineTo(smX - 6, smBaseY - 15);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Hammered copper/brass cylindrical fire chamber
+      const potG = ctx.createLinearGradient(smX - 6, smBaseY - 18, smX + 8, smBaseY - 18);
+      potG.addColorStop(0, '#92400e');
+      potG.addColorStop(0.42, '#f59e0b');
+      potG.addColorStop(0.75, '#d97706');
+      potG.addColorStop(1, '#5a2408');
+      ctx.fillStyle = potG;
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(smX - 6, smBaseY - 18, 14, 18, 2.5);
+      ctx.fill();
+      ctx.stroke();
+
+      // Conical angled brass smoke nozzle pointing right toward the 3 hives
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.moveTo(smX - 6, smBaseY - 18);
+      ctx.lineTo(smX + 8, smBaseY - 18);
+      ctx.lineTo(smX + 12, smBaseY - 27);
+      ctx.lineTo(smX + 7, smBaseY - 28);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 4. CALMING WHITE SMOKE STREAM (Gentle wisp when idle, rich billowing clouds when smoked!)
+      const nozzleX = smX + 10;
+      const nozzleY = smBaseY - 27;
+      if (smoked) {
+        for (let s = 0; s < 14; s++) {
+          const frac = ((time * 0.65 + s / 14) % 1);
+          const sx = nozzleX + frac * 265;
+          const sy = nozzleY - 8 - Math.sin(frac * Math.PI) * 28 + Math.sin(time * 3.5 + s * 1.3) * 7;
+          const sr = 7 + frac * 18;
+          const alpha = Math.sin(frac * Math.PI) * 0.42;
+          const smG = ctx.createRadialGradient(sx, sy, 1, sx, sy, sr);
+          smG.addColorStop(0, `rgba(248, 250, 252, ${alpha.toFixed(2)})`);
+          smG.addColorStop(1, 'rgba(226, 232, 240, 0)');
+          ctx.fillStyle = smG;
+          ctx.beginPath();
+          ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else {
+        // Subtle idle smoke wisp rising lazily from the ready smoker nozzle
+        for (let w = 0; w < 3; w++) {
+          const frac = ((time * 0.55 + w * 0.33) % 1);
+          const wx = nozzleX + 3 + frac * 14 + Math.sin(time * 3 + w) * 2.5;
+          const wy = nozzleY - frac * 22;
+          ctx.fillStyle = `rgba(241, 245, 249, ${((1 - frac) * 0.42).toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(wx, wy, 2.5 + frac * 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // 5. ANIMATED CIRCLING GOLDEN BEE SWARM (18 Bees Orbiting the 3 Wooden Beehives!)
+      const orbitScale = 1 - calm * 0.82;
+      // Subtle golden flight-path motion wisps when actively buzzing
+      if (orbitScale > 0.45) {
+        ctx.strokeStyle = `rgba(253, 224, 71, ${(0.22 * orbitScale).toFixed(2)})`;
+        ctx.lineWidth = 1.1;
+        for (let hi = 0; hi < hives.length; hi++) {
+          const hv = hives[hi];
+          const rotA = time * 1.4 + hi * 1.1;
+          ctx.beginPath();
+          ctx.ellipse(hv.cx, floorY - 54, 42 * orbitScale, 24 * orbitScale, 0.1 * (hi - 1), rotA, rotA + 1.5);
+          ctx.stroke();
+        }
+      }
+
+      const beeCount = 18;
+      for (let b = 0; b < beeCount; b++) {
+        const hv = hives[b % 3];
+        const speed = (b % 2 === 0 ? 1 : -1) * (2.6 + (b % 4) * 0.45) * (smoked ? 0.35 : 1);
+        const ang = time * speed + b * 1.17 + phase;
+        const rx = (28 + (b % 4) * 9) * orbitScale;
+        const ry = (16 + (b % 3) * 8) * orbitScale;
+        const targetY = smoked ? (floorY - 18) : (floorY - 54 - (b % 3) * 8);
+        const bx = hv.cx + Math.cos(ang) * rx;
+        const by = targetY + Math.sin(ang * (b % 3 === 0 ? 2 : 1)) * ry;
+        const vx = -Math.sin(ang) * speed;
+        const facing = vx >= 0 ? 1 : -1;
+
+        ctx.save();
+        ctx.translate(bx, by);
+        ctx.scale(facing, 1);
+
+        // Translucent rapid-fluttering wings
+        const wingFlap = Math.sin(time * 52 + b * 2.3) * 2.2;
+        ctx.fillStyle = 'rgba(240, 249, 255, 0.78)';
+        ctx.beginPath();
+        ctx.ellipse(-0.6, -2.8 + wingFlap * 0.35, 2.8, 1.5, -0.45, 0, Math.PI * 2);
+        ctx.ellipse(1.0, -2.5 - wingFlap * 0.35, 2.4, 1.3, 0.35, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Plump golden-amber & jet-black striped bee body
+        ctx.fillStyle = '#facc15';
+        ctx.strokeStyle = '#1c1917';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 3.6, 2.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        // Crisp black stripes
+        ctx.fillStyle = '#18181b';
+        ctx.fillRect(-1.8, -1.9, 1.2, 3.8);
+        ctx.fillRect(0.4, -2.0, 1.2, 4.0);
+        // Tiny dark head
+        ctx.beginPath();
+        ctx.arc(3.3, -0.2, 1.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      ctx.restore();
+      return;
+    }
+
     if (p.type === 'battir_locomotive_crossing') {
       // =====================================================================
       // NEW OBSTACLE #4: LIVE FOREGROUND 1892 OTTOMAN EXPRESS TRAIN CROSSING!

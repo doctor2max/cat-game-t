@@ -86,8 +86,8 @@
       // CHAPTER 4 (9300 .. 12350): معبر قطار بتّير ١٨٩٢ السريع وجسر وادي المخرور الشاهق
       // =====================================================================
       { x: 9300, y: groundY, w: 1160, h: groundH, type: 'battir_qantara_arcade' },
-      // Live Foreground 1892 Ottoman Express Train Crossing #1 + Overhead Stone Footbridge!
-      { x: 9540, y: groundY - 115, w: 320, h: 115, type: 'battir_locomotive_crossing', nonSolid: true, phase: 0.4 },
+      // Wooden Mountain Beehives & Circling Swarm #1 + Brass Beekeeper Smoker + Overhead Stone Footbridge!
+      { x: 9540, y: groundY - 115, w: 320, h: 115, type: 'battir_beehive_swarm', nonSolid: true, phase: 0.4 },
       { x: 9435, y: 505, w: 130, h: 22, type: 'battir_qantara_arcade', oneWay: true },
       { x: 9590, y: 425, w: 230, h: 22, type: 'battir_qantara_arcade', oneWay: true },
       { x: 9855, y: 505, w: 130, h: 22, type: 'battir_qantara_arcade', oneWay: true },
@@ -107,8 +107,8 @@
       { x: 12965, y: 382, w: 36, h: 233, type: 'battir_alley_wall', climbable: true },
       { x: 12985, y: 382, w: 245, h: 24, type: 'battir_fortress_wall', oneWay: true },
 
-      // Live Foreground 1892 Ottoman Express Train Crossing #2 + Citadel Stone Footbridge!
-      { x: 13350, y: groundY - 115, w: 320, h: 115, type: 'battir_locomotive_crossing', nonSolid: true, phase: 2.6 },
+      // Wooden Mountain Beehives & Circling Swarm #2 + Brass Beekeeper Smoker + Citadel Stone Footbridge!
+      { x: 13350, y: groundY - 115, w: 320, h: 115, type: 'battir_beehive_swarm', nonSolid: true, phase: 2.6 },
       { x: 13255, y: 505, w: 125, h: 22, type: 'battir_fortress_wall', oneWay: true },
       { x: 13405, y: 422, w: 225, h: 22, type: 'battir_fortress_wall', oneWay: true },
       { x: 13660, y: 505, w: 125, h: 22, type: 'battir_fortress_wall', oneWay: true },

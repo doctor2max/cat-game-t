@@ -398,7 +398,7 @@ window.Game.Store = (function () {
       'battir_press_pad', 'battir_stone_roller', 'battir_olive_press',
       'battir_railway_semaphore', 'battir_aqueduct_surge',
       'battir_noria_wheel', 'battir_taboon_oven', 'battir_sabr_hedge',
-      'battir_flash_sluice', 'battir_locomotive_crossing',
+      'battir_flash_sluice', 'battir_locomotive_crossing', 'battir_beehive_swarm',
     ]);
     const groundTypes = new Set([
       'asphalt', 'cobble', 'grass', 'pier', 'rooftop',

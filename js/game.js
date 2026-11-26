@@ -1293,6 +1293,15 @@ window.Game = window.Game || {};
             Particles.spawnDust(fCx, p.y + 28, 12, '#38bdf8');
             Particles.spawnPopup(fCx, p.y + 12, isEn ? '💧 Aqueduct Sluice Shut!' : '💧 أُغلق شلال القنطرة!', '#7dd3fc');
           }
+        } else if (p.type === 'battir_beehive_swarm') {
+          const smX = p.x + 28, smY = p.y + p.h - 24;
+          const hiveCx = p.x + p.w * 0.55;
+          if ((Math.hypot(mx - smX, my - smY) < range + 75 || Math.hypot(mx - hiveCx, my - smY) < range + 95) && !(p.smokeTimer > 0.3)) {
+            p.smokeTimer = 4.5;
+            p.hiveState = 'smoked';
+            Particles.spawnDust(smX + 18, smY - 12, 16, '#f1f5f9');
+            Particles.spawnPopup(hiveCx, p.y + 10, isEn ? '🍯 Bees Calmed by Smoker!' : '🍯 هدأ النحل بدخان المدخنة!', '#fde68a');
+          }
         }
       }
     }
@@ -1984,6 +1993,29 @@ window.Game = window.Game || {};
             c.y < floorY
           ) {
             onCatHit('شلال قنطرة المعدود المتدفق! اعبر وقت الهدوء أو موء -1 ❤️');
+          }
+        }
+      } else if (p.type === 'battir_beehive_swarm') {
+        // Wooden Mountain Beehives & Circling Swarm + Brass Beekeeper Smoker!
+        const floorY = p.y + p.h;
+        if (p.smokeTimer > 0) {
+          p.smokeTimer = Math.max(0, p.smokeTimer - dt);
+          p.hiveState = 'smoked';
+          p.swarmCalm = Math.min(1, (p.swarmCalm || 0) + dt * 3.8);
+        } else {
+          p.hiveState = 'buzz';
+          p.swarmCalm = Math.max(0, (p.swarmCalm || 0) - dt * 2.2);
+        }
+        // Active bees sting if cat walks directly through the hive swarm without smoking or taking upper bridge
+        if (p.hiveState !== 'smoked' && (p.swarmCalm || 0) < 0.45) {
+          if (
+            !isInCheckpointSafeZone(level, p.x + 56, floorY - 76, p.w - 86, 76) &&
+            c.x + c.w - 10 > p.x + 58 &&
+            c.x + 10 < p.x + p.w - 28 &&
+            c.y + c.h > floorY - 76 &&
+            c.y < floorY + 2
+          ) {
+            onCatHit('سرب النحل الجبلي! استخدم المواء لتشغيل المدخنة أو اعبر من الجسر العلوي -1 ❤️');
           }
         }
       } else if (p.type === 'battir_locomotive_crossing') {
