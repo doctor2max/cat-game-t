@@ -25580,81 +25580,77 @@ window.Game = window.Game || {};
 
   function ensureBattirRealisticTrees() {
     if (!tex.pomegranateTreeSprite) {
-      // 2x Retina Pre-Baked Botanical Palestinian Pomegranate Tree (280x260 -> 140x130 logical)
+      // 2x Retina Pre-Baked Botanical Palestinian Pomegranate Tree (280x260 -> 118x110 logical, gracefully branched & arched!)
       tex.pomegranateTreeSprite = makeOffscreen(280, 260, (c) => {
-        const rand = buildBattirTreeRng(26019);
+        const rand = buildBattirTreeRng(26037);
         c.save();
         c.scale(2, 2);
         c.translate(70, 122);
 
-        // Soft dappled ground shadow
-        const shG = c.createRadialGradient(0, 1, 6, 0, 1, 46);
-        shG.addColorStop(0, 'rgba(24, 15, 8, 0.34)');
+        const shG = c.createRadialGradient(0, 1, 5, 0, 1, 44);
+        shG.addColorStop(0, 'rgba(24, 15, 8, 0.32)');
         shG.addColorStop(1, 'rgba(24, 15, 8, 0)');
         c.fillStyle = shG;
         c.beginPath();
-        c.ellipse(2, 1, 46, 7.5, 0, 0, Math.PI * 2);
+        c.ellipse(2, 1, 44, 7, 0, 0, Math.PI * 2);
         c.fill();
 
-        // Helper: Sculpted tapered organic branch with sunlit rim & shadow underside
-        const drawBranch = (x0, y0, cx0, cy0, x1, y1, w0, w1, col1, col2) => {
+        const drawTaperedLimb = (x0, y0, mx, my, x1, y1, w0, w1, colMain, colHi) => {
           const dx = x1 - x0, dy = y1 - y0;
           const len = Math.hypot(dx, dy) || 1;
           const nx = -dy / len, ny = dx / len;
           const bG = c.createLinearGradient(x0 - nx * w0, y0 - ny * w0, x0 + nx * w0, y0 + ny * w0);
-          bG.addColorStop(0, col2);
-          bG.addColorStop(0.45, col1);
-          bG.addColorStop(1, '#2f1e13');
+          bG.addColorStop(0, colHi);
+          bG.addColorStop(0.45, colMain);
+          bG.addColorStop(1, '#2b1b11');
           c.fillStyle = bG;
           c.beginPath();
           c.moveTo(x0 - nx * w0 * 0.5, y0 - ny * w0 * 0.5);
-          c.quadraticCurveTo(cx0 - nx * (w0 + w1) * 0.25, cy0 - ny * (w0 + w1) * 0.25, x1 - nx * w1 * 0.5, y1 - ny * w1 * 0.5);
+          c.quadraticCurveTo(mx - nx * (w0 + w1) * 0.26, my - ny * (w0 + w1) * 0.26, x1 - nx * w1 * 0.5, y1 - ny * w1 * 0.5);
           c.lineTo(x1 + nx * w1 * 0.5, y1 + ny * w1 * 0.5);
-          c.quadraticCurveTo(cx0 + nx * (w0 + w1) * 0.25, cy0 + ny * (w0 + w1) * 0.25, x0 + nx * w0 * 0.5, y0 + ny * w0 * 0.5);
+          c.quadraticCurveTo(mx + nx * (w0 + w1) * 0.26, my + ny * (w0 + w1) * 0.26, x0 + nx * w0 * 0.5, y0 + ny * w0 * 0.5);
           c.closePath();
           c.fill();
         };
 
-        // 1. Multi-Stemmed Twisted Pomegranate Trunks (authentic graceful 4-stem orchard base!)
-        drawBranch(-8, 2, -16, -24, -34, -56, 7.5, 2.8, '#7a5d48', '#9c7e66');
-        drawBranch(-2, 2, -6, -30, -14, -74, 8.2, 3.0, '#785b46', '#9e8068');
-        drawBranch(4, 2, 10, -28, 18, -72, 7.8, 2.8, '#6e523e', '#92745c');
-        drawBranch(9, 2, 18, -22, 36, -54, 6.6, 2.4, '#654a37', '#8a6d56');
-        // Secondary arching & slightly weeping outer twigs
-        const subBranches = [
-          [-34, -56, -46, -64, -54, -72, 2.8, 1.0],
-          [-26, -46, -34, -62, -36, -80, 2.6, 0.9],
-          [-14, -74, -22, -86, -24, -96, 2.6, 0.9],
-          [-10, -64, -2, -82, 2, -98, 2.5, 0.9],
-          [18, -72, 26, -86, 30, -96, 2.6, 0.9],
-          [16, -60, 32, -72, 46, -80, 2.4, 0.9],
-          [36, -54, 48, -60, 56, -66, 2.3, 0.8],
+        drawTaperedLimb(-7, 2, -16, -24, -36, -54, 6.2, 2.4, '#6e523d', '#987a62');
+        drawTaperedLimb(-1, 2, -8, -32, -18, -74, 7.2, 2.5, '#735742', '#9c7e66');
+        drawTaperedLimb(4, 2, 11, -30, 20, -72, 6.8, 2.4, '#694e3a', '#91735b');
+        drawTaperedLimb(9, 2, 20, -24, 39, -52, 5.8, 2.1, '#614633', '#876a52');
+
+        const pomArcs = [
+          [-36, -54, -52, -62, -60, -52],
+          [-26, -46, -40, -68, -48, -76],
+          [-18, -74, -30, -90, -34, -84],
+          [-12, -66, -4, -92, 6, -98],
+          [20, -72, 32, -90, 40, -82],
+          [16, -60, 36, -72, 50, -66],
+          [39, -52, 54, -58, 60, -48],
         ];
-        for (const [x0, y0, mx, my, x1, y1, w0, w1] of subBranches) {
-          drawBranch(x0, y0, mx, my, x1, y1, w0, w1, '#6c503c', '#8e7159');
+        for (const [x0, y0, mx, my, x1, y1] of pomArcs) {
+          drawTaperedLimb(x0, y0, mx, my, x1, y1, 2.4, 0.85, '#664a36', '#8a6d55');
         }
 
-        // 2. Asymmetric Natural Foliage Sub-Crowns (360+ glossy narrow oblong pomegranate leaves!)
-        const crownPods = [
-          [-44, -68, 20, 14], [-32, -82, 22, 16], [-12, -92, 24, 17],
-          [12, -94, 23, 17], [32, -82, 22, 15], [46, -68, 19, 13],
-          [-22, -68, 21, 14], [4, -76, 23, 15], [26, -66, 20, 13],
-        ];
-
-        const scatterLeaves = (count, colors, yBias, sizeMult) => {
+        const drawArchedLeafSpray = (x0, y0, mx, my, x1, y1, count, palette, spread, droopBias) => {
           for (let i = 0; i < count; i++) {
-            const pod = crownPods[Math.floor(rand() * crownPods.length)];
-            const ang = rand() * Math.PI * 2;
-            const rad = Math.pow(rand(), 0.58);
-            const lx = pod[0] + Math.cos(ang) * pod[2] * rad;
-            const ly = pod[1] + yBias + Math.sin(ang) * pod[3] * rad;
-            const lRot = Math.atan2(ly + 72, lx) + (rand() - 0.5) * 1.4;
-            const lLen = (5.4 + rand() * 4.2) * sizeMult;
-            const lWid = (1.6 + rand() * 0.9) * sizeMult;
+            const u = 0.15 + rand() * 0.85;
+            const inv = 1 - u;
+            const bx = inv * inv * x0 + 2 * inv * u * mx + u * u * x1;
+            const by = inv * inv * y0 + 2 * inv * u * my + u * u * y1;
+            const tx = 2 * inv * (mx - x0) + 2 * u * (x1 - mx);
+            const ty = 2 * inv * (my - y0) + 2 * u * (y1 - my);
+            const tanAng = Math.atan2(ty, tx);
+            const side = rand() > 0.5 ? 1 : -1;
+            const offR = rand() * spread;
+            const lx = bx + Math.cos(tanAng + side * 1.4) * offR;
+            const ly = by + Math.sin(tanAng + side * 1.4) * offR + droopBias * u;
+            const lRot = tanAng + side * (0.45 + rand() * 0.55) + 0.18 * u;
+            const lLen = 5.0 + rand() * 3.8;
+            const lWid = 1.45 + rand() * 0.8;
             c.save();
             c.translate(lx, ly);
             c.rotate(lRot);
-            c.fillStyle = colors[Math.floor(rand() * colors.length)];
+            c.fillStyle = palette[Math.floor(rand() * palette.length)];
             c.beginPath();
             c.moveTo(-lLen * 0.5, 0);
             c.quadraticCurveTo(0, -lWid, lLen * 0.5, 0);
@@ -25665,278 +25661,233 @@ window.Game = window.Game || {};
           }
         };
 
-        // Pass A: Deep shaded interior emerald foliage
-        scatterLeaves(125, ['#163826', '#1c462e', '#215034'], 4, 1.08);
-
-        // Peek-through dark inner woody branches visible between foliage gaps
-        c.strokeStyle = 'rgba(54, 36, 24, 0.72)';
-        c.lineWidth = 1.6;
-        c.beginPath();
-        c.moveTo(-22, -62); c.quadraticCurveTo(-28, -74, -36, -82);
-        c.moveTo(14, -64); c.quadraticCurveTo(22, -76, 30, -84);
-        c.moveTo(-4, -70); c.quadraticCurveTo(0, -84, 4, -92);
-        c.stroke();
-
-        // Pass B: Rich glossy mid-canopy pomegranate green
-        scatterLeaves(135, ['#2a6539', '#357942', '#3f8748', '#2d6d3b'], 0, 1.0);
-        // Pass C: Sunlit upper-right warm olive-chartreuse & bronze new-growth leaf tips
-        scatterLeaves(95, ['#5c9d45', '#76b14c', '#98c159', '#b5a84c'], -5, 0.9);
-        // Delicate warm sunset highlights along top-right outer crest
-        for (let i = 0; i < 28; i++) {
-          const lx = -12 + rand() * 58;
-          const ly = -106 + rand() * 28;
-          c.save();
-          c.translate(lx, ly);
-          c.rotate((rand() - 0.5) * 2.2);
-          c.fillStyle = i % 4 === 0 ? 'rgba(217, 134, 72, 0.78)' : 'rgba(218, 224, 128, 0.72)';
-          c.beginPath();
-          c.ellipse(0, 0, 3.6, 1.3, 0, 0, Math.PI * 2);
-          c.fill();
-          c.restore();
+        for (const [x0, y0, mx, my, x1, y1] of pomArcs) {
+          drawArchedLeafSpray(x0, y0 + 3, mx, my + 3, x1, y1 + 4, 24, ['#153825', '#1b472d', '#225235'], 11, 4);
+        }
+        for (const [x0, y0, mx, my, x1, y1] of pomArcs) {
+          drawArchedLeafSpray(x0, y0, mx, my, x1, y1, 28, ['#2a6638', '#367c42', '#448e4a', '#2e6f3c'], 10, 2);
+        }
+        for (const [x0, y0, mx, my, x1, y1] of pomArcs) {
+          drawArchedLeafSpray(x0, y0 - 3, mx, my - 4, x1, y1 - 2, 16, ['#62a447', '#80b850', '#a9c95e', '#c2a44c'], 8, 0);
         }
 
-        // 3. Realistic Sculpted Ruby-Crimson Pomegranates with 5-Pointed Calyx Crowns (ثمار الرمان بتيجانها!)
         const fruits = [
-          [-38, -64, 5.4], [-20, -76, 5.8], [-6, -66, 5.2],
-          [10, -84, 5.6], [24, -70, 6.0], [40, -62, 5.2], [-2, -96, 5.0],
+          [-50, -54, 4.8], [-34, -70, 5.2], [-18, -78, 5.0],
+          [4, -90, 5.0], [26, -78, 5.4], [44, -64, 5.0], [52, -52, 4.6],
         ];
         for (const [fx, fy, fr] of fruits) {
-          // Slender woody fruit stem
           c.strokeStyle = '#4a3220';
-          c.lineWidth = 1.0;
-          c.beginPath(); c.moveTo(fx, fy - fr - 4); c.lineTo(fx, fy - fr + 0.5); c.stroke();
-          // Sculpted slightly-oblate ruby pomegranate body with glossy specular highlight
-          const pmG = c.createRadialGradient(fx - fr * 0.3, fy - fr * 0.3, 0.8, fx, fy, fr * 1.1);
+          c.lineWidth = 0.95;
+          c.beginPath(); c.moveTo(fx, fy - fr - 4.5); c.lineTo(fx, fy - fr + 0.5); c.stroke();
+          const pmG = c.createRadialGradient(fx - fr * 0.3, fy - fr * 0.3, 0.7, fx, fy, fr * 1.1);
           pmG.addColorStop(0.00, '#fda4af');
-          pmG.addColorStop(0.28, '#e11d48');
-          pmG.addColorStop(0.72, '#9f1239');
-          pmG.addColorStop(1.00, '#4c0519');
+          pmG.addColorStop(0.30, '#dc2626');
+          pmG.addColorStop(0.75, '#991b1b');
+          pmG.addColorStop(1.00, '#450a0a');
           c.fillStyle = pmG;
           c.beginPath();
           c.ellipse(fx, fy, fr, fr * 0.94, 0, 0, Math.PI * 2);
           c.fill();
-          // Authentic jagged 3-tooth calyx crown (تاج الرمان) at bottom
-          c.fillStyle = '#9f1239';
+          c.fillStyle = '#991b1b';
           c.beginPath();
-          c.moveTo(fx - 2.4, fy + fr * 0.82);
-          c.lineTo(fx - 2.8, fy + fr + 2.4);
-          c.lineTo(fx - 0.9, fy + fr + 1.0);
-          c.lineTo(fx, fy + fr + 2.6);
-          c.lineTo(fx + 0.9, fy + fr + 1.0);
-          c.lineTo(fx + 2.8, fy + fr + 2.4);
-          c.lineTo(fx + 2.4, fy + fr * 0.82);
+          c.moveTo(fx - 2.1, fy + fr * 0.82);
+          c.lineTo(fx - 2.5, fy + fr + 2.2);
+          c.lineTo(fx - 0.8, fy + fr + 0.9);
+          c.lineTo(fx, fy + fr + 2.4);
+          c.lineTo(fx + 0.8, fy + fr + 0.9);
+          c.lineTo(fx + 2.5, fy + fr + 2.2);
+          c.lineTo(fx + 2.1, fy + fr * 0.82);
           c.closePath();
           c.fill();
-          // Glossy sunlit pinpoint highlight
           c.fillStyle = 'rgba(255, 241, 242, 0.55)';
           c.beginPath();
           c.ellipse(fx - fr * 0.34, fy - fr * 0.30, fr * 0.22, fr * 0.14, -0.5, 0, Math.PI * 2);
           c.fill();
         }
-
-        // 4. Tiny Bright Scarlet-Orange Pomegranate Blossoms (زهر الجلّنار)
-        for (const [bx, by] of [[-46, -74], [-14, -88], [32, -82], [48, -70]]) {
+        for (const [bx, by] of [[-56, -58], [-26, -86], [34, -84], [54, -56]]) {
           c.fillStyle = '#f97316';
-          c.beginPath(); c.arc(bx, by, 2.3, 0, Math.PI * 2); c.fill();
+          c.beginPath(); c.arc(bx, by, 2.2, 0, Math.PI * 2); c.fill();
           c.fillStyle = '#fef08a';
-          c.beginPath(); c.arc(bx, by, 0.9, 0, Math.PI * 2); c.fill();
+          c.beginPath(); c.arc(bx, by, 0.85, 0, Math.PI * 2); c.fill();
         }
         c.restore();
       });
     }
 
     if (!tex.oliveTreeSprite) {
-      // 2x Retina Pre-Baked Botanical Ancient Palestinian Rumi Olive Tree (320x300 -> 160x150 logical)
+      // 2x Retina Pre-Baked Botanical Ancient Palestinian Rumi Olive Tree
+      // Richly branched crooked skeleton + gracefully arched cascading silver-sage foliage!
       tex.oliveTreeSprite = makeOffscreen(320, 300, (c) => {
-        const rand = buildBattirTreeRng(26088);
+        const rand = buildBattirTreeRng(26099);
         c.save();
         c.scale(2, 2);
         c.translate(80, 141);
 
-        // Soft dappled ground shadow beneath the broad ancient crown
-        const shG = c.createRadialGradient(2, 1, 8, 2, 1, 62);
-        shG.addColorStop(0, 'rgba(22, 14, 8, 0.36)');
+        const shG = c.createRadialGradient(2, 1, 8, 2, 1, 58);
+        shG.addColorStop(0, 'rgba(22, 14, 8, 0.34)');
         shG.addColorStop(1, 'rgba(22, 14, 8, 0)');
         c.fillStyle = shG;
         c.beginPath();
-        c.ellipse(2, 1, 62, 9, 0, 0, Math.PI * 2);
+        c.ellipse(2, 1, 58, 8.5, 0, 0, Math.PI * 2);
         c.fill();
 
-        // 1. CENTURIES-OLD GNARLED, HOLLOW-CLEFTED, SPIRALLY TWISTED RUMI OLIVE TRUNK
         const traceTrunk = () => {
           c.beginPath();
-          c.moveTo(-34, 3);
-          c.bezierCurveTo(-24, -4, -19, -16, -18, -32);
-          c.bezierCurveTo(-17, -46, -24, -60, -46, -80);
-          c.lineTo(-37, -86);
-          c.bezierCurveTo(-22, -72, -13, -65, -8, -62);
-          c.bezierCurveTo(-9, -76, -5, -88, 2, -98);
-          c.lineTo(11, -96);
-          c.bezierCurveTo(9, -84, 10, -73, 14, -68);
-          c.bezierCurveTo(23, -76, 35, -83, 49, -86);
-          c.lineTo(52, -78);
-          c.bezierCurveTo(36, -68, 24, -55, 20, -37);
-          c.bezierCurveTo(18, -19, 25, -6, 36, 3);
-          c.quadraticCurveTo(18, 0, 9, 5);
+          c.moveTo(-30, 3);
+          c.bezierCurveTo(-21, -4, -17, -16, -16, -32);
+          c.bezierCurveTo(-15, -45, -22, -58, -42, -76);
+          c.lineTo(-34, -82);
+          c.bezierCurveTo(-20, -69, -11, -61, -6, -58);
+          c.bezierCurveTo(-7, -72, -3, -84, 3, -94);
+          c.lineTo(11, -92);
+          c.bezierCurveTo(9, -80, 10, -70, 14, -65);
+          c.bezierCurveTo(22, -72, 33, -78, 46, -81);
+          c.lineTo(49, -74);
+          c.bezierCurveTo(33, -64, 22, -52, 18, -35);
+          c.bezierCurveTo(16, -18, 22, -6, 32, 3);
+          c.quadraticCurveTo(15, 0, 7, 5);
           c.quadraticCurveTo(0, 1, -8, 4);
-          c.quadraticCurveTo(-20, 0, -34, 3);
+          c.quadraticCurveTo(-18, 0, -30, 3);
           c.closePath();
         };
-
-        // Authentic weathered driftwood-grey & warm sepia Rumi olive bark
-        const trG = c.createLinearGradient(-32, -48, 34, -42);
-        trG.addColorStop(0.00, '#3c3127');
-        trG.addColorStop(0.24, '#6e6052');
-        trG.addColorStop(0.54, '#9e907e');
-        trG.addColorStop(0.78, '#847564');
-        trG.addColorStop(1.00, '#382c22');
+        const trG = c.createLinearGradient(-28, -46, 30, -40);
+        trG.addColorStop(0.00, '#3d3228');
+        trG.addColorStop(0.26, '#716354');
+        trG.addColorStop(0.56, '#a39583');
+        trG.addColorStop(0.80, '#827362');
+        trG.addColorStop(1.00, '#3a2e24');
         traceTrunk();
         c.fillStyle = trG;
         c.fill();
 
-        // Sculpted internal bark grain, central ancient hollow cleft, spiraling sinews & moss
         c.save();
         traceTrunk();
         c.clip();
-        // Central ancient hollow cleft (تجوّف الزيتون الرومي القديم)
-        const cleftG = c.createLinearGradient(-8, -32, 6, -32);
-        cleftG.addColorStop(0, '#1c140e');
-        cleftG.addColorStop(0.6, '#2b1e15');
-        cleftG.addColorStop(1, '#4b3b2d');
+        const cleftG = c.createLinearGradient(-7, -30, 5, -30);
+        cleftG.addColorStop(0, '#1b130d');
+        cleftG.addColorStop(0.65, '#2b1f16');
+        cleftG.addColorStop(1, '#4d3c2e');
         c.fillStyle = cleftG;
         c.beginPath();
-        c.moveTo(-5, -8);
-        c.bezierCurveTo(-11, -24, -7, -44, -1, -56);
-        c.bezierCurveTo(6, -42, 7, -22, 2, -8);
+        c.moveTo(-4, -8);
+        c.bezierCurveTo(-10, -24, -6, -42, -1, -54);
+        c.bezierCurveTo(5, -40, 6, -22, 2, -8);
         c.closePath();
         c.fill();
-        // Deep spiraling rope-like bark ridges (paired dark fissure + silver-beige highlight)
         const sinews = [
-          [[-24, 2], [-14, -22], [-16, -50], [-40, -82]],
-          [[-13, 3], [-8, -22], [-4, -54], [4, -95]],
-          [[6, 4], [10, -22], [14, -50], [42, -82]],
-          [[20, 3], [16, -20], [16, -44], [34, -72]],
-          [[-2, -52], [3, -68], [8, -82], [9, -96]],
+          [[-21, 2], [-12, -20], [-14, -48], [-36, -78]],
+          [[-10, 3], [-6, -22], [-3, -52], [4, -90]],
+          [[6, 4], [9, -22], [13, -48], [39, -77]],
+          [[18, 3], [14, -20], [14, -42], [32, -68]],
         ];
         for (const pts of sinews) {
           c.strokeStyle = 'rgba(30, 21, 14, 0.56)';
-          c.lineWidth = 1.8;
+          c.lineWidth = 1.7;
           c.beginPath();
           c.moveTo(pts[0][0], pts[0][1]);
           c.bezierCurveTo(pts[1][0], pts[1][1], pts[2][0], pts[2][1], pts[3][0], pts[3][1]);
           c.stroke();
           c.strokeStyle = 'rgba(232, 222, 204, 0.34)';
-          c.lineWidth = 1.1;
+          c.lineWidth = 1.05;
           c.beginPath();
-          c.moveTo(pts[0][0] + 1.8, pts[0][1]);
-          c.bezierCurveTo(pts[1][0] + 1.8, pts[1][1], pts[2][0] + 1.8, pts[2][1], pts[3][0] + 1.8, pts[3][1]);
+          c.moveTo(pts[0][0] + 1.6, pts[0][1]);
+          c.bezierCurveTo(pts[1][0] + 1.6, pts[1][1], pts[2][0] + 1.6, pts[2][1], pts[3][0] + 1.6, pts[3][1]);
           c.stroke();
         }
-        // Fine gnarled bark cracks & olive-grey lichen patches near the root base
-        c.fillStyle = 'rgba(115, 130, 82, 0.32)';
-        c.beginPath();
-        c.ellipse(-18, -14, 5, 8, -0.2, 0, Math.PI * 2);
-        c.ellipse(15, -22, 4.5, 7, 0.15, 0, Math.PI * 2);
-        c.fill();
         c.restore();
 
-        // 2. CROOKED SPREADING SECONDARY & TERTIARY OLIVE LIMBS
-        const drawLimb = (x0, y0, cx0, cy0, x1, y1, lw) => {
-          c.strokeStyle = '#4e4135';
+        const drawArchLimb = (x0, y0, mx, my, x1, y1, lw) => {
+          c.strokeStyle = '#4c3f33';
           c.lineWidth = lw;
           c.lineCap = 'round';
           c.beginPath();
           c.moveTo(x0, y0);
-          c.quadraticCurveTo(cx0, cy0, x1, y1);
+          c.quadraticCurveTo(mx, my, x1, y1);
           c.stroke();
-          c.strokeStyle = 'rgba(195, 184, 166, 0.36)';
-          c.lineWidth = Math.max(0.7, lw * 0.35);
+          c.strokeStyle = 'rgba(196, 185, 168, 0.34)';
+          c.lineWidth = Math.max(0.65, lw * 0.34);
           c.beginPath();
-          c.moveTo(x0 + 0.8, y0 - 0.6);
-          c.quadraticCurveTo(cx0 + 0.8, cy0 - 0.6, x1 + 0.8, y1 - 0.6);
+          c.moveTo(x0 + 0.7, y0 - 0.6);
+          c.quadraticCurveTo(mx + 0.7, my - 0.6, x1 + 0.7, y1 - 0.6);
           c.stroke();
         };
-        const limbs = [
-          [-42, -82, -56, -92, -64, -104, 3.8],
-          [-38, -82, -34, -98, -28, -114, 3.2],
-          [-26, -74, -42, -80, -56, -86, 2.5],
-          [4, -95, -6, -110, -14, -124, 3.1],
-          [8, -94, 18, -110, 26, -124, 3.0],
-          [46, -82, 58, -92, 66, -102, 3.4],
-          [38, -78, 34, -96, 44, -112, 2.7],
+
+        const oliveBoughs = [
+          [-38, -78, -56, -88, -68, -76, 3.6],
+          [-35, -80, -52, -104, -64, -98, 3.0],
+          [-26, -74, -36, -102, -46, -112, 2.8],
+          [-10, -76, -24, -108, -32, -120, 2.7],
+          [4, -92, -8, -118, -16, -128, 2.8],
+          [7, -92, 12, -122, 24, -128, 2.8],
+          [16, -76, 32, -108, 44, -116, 2.8],
+          [38, -78, 52, -102, 64, -96, 3.0],
+          [44, -76, 60, -84, 70, -72, 3.4],
+          [-18, -90, -8, -104, 2, -110, 2.0],
+          [22, -88, 12, -102, 4, -108, 2.0],
         ];
-        for (const [x0, y0, mx, my, x1, y1, lw] of limbs) {
-          drawLimb(x0, y0, mx, my, x1, y1, lw);
+        for (const [x0, y0, mx, my, x1, y1, lw] of oliveBoughs) {
+          drawArchLimb(x0, y0, mx, my, x1, y1, lw);
         }
 
-        // 3. AIRY, NATURAL SILVERY-SAGE OLIVE CROWN (480+ Individual Slender Lanceolate Leaves!)
-        const crownPods = [
-          [-58, -96, 18, 13], [-44, -108, 22, 15], [-24, -118, 24, 16],
-          [-2, -124, 25, 16], [20, -120, 24, 16], [42, -110, 22, 15], [58, -96, 18, 13],
-          [-38, -90, 20, 12], [-12, -100, 22, 13], [16, -98, 22, 13], [40, -90, 20, 12],
-        ];
-
-        const scatterOliveLeaves = (count, palette, yOff, scaleL, rightSunOnly = false) => {
+        const drawCurvedOliveCluster = (x0, y0, mx, my, x1, y1, count, palette, spread, droop, rightSunOnly = false) => {
           for (let i = 0; i < count; i++) {
-            const pod = crownPods[Math.floor(rand() * crownPods.length)];
-            const a = rand() * Math.PI * 2;
-            const d = Math.pow(rand(), 0.56);
-            const lx = pod[0] + Math.cos(a) * pod[2] * d;
-            const ly = pod[1] + yOff + Math.sin(a) * pod[3] * d;
-            if (rightSunOnly && lx < -18 && ly > -118) continue;
-            // Natural organic drooping / radiating lanceolate olive-leaf orientation
-            const rot = Math.atan2(ly + 95, lx) + (rand() - 0.5) * 1.85;
-            const len = (5.2 + rand() * 4.4) * scaleL;
-            const wid = (1.15 + rand() * 0.65) * scaleL;
+            const u = 0.22 + rand() * 0.78;
+            const inv = 1 - u;
+            const bx = inv * inv * x0 + 2 * inv * u * mx + u * u * x1;
+            const by = inv * inv * y0 + 2 * inv * u * my + u * u * y1;
+            if (rightSunOnly && bx < -14 && by > -118) continue;
+            const tx = 2 * inv * (mx - x0) + 2 * u * (x1 - mx);
+            const ty = 2 * inv * (my - y0) + 2 * u * (y1 - my);
+            const tanAng = Math.atan2(ty, tx);
+            const side = rand() > 0.5 ? 1 : -1;
+            const dist = rand() * spread;
+            const lx = bx + Math.cos(tanAng + side * 1.35) * dist;
+            const ly = by + Math.sin(tanAng + side * 1.35) * dist + droop * u * u;
+            const rot = tanAng + side * (0.35 + rand() * 0.65) + 0.28 * u;
+            const len = 5.4 + rand() * 4.2;
+            const wid = 1.05 + rand() * 0.55;
             c.save();
             c.translate(lx, ly);
             c.rotate(rot);
             c.fillStyle = palette[Math.floor(rand() * palette.length)];
             c.beginPath();
-            c.moveTo(-len * 0.5, 0);
-            c.quadraticCurveTo(0, -wid, len * 0.5, 0);
-            c.quadraticCurveTo(0, wid, -len * 0.5, 0);
+            c.moveTo(-len * 0.5, 0.3);
+            c.quadraticCurveTo(0, -wid - 0.5, len * 0.5, 0.4);
+            c.quadraticCurveTo(0, wid - 0.1, -len * 0.5, 0.3);
             c.closePath();
             c.fill();
             c.restore();
           }
         };
 
-        // Pass A: Deep shadowed inner-crown olive foliage
-        scatterOliveLeaves(155, ['#22321c', '#2a3d22', '#314628'], 4, 1.12);
+        for (let bi = 0; bi < 9; bi++) {
+          const [x0, y0, mx, my, x1, y1] = oliveBoughs[bi];
+          drawCurvedOliveCluster(x0, y0 + 3, mx, my + 3, x1, y1 + 4, 20, ['#21311b', '#293d21', '#314728'], 11, 5);
+        }
+        for (const [x0, y0, mx, my, x1, y1, lw] of oliveBoughs) {
+          drawArchLimb(x0, y0, mx, my, x1, y1, lw * 0.58);
+        }
+        for (let bi = 0; bi < 9; bi++) {
+          const [x0, y0, mx, my, x1, y1] = oliveBoughs[bi];
+          drawCurvedOliveCluster(x0, y0, mx, my, x1, y1, 24, ['#425831', '#51693c', '#637c4d', '#7b916a'], 10, 3);
+        }
+        for (let bi = 0; bi < 9; bi++) {
+          const [x0, y0, mx, my, x1, y1] = oliveBoughs[bi];
+          drawCurvedOliveCluster(x0, y0 - 3, mx, my - 4, x1, y1 - 2, 16, ['#8ea37e', '#a6b896', '#bfcca9', '#778d65'], 8.5, 1.5);
+        }
+        for (let bi = 4; bi < 9; bi++) {
+          const [x0, y0, mx, my, x1, y1] = oliveBoughs[bi];
+          drawCurvedOliveCluster(x0, y0 - 5, mx, my - 6, x1, y1 - 4, 9, ['#c9cd90', '#e0d597', '#ecdaa2'], 6.5, 0, true);
+        }
 
-        // Visible crooked dark inner branches & twigs peeking organically through sky gaps!
-        c.strokeStyle = 'rgba(64, 53, 43, 0.78)';
-        c.lineWidth = 1.6;
-        c.beginPath();
-        c.moveTo(-42, -88); c.quadraticCurveTo(-48, -98, -54, -106);
-        c.moveTo(-18, -96); c.quadraticCurveTo(-12, -108, -6, -118);
-        c.moveTo(14, -96); c.quadraticCurveTo(22, -108, 30, -116);
-        c.moveTo(42, -88); c.quadraticCurveTo(50, -96, 56, -104);
-        c.stroke();
-
-        // Pass B: Rich Mediterranean olive-green mid-crown & silvery-sage leaf undersides
-        scatterOliveLeaves(175, ['#435932', '#526a3d', '#647c4e', '#7e936d'], 0, 1.02);
-
-        // Pass C: Signature Palestinian dusty silvery-sage shimmer across sunlit outer twigs!
-        scatterOliveLeaves(130, ['#8ca17c', '#a3b593', '#bcc9aa', '#758b63'], -4, 0.94);
-
-        // Pass D: Warm golden-apricot Battir sunset rim-light kissing the upper-right olive leaves
-        scatterOliveLeaves(55, ['#c8cc8f', '#dfd496', '#ebd8a0'], -7, 0.86, true);
-
-        // 4. Tiny Hanging Green & Ripe Dark-Violet Palestinian Olives tucked beneath lower twigs
         const olives = [
-          [-50, -90, true], [-34, -96, false], [-18, -94, true],
-          [0, -102, false], [18, -96, true], [36, -94, false], [52, -90, true],
+          [-60, -80, true], [-46, -98, false], [-28, -110, true],
+          [0, -112, false], [26, -112, true], [48, -96, false], [62, -78, true],
         ];
         for (const [ox, oy, ripe] of olives) {
           c.fillStyle = ripe ? '#2e2038' : '#6f8736';
           c.beginPath();
-          c.ellipse(ox, oy, 1.7, 2.4, 0.16, 0, Math.PI * 2);
-          c.fill();
-          c.fillStyle = 'rgba(255, 255, 255, 0.34)';
-          c.beginPath();
-          c.arc(ox - 0.5, oy - 0.7, 0.5, 0, Math.PI * 2);
+          c.ellipse(ox, oy, 1.6, 2.3, 0.16, 0, Math.PI * 2);
           c.fill();
         }
         c.restore();
@@ -25949,7 +25900,7 @@ window.Game = window.Game || {};
     ctx.save();
     ctx.translate(x, groundY);
     ctx.scale(scale, scale);
-    ctx.drawImage(tex.pomegranateTreeSprite, -70, -122, 140, 130);
+    ctx.drawImage(tex.pomegranateTreeSprite, -59, -103, 118, 110);
     ctx.restore();
   }
 
@@ -25958,7 +25909,7 @@ window.Game = window.Game || {};
     ctx.save();
     ctx.translate(x, groundY);
     ctx.scale(scale, scale);
-    ctx.drawImage(tex.oliveTreeSprite, -80, -141, 160, 150);
+    ctx.drawImage(tex.oliveTreeSprite, -68, -120, 136, 128);
     ctx.restore();
   }
 
@@ -26231,15 +26182,35 @@ window.Game = window.Game || {};
           for (let s = segs; s >= 0; s--) ctx.lineTo(pts[s][0], pts[s][1] + 15);
           ctx.closePath(); ctx.fill();
 
-          // Weathered cylindrically shaded dry-stone wall spanning edge-to-edge
-          const wCol = ctx.createLinearGradient(xL, baseY, xR, baseY);
-          wCol.addColorStop(0.0, '#6a4b2d'); wCol.addColorStop(0.22, '#b58d62');
-          wCol.addColorStop(0.5, '#d6b387'); wCol.addColorStop(0.78, '#ae865b'); wCol.addColorStop(1.0, '#5a3e23');
-          ctx.fillStyle = wCol; ctx.strokeStyle = 'rgba(54, 32, 14, 0.45)'; ctx.lineWidth = 0.9;
+          // Hand-stacked rustic dry-stone Sanasel wall (سناسل حجرية يدوية قديمة) spanning edge-to-edge!
+          const wBackG = ctx.createLinearGradient(xL, baseY, xR, baseY);
+          wBackG.addColorStop(0.0, '#3a291a'); wBackG.addColorStop(0.5, '#4c3825'); wBackG.addColorStop(1.0, '#322316');
+          ctx.fillStyle = wBackG;
           ctx.beginPath();
           pts.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py); });
-          for (let s = segs; s >= 0; s--) ctx.lineTo(pts[s][0], pts[s][1] + 11);
-          ctx.closePath(); ctx.fill(); ctx.stroke();
+          for (let s = segs; s >= 0; s--) ctx.lineTo(pts[s][0], pts[s][1] + 12);
+          ctx.closePath(); ctx.fill();
+          const distSanaselCols = ['#bfa78a', '#b19677', '#c9b498', '#a38768', '#d2bfa6', '#9a8064'];
+          for (let row = 0; row < 2; row++) {
+            let cx0 = xL + (row === 1 ? 6 : 0);
+            let ci = 0;
+            while (cx0 < xR) {
+              const hHash = Math.abs(Math.floor(baseY * 3) + row * 17 + ci * 13);
+              const rw = 5.0 + (hHash % 5) * 1.15;
+              const rh = 2.6 + ((hHash * 3) % 3) * 0.45;
+              const u = Math.max(0, Math.min(1, (cx0 - xL) / (xR - xL)));
+              const cy0 = baseY + Math.sin(u * Math.PI) * bulge + Math.sin(u * Math.PI * 2.3 + ph) * waveAmp + 2.8 + row * 5.2 + ((hHash % 3) - 1) * 0.6;
+              ctx.fillStyle = distSanaselCols[hHash % distSanaselCols.length];
+              ctx.strokeStyle = 'rgba(42, 28, 16, 0.55)';
+              ctx.lineWidth = 0.65;
+              ctx.beginPath();
+              ctx.ellipse(cx0 + rw, cy0, rw, rh, ((hHash % 5) - 2) * 0.05, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+              cx0 += rw * 1.88;
+              ci++;
+            }
+          }
         }
         ctx.restore();
       };
@@ -26475,54 +26446,71 @@ window.Game = window.Game || {};
           for (let s = segs; s >= 0; s--) ctx.lineTo(ptsTop[s][0], ptsTop[s][1] + wallH + 6);
           ctx.closePath(); ctx.fill();
 
-          // 3. Organic undulating 3D weathered dry-stone retaining wall (cylindrically shaded across the hill!)
+          // 3. AUTHENTIC HAND-STACKED DRY-STONE BATTIR SANASEL (سناسل حجرية يدوية قديمة!)
+          // Dark recessed dry-stone soil crevice backing (gives real depth between unmortared fieldstones!)
           const wPath = () => {
             ctx.beginPath();
             ptsTop.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py); });
             for (let s = segs; s >= 0; s--) ctx.lineTo(ptsTop[s][0], ptsTop[s][1] + wallH);
             ctx.closePath();
           };
-          const stG = ctx.createLinearGradient(xL, baseY, xR, baseY);
-          stG.addColorStop(0.0, '#5a3f26'); stG.addColorStop(0.18, '#a4805a');
-          stG.addColorStop(0.46, '#d9ba91'); stG.addColorStop(0.75, '#b69066'); stG.addColorStop(1.0, '#4f3720');
-          ctx.fillStyle = stG;
+          ctx.fillStyle = '#332417';
           wPath(); ctx.fill();
 
-          // Interlocking dry-stone courses & sunlit top limestone cap
-          ctx.save();
-          wPath(); ctx.clip();
+          // Hand-stacked irregular weathered mountain limestone fieldstones (bottom heavy boulders -> top capstones)
+          const sanaselPal = ['#c7b7a0', '#b8a58c', '#d4c6b1', '#a6937a', '#cfc0aa', '#9c8b75', '#ddd1bf'];
           const rows = 3;
-          for (let r = 1; r < rows; r++) {
-            const ryOff = (wallH / rows) * r;
-            ctx.strokeStyle = 'rgba(46, 28, 14, 0.36)'; ctx.lineWidth = 0.95;
-            ctx.beginPath();
-            ptsTop.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py + ryOff); else ctx.lineTo(px, py + ryOff); });
-            ctx.stroke();
-          }
-          const numStones = Math.floor((xR - xL) / 22);
-          for (let r = 0; r < rows; r++) {
-            const y0Off = (wallH / rows) * r;
-            const rh = wallH / rows;
-            for (let c = 0; c < numStones; c++) {
-              const u = (c + (r % 2) * 0.48) / numStones;
-              const bx = xL + u * (xR - xL);
-              const by = evalContourY(bx, xL, xR, baseY, bulge, waveAmp, phase) + y0Off;
-              ctx.strokeStyle = 'rgba(42, 24, 10, 0.32)'; ctx.lineWidth = 0.85;
-              ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx + ((seed + c + r) % 3 - 1) * 1.2, by + rh); ctx.stroke();
-              if ((c * 3 + r + seed) % 5 === 0) {
-                ctx.fillStyle = 'rgba(255, 246, 224, 0.14)';
-                ctx.fillRect(bx + 2, by + 1.5, 11, rh - 3);
+          const rowStep = wallH / rows;
+          for (let r = rows - 1; r >= 0; r--) {
+            let sx0 = xL + (r % 2 === 1 ? 8 : 0);
+            let ci = 0;
+            while (sx0 < xR) {
+              const h = Math.abs(seed * 31 + r * 19 + ci * 13);
+              const sizeBoost = r === rows - 1 ? 1.20 : (r === 0 ? 0.94 : 1.05);
+              const rx = (5.8 + (h % 6) * 1.35) * sizeBoost;
+              const ry = (rowStep * 0.56 + ((h * 3) % 3) * 0.55);
+              const stoneCx = sx0 + rx;
+              const hillY = evalContourY(stoneCx, xL, xR, baseY, bulge, waveAmp, phase);
+              const stoneCy = hillY + (r + 0.52) * rowStep + (((h % 5) - 2) * 0.55);
+              const tilt = (((h * 7) % 7) - 3) * 0.045;
+              const uPos = Math.max(0, Math.min(1, (stoneCx - xL) / (xR - xL)));
+              const sideShade = Math.abs(uPos - 0.5) * 2;
+
+              ctx.save();
+              ctx.translate(stoneCx, stoneCy);
+              ctx.rotate(tilt);
+              ctx.fillStyle = sanaselPal[h % sanaselPal.length];
+              ctx.strokeStyle = 'rgba(34, 23, 14, 0.72)';
+              ctx.lineWidth = 0.85;
+              ctx.beginPath();
+              ctx.moveTo(-rx * 0.95, 0.1 * ry);
+              ctx.quadraticCurveTo(-rx * 0.85, -ry * 0.95, -rx * 0.15, -ry * 0.98);
+              ctx.quadraticCurveTo(rx * 0.65, -ry * 0.92, rx * 0.96, -ry * 0.15);
+              ctx.quadraticCurveTo(rx * 0.92, ry * 0.92, rx * 0.12, ry * 0.96);
+              ctx.quadraticCurveTo(-rx * 0.78, ry * 0.90, -rx * 0.95, 0.1 * ry);
+              ctx.closePath();
+              ctx.fill();
+              ctx.fillStyle = `rgba(255, 250, 238, ${(0.22 * (1 - sideShade * 0.55)).toFixed(2)})`;
+              ctx.beginPath();
+              ctx.ellipse(-rx * 0.12, -ry * 0.42, rx * 0.56, ry * 0.28, 0, 0, Math.PI * 2);
+              ctx.fill();
+              if (sideShade > 0.45) {
+                ctx.fillStyle = `rgba(34, 22, 12, ${((sideShade - 0.45) * 0.58).toFixed(2)})`;
+                ctx.fill();
               }
+              ctx.stroke();
+              ctx.restore();
+
+              if (r === 1 && (h % 6) === 0) {
+                ctx.fillStyle = '#4d6b28';
+                ctx.beginPath();
+                ctx.ellipse(stoneCx + rx * 0.78, stoneCy + ry * 0.35, 3.0, 1.7, 0.2, 0, Math.PI * 2);
+                ctx.fill();
+              }
+              sx0 += rx * 1.82;
+              ci++;
             }
           }
-          ctx.restore();
-          ctx.strokeStyle = 'rgba(46, 28, 14, 0.52)'; ctx.lineWidth = 1.0;
-          wPath(); ctx.stroke();
-          // Crisp sunlit limestone coping rim along the terrace curve
-          ctx.strokeStyle = 'rgba(255, 246, 224, 0.38)'; ctx.lineWidth = 1.3;
-          ctx.beginPath();
-          ptsTop.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py + 1.0); else ctx.lineTo(px, py + 1.0); });
-          ctx.stroke();
 
           // 4. Organized Built-In Stone Sawaqi Channel (ساقية حجرية منظمة بمياه نقية شفافة)
           if (withChannel) {
