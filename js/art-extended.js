@@ -24047,28 +24047,6 @@ window.Game = window.Game || {};
       // Sunset-gilded stone balustrade along top of viaduct
       ctx.fillStyle = '#fed7aa';
       ctx.fillRect(vdX, vdTopY - 4, vdW, 6);
-
-      // Distant Silhouette of the 1892 Steam Express gliding across the high gorge viaduct!
-      const trX = vdX + vdW - (((time * 58 + rep * 260) % (vdW + 260)));
-      if (trX > vdX - 160 && trX < vdX + vdW + 40) {
-        ctx.save();
-        ctx.beginPath(); ctx.rect(vdX, vdTopY - 60, vdW, 62); ctx.clip();
-        ctx.fillStyle = '#29150e';
-        ctx.fillRect(trX, vdTopY - 22, 46, 18);
-        ctx.fillRect(trX + 6, vdTopY - 32, 7, 11);
-        for (let c = 1; c <= 3; c++) {
-          ctx.fillStyle = '#5c2418';
-          ctx.fillRect(trX + c * 52, vdTopY - 20, 46, 16);
-          ctx.fillStyle = '#fde047';
-          for (let wx = 6; wx < 40; wx += 10) ctx.fillRect(trX + c * 52 + wx, vdTopY - 16, 6, 5);
-        }
-        for (let pf = 0; pf < 5; pf++) {
-          const u = ((time * 1.6 + pf * 0.2) % 1);
-          ctx.fillStyle = `rgba(254, 215, 170, ${((1 - u) * 0.65).toFixed(2)})`;
-          ctx.beginPath(); ctx.arc(trX + 10 + u * 45, vdTopY - 36 - u * 20, 4 + u * 8, 0, Math.PI * 2); ctx.fill();
-        }
-        ctx.restore();
-      }
     }
 
     // =========================================================================
@@ -24122,90 +24100,109 @@ window.Game = window.Game || {};
 
       } else if (zoneIdx === 1) {
         // ---------------------------------------------------------------------
-        // SCENE 1: AUTHENTIC AIN AL-BALAD STEPPED TERRACES & NARROW WINDING CHANNELS
-        // (ممرات مائية حجرية ضيقة تسير بين مساطب بتّير نحو البركة الرومانية — بدون شلالات ضخمة!)
+        // SCENE 1: LUSH WOODED HILLSIDE WITH AIN AL-BALAD TERRACES CLOSER TO RIVER
+        // (تلة مليئة بالأشجار قريبة من النهر، تتدرج فيها المساطب وممرات الماء الضيقة)
         // ---------------------------------------------------------------------
-        const cx0 = sx + 55;
-        // 4 Stepped Agricultural Terraces rising behind Ain al-Balad spring arch
+        const cx0 = sx + 45;
+        // Grounded lush green tree-covered Judean hillside descending all the way to the river bank!
+        const hill1G = ctx.createLinearGradient(cx0, 345, cx0, 646);
+        hill1G.addColorStop(0.0, '#4d7c0f'); hill1G.addColorStop(0.5, '#365314'); hill1G.addColorStop(1.0, '#1a2e05');
+        ctx.fillStyle = hill1G;
+        ctx.beginPath();
+        ctx.moveTo(cx0 - 65, 648);
+        ctx.bezierCurveTo(cx0 + 10, 420, cx0 + 135, 342, cx0 + 295, 354);
+        ctx.bezierCurveTo(cx0 + 445, 366, cx0 + 530, 458, cx0 + 595, 648);
+        ctx.closePath(); ctx.fill();
+        // Dense Mediterranean olive, pomegranate & cypress forest crowning the hillside behind the terraces!
+        drawCypressSilhouette(ctx, cx0 + 82, 438, 108);
+        drawAncientOliveSunset(ctx, cx0 + 165, 412, 0.88);
+        drawPomegranateTree(ctx, cx0 + 265, 402, 0.85);
+        drawAncientOliveSunset(ctx, cx0 + 365, 418, 0.92);
+        drawCypressSilhouette(ctx, cx0 + 452, 456, 114);
+
+        // 4 Stepped Agricultural Terraces nestled low & close to the river inside the wooded hill
         for (let tier = 0; tier < 4; tier++) {
-          const tx = cx0 + (3 - tier) * 26;
-          const ty = 336 + tier * 56;
-          const tw = 420 - (3 - tier) * 34;
-          drawFieldstoneRetainingWall(ctx, tx, ty, tw, 52, tier + 21, time);
+          const tx = cx0 + 18 + (3 - tier) * 24;
+          const ty = 424 + tier * 42;
+          const tw = 425 - (3 - tier) * 34;
+          drawFieldstoneRetainingWall(ctx, tx, ty, tw, 40, tier + 21, time);
         }
-        // Small Authentic Vaulted Ain al-Balad Spring Arch (عين البلد) at upper terrace
+        // Authentic Vaulted Ain al-Balad Spring Arch (عين البلد) nestled into the wooded slope
         ctx.fillStyle = '#dcb080'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.roundRect(cx0 + 130, 286, 68, 52, [28, 28, 2, 2]); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.roundRect(cx0 + 148, 382, 60, 44, [24, 24, 2, 2]); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#140c08';
-        ctx.beginPath(); ctx.arc(cx0 + 164, 318, 17, Math.PI, 0); ctx.lineTo(cx0 + 181, 338); ctx.lineTo(cx0 + 147, 338); ctx.closePath(); ctx.fill();
-        // Gentle Narrow Winding Carved-Stone Irrigation Channels connecting terrace-to-terrace -> Roman Pool!
+        ctx.beginPath(); ctx.arc(cx0 + 178, 410, 14, Math.PI, 0); ctx.lineTo(cx0 + 192, 426); ctx.lineTo(cx0 + 164, 426); ctx.closePath(); ctx.fill();
+        // Narrow Winding Carved-Stone Irrigation Channels flowing between the terraces -> Roman Pool
         const rillPts = [
-          [cx0 + 164, 336], [cx0 + 285, 342], [cx0 + 295, 396],
-          [cx0 + 175, 400], [cx0 + 185, 452], [cx0 + 365, 456],
-          [cx0 + 375, 508], [sx + 532, 514]
+          [cx0 + 178, 426], [cx0 + 296, 430], [cx0 + 306, 470],
+          [cx0 + 196, 474], [cx0 + 206, 514], [cx0 + 372, 518],
+          [cx0 + 382, 558], [sx + 532, 562]
         ];
-        // Carved limestone channel bed framing the narrow stream
-        ctx.strokeStyle = '#9c7852'; ctx.lineWidth = 11; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-        ctx.beginPath();
-        rillPts.forEach(([rx, ry], idx) => { if (idx === 0) ctx.moveTo(rx, ry); else ctx.lineTo(rx, ry); });
-        ctx.stroke();
-        // Narrow crystal-turquoise spring rill (6px wide, NOT a giant waterfall!)
-        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 6;
-        ctx.beginPath();
-        rillPts.forEach(([rx, ry], idx) => { if (idx === 0) ctx.moveTo(rx, ry); else ctx.lineTo(rx, ry); });
-        ctx.stroke();
-        // Animated golden-ivory sunlit sparkles gliding smoothly through the narrow stone channels
-        ctx.strokeStyle = 'rgba(254, 249, 195, 0.9)'; ctx.lineWidth = 2.0;
-        ctx.setLineDash([10, 22]);
-        ctx.lineDashOffset = -time * 44;
-        ctx.beginPath();
-        rillPts.forEach(([rx, ry], idx) => { if (idx === 0) ctx.moveTo(rx, ry); else ctx.lineTo(rx, ry); });
-        ctx.stroke();
+        ctx.strokeStyle = '#9c7852'; ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.beginPath(); rillPts.forEach(([rx, ry], idx) => { if (idx === 0) ctx.moveTo(rx, ry); else ctx.lineTo(rx, ry); }); ctx.stroke();
+        ctx.strokeStyle = '#0ea5e9'; ctx.lineWidth = 5.5;
+        ctx.beginPath(); rillPts.forEach(([rx, ry], idx) => { if (idx === 0) ctx.moveTo(rx, ry); else ctx.lineTo(rx, ry); }); ctx.stroke();
+        ctx.strokeStyle = 'rgba(254, 249, 195, 0.9)'; ctx.lineWidth = 1.9;
+        ctx.setLineDash([10, 22]); ctx.lineDashOffset = -time * 44;
+        ctx.beginPath(); rillPts.forEach(([rx, ry], idx) => { if (idx === 0) ctx.moveTo(rx, ry); else ctx.lineTo(rx, ry); }); ctx.stroke();
         ctx.setLineDash([]);
 
-        // Recessed Roman 4-Column Stone Colonnade & Stepped Emerald-Turquoise Roman Pool!
-        const plX = sx + 520, plY = 468, plW = 330;
+        // Recessed Roman 4-Column Stone Colonnade & Stepped Emerald-Turquoise Roman Pool close to river
+        const plX = sx + 520, plY = 492, plW = 330;
         drawFieldstoneRetainingWall(ctx, plX - 10, plY + 42, plW + 20, 56, 5, time);
         for (let c = 0; c < 4; c++) {
           const colX = plX + 28 + c * 90;
           ctx.fillStyle = '#f2cba0'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.4;
-          ctx.fillRect(colX - 8, plY - 58, 16, 102); ctx.strokeRect(colX - 8, plY - 58, 16, 102);
-          ctx.fillRect(colX - 13, plY - 64, 26, 7); ctx.strokeRect(colX - 13, plY - 64, 26, 7);
+          ctx.fillRect(colX - 8, plY - 54, 16, 98); ctx.strokeRect(colX - 8, plY - 54, 16, 98);
+          ctx.fillRect(colX - 13, plY - 60, 26, 7); ctx.strokeRect(colX - 13, plY - 60, 26, 7);
         }
         ctx.fillStyle = '#e6b885'; ctx.strokeStyle = '#3b210e';
-        ctx.fillRect(plX + 8, plY - 76, plW - 16, 13); ctx.strokeRect(plX + 8, plY - 76, plW - 16, 13);
+        ctx.fillRect(plX + 8, plY - 72, plW - 16, 13); ctx.strokeRect(plX + 8, plY - 72, plW - 16, 13);
         const poolG = ctx.createLinearGradient(plX, plY + 44, plX, plY + 86);
         poolG.addColorStop(0, '#0284c7'); poolG.addColorStop(0.6, '#0d9488'); poolG.addColorStop(1, '#115e59');
         ctx.fillStyle = poolG;
         ctx.fillRect(plX + 6, plY + 46, plW - 12, 38);
 
-        drawPomegranateTree(ctx, sx + 945, 560, 1.1);
-        drawAncientOliveSunset(ctx, sx + 1115, 564, 1.2);
+        drawPomegranateTree(ctx, sx + 945, 588, 1.1);
+        drawAncientOliveSunset(ctx, sx + 1115, 592, 1.2);
 
       } else if (zoneIdx === 2) {
         // ---------------------------------------------------------------------
-        // SCENE 2: 5-LEVEL ZIG-ZAG SANASEL TERRACES WITH NARROW INTER-TERRACE RILLS
+        // SCENE 2: WOODED VALLEY HILL WITH 5-LEVEL SANASEL TERRACES CLOSE TO RIVER
         // ---------------------------------------------------------------------
+        const h2x = sx + 15;
+        const hill2G = ctx.createLinearGradient(h2x, 348, h2x, 648);
+        hill2G.addColorStop(0.0, '#4d7c0f'); hill2G.addColorStop(0.52, '#365314'); hill2G.addColorStop(1.0, '#1a2e05');
+        ctx.fillStyle = hill2G;
+        ctx.beginPath();
+        ctx.moveTo(h2x - 55, 648);
+        ctx.bezierCurveTo(h2x + 30, 412, h2x + 175, 342, h2x + 365, 356);
+        ctx.bezierCurveTo(h2x + 540, 368, h2x + 635, 454, h2x + 715, 648);
+        ctx.closePath(); ctx.fill();
+        // Dense tree canopy crowning the terraced valley hillside
+        drawCypressSilhouette(ctx, h2x + 75, 434, 114);
+        drawAncientOliveSunset(ctx, h2x + 185, 414, 0.96);
+        drawPomegranateTree(ctx, h2x + 315, 404, 0.94);
+        drawAncientOliveSunset(ctx, h2x + 445, 416, 0.98);
+        drawCypressSilhouette(ctx, h2x + 560, 452, 118);
+
         for (let st = 0; st < 5; st++) {
           const tx = sx + 40 + st * 26;
-          const ty = 368 + st * 44;
+          const ty = 420 + st * 38;
           const tw = 560 - st * 52;
-          drawFieldstoneRetainingWall(ctx, tx, ty, tw, 46, st + 8, time);
-          // Narrow carved-stone step connector channel trickling gently to the next lower terrace!
+          drawFieldstoneRetainingWall(ctx, tx, ty, tw, 38, st + 8, time);
           if (st < 4) {
             const dropX = (st % 2 === 0) ? (tx + tw - 28) : (tx + 28);
-            ctx.strokeStyle = '#9c7852'; ctx.lineWidth = 9;
-            ctx.beginPath(); ctx.moveTo(dropX, ty + 6); ctx.lineTo(dropX + (st % 2 === 0 ? -12 : 12), ty + 46); ctx.stroke();
-            ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 4.5;
-            ctx.beginPath(); ctx.moveTo(dropX, ty + 6); ctx.lineTo(dropX + (st % 2 === 0 ? -12 : 12), ty + 46); ctx.stroke();
+            ctx.strokeStyle = '#9c7852'; ctx.lineWidth = 8.5;
+            ctx.beginPath(); ctx.moveTo(dropX, ty + 6); ctx.lineTo(dropX + (st % 2 === 0 ? -12 : 12), ty + 40); ctx.stroke();
+            ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 4.2;
+            ctx.beginPath(); ctx.moveTo(dropX, ty + 6); ctx.lineTo(dropX + (st % 2 === 0 ? -12 : 12), ty + 40); ctx.stroke();
           }
         }
-        drawPomegranateTree(ctx, sx + 165, 368, 0.94);
-        drawAncientOliveSunset(ctx, sx + 355, 368, 0.96);
-        drawRuggedMintar(ctx, sx + 695, 562, 1.15);
-        drawPomegranateTree(ctx, sx + 865, 560, 1.16);
-        drawRuggedMintar(ctx, sx + 1025, 556, 0.86);
-        drawAncientOliveSunset(ctx, sx + 1175, 564, 1.14);
+        drawRuggedMintar(ctx, sx + 715, 588, 1.12);
+        drawPomegranateTree(ctx, sx + 875, 586, 1.14);
+        drawRuggedMintar(ctx, sx + 1035, 582, 0.86);
+        drawAncientOliveSunset(ctx, sx + 1175, 590, 1.12);
 
       } else if (zoneIdx === 3) {
         // ---------------------------------------------------------------------
@@ -24278,6 +24275,94 @@ window.Game = window.Game || {};
         drawPomegranateTree(ctx, sx + 1015, 560, 1.12);
         drawAncientOliveSunset(ctx, sx + 1165, 564, 1.18);
       }
+    }
+
+    // =========================================================================
+    // 2B. CURVED VALLEY 1892 OTTOMAN TRAIN PASSING IN FRONT OF TERRACED HILLS
+    //     AND DISAPPEARING BEHIND ADJACENT WOODED HILLS ALONG THE RIVER VALLEY!
+    // =========================================================================
+    const vSpan = 1480;
+    const vOff = -((camX * 0.48) % vSpan);
+    for (let rep = -1; rep <= 1; rep++) {
+      const vx = vOff + rep * vSpan;
+      // Graceful valley rail arc curving in front of the terraced hillside right above the river!
+      const valleyRailPt = (u) => {
+        const rx = vx + 150 + u * 1160;
+        const ry = 616 - Math.sin(u * Math.PI) * 38;
+        return [rx, ry];
+      };
+      // Curved stone railway embankment & gleaming steel tracks along the valley floor
+      ctx.save();
+      ctx.fillStyle = '#9c734b'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      for (let i = 0; i <= 24; i++) {
+        const [rx, ry] = valleyRailPt(i / 24);
+        if (i === 0) ctx.moveTo(rx, ry); else ctx.lineTo(rx, ry);
+      }
+      for (let i = 24; i >= 0; i--) {
+        const [rx, ry] = valleyRailPt(i / 24);
+        ctx.lineTo(rx, ry + 15);
+      }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i <= 24; i++) {
+        const [rx, ry] = valleyRailPt(i / 24);
+        if (i === 0) ctx.moveTo(rx, ry - 1.5); else ctx.lineTo(rx, ry - 1.5);
+      }
+      ctx.stroke();
+
+      // Vintage 1892 Ottoman Steam Locomotive + 3 Warm-Lit Carriages curving along the valley!
+      const trainU = ((time * 0.055 + (rep + 2) * 0.37) % 1.24) - 0.12;
+      for (let car = 3; car >= 0; car--) {
+        const cu = trainU - car * 0.042;
+        if (cu < 0.0 || cu > 1.0) continue;
+        const [cx0, cy0] = valleyRailPt(cu);
+        const [cx1, cy1] = valleyRailPt(Math.min(1.0, cu + 0.01));
+        const ang = Math.atan2(cy1 - cy0, cx1 - cx0);
+        ctx.save();
+        ctx.translate(cx0, cy0 - 2);
+        ctx.rotate(ang);
+        if (car === 0) {
+          ctx.fillStyle = '#1c1917'; ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.roundRect(-22, -16, 42, 14, 3); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#7f1d1d'; ctx.fillRect(-22, -22, 15, 14);
+          ctx.fillStyle = '#f59e0b'; ctx.fillRect(11, -24, 6, 10);
+          // Warm golden headlight glow & drifting sunset-tinted steam trail
+          ctx.fillStyle = 'rgba(254, 240, 138, 0.72)';
+          ctx.beginPath(); ctx.arc(21, -9, 3.2, 0, Math.PI * 2); ctx.fill();
+          for (let pf = 0; pf < 5; pf++) {
+            const pr = ((time * 1.45 + pf * 0.2) % 1);
+            ctx.fillStyle = `rgba(254, 226, 190, ${((1 - pr) * 0.62).toFixed(2)})`;
+            ctx.beginPath(); ctx.arc(14 - pr * 34, -27 - pr * 24, 3.5 + pr * 7.5, 0, Math.PI * 2); ctx.fill();
+          }
+        } else {
+          ctx.fillStyle = '#6b2316'; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.roundRect(-20, -16, 38, 14, 2.5); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#fef08a';
+          for (let wx = -15; wx <= 10; wx += 8) ctx.fillRect(wx, -12.5, 5, 5);
+        }
+        ctx.restore();
+      }
+      ctx.restore();
+
+      // Adjacent Wooded Valley Occlusion Hills (تلة جانبية مليئة بالأشجار يختفي القطار خلفها!)
+      const drawOcclusionHill = (ox) => {
+        const ohG = ctx.createLinearGradient(ox, 535, ox, 650);
+        ohG.addColorStop(0.0, '#3f6212'); ohG.addColorStop(0.55, '#2b4709'); ohG.addColorStop(1.0, '#142605');
+        ctx.fillStyle = ohG; ctx.strokeStyle = '#142605'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(ox - 165, 650);
+        ctx.bezierCurveTo(ox - 115, 558, ox - 45, 532, ox + 10, 540);
+        ctx.bezierCurveTo(ox + 75, 548, ox + 135, 582, ox + 175, 650);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Olive, pomegranate & cypress trees crowning the occlusion hill
+        drawCypressSilhouette(ctx, ox - 68, 568, 76);
+        drawAncientOliveSunset(ctx, ox - 8, 556, 0.72);
+        drawPomegranateTree(ctx, ox + 64, 574, 0.74);
+      };
+      drawOcclusionHill(vx + 115);
+      drawOcclusionHill(vx + 1345);
     }
 
     // =========================================================================
