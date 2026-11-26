@@ -26886,7 +26886,8 @@ window.Game = window.Game || {};
 
     for (let bx = worldStart; bx <= worldEnd; bx += blockW) {
       const sx = bx - camX * p;
-      const zoneIdx = ((Math.round(bx / blockW) % 5) + 5) % 5;
+      const blockIdx = Math.round(bx / blockW);
+      const zoneIdx = ((blockIdx % 5) + 5) % 5;
 
       if (zoneIdx === 0) {
         // ---------------------------------------------------------------------
@@ -26905,11 +26906,11 @@ window.Game = window.Game || {};
         // Tier 1 (Lower Courtyard Wall, Pomegranate & Ancient Olive Orchard)
         drawFieldstoneRetainingWall(ctx, sx + 30, 558, 620, 36, 3);
         drawPomegranateTree(ctx, sx + 690, 560, 1.12);
-        drawTerraceFarmer(ctx, sx + 755, 562, 0.94, time, 'pick', 1, i * 7 + 1);
+        drawTerraceFarmer(ctx, sx + 755, 562, 0.94, time, 'pick', 1, blockIdx * 7 + 1);
         drawCypressSilhouette(ctx, sx + 835, 558, 162);
         drawAncientOliveSunset(ctx, sx + 985, 564, 1.22);
-        drawOliveHarvestScene(ctx, sx + 985, 564, 1.22, time, i * 13 + 1);
-        drawTerraceFarmer(ctx, sx + 1090, 562, 0.92, time, 'hoe', -1, i * 11 + 6);
+        drawOliveHarvestScene(ctx, sx + 985, 564, 1.22, time, blockIdx * 13 + 1);
+        drawTerraceFarmer(ctx, sx + 1090, 562, 0.92, time, 'hoe', -1, blockIdx * 11 + 6);
         drawPomegranateTree(ctx, sx + 1155, 558, 1.04);
 
       } else if (zoneIdx === 1) {
@@ -27240,9 +27241,9 @@ window.Game = window.Game || {};
         drawPureStoneSpoutPour(plX - 4, plY + 52, plX + 14, plY + 62, 12);
 
         drawPomegranateTree(ctx, sx + 945, 588, 1.1);
-        drawTerraceFarmer(ctx, sx + 1010, 590, 0.94, time, 'hoe', -1, i * 11 + 4);
+        drawTerraceFarmer(ctx, sx + 1010, 590, 0.94, time, 'hoe', -1, blockIdx * 11 + 4);
         drawAncientOliveSunset(ctx, sx + 1115, 592, 1.2);
-        drawOliveHarvestScene(ctx, sx + 1115, 592, 1.2, time, i * 19 + 2);
+        drawOliveHarvestScene(ctx, sx + 1115, 592, 1.2, time, blockIdx * 19 + 2);
 
       } else if (zoneIdx === 2) {
         // ---------------------------------------------------------------------
@@ -27669,10 +27670,10 @@ window.Game = window.Game || {};
           }
         }
         drawPomegranateTree(ctx, sx + 662, 588, 1.06);
-        drawTerraceFarmer(ctx, sx + 310, 488, 0.88, time, 'hoe', 1, i * 7 + 2);
-        drawTerraceFarmer(ctx, sx + 472, 540, 0.90, time, 'pick', -1, i * 9 + 5);
+        drawTerraceFarmer(ctx, sx + 310, 488, 0.88, time, 'hoe', 1, blockIdx * 7 + 2);
+        drawTerraceFarmer(ctx, sx + 472, 540, 0.90, time, 'pick', -1, blockIdx * 9 + 5);
         drawAncientOliveSunset(ctx, sx + 1072, 590, 1.12);
-        drawOliveHarvestScene(ctx, sx + 1072, 590, 1.12, time, i * 13 + 5);
+        drawOliveHarvestScene(ctx, sx + 1072, 590, 1.12, time, blockIdx * 13 + 5);
 
       } else if (zoneIdx === 3) {
         // ---------------------------------------------------------------------
@@ -27707,8 +27708,8 @@ window.Game = window.Game || {};
 
         drawCypressSilhouette(ctx, sx + 695, 558, 165);
         drawAncientOliveSunset(ctx, sx + 855, 564, 1.24);
-        drawOliveHarvestScene(ctx, sx + 855, 564, 1.24, time, i * 11 + 3);
-        drawTerraceFarmer(ctx, sx + 962, 564, 0.94, time, 'pick', -1, i * 13 + 7);
+        drawOliveHarvestScene(ctx, sx + 855, 564, 1.24, time, blockIdx * 11 + 3);
+        drawTerraceFarmer(ctx, sx + 962, 564, 0.94, time, 'pick', -1, blockIdx * 13 + 7);
         drawPomegranateTree(ctx, sx + 1045, 560, 1.14);
         drawCypressSilhouette(ctx, sx + 1190, 558, 148);
 
@@ -27784,7 +27785,7 @@ window.Game = window.Game || {};
         drawSunsetVillageHouse(ctx, sx + 635, 558, 186, 122, { domeR: 58, mashrabiya: true, sideW: 18, topCol: '#f7d5a8' });
         drawCypressSilhouette(ctx, sx + 868, 558, 152);
         drawPomegranateTree(ctx, sx + 1015, 560, 1.12);
-        drawTerraceFarmer(ctx, sx + 1085, 564, 0.96, time, 'hoe', 1, i * 17 + 9);
+        drawTerraceFarmer(ctx, sx + 1085, 564, 0.96, time, 'hoe', 1, blockIdx * 17 + 9);
         drawAncientOliveSunset(ctx, sx + 1165, 564, 1.18);
       }
     }
