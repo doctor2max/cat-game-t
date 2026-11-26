@@ -23771,113 +23771,111 @@ window.Game = window.Game || {};
     const sideW = o.sideW !== undefined ? o.sideW : 20;
     ctx.save();
 
-    const seed = Math.abs(Math.floor(x * 0.23 + botY));
+    // Fixed world-independent seed so stone shades NEVER flicker when the camera scrolls!
+    const seed = Math.abs(Math.floor(botY * 3 + w * 7 + h * 11));
 
-    // 1. Shaded Deep-Umber 3D Right Stone Facet (with hand-laid stone courses!)
+    // 1. Softly shaded 3D Right Stone Facet with weathered rounded upper corner
     const sidePath = () => {
       ctx.beginPath();
-      ctx.moveTo(x + w, y);
-      ctx.lineTo(x + w + sideW, y + 10);
-      ctx.lineTo(x + w + sideW, botY);
-      ctx.lineTo(x + w, botY);
+      ctx.moveTo(x + w - 2, y + 1);
+      ctx.quadraticCurveTo(x + w + sideW * 0.55, y + 3, x + w + sideW, y + 10);
+      ctx.lineTo(x + w + sideW, botY - 2);
+      ctx.quadraticCurveTo(x + w + sideW, botY, x + w + sideW - 2, botY);
+      ctx.lineTo(x + w - 2, botY);
       ctx.closePath();
     };
     const sG = ctx.createLinearGradient(x + w, y, x + w + sideW, botY);
-    sG.addColorStop(0, '#784c2a');
-    sG.addColorStop(1, '#3b200e');
+    sG.addColorStop(0, '#8d6440');
+    sG.addColorStop(1, '#543720');
     ctx.fillStyle = sG;
     sidePath(); ctx.fill();
     ctx.save();
     sidePath(); ctx.clip();
-    for (let sy = y + 11; sy < botY; sy += 11) {
-      ctx.strokeStyle = 'rgba(26, 12, 4, 0.52)'; ctx.lineWidth = 1.0;
+    for (let sy = y + 11.5; sy < botY; sy += 11.5) {
+      ctx.strokeStyle = 'rgba(52, 30, 14, 0.28)'; ctx.lineWidth = 0.85;
       ctx.beginPath(); ctx.moveTo(x + w, sy); ctx.lineTo(x + w + sideW, sy + 8); ctx.stroke();
-      const midX = x + w + sideW * (0.35 + ((sy / 11) % 2) * 0.3);
-      ctx.beginPath(); ctx.moveTo(midX, sy); ctx.lineTo(midX, sy + 11); ctx.stroke();
+      const midX = x + w + sideW * (0.35 + ((Math.floor(sy / 11.5)) % 2) * 0.3);
+      ctx.beginPath(); ctx.moveTo(midX, sy); ctx.lineTo(midX, sy + 11.5); ctx.stroke();
     }
     ctx.restore();
-    ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.4; sidePath(); ctx.stroke();
+    ctx.strokeStyle = 'rgba(68, 42, 22, 0.45)'; ctx.lineWidth = 1.1; sidePath(); ctx.stroke();
 
-    // 2. Authentic Hand-Dressed Palestinian Weathered Limestone Masonry Front Wall (حجر قديم منحوت!)
-    ctx.fillStyle = '#57371d'; // Recessed dark-earth mortar seams
-    ctx.fillRect(x, y, w, h);
-    const stonePalette = ['#e8c69a', '#d4a674', '#c08e5d', '#deb788', '#ac7c4e', '#ecd4b0', '#c89866'];
+    // 2. Soft Weathered Limestone Masonry Front Wall with gently rounded corners (أقل حدة وثابتة اللون!)
+    const frontPath = () => {
+      ctx.beginPath(); ctx.roundRect(x, y, w, h, [5.5, 5.5, 2, 2]);
+    };
+    ctx.fillStyle = '#967250'; // Soft warm-limestone mortar base
+    frontPath(); ctx.fill();
+    const stonePalette = ['#e2c69e', '#d9ba91', '#cfaf84', '#d6b78d', '#c7a57a', '#e6cea9', '#d2b287'];
     const rowH = 11.5;
     const baseStoneW = 22;
     ctx.save();
-    ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+    frontPath(); ctx.clip();
     let rowIdx = 0;
     for (let sy = y; sy < botY; sy += rowH) {
       const xOff = (rowIdx % 2) * (baseStoneW * 0.5);
       let colIdx = 0;
       for (let sx0 = x - xOff; sx0 < x + w; sx0 += baseStoneW) {
-        const wJitter = ((seed + rowIdx * 5 + colIdx * 3) % 5 - 2) * 1.1;
-        const sw = baseStoneW - 1.4 + wJitter;
-        const sh = rowH - 1.4;
+        const wJitter = ((seed + rowIdx * 5 + colIdx * 3) % 5 - 2) * 0.85;
+        const sw = baseStoneW - 1.1 + wJitter;
+        const sh = rowH - 1.1;
         const pIdx = (seed + rowIdx * 7 + colIdx * 13) % stonePalette.length;
         ctx.fillStyle = stonePalette[pIdx];
-        ctx.beginPath(); ctx.roundRect(sx0 + 0.7, sy + 0.7, sw, sh, 1.4); ctx.fill();
-        // Sunlit top-left chiseled stone edge + deep bottom-right bevel shadow
-        ctx.fillStyle = 'rgba(255, 248, 228, 0.28)';
-        ctx.fillRect(sx0 + 1.0, sy + 0.8, sw - 0.8, 1.6);
-        ctx.fillStyle = 'rgba(42, 22, 8, 0.28)';
-        ctx.fillRect(sx0 + 1.0, sy + sh - 0.8, sw - 0.8, 1.4);
-        // Occasional pitted rough stone grain
-        if ((seed + rowIdx + colIdx) % 3 === 0) {
-          ctx.fillStyle = 'rgba(58, 34, 14, 0.16)';
-          ctx.fillRect(sx0 + 4, sy + 4, 4, 2);
-        }
+        ctx.beginPath(); ctx.roundRect(sx0 + 0.55, sy + 0.55, sw, sh, 2.2); ctx.fill();
+        // Gentle sunlit top bevel & soft underside shadow
+        ctx.fillStyle = 'rgba(255, 249, 234, 0.16)';
+        ctx.fillRect(sx0 + 1.2, sy + 0.7, sw - 1.4, 1.3);
+        ctx.fillStyle = 'rgba(62, 38, 18, 0.16)';
+        ctx.fillRect(sx0 + 1.2, sy + sh - 0.8, sw - 1.4, 1.1);
         colIdx++;
       }
       rowIdx++;
     }
-    // Prominent alternating dressed corner quoins (أحجار الزوايا البارزة)
+    // Soft weathered corner quoins (أحجار زوايا ناعمة)
     for (let qy = y + 2, qi = 0; qy < botY - 8; qy += rowH, qi++) {
-      const qw = (qi % 2 === 0) ? 16 : 11;
-      ctx.fillStyle = 'rgba(255, 244, 220, 0.22)';
-      ctx.strokeStyle = 'rgba(52, 28, 12, 0.45)'; ctx.lineWidth = 0.8;
-      ctx.fillRect(x + 1, qy, qw, rowH - 1.4); ctx.strokeRect(x + 1, qy, qw, rowH - 1.4);
-      ctx.fillRect(x + w - qw - 1, qy, qw, rowH - 1.4); ctx.strokeRect(x + w - qw - 1, qy, qw, rowH - 1.4);
+      const qw = (qi % 2 === 0) ? 15 : 10;
+      ctx.fillStyle = 'rgba(255, 246, 228, 0.14)';
+      ctx.strokeStyle = 'rgba(74, 46, 22, 0.24)'; ctx.lineWidth = 0.7;
+      ctx.beginPath(); ctx.roundRect(x + 1, qy, qw, rowH - 1.2, 1.8); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(x + w - qw - 1, qy, qw, rowH - 1.2, 1.8); ctx.fill(); ctx.stroke();
     }
-    // Warm sunset top glow & weathered damp stone base gradient
     const shadeG = ctx.createLinearGradient(x, y, x, botY);
-    shadeG.addColorStop(0.0, 'rgba(255, 232, 194, 0.16)');
+    shadeG.addColorStop(0.0, 'rgba(255, 238, 208, 0.12)');
     shadeG.addColorStop(0.62, 'rgba(0, 0, 0, 0)');
-    shadeG.addColorStop(1.0, 'rgba(44, 22, 8, 0.36)');
+    shadeG.addColorStop(1.0, 'rgba(58, 34, 16, 0.24)');
     ctx.fillStyle = shadeG; ctx.fillRect(x, y, w, h);
     ctx.restore();
-    ctx.strokeStyle = '#3b210e';
-    ctx.lineWidth = 1.6;
-    ctx.strokeRect(x, y, w, h);
+    ctx.strokeStyle = 'rgba(68, 42, 22, 0.48)';
+    ctx.lineWidth = 1.2;
+    frontPath(); ctx.stroke();
 
-    // 3. Roof Style: Stone-Coursed Sunset Dome, Pitched Marseilles Terracotta Roof, or Clay Pigeon-Tower!
+    // 3. Roof Style: Soft Stone-Coursed Sunset Dome, Pitched Marseilles Terracotta Roof, or Clay Pigeon-Tower!
     if (o.tileRoof) {
       const rfG = ctx.createLinearGradient(x, y - 34, x, y);
       rfG.addColorStop(0, '#ea580c'); rfG.addColorStop(0.55, '#b91c1c'); rfG.addColorStop(1, '#7f1d1d');
-      ctx.fillStyle = rfG; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.5;
+      ctx.fillStyle = rfG; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.3;
       ctx.beginPath();
-      ctx.moveTo(x - 8, y); ctx.lineTo(x + 22, y - 32);
-      ctx.lineTo(x + w - 18, y - 32); ctx.lineTo(x + w + 10, y);
+      ctx.moveTo(x - 6, y + 1); ctx.lineTo(x + 22, y - 32);
+      ctx.lineTo(x + w - 18, y - 32); ctx.lineTo(x + w + 8, y + 1);
       ctx.closePath(); ctx.fill(); ctx.stroke();
     } else if (o.domeR) {
       const r = o.domeR;
       const cx = x + w * 0.5;
       const domePath = () => {
         ctx.beginPath();
-        ctx.moveTo(cx - r, y);
+        ctx.moveTo(cx - r, y + 1);
         ctx.bezierCurveTo(cx - r, y - r * 0.95, cx - r * 0.3, y - r * 1.1, cx, y - r * 1.1);
-        ctx.bezierCurveTo(cx + r * 0.3, y - r * 1.1, cx + r, y - r * 0.95, cx + r, y);
+        ctx.bezierCurveTo(cx + r * 0.3, y - r * 1.1, cx + r, y - r * 0.95, cx + r, y + 1);
         ctx.closePath();
       };
       const dG = ctx.createRadialGradient(cx - r * 0.35, y - r * 0.55, 4, cx, y - r * 0.15, r * 1.1);
-      dG.addColorStop(0, '#f5d9ad'); dG.addColorStop(0.5, '#cf9662'); dG.addColorStop(1, '#6e4221');
+      dG.addColorStop(0, '#f2d9b4'); dG.addColorStop(0.55, '#cfa072'); dG.addColorStop(1, '#855832');
       ctx.fillStyle = dG; domePath(); ctx.fill();
-      // Concentric weathered stone courses wrapping around the vaulted stone dome
       ctx.save();
       domePath(); ctx.clip();
       for (let dr = 1; dr <= 4; dr++) {
         const dy = y - (r * 1.05 * dr) / 5;
-        ctx.strokeStyle = 'rgba(54, 30, 12, 0.40)'; ctx.lineWidth = 0.9;
+        ctx.strokeStyle = 'rgba(72, 44, 22, 0.24)'; ctx.lineWidth = 0.75;
         ctx.beginPath(); ctx.moveTo(cx - r, dy); ctx.quadraticCurveTo(cx, dy + 4, cx + r, dy); ctx.stroke();
         for (let j = -4; j <= 4; j++) {
           const jx = cx + j * (r * 0.24) + (dr % 2) * 5;
@@ -23885,9 +23883,9 @@ window.Game = window.Game || {};
         }
       }
       ctx.restore();
-      ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.5; domePath(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(68, 42, 22, 0.48)'; ctx.lineWidth = 1.2; domePath(); ctx.stroke();
       ctx.fillStyle = '#fbbf24';
-      ctx.beginPath(); ctx.arc(cx, y - r * 1.14, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, y - r * 1.14, 3.8, 0, Math.PI * 2); ctx.fill();
     }
     if (o.pigeonTower) {
       // Traditional Palestinian Clay Rooftop Pigeon-Cote (برج الحمام الفخاري)!
@@ -24144,74 +24142,79 @@ window.Game = window.Game || {};
     const drawOldBattirHouse = (x, botY, bw, bh, hasDome) => {
       const y = botY - bh;
       const sideW = Math.round(bw * 0.16);
-      const seed = Math.abs(Math.floor(x * 0.37 + botY));
+      // Fixed world-independent seed so stones NEVER flicker or shift color while the camera moves!
+      const seed = Math.abs(Math.floor(botY * 3 + bw * 7 + bh * 11));
 
-      // 1. Shaded 3D Stone Side Wall with visible stone courses
+      // 1. Softly shaded 3D Stone Side Wall with weathered rounded top corner
       const sidePath = () => {
         ctx.beginPath();
-        ctx.moveTo(x + bw, y); ctx.lineTo(x + bw + sideW, y + 5);
-        ctx.lineTo(x + bw + sideW, botY); ctx.lineTo(x + bw, botY); ctx.closePath();
+        ctx.moveTo(x + bw - 1, y + 1);
+        ctx.quadraticCurveTo(x + bw + sideW * 0.5, y + 2, x + bw + sideW, y + 6);
+        ctx.lineTo(x + bw + sideW, botY - 1);
+        ctx.lineTo(x + bw - 1, botY);
+        ctx.closePath();
       };
-      ctx.fillStyle = '#6b492c'; sidePath(); ctx.fill();
+      ctx.fillStyle = '#8b6847'; sidePath(); ctx.fill();
       ctx.save();
       sidePath(); ctx.clip();
-      for (let sy = y + 6; sy < botY; sy += 6.5) {
-        ctx.strokeStyle = 'rgba(34, 18, 6, 0.52)'; ctx.lineWidth = 0.8;
+      for (let sy = y + 6.5; sy < botY; sy += 6.5) {
+        ctx.strokeStyle = 'rgba(66, 42, 22, 0.26)'; ctx.lineWidth = 0.7;
         ctx.beginPath(); ctx.moveTo(x + bw, sy); ctx.lineTo(x + bw + sideW, sy + 4); ctx.stroke();
       }
       ctx.restore();
-      ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.0; sidePath(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(74, 46, 24, 0.42)'; ctx.lineWidth = 0.85; sidePath(); ctx.stroke();
 
-      // 2. Authentic Hand-Laid Weathered Stone Masonry Front Wall (NOT smooth!)
-      ctx.fillStyle = '#5c3c20'; // Recessed mortar base
-      ctx.fillRect(x, y, bw, bh);
-      const stonePalette = ['#e4c599', '#cfa574', '#be905e', '#d9b585', '#a97b4d', '#e8d0ab'];
+      // 2. Soft Weathered Limestone Masonry Front Wall with gently rounded corners (أقل حدة وثابتة اللون!)
+      const frontPath = () => {
+        ctx.beginPath(); ctx.roundRect(x, y, bw, bh, [3.5, 3.5, 1.5, 1.5]);
+      };
+      ctx.fillStyle = '#9c7a56'; // Soft warm mortar base
+      frontPath(); ctx.fill();
+      const stonePalette = ['#e2c8a4', '#d8ba93', '#ceb087', '#d5b78f', '#c7a77e', '#e5cea9'];
       const rowH = 6.5;
       const stoneW = 11.5;
       ctx.save();
-      ctx.beginPath(); ctx.rect(x, y, bw, bh); ctx.clip();
+      frontPath(); ctx.clip();
       let rowIdx = 0;
       for (let sy = y; sy < botY; sy += rowH) {
         const xOff = (rowIdx % 2) * (stoneW * 0.5);
         let colIdx = 0;
         for (let sx0 = x - xOff; sx0 < x + bw; sx0 += stoneW) {
-          const wVar = stoneW - 1.0 + ((seed + rowIdx * 5 + colIdx * 3) % 3 - 1) * 0.9;
+          const wVar = stoneW - 0.8 + ((seed + rowIdx * 5 + colIdx * 3) % 3 - 1) * 0.7;
           const shadeIdx = (seed + rowIdx * 7 + colIdx * 11) % stonePalette.length;
           ctx.fillStyle = stonePalette[shadeIdx];
-          ctx.fillRect(sx0 + 0.6, sy + 0.6, wVar, rowH - 1.1);
-          // Sunlit stone top bevel & chiseled bottom shadow
-          ctx.fillStyle = 'rgba(255, 248, 228, 0.24)';
-          ctx.fillRect(sx0 + 0.6, sy + 0.6, wVar, 1.0);
-          ctx.fillStyle = 'rgba(42, 22, 8, 0.24)';
-          ctx.fillRect(sx0 + 0.6, sy + rowH - 1.4, wVar, 0.9);
+          ctx.beginPath(); ctx.roundRect(sx0 + 0.45, sy + 0.45, wVar, rowH - 0.9, 1.3); ctx.fill();
+          ctx.fillStyle = 'rgba(255, 249, 235, 0.14)';
+          ctx.fillRect(sx0 + 0.8, sy + 0.5, wVar - 0.6, 0.8);
+          ctx.fillStyle = 'rgba(66, 42, 20, 0.14)';
+          ctx.fillRect(sx0 + 0.8, sy + rowH - 1.2, wVar - 0.6, 0.7);
           colIdx++;
         }
         rowIdx++;
       }
-      // Subtle warm vertical age shading & weathered lower stone darkening
       const ageG = ctx.createLinearGradient(x, y, x, botY);
-      ageG.addColorStop(0.0, 'rgba(255, 240, 210, 0.12)');
+      ageG.addColorStop(0.0, 'rgba(255, 244, 222, 0.10)');
       ageG.addColorStop(0.65, 'rgba(0, 0, 0, 0)');
-      ageG.addColorStop(1.0, 'rgba(46, 24, 8, 0.34)');
+      ageG.addColorStop(1.0, 'rgba(62, 38, 18, 0.22)');
       ctx.fillStyle = ageG; ctx.fillRect(x, y, bw, bh);
       ctx.restore();
-      ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.0; ctx.strokeRect(x, y, bw, bh);
+      ctx.strokeStyle = 'rgba(74, 46, 24, 0.45)'; ctx.lineWidth = 0.85; frontPath(); ctx.stroke();
 
-      // 3. Weathered Stone-Coursed Dome (قبة حجرية وليست ملساء)
+      // 3. Soft Weathered Stone-Coursed Dome
       if (hasDome) {
         const dr = bw * 0.34;
         const dcx = x + bw * 0.5;
         const domePath = () => {
-          ctx.beginPath(); ctx.arc(dcx, y, dr, Math.PI, 0); ctx.closePath();
+          ctx.beginPath(); ctx.arc(dcx, y + 1, dr, Math.PI, 0); ctx.closePath();
         };
         const dG = ctx.createRadialGradient(dcx - dr * 0.25, y - dr * 0.48, 2, dcx, y, dr);
-        dG.addColorStop(0, '#f0d4ad'); dG.addColorStop(0.6, '#c79765'); dG.addColorStop(1, '#855832');
+        dG.addColorStop(0, '#edd5b4'); dG.addColorStop(0.6, '#cca277'); dG.addColorStop(1, '#98704b');
         ctx.fillStyle = dG; domePath(); ctx.fill();
         ctx.save();
         domePath(); ctx.clip();
         for (let r = 1; r <= 3; r++) {
           const dy = y - (dr * r) / 4;
-          ctx.strokeStyle = 'rgba(54, 30, 12, 0.38)'; ctx.lineWidth = 0.75;
+          ctx.strokeStyle = 'rgba(74, 46, 22, 0.22)'; ctx.lineWidth = 0.65;
           ctx.beginPath(); ctx.moveTo(dcx - dr, dy); ctx.quadraticCurveTo(dcx, dy + 2.5, dcx + dr, dy); ctx.stroke();
           for (let j = -3; j <= 3; j++) {
             const jx = dcx + j * (dr * 0.3) + (r % 2) * 3;
@@ -24219,20 +24222,20 @@ window.Game = window.Game || {};
           }
         }
         ctx.restore();
-        ctx.strokeStyle = '#4a2b16'; ctx.lineWidth = 1.0; domePath(); ctx.stroke();
+        ctx.strokeStyle = 'rgba(74, 46, 24, 0.45)'; ctx.lineWidth = 0.85; domePath(); ctx.stroke();
       }
-      // Pointed arched heritage windows framed with carved stone arch stones & warm evening glow
+      // Pointed arched heritage windows framed with soft stone arch trim & warm evening glow
       for (const wx of [x + bw * 0.28, x + bw * 0.72]) {
-        ctx.fillStyle = '#e8cfa6'; ctx.strokeStyle = '#4a2b16'; ctx.lineWidth = 0.85;
+        ctx.fillStyle = '#e5cfa9'; ctx.strokeStyle = 'rgba(74, 46, 24, 0.5)'; ctx.lineWidth = 0.75;
         ctx.beginPath();
-        ctx.moveTo(wx - 6.5, y + bh * 0.64); ctx.lineTo(wx - 6.5, y + bh * 0.35);
-        ctx.quadraticCurveTo(wx, y + bh * 0.18, wx + 6.5, y + bh * 0.35);
-        ctx.lineTo(wx + 6.5, y + bh * 0.64); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.moveTo(wx - 6.2, y + bh * 0.64); ctx.lineTo(wx - 6.2, y + bh * 0.35);
+        ctx.quadraticCurveTo(wx, y + bh * 0.19, wx + 6.2, y + bh * 0.35);
+        ctx.lineTo(wx + 6.2, y + bh * 0.64); ctx.closePath(); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#fef08a';
         ctx.beginPath();
-        ctx.moveTo(wx - 4.4, y + bh * 0.61); ctx.lineTo(wx - 4.4, y + bh * 0.37);
-        ctx.quadraticCurveTo(wx, y + bh * 0.24, wx + 4.4, y + bh * 0.37);
-        ctx.lineTo(wx + 4.4, y + bh * 0.61); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.moveTo(wx - 4.2, y + bh * 0.61); ctx.lineTo(wx - 4.2, y + bh * 0.37);
+        ctx.quadraticCurveTo(wx, y + bh * 0.25, wx + 4.2, y + bh * 0.37);
+        ctx.lineTo(wx + 4.2, y + bh * 0.61); ctx.closePath(); ctx.fill(); ctx.stroke();
       }
     };
 
