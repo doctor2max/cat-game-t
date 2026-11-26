@@ -27449,14 +27449,124 @@ window.Game = window.Game || {};
         }
         ctx.restore();
 
-        // Authentic Vaulted Ain al-Balad Spring Arch (عين البلد) feeding the top organized channel!
+        // Authentic Detailed Ain al-Balad Stone Spring & Small Catch-Pool (نبعة حجرية متقنة وأمامها بركة صغيرة)
         const spX = cx0 + 178;
         const spY = evalContourY(spX, s1L, s1R, 406, 24, 5.5, 0.2);
-        ctx.fillStyle = '#dcb080'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.4;
-        ctx.beginPath(); ctx.roundRect(spX - 28, spY - 40, 56, 42, [22, 22, 2, 2]); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#18110c';
-        ctx.beginPath(); ctx.arc(spX, spY - 14, 12, Math.PI, 0); ctx.lineTo(spX + 12, spY + 1); ctx.lineTo(spX - 12, spY + 1); ctx.closePath(); ctx.fill();
-        drawPureStoneSpoutPour(spX, spY - 5, spX + 4, spY + 3, 9);
+        {
+          const sW = 74, sH = 48;
+          const sL = spX - sW * 0.5, sT = spY - sH + 2;
+          const sPal = ['#efe5d4', '#e3d5be', '#d6c4a8', '#cbb798', '#dfd0b8'];
+
+          // 1. Dressed Limestone Spring Masonry Headwall with Stone Courses & Cornice Cap
+          ctx.save();
+          ctx.beginPath();
+          ctx.roundRect(sL, sT, sW, sH, [5, 5, 1, 1]);
+          ctx.fillStyle = '#d9c7aa'; ctx.fill();
+          ctx.clip();
+          for (let r = 0; r < 5; r++) {
+            const ry = sT + r * 10;
+            const off = (r % 2) * 9;
+            for (let bx = -18 + off; bx < sW + 18; bx += 18) {
+              ctx.fillStyle = sPal[Math.abs(17 + r * 7 + Math.floor(bx / 18) * 5) % sPal.length];
+              ctx.beginPath(); ctx.roundRect(sL + bx + 0.6, ry + 0.6, 16.8, 8.8, 1.4); ctx.fill();
+            }
+          }
+          // Warm directional side shadow & damp lower stone patina
+          const dampG = ctx.createLinearGradient(0, sT + 18, 0, spY + 2);
+          dampG.addColorStop(0, 'rgba(38, 56, 36, 0)');
+          dampG.addColorStop(1, 'rgba(28, 48, 32, 0.34)');
+          ctx.fillStyle = dampG; ctx.fillRect(sL, sT + 18, sW, sH - 18);
+          ctx.restore();
+          ctx.strokeStyle = '#54402e'; ctx.lineWidth = 1.25;
+          ctx.beginPath(); ctx.roundRect(sL, sT, sW, sH, [5, 5, 1, 1]); ctx.stroke();
+
+          // Projecting top limestone cornice & historic carved inscription plaque
+          ctx.fillStyle = '#f2e8d8'; ctx.strokeStyle = '#54402e'; ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.roundRect(sL - 4, sT - 4, sW + 8, 5.5, 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#e7dac4'; ctx.strokeStyle = '#6b533b'; ctx.lineWidth = 0.85;
+          ctx.fillRect(spX - 15, sT + 3.5, 30, 8.5); ctx.strokeRect(spX - 15, sT + 3.5, 30, 8.5);
+          ctx.strokeStyle = 'rgba(84, 64, 46, 0.55)'; ctx.lineWidth = 0.7;
+          ctx.beginPath(); ctx.moveTo(spX - 11, sT + 6.5); ctx.lineTo(spX + 11, sT + 6.5); ctx.moveTo(spX - 9, sT + 9.2); ctx.lineTo(spX + 9, sT + 9.2); ctx.stroke();
+
+          // 2. Recessed Pointed Stone Spring Arch with Carved Voussoirs & Mossy Grotto Interior
+          const aR = 14, aSpY = spY - 14;
+          // Recessed shaded wet grotto
+          const grG = ctx.createLinearGradient(spX, aSpY - aR, spX, spY + 2);
+          grG.addColorStop(0, '#141814'); grG.addColorStop(0.65, '#1d2b22'); grG.addColorStop(1, '#113036');
+          ctx.fillStyle = grG;
+          ctx.beginPath();
+          ctx.moveTo(spX - aR, spY + 2);
+          ctx.lineTo(spX - aR, aSpY);
+          ctx.quadraticCurveTo(spX - aR, aSpY - aR * 0.9, spX, aSpY - aR - 2.5);
+          ctx.quadraticCurveTo(spX + aR, aSpY - aR * 0.9, spX + aR, aSpY);
+          ctx.lineTo(spX + aR, spY + 2);
+          ctx.closePath(); ctx.fill();
+
+          // Carved radial limestone arch voussoirs (أحجار عقد القوس)
+          for (let v = 0; v < 7; v++) {
+            const a0 = Math.PI + (v / 7) * Math.PI;
+            const a1 = Math.PI + ((v + 1) / 7) * Math.PI;
+            ctx.fillStyle = v % 2 === 0 ? '#efe4d0' : '#d2bc9a';
+            ctx.strokeStyle = '#54402e'; ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.arc(spX, aSpY, aR + 5.2, a0, a1);
+            ctx.arc(spX, aSpY, aR, a1, a0, true);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+          }
+
+          // Lush emerald moss & maidenhair fern cushions clinging around the damp spring stones
+          for (const [mx, my, mrx, mry] of [
+            [sL + 4, sT - 2, 10, 4.2], [sL + sW - 6, sT - 2, 11, 4.5],
+            [spX - aR - 5, spY - 4, 6.5, 4.2], [spX + aR + 5, spY - 3, 6.0, 3.8]
+          ]) {
+            ctx.fillStyle = '#365f26';
+            ctx.beginPath(); ctx.ellipse(mx, my, mrx, mry, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#5a943a';
+            ctx.beginPath(); ctx.ellipse(mx - 1.5, my - 1.2, mrx * 0.62, mry * 0.58, 0, 0, Math.PI * 2); ctx.fill();
+          }
+
+          // 3. Small Hand-Laid Stone Catch-Pool right in front of the Spring (بركة صغيرة أمام النبعة)
+          const pCy = spY + 6.5;
+          // Outer raised limestone pool rim
+          ctx.fillStyle = '#cbb798'; ctx.strokeStyle = '#4a3723'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.ellipse(spX, pCy + 1.5, 38, 10.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#e8dcc6';
+          ctx.beginPath(); ctx.ellipse(spX, pCy, 37, 9.2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          // Crystal-clear turquoise-emerald spring pool water inside the small basin
+          const spPoolG = ctx.createRadialGradient(spX - 4, pCy - 1, 2, spX, pCy, 34);
+          spPoolG.addColorStop(0.0, '#7dd3dc');
+          spPoolG.addColorStop(0.45, '#2b8f96');
+          spPoolG.addColorStop(1.0, '#124e58');
+          ctx.fillStyle = spPoolG;
+          ctx.beginPath(); ctx.ellipse(spX, pCy, 32, 6.8, 0, 0, Math.PI * 2); ctx.fill();
+          // Animated concentric water ripples radiating from where the spring stream splashes!
+          const spRip = (time * 1.8) % 1;
+          ctx.strokeStyle = `rgba(224, 249, 255, ${(0.72 * (1 - spRip)).toFixed(2)})`;
+          ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.ellipse(spX + 3, pCy - 0.5, 4 + spRip * 18, 1.3 + spRip * 4.2, 0, 0, Math.PI * 2); ctx.stroke();
+          const spRip2 = (time * 1.8 + 0.5) % 1;
+          ctx.strokeStyle = `rgba(224, 249, 255, ${(0.65 * (1 - spRip2)).toFixed(2)})`;
+          ctx.beginPath(); ctx.ellipse(spX + 3, pCy - 0.5, 4 + spRip2 * 18, 1.3 + spRip2 * 4.2, 0, 0, Math.PI * 2); ctx.stroke();
+
+          // 4. Carved Stone Spring Spout & Sparkling Continuous Falling Spring Water Stream!
+          ctx.fillStyle = '#b9a282'; ctx.strokeStyle = '#3b2818'; ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.roundRect(spX - 5, spY - 12, 10, 5.5, 1.5); ctx.fill(); ctx.stroke();
+          const jetG = ctx.createLinearGradient(spX, spY - 10, spX + 3, pCy);
+          jetG.addColorStop(0, 'rgba(224, 249, 255, 0.94)');
+          jetG.addColorStop(0.55, 'rgba(125, 211, 232, 0.84)');
+          jetG.addColorStop(1, 'rgba(240, 252, 255, 0.95)');
+          ctx.fillStyle = jetG;
+          ctx.beginPath();
+          ctx.moveTo(spX - 2.6, spY - 9);
+          ctx.quadraticCurveTo(spX + 3.2, spY - 5, spX + 4.8, pCy - 0.5);
+          ctx.lineTo(spX + 0.8, pCy - 0.5);
+          ctx.quadraticCurveTo(spX + 0.2, spY - 5, spX - 0.4, spY - 9);
+          ctx.closePath(); ctx.fill();
+          // White aerated splash foam crown on the small pool surface
+          const fPulse = Math.sin(time * 9) * 0.6;
+          ctx.fillStyle = 'rgba(248, 253, 255, 0.88)';
+          ctx.beginPath(); ctx.ellipse(spX + 2.8, pCy - 0.6, 5.2 + fPulse, 2.0, 0, 0, Math.PI * 2); ctx.fill();
+        }
 
         // Recessed Roman 4-Column Stone Colonnade & Crystal-Clear Emerald-Turquoise Roman Pool
         const plX = sx + 520, plY = 492, plW = 330;
@@ -28135,10 +28245,10 @@ window.Game = window.Game || {};
       }
       ctx.stroke();
 
-      // Modern Sleek Regional Express Passenger Train (قطار ركاب حديث ومتطور أكبر وأسرع — بديلاً عن البخاري!)
-      const trainU = ((time * 0.092 + (rep + 2) * 0.37) % 1.38) - 0.16;
+      // Modern Sleek Regional Express Passenger Train (قطار ركاب حديث أكبر وأسرع — بديلاً عن البخاري!)
+      const trainU = ((time * 0.138 + (rep + 2) * 0.37) % 1.46) - 0.18;
       for (let car = 3; car >= 0; car--) {
-        const cu = trainU - car * 0.078;
+        const cu = trainU - car * 0.096;
         if (cu < -0.02 || cu > 1.02) continue;
         const [cx0, cy0] = valleyRailPt(Math.max(0, Math.min(1, cu)));
         const [cx1, cy1] = valleyRailPt(Math.max(0, Math.min(1, cu + 0.012)));
@@ -28146,7 +28256,7 @@ window.Game = window.Game || {};
         ctx.save();
         ctx.translate(cx0, cy0 - 2.5);
         ctx.rotate(ang);
-        ctx.scale(1.26, 1.26);
+        ctx.scale(1.56, 1.56);
 
         // Dark recessed dual rail bogies & steel wheels riding flush on the track
         ctx.fillStyle = '#1e293b';
