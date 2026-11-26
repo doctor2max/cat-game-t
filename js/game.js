@@ -2468,6 +2468,7 @@ window.Game = window.Game || {};
 
   function drawBackground(time) {
     const theme = level.theme;
+    const bgTime = level && level.staticBackground ? 0 : time;
     if (theme === 'museum') {
       Art.drawMuseumSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
       Art.drawMuseumMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
@@ -2520,8 +2521,8 @@ window.Game = window.Game || {};
       Art.drawGreeceSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
       Art.drawGreeceMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
     } else if (theme === 'battir') {
-      Art.drawBattirSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawBattirMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+      Art.drawBattirSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, bgTime);
+      Art.drawBattirMidground(ctx, camX, LOGICAL_W, LOGICAL_H, bgTime);
     } else if (theme === 'construction') {
       Art.drawConstructionSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
       Art.drawConstructionMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
@@ -2547,14 +2548,16 @@ window.Game = window.Game || {};
       }
     }
 
-    Art.drawStreetlamps(ctx, level.lamps, camX, time);
+    Art.drawStreetlamps(ctx, level.lamps, camX, bgTime);
 
-    // Lightweight floating dust motes
-    ctx.fillStyle = 'rgba(255, 226, 170, 0.25)';
-    for (let i = 0; i < 10; i++) {
-      const dx = (i * 197 + time * 18) % LOGICAL_W;
-      const dy = (i * 89 + Math.sin(time + i) * 25) % 600;
-      ctx.fillRect(dx, dy, 3, 3);
+    // Lightweight floating dust motes (omitted when staticBackground is enabled)
+    if (!(level && level.staticBackground)) {
+      ctx.fillStyle = 'rgba(255, 226, 170, 0.25)';
+      for (let i = 0; i < 10; i++) {
+        const dx = (i * 197 + time * 18) % LOGICAL_W;
+        const dy = (i * 89 + Math.sin(time + i) * 25) % 600;
+        ctx.fillRect(dx, dy, 3, 3);
+      }
     }
 
     if (dimBackground) {
@@ -2569,7 +2572,7 @@ window.Game = window.Game || {};
 
     // Atmospheric World Teasers (drawn right BEHIND wooden piers/rooftops & water for true occlusion!)
     if (Art.drawWorldTeasers) {
-      Art.drawWorldTeasers(ctx, level, catCtrl ? catCtrl.cat : null, camX, camY, time, cullW);
+      Art.drawWorldTeasers(ctx, level, catCtrl ? catCtrl.cat : null, camX, camY, level && level.staticBackground ? 0 : time, cullW);
     }
 
     for (const p of level.platforms) {
