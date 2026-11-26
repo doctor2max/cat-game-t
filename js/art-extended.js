@@ -12173,82 +12173,521 @@ window.Game = window.Game || {};
 
     if (p.type === 'battir_noria_wheel') {
       // =====================================================================
-      // GIANT ROTATING WOODEN AIN AL-BALAD WATERWHEEL (ناعورة عين البلد المائية!)
+      // GIANT ROTATING WOODEN AIN AL-BALAD WATERWHEEL (ناعورة عين البلد التراثية!)
+      // Museum-grade Levantine/Palestinian wooden noria: dressed-limestone pier,
+      // star-lattice olive-wood truss, laminated felloes, iron straps & rivets,
+      // 16 perimeter scoop blades, dynamic water-carrying copper-hooped buckets,
+      // and translucent sunset-lit water ribbons & river splash!
       // =====================================================================
       ctx.save();
       const r = p.radius || 108;
       const cx = px;
       const cy = py;
       const ang0 = p.wheelAngle !== undefined ? p.wheelAngle : (p.phase || 0);
+      const rotDir = (p.rotSpeed || 0.78) >= 0 ? 1 : -1;
+      const worldSeed = Math.floor((p.x || 0) * 0.17 + (p.y || 0) * 5);
 
-      // 1. Stationary Carved Stone Aqueduct Support Pier & Overhead Spring Flume!
-      const pierG = ctx.createLinearGradient(cx - 22, cy, cx + 22, 720);
-      pierG.addColorStop(0, '#d8aa7d'); pierG.addColorStop(1, '#5c3a21');
-      ctx.fillStyle = pierG; ctx.strokeStyle = '#382010'; ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.moveTo(cx - 14, cy); ctx.lineTo(cx + 14, cy);
-      ctx.lineTo(cx + 26, 720); ctx.lineTo(cx - 26, 720);
-      ctx.closePath(); ctx.fill(); ctx.stroke();
-
-      // Cascading turquoise spring stream pouring down across the wheel rim
-      const flG = ctx.createLinearGradient(cx, cy - r - 12, cx, cy + r + 40);
-      flG.addColorStop(0, 'rgba(186, 230, 253, 0.78)');
-      flG.addColorStop(0.5, 'rgba(56, 189, 248, 0.45)');
-      flG.addColorStop(1, 'rgba(14, 165, 233, 0.15)');
-      ctx.fillStyle = flG;
-      ctx.beginPath();
-      ctx.ellipse(cx + r * 0.62, cy + 10, 14, r * 0.95, 0.08, 0, Math.PI * 2);
+      // 1. STATIONARY DRESSED-LIMESTONE AQUEDUCT SUPPORT PIER & MOSSY BASE
+      const pierBottom = Math.max(cy + r + 76, 720);
+      const pierTopY = cy - 6;
+      const pierH = pierBottom - pierTopY;
+      ctx.save();
+      const tracePier = () => {
+        ctx.beginPath();
+        ctx.moveTo(cx - 17, pierTopY);
+        ctx.lineTo(cx + 17, pierTopY);
+        ctx.lineTo(cx + 31, pierBottom);
+        ctx.lineTo(cx - 31, pierBottom);
+        ctx.closePath();
+      };
+      // Warm Jerusalem/Battir limestone base fill
+      const pierG = ctx.createLinearGradient(cx - 30, pierTopY, cx + 30, pierTopY);
+      pierG.addColorStop(0, '#9a7a5c');
+      pierG.addColorStop(0.35, '#d8be9e');
+      pierG.addColorStop(0.72, '#c5a582');
+      pierG.addColorStop(1, '#7c5d42');
+      tracePier();
+      ctx.fillStyle = pierG;
       ctx.fill();
 
-      // 2. Rotating Olive-Wood Spokes & Double Wooden Rim
+      // Clip stone courses, mortar grooves & damp moss inside pier silhouette
+      ctx.save();
+      tracePier();
+      ctx.clip();
+      const stonePalette = ['#d6be9e', '#ccb08e', '#c2a37f', '#dfd0b8', '#b89875'];
+      const courseH = 14;
+      const numCourses = Math.ceil(pierH / courseH);
+      for (let row = 0; row < numCourses; row++) {
+        const sy = pierTopY + row * courseH;
+        const t = row / Math.max(1, numCourses);
+        const halfW = 17 + t * 14;
+        const shift = (row % 2) * 11;
+        for (let sx = -halfW - 14 + shift; sx < halfW + 14; sx += 22) {
+          const idx = Math.abs(worldSeed + row * 7 + Math.floor(sx * 0.13) * 13) % stonePalette.length;
+          ctx.fillStyle = stonePalette[idx];
+          ctx.beginPath();
+          ctx.roundRect(cx + sx + 0.8, sy + 0.8, 20.4, courseH - 1.6, 2.2);
+          ctx.fill();
+          // Soft top sunlit bevel & bottom shadow
+          ctx.fillStyle = 'rgba(255, 248, 232, 0.24)';
+          ctx.fillRect(cx + sx + 2, sy + 1.2, 18, 1.5);
+          ctx.fillStyle = 'rgba(54, 34, 18, 0.20)';
+          ctx.fillRect(cx + sx + 2, sy + courseH - 2.4, 18, 1.4);
+        }
+      }
+      // Subtle cylindrical/directional shading across pier face
+      const pShade = ctx.createLinearGradient(cx - 30, 0, cx + 30, 0);
+      pShade.addColorStop(0, 'rgba(38, 22, 10, 0.32)');
+      pShade.addColorStop(0.38, 'rgba(255, 244, 218, 0.08)');
+      pShade.addColorStop(1, 'rgba(38, 22, 10, 0.36)');
+      ctx.fillStyle = pShade;
+      ctx.fillRect(cx - 34, pierTopY, 68, pierH);
+      // Damp moss & fern tufts clinging to lower wet pier stones
+      for (let m = 0; m < 7; m++) {
+        const mx = cx - 22 + ((m * 17 + worldSeed) % 44);
+        const my = cy + r * 0.52 + (m % 4) * 16;
+        ctx.fillStyle = m % 2 === 0 ? 'rgba(63, 98, 18, 0.62)' : 'rgba(21, 128, 61, 0.48)';
+        ctx.beginPath();
+        ctx.ellipse(mx, my, 7 + (m % 3) * 3, 3.2, (m % 2 === 0 ? 0.18 : -0.15), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+      tracePier();
+      ctx.strokeStyle = '#4a311e';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Carved Limestone Corbel Cap & Heavy Timber Cross-Beam below Axle
+      ctx.fillStyle = '#dec6a6';
+      ctx.strokeStyle = '#4a311e';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.roundRect(cx - 23, pierTopY - 4, 46, 11, 3);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255, 248, 232, 0.38)';
+      ctx.fillRect(cx - 21, pierTopY - 3, 42, 2.2);
+      ctx.restore();
+
+      // 2. SUBTLE STONE RECEIVING FLUME CHUTE (Upper-side trough catching water from crest!)
+      const chuteSide = -rotDir; // Water rises on the -rotDir side and spills near the top
+      const chuteX = cx + chuteSide * (r * 0.32);
+      const chuteY = cy - r * 0.78;
+      ctx.save();
+      ctx.fillStyle = '#b99773';
+      ctx.strokeStyle = '#4a311e';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.roundRect(chuteX - 24, chuteY, 48, 10, 3);
+      ctx.fill();
+      ctx.stroke();
+      // Shimmering water film inside the stone receiving flume
+      ctx.fillStyle = 'rgba(125, 211, 252, 0.68)';
+      ctx.fillRect(chuteX - 20, chuteY + 1.5, 40, 3.2);
+      ctx.restore();
+
+      // 3. ROTATING LEVANTINE WOODEN NORIA WHEEL (Star-Lattice Truss, Laminated Rims, 16 Scoop Blades!)
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(ang0);
-      ctx.strokeStyle = '#5c3419';
-      ctx.lineWidth = 4.5;
-      for (let s = 0; s < 8; s++) {
-        const sa = s * (Math.PI * 0.25);
+
+      // 3a. Soft rear 3D thickness shadow of the outer rim
+      ctx.strokeStyle = 'rgba(32, 16, 6, 0.42)';
+      ctx.lineWidth = 13;
+      ctx.beginPath();
+      ctx.arc(2.5, 3, r - 11, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 3b. 16 Perimeter Wooden Water-Scoop Paddles (القدوس وألواح الغرف) around the outer rim
+      for (let k = 0; k < 16; k++) {
+        const ka = k * (Math.PI / 8);
+        ctx.save();
+        ctx.rotate(ka);
+        // Damp weathered olive-wood scoop blade projecting from outer felloe
+        const blG = ctx.createLinearGradient(r - 12, -4, r + 4, 4);
+        blG.addColorStop(0, '#5a3217');
+        blG.addColorStop(0.55, '#8c5228');
+        blG.addColorStop(1, '#3d200d');
+        ctx.fillStyle = blG;
+        ctx.strokeStyle = '#261307';
+        ctx.lineWidth = 1.1;
         ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(sa) * (r - 6), Math.sin(sa) * (r - 6));
+        ctx.moveTo(r - 11, -3.6);
+        ctx.lineTo(r + 3.5, -5.2);
+        ctx.lineTo(r + 4.5, 3.2);
+        ctx.lineTo(r - 11, 3.6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Wet specular highlight edge
+        ctx.strokeStyle = 'rgba(224, 242, 254, 0.35)';
+        ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(r - 8, -3.2);
+        ctx.lineTo(r + 2.5, -4.4);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 3c. Authentic Levantine Tangential Square/Octagon Cross-Bracing Struts (تشبيكة الناعورة الخشبية)
+      const braceR = r * 0.56;
+      const innerSpan = r * 0.28;
+      for (let s = 0; s < 4; s++) {
+        ctx.save();
+        ctx.rotate(s * (Math.PI * 0.5) + Math.PI * 0.25);
+        // Twin parallel chordal timber beams framing the central hub
+        for (const off of [-innerSpan, innerSpan]) {
+          const chordLen = Math.sqrt(Math.max(1, (r - 12) * (r - 12) - off * off));
+          ctx.fillStyle = '#6c3b1c';
+          ctx.strokeStyle = '#2c1508';
+          ctx.lineWidth = 1.0;
+          ctx.fillRect(-chordLen, off - 2.6, chordLen * 2, 5.2);
+          ctx.strokeRect(-chordLen, off - 2.6, chordLen * 2, 5.2);
+          ctx.fillStyle = 'rgba(235, 195, 145, 0.22)';
+          ctx.fillRect(-chordLen + 2, off - 2.0, chordLen * 2 - 4, 1.3);
+        }
+        ctx.restore();
+      }
+
+      // 3d. 8 Sturdy Tapered Main Olive-Wood Radial Spokes with 3D Bevel Shading
+      for (let s = 0; s < 8; s++) {
+        ctx.save();
+        ctx.rotate(s * (Math.PI * 0.25));
+        const spG = ctx.createLinearGradient(0, -4.5, 0, 4.5);
+        spG.addColorStop(0, '#a66534');
+        spG.addColorStop(0.45, '#76401c');
+        spG.addColorStop(1, '#3b1d0b');
+        ctx.fillStyle = spG;
+        ctx.strokeStyle = '#241106';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(10, -4.4);
+        ctx.lineTo(r - 10, -2.8);
+        ctx.lineTo(r - 10, 2.8);
+        ctx.lineTo(10, 4.4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Subtle sunlit wood grain highlight
+        ctx.strokeStyle = 'rgba(254, 226, 175, 0.24)';
+        ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(14, -2.6);
+        ctx.lineTo(r - 14, -1.5);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 3e. Inner Structural Timber Ring (r * 0.56)
+      ctx.strokeStyle = '#3b1e0c';
+      ctx.lineWidth = 7.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, braceR, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = '#8b4e24';
+      ctx.lineWidth = 4.4;
+      ctx.beginPath();
+      ctx.arc(0, 0, braceR, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(245, 200, 140, 0.28)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, braceR - 1.2, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 3f. Outer Laminated Olive-Wood Wheel Rim (Double Felloe Ring + Iron Splice Plates & Rivets!)
+      const rimR = r - 10;
+      ctx.strokeStyle = '#2d1508';
+      ctx.lineWidth = 13.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, rimR, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = '#7c431e';
+      ctx.lineWidth = 10.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, rimR, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = '#b46d38';
+      ctx.lineWidth = 4.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, rimR - 1.2, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(254, 232, 188, 0.30)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, rimR - 3.6, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Forged iron splice plates & twin rivets joining the 8 curved wooden felloe segments
+      for (let j = 0; j < 8; j++) {
+        ctx.save();
+        ctx.rotate(j * (Math.PI * 0.25) + Math.PI * 0.125);
+        ctx.fillStyle = '#334155';
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.roundRect(rimR - 6.2, -3.5, 12.4, 7, 1.5);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#e2a84b';
+        ctx.beginPath();
+        ctx.arc(rimR - 2.8, 0, 1.2, 0, Math.PI * 2);
+        ctx.arc(rimR + 2.8, 0, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 3g. Heavy Carved Timber Axle Boss, Riveted Iron Band & Forged Brass Hub Cap
+      ctx.fillStyle = '#4a2611';
+      ctx.strokeStyle = '#220f05';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(0, 0, 21, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      const ironHubG = ctx.createRadialGradient(-4, -4, 2, 0, 0, 16);
+      ironHubG.addColorStop(0, '#64748b');
+      ironHubG.addColorStop(0.6, '#334155');
+      ironHubG.addColorStop(1, '#0f172a');
+      ctx.fillStyle = ironHubG;
+      ctx.strokeStyle = '#090d16';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, 15.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      // 6 forged hub bolts around the iron collar
+      ctx.fillStyle = '#cbd5e1';
+      for (let hb = 0; hb < 6; hb++) {
+        const ha = hb * (Math.PI / 3);
+        ctx.beginPath();
+        ctx.arc(Math.cos(ha) * 11.2, Math.sin(ha) * 11.2, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Hammered brass central grease cap
+      const brassG = ctx.createRadialGradient(-2, -2.5, 1, 0, 0, 7.5);
+      brassG.addColorStop(0, '#fef08a');
+      brassG.addColorStop(0.55, '#d97706');
+      brassG.addColorStop(1, '#78350f');
+      ctx.fillStyle = brassG;
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, 7.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore(); // end rotating wheel
+
+      // 4. REALISTIC RIVER IMMERSION SPLASH & TRANSLUCENT FALLING WATER VEILS (No Giant Oval!)
+      const splashY = cy + r - 6;
+      ctx.save();
+      // Soft foamy white-and-turquoise river churn where the lower blades dip into the stream
+      const foamG = ctx.createRadialGradient(cx, splashY + 6, 6, cx, splashY + 6, 54);
+      foamG.addColorStop(0, 'rgba(240, 249, 255, 0.72)');
+      foamG.addColorStop(0.45, 'rgba(125, 211, 252, 0.42)');
+      foamG.addColorStop(1, 'rgba(14, 165, 233, 0)');
+      ctx.fillStyle = foamG;
+      ctx.beginPath();
+      ctx.ellipse(cx, splashY + 6, 54, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Animated splashing river crest ripples
+      ctx.strokeStyle = 'rgba(240, 249, 255, 0.72)';
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = 'round';
+      for (let w = -1; w <= 1; w++) {
+        const wOff = Math.sin(time * 7.5 + w * 1.9) * 3.5;
+        ctx.beginPath();
+        ctx.moveTo(cx - 28 + w * 14, splashY + 5 + wOff * 0.4);
+        ctx.quadraticCurveTo(cx + w * 14, splashY - 2 + wOff, cx + 28 + w * 14, splashY + 5 - wOff * 0.4);
         ctx.stroke();
       }
-      // Outer & inner wooden wheel rims with iron rivets
-      ctx.strokeStyle = '#7c431e'; ctx.lineWidth = 8;
-      ctx.beginPath(); ctx.arc(0, 0, r - 8, 0, Math.PI * 2); ctx.stroke();
-      ctx.strokeStyle = '#b46934'; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(0, 0, r - 8, 0, Math.PI * 2); ctx.stroke();
-      ctx.strokeStyle = '#45220d'; ctx.lineWidth = 4;
-      ctx.beginPath(); ctx.arc(0, 0, r * 0.52, 0, Math.PI * 2); ctx.stroke();
-      // Central forged-iron & brass hub
-      ctx.fillStyle = '#334155'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#f59e0b';
-      ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI * 2); ctx.fill();
+      // Fine airborne spray pearls flung outward by the turning lower paddles
+      for (let sp = 0; sp < 8; sp++) {
+        const frac = ((time * 1.9 + sp * 0.27) % 1);
+        const dirX = -rotDir * (14 + frac * 34 + (sp % 3) * 6);
+        const arcY = -Math.sin(frac * Math.PI) * (18 + (sp % 3) * 7);
+        const alpha = (1 - frac) * 0.78;
+        ctx.fillStyle = `rgba(224, 242, 254, ${alpha.toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(cx + dirX, splashY + arcY, 1.5 + (1 - frac) * 1.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
       ctx.restore();
 
-      // 3. Four Horizontal Orbiting Wooden Bucket-Paddle Platforms!
+      // 5. FOUR HORIZONTAL ORBITING CEDAR STEPPING DECKS & COPPER-HOOPED WATER BUCKETS
+      // Exact physics alignment with cat.js: orbitR = r * 0.88, bw = 86, bh = 16
       const orbitR = r * 0.88;
-      const bw = 86, bh = 16;
+      const bw = 86;
+      const bh = 16;
       for (let bi = 0; bi < 4; bi++) {
         const a = ang0 + bi * (Math.PI * 0.5);
-        const bx = cx + Math.cos(a) * orbitR - bw * 0.5;
-        const by = cy + Math.sin(a) * orbitR - 8;
-        // Copper-bound wooden water bucket underneath paddle
-        ctx.fillStyle = '#78350f'; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.3;
-        ctx.beginPath(); ctx.roundRect(bx + bw * 0.5 - 14, by + 11, 28, 16, [2, 2, 8, 8]); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(bx + bw * 0.5 - 11, by + 12, 22, 4);
-        // Dripping turquoise spring droplets
-        ctx.fillStyle = '#bae6fd';
-        const dropOff = ((time * 38 + bi * 11) % 18);
-        ctx.beginPath(); ctx.arc(bx + bw * 0.5, by + 28 + dropOff, 2.3, 0, Math.PI * 2); ctx.fill();
-        // Solid cedar & brass-trimmed landing deck
+        const pivotX = cx + Math.cos(a) * orbitR;
+        const pivotY = cy + Math.sin(a) * orbitR;
+        const bx = pivotX - bw * 0.5;
+        const by = pivotY - 8;
+
+        // Determine if bucket is ascending (full of water!) or near crest (pouring!)
+        // Vertical velocity of bucket is sin'(a) * rotDir = cos(a) * rotDir; negative => rising!
+        const rising = (Math.cos(a) * rotDir) < 0;
+        const heightNorm = Math.max(0, Math.min(1, (cy + orbitR - pivotY) / (orbitR * 2)));
+        const hasWater = rising || heightNorm > 0.72;
+        const isPouring = heightNorm > 0.76;
+
+        // 5a. Translucent Pouring Water Ribbon when bucket reaches upper crest!
+        if (isPouring) {
+          const pourStrength = Math.min(1, (heightNorm - 0.76) / 0.22);
+          const streamH = 26 + pourStrength * 42;
+          const pourX = pivotX + rotDir * 11;
+          const pourG = ctx.createLinearGradient(pourX, by + 16, pourX, by + 16 + streamH);
+          pourG.addColorStop(0, `rgba(224, 242, 254, ${(0.76 * pourStrength).toFixed(2)})`);
+          pourG.addColorStop(0.55, `rgba(103, 232, 249, ${(0.45 * pourStrength).toFixed(2)})`);
+          pourG.addColorStop(1, 'rgba(56, 189, 248, 0)');
+          ctx.fillStyle = pourG;
+          ctx.beginPath();
+          ctx.moveTo(pourX - 3.5, by + 14);
+          ctx.quadraticCurveTo(pourX + rotDir * 7, by + 16 + streamH * 0.45, pourX + rotDir * 10, by + 16 + streamH);
+          ctx.lineTo(pourX + rotDir * 4, by + 16 + streamH);
+          ctx.quadraticCurveTo(pourX + rotDir * 2, by + 16 + streamH * 0.45, pourX - 0.5, by + 14);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        // 5b. Suspended Staved Olive-Wood & Copper-Hooped Water Bucket underneath deck
+        const bkX = pivotX;
+        const bkTopY = by + 11;
+        const bkH = 19;
+        // Twin forged iron suspension straps from deck underside to bucket rim
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        ctx.moveTo(bkX - 16, by + 9); ctx.lineTo(bkX - 15, bkTopY + 5);
+        ctx.moveTo(bkX + 16, by + 9); ctx.lineTo(bkX + 15, bkTopY + 5);
+        ctx.stroke();
+
+        // Tapered wooden bucket body with 3D cylindrical shading
+        const bkG = ctx.createLinearGradient(bkX - 16, bkTopY, bkX + 16, bkTopY);
+        bkG.addColorStop(0, '#4a230a');
+        bkG.addColorStop(0.35, '#924f20');
+        bkG.addColorStop(0.68, '#743b15');
+        bkG.addColorStop(1, '#361705');
+        ctx.fillStyle = bkG;
+        ctx.strokeStyle = '#241004';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(bkX - 16, bkTopY);
+        ctx.lineTo(bkX + 16, bkTopY);
+        ctx.lineTo(bkX + 12.5, bkTopY + bkH);
+        ctx.quadraticCurveTo(bkX, bkTopY + bkH + 2.5, bkX - 12.5, bkTopY + bkH);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Vertical wooden barrel stave seams
+        ctx.strokeStyle = 'rgba(30, 12, 4, 0.48)';
+        ctx.lineWidth = 0.9;
+        for (const sx of [-7.5, 0, 7.5]) {
+          ctx.beginPath();
+          ctx.moveTo(bkX + sx, bkTopY + 1);
+          ctx.lineTo(bkX + sx * 0.78, bkTopY + bkH);
+          ctx.stroke();
+        }
+        // Twin gleaming hammered-copper hoops around bucket
+        for (const [hy, hw] of [[bkTopY + 5.5, 14.8], [bkTopY + 13.5, 13.2]]) {
+          const cpG = ctx.createLinearGradient(bkX - hw, hy, bkX + hw, hy);
+          cpG.addColorStop(0, '#7c2d12');
+          cpG.addColorStop(0.4, '#fb923c');
+          cpG.addColorStop(0.75, '#c2410c');
+          cpG.addColorStop(1, '#5a1e0a');
+          ctx.fillStyle = cpG;
+          ctx.fillRect(bkX - hw, hy, hw * 2, 2.5);
+        }
+
+        // Shimmering crystal-clear spring water brimming inside rising/cresting buckets!
+        if (hasWater) {
+          const wG = ctx.createLinearGradient(bkX - 13, bkTopY, bkX + 13, bkTopY + 4);
+          wG.addColorStop(0, '#38bdf8');
+          wG.addColorStop(0.5, '#e0f2fe');
+          wG.addColorStop(1, '#0ea5e9');
+          ctx.fillStyle = wG;
+          ctx.beginPath();
+          ctx.ellipse(bkX, bkTopY + 1.2, 13.5, 2.4, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Sparkling falling water droplets dripping from wet bucket base
+        for (let d = 0; d < 2; d++) {
+          const dropFrac = ((time * 1.85 + bi * 0.37 + d * 0.5) % 1);
+          const dx = bkX + (d === 0 ? -5 : 6) + Math.sin(time * 4 + bi + d) * 1.2;
+          const dy = bkTopY + bkH + 2 + dropFrac * 24;
+          const da = (1 - dropFrac) * (hasWater ? 0.85 : 0.45);
+          ctx.fillStyle = `rgba(224, 242, 254, ${da.toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(dx, dy, 1.3 + (1 - dropFrac) * 1.1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 5c. Solid Hand-Planked Cedar Stepping Deck (exact landing surface at bx, by, bw, bh)
+        // Soft underside shadow
+        ctx.fillStyle = 'rgba(24, 10, 4, 0.36)';
+        ctx.beginPath();
+        ctx.roundRect(bx + 2, by + 3, bw - 4, bh - 1, 5);
+        ctx.fill();
+
         const dG = ctx.createLinearGradient(bx, by, bx, by + bh);
-        dG.addColorStop(0, '#f59e0b'); dG.addColorStop(0.5, '#b45309'); dG.addColorStop(1, '#451a03');
-        ctx.fillStyle = dG; ctx.strokeStyle = '#271105'; ctx.lineWidth = 1.6;
-        ctx.beginPath(); ctx.roundRect(bx, by, bw, bh - 2, 5); ctx.fill(); ctx.stroke();
+        dG.addColorStop(0, '#e3a857');
+        dG.addColorStop(0.24, '#c47c32');
+        dG.addColorStop(0.72, '#8b4c1b');
+        dG.addColorStop(1, '#4c240a');
+        ctx.fillStyle = dG;
+        ctx.strokeStyle = '#2b1306';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, bh - 2, 4.5);
+        ctx.fill();
+        ctx.stroke();
+
+        // Top sunlit honey-wood bevel + plank joint grooves
+        ctx.fillStyle = 'rgba(255, 245, 214, 0.42)';
+        ctx.fillRect(bx + 5, by + 1.4, bw - 10, 2.2);
+        ctx.strokeStyle = 'rgba(43, 19, 6, 0.38)';
+        ctx.lineWidth = 1.0;
+        for (const pxOff of [22, 43, 64]) {
+          ctx.beginPath();
+          ctx.moveTo(bx + pxOff, by + 2);
+          ctx.lineTo(bx + pxOff, by + bh - 3);
+          ctx.stroke();
+        }
+
+        // Forged Dark-Iron End Caps & Brass Nail Heads on both deck ends
+        for (const capX of [bx + 2, bx + bw - 9]) {
+          ctx.fillStyle = '#334155';
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.roundRect(capX, by + 1, 7, bh - 4, 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath();
+          ctx.arc(capX + 3.5, by + 4.5, 1.1, 0, Math.PI * 2);
+          ctx.arc(capX + 3.5, by + bh - 6.5, 1.1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Central Forged-Iron Swivel Pivot Pin connecting deck cleanly to rotating wheel rim
+        ctx.fillStyle = '#1e293b';
+        ctx.strokeStyle = '#090d16';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.arc(pivotX, pivotY, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(pivotX, pivotY, 1.8, 0, Math.PI * 2);
+        ctx.fill();
       }
+
       ctx.restore();
       return;
     }
