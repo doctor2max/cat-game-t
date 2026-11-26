@@ -38,6 +38,7 @@ window.Game.Cat = function (startX, startY) {
     nightVision: false,
     lives: 6,
     maxLives: 7,
+    purpleLives: 0,
     invulnTimer: 0,
     hurtTimer: 0,
     respawnLockTimer: 0,
@@ -1654,14 +1655,24 @@ window.Game.Cat = function (startX, startY) {
       return true;
     }
 
-    cat.lives = Math.max(0, cat.lives - 1);
+    const usedPurple = cat.purpleLives > 0;
+    if (usedPurple) {
+      cat.purpleLives -= 1;
+    } else {
+      cat.lives = Math.max(0, cat.lives - 1);
+    }
     cat.invulnTimer = 1.6;
     cat.hurtTimer = 0.72; // Plays full 7-frame Row 3 Hurt animation!
     cat.respawnLockTimer = 0.55; // Brief movement input lock on checkpoint respawn so Mashmasha never accidentally runs off!
     cat.jumpBufferTimer = 0;
     Audio.playHurt();
     const localizedReason = reason && window.Game.I18n ? window.Game.I18n.translateDynamic(reason) : reason;
-    Particles.spawnPopup(cat.x + cat.w / 2, cat.y - 12, localizedReason || '-1 ❤️', '#ff6b8b');
+    if (usedPurple) {
+      const isEn = window.Game.I18n && window.Game.I18n.isEn();
+      Particles.spawnPopup(cat.x + cat.w / 2, cat.y - 12, isEn ? '-1 💜 Extra Life' : '-1 💜 الروح الإضافية', '#d8b4fe');
+    } else {
+      Particles.spawnPopup(cat.x + cat.w / 2, cat.y - 12, localizedReason || '-1 ❤️', '#ff6b8b');
+    }
 
     cat.x = cat.checkpointX;
     cat.y = cat.checkpointY;

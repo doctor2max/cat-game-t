@@ -32,8 +32,9 @@
       { x: 1120, y: groundY, w: 1040, h: groundH, type: 'battir_qantara_arcade' },
       { x: 1140, y: 398, w: 230, h: 24, type: 'battir_qantara_arcade', oneWay: true },
 
-      // Climbable Stacked Qantara Stone Courtyard Shaft #1
+      // Climbable Stacked Qantara Stone Courtyard Shaft #1 + Palestinian Woman & Fresh Produce Stall between the 2 columns!
       { x: 1530, y: 385, w: 36, h: 230, type: 'battir_alley_wall', climbable: true },
+      { x: 1568, y: groundY - 102, w: 120, h: 102, type: 'battir_farmer_stall', nonSolid: true },
       { x: 1690, y: 385, w: 36, h: 230, type: 'battir_alley_wall', climbable: true },
       { x: 1710, y: 385, w: 225, h: 24, type: 'battir_qantara_arcade', oneWay: true },
 

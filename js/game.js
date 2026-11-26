@@ -65,6 +65,7 @@ window.Game = window.Game || {};
 
   const livesBar = document.getElementById('livesBar');
   const livesCount = document.getElementById('livesCount');
+  const purpleHeartBadge = document.getElementById('purpleHeartBadge');
   const shieldBadge = document.getElementById('shieldBadge');
   const treatsCount = document.getElementById('treatsCount');
   const hudCoinsCard = document.getElementById('hudCoinsCard');
@@ -692,6 +693,7 @@ window.Game = window.Game || {};
 
     hudState.lives = -1;
     hudState.maxLives = -1;
+    hudState.purpleLives = -1;
     hudState.treats = -1;
     hudState.nv = null;
     hudState.meowCd = null;
@@ -700,7 +702,7 @@ window.Game = window.Game || {};
     syncCoinDisplays();
   }
 
-  const hudState = { lives: -1, maxLives: -1, treats: -1, nv: null, meowCd: null, shield: null };
+  const hudState = { lives: -1, maxLives: -1, purpleLives: -1, treats: -1, nv: null, meowCd: null, shield: null };
   let lifeSegs = [];
 
   function updateHUD() {
@@ -724,6 +726,11 @@ window.Game = window.Game || {};
       for (let i = 0; i < lifeSegs.length; i++) {
         lifeSegs[i].classList.toggle('active', i < c.lives);
       }
+    }
+    const curPurple = c.purpleLives || 0;
+    if (hudState.purpleLives !== curPurple) {
+      hudState.purpleLives = curPurple;
+      if (purpleHeartBadge) purpleHeartBadge.classList.toggle('hidden', curPurple <= 0);
     }
     if (hudState.shield !== c.shieldActive) {
       hudState.shield = c.shieldActive;
@@ -2050,6 +2057,28 @@ window.Game = window.Game || {};
           p.crossState = 'clear';
           p.gateClose = Math.max(0, (p.gateClose || 0) - dt * 3.2);
           p.trainActive = false;
+        }
+      } else if (p.type === 'battir_farmer_stall') {
+        // Palestinian village woman between the climbable columns grants Mashmasha an extra Purple Heart life!
+        if (p.giftAnim > 0) p.giftAnim = Math.max(0, p.giftAnim - dt * 1.1);
+        if (
+          !p.gifted &&
+          c.x + c.w > p.x + 10 &&
+          c.x < p.x + p.w - 10 &&
+          c.y + c.h > p.y + 18 &&
+          c.y < p.y + p.h + 6
+        ) {
+          p.gifted = true;
+          p.giftAnim = 1.0;
+          c.purpleLives = (c.purpleLives || 0) + 1;
+          if (Audio.playTreat) Audio.playTreat();
+          else if (Audio.playPurr) Audio.playPurr();
+          haptic(16);
+          Particles.spawnDust(p.x + p.w * 0.5, p.y + 34, 14, '#c084fc');
+          Particles.spawnCoinSparkle(p.x + p.w * 0.5, p.y + 24);
+          const isEn = window.Game.I18n && window.Game.I18n.isEn();
+          Particles.spawnPopup(p.x + p.w * 0.5, p.y + 8, isEn ? '+1 💜 Extra Life!' : '+1 💜 روح إضافية!', '#d8b4fe');
+          updateHUD();
         }
       }
     }
