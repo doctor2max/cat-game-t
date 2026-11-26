@@ -24011,42 +24011,165 @@ window.Game = window.Game || {};
 
   function drawBattirMidground(ctx, camX, w, h, time) {
     // =========================================================================
-    // 1. TOWERING FULL-VALLEY WADI AL-MAKHROUR VIADUCT & CANYON CRAGS (0.22x)
+    // 1. LIVING BATTIR TERRACED HILLSIDE PANORAMA (0.22x — NO VIADUCT BRIDGE!)
+    //    Harmonious blend of terraced hills, old vaulted stone homes, modern
+    //    Jerusalem-stone Palestinian villas, lush olive/cypress trees & gardens!
     // =========================================================================
-    const span = 1720;
+    const span = 1640;
     const off = -((camX * 0.22) % span);
+
+    // Helper: Distant Modern Palestinian Jerusalem-Stone Home (منازل حديثة من الحجر القدسي)
+    const drawModernBattirHouse = (x, botY, bw, bh, pitchedRoof) => {
+      const y = botY - bh;
+      const sideW = Math.round(bw * 0.16);
+      // Shaded 3D right side wall
+      ctx.fillStyle = '#a89276'; ctx.strokeStyle = '#4a3723'; ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(x + bw, y); ctx.lineTo(x + bw + sideW, y + 6);
+      ctx.lineTo(x + bw + sideW, botY); ctx.lineTo(x + bw, botY); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      // Sunlit crisp cream-white Jerusalem limestone facade
+      const fG = ctx.createLinearGradient(x, y, x, botY);
+      fG.addColorStop(0.0, '#fffaf0'); fG.addColorStop(0.65, '#f2e4cc'); fG.addColorStop(1.0, '#d6bf9c');
+      ctx.fillStyle = fG; ctx.fillRect(x, y, bw, bh); ctx.strokeRect(x, y, bw, bh);
+      // Subtle horizontal dressed-stone courses
+      ctx.strokeStyle = 'rgba(120, 95, 65, 0.22)'; ctx.lineWidth = 0.7;
+      for (let ry = y + 10; ry < botY - 4; ry += 10) {
+        ctx.beginPath(); ctx.moveTo(x + 1, ry); ctx.lineTo(x + bw - 1, ry); ctx.stroke();
+      }
+      if (pitchedRoof) {
+        // Modern warm terracotta Mediterranean hipped roof
+        const rG = ctx.createLinearGradient(x, y - 16, x, y + 2);
+        rG.addColorStop(0, '#c2410c'); rG.addColorStop(1, '#7c2d12');
+        ctx.fillStyle = rG; ctx.strokeStyle = '#431407'; ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(x - 6, y + 2); ctx.lineTo(x + bw * 0.18, y - 15);
+        ctx.lineTo(x + bw * 0.86, y - 15); ctx.lineTo(x + bw + sideW + 4, y + 5);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      } else {
+        // Contemporary flat stone roof parapet + subtle solar water heater (سخان شمسي)
+        ctx.fillStyle = '#faf0de'; ctx.strokeStyle = '#5c462e'; ctx.lineWidth = 1.0;
+        ctx.fillRect(x - 2, y - 4, bw + 4, 5); ctx.strokeRect(x - 2, y - 4, bw + 4, 5);
+        // Tiny solar panel + white water cylinder on rooftop
+        ctx.fillStyle = '#1e3a8a';
+        ctx.beginPath(); ctx.moveTo(x + bw * 0.62, y - 4); ctx.lineTo(x + bw * 0.78, y - 11); ctx.lineTo(x + bw * 0.84, y - 4); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath(); ctx.roundRect(x + bw * 0.56, y - 13, 11, 5, 2); ctx.fill();
+      }
+      // Wide modern panoramic glass windows & stone balcony catching golden sunset light
+      const rows = bh > 52 ? 2 : 1;
+      for (let r = 0; r < rows; r++) {
+        const wy = y + 11 + r * 24;
+        for (let c = 0; c < 3; c++) {
+          const wx = x + 8 + c * ((bw - 18) / 3);
+          const ww = Math.max(10, (bw - 26) / 3);
+          ctx.fillStyle = (r === 0 && c === 1) ? '#fde047' : '#334155';
+          ctx.fillRect(wx, wy, ww, 13);
+          ctx.strokeStyle = '#e7dcc8'; ctx.lineWidth = 0.8;
+          ctx.strokeRect(wx, wy, ww, 13);
+        }
+      }
+      // Stone balcony rail on upper floor
+      if (bh > 52) {
+        ctx.fillStyle = '#f5ead6'; ctx.strokeStyle = '#5c462e'; ctx.lineWidth = 0.9;
+        ctx.fillRect(x + bw * 0.24, y + 25, bw * 0.52, 6); ctx.strokeRect(x + bw * 0.24, y + 25, bw * 0.52, 6);
+      }
+    };
+
+    // Helper: Distant Old Heritage Vaulted Stone House (منازل حجرية قديمة مقببة)
+    const drawOldBattirHouse = (x, botY, bw, bh, hasDome) => {
+      const y = botY - bh;
+      const sideW = Math.round(bw * 0.15);
+      ctx.fillStyle = '#7c5838'; ctx.strokeStyle = '#3b210e'; ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(x + bw, y); ctx.lineTo(x + bw + sideW, y + 5);
+      ctx.lineTo(x + bw + sideW, botY); ctx.lineTo(x + bw, botY); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      const oG = ctx.createLinearGradient(x, y, x, botY);
+      oG.addColorStop(0.0, '#e8c496'); oG.addColorStop(1.0, '#a67549');
+      ctx.fillStyle = oG; ctx.fillRect(x, y, bw, bh); ctx.strokeRect(x, y, bw, bh);
+      if (hasDome) {
+        const dr = bw * 0.34;
+        const dG = ctx.createRadialGradient(x + bw * 0.42, y - dr * 0.45, 2, x + bw * 0.5, y, dr);
+        dG.addColorStop(0, '#f7dec0'); dG.addColorStop(1, '#9c6c42');
+        ctx.fillStyle = dG; ctx.strokeStyle = '#4a2b16'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.arc(x + bw * 0.5, y, dr, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      // Pointed arched heritage windows with warm evening glow
+      for (const wx of [x + bw * 0.28, x + bw * 0.72]) {
+        ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#4a2b16'; ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(wx - 5, y + bh * 0.62); ctx.lineTo(wx - 5, y + bh * 0.36);
+        ctx.quadraticCurveTo(wx, y + bh * 0.22, wx + 5, y + bh * 0.36);
+        ctx.lineTo(wx + 5, y + bh * 0.62); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+    };
+
     for (let rep = -1; rep <= 1; rep++) {
       const vx = off + rep * span;
-      // Colossal Full-Height 6-Arch Ottoman Stone Gorge Viaduct spanning across the misty sunset canyon!
-      const vdX = vx + 680, vdW = 780, vdTopY = 368, vdBotY = 648;
-      const vdG = ctx.createLinearGradient(vdX, vdTopY, vdX, vdBotY);
-      vdG.addColorStop(0.0, '#d9a472');
-      vdG.addColorStop(0.45, '#9e683e');
-      vdG.addColorStop(1.0, '#4a2b16');
-      ctx.fillStyle = vdG;
-      ctx.strokeStyle = '#361d0d';
-      ctx.lineWidth = 1.5;
+
+      // Hill A (Left-Center Lush Terraced Village Hill)
+      const hAG = ctx.createLinearGradient(0, 290, 0, 620);
+      hAG.addColorStop(0.0, '#6a8238'); hAG.addColorStop(0.45, '#4b6626'); hAG.addColorStop(1.0, '#293b14');
+      ctx.fillStyle = hAG;
       ctx.beginPath();
-      ctx.moveTo(vdX, vdTopY);
-      ctx.lineTo(vdX + vdW, vdTopY);
-      ctx.lineTo(vdX + vdW, vdBotY);
-      // Carve 6 soaring monumental semicircular viaduct arches!
-      const archCount = 6;
-      const stepW = vdW / archCount;
-      for (let a = archCount - 1; a >= 0; a--) {
-        const acx = vdX + (a + 0.5) * stepW;
-        const hw = stepW * 0.34;
-        ctx.lineTo(acx + hw, vdBotY);
-        ctx.lineTo(acx + hw, vdTopY + 76);
-        ctx.arc(acx, vdTopY + 76, hw, 0, Math.PI, true);
-        ctx.lineTo(acx - hw, vdBotY);
+      ctx.moveTo(vx - 40, 625);
+      ctx.bezierCurveTo(vx + 110, 390, vx + 310, 292, vx + 540, 314);
+      ctx.bezierCurveTo(vx + 760, 336, vx + 910, 448, vx + 1040, 625);
+      ctx.closePath(); ctx.fill();
+
+      // Hill B (Right-Center Overlapping Terraced Orchard & Modern/Old Village Hill)
+      const hBG = ctx.createLinearGradient(0, 308, 0, 625);
+      hBG.addColorStop(0.0, '#5e7a30'); hBG.addColorStop(0.5, '#3f5a1e'); hBG.addColorStop(1.0, '#223310');
+      ctx.fillStyle = hBG;
+      ctx.beginPath();
+      ctx.moveTo(vx + 680, 625);
+      ctx.bezierCurveTo(vx + 835, 405, vx + 1055, 305, vx + 1285, 326);
+      ctx.bezierCurveTo(vx + 1485, 344, vx + 1585, 445, vx + span + 80, 625);
+      ctx.closePath(); ctx.fill();
+
+      // Stepped Dry-Stone Agricultural Terraces & Lush Green Gardens across both hills
+      for (const [tx, ty, tw] of [
+        [vx + 220, 384, 380], [vx + 155, 434, 520], [vx + 105, 488, 640],
+        [vx + 960, 398, 410], [vx + 890, 448, 540], [vx + 840, 502, 620],
+      ]) {
+        ctx.fillStyle = '#c9a276'; ctx.strokeStyle = 'rgba(59, 33, 14, 0.55)'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.roundRect(tx, ty, tw, 12, 3); ctx.fill(); ctx.stroke();
+        // Lush garden bed greenery crowning each distant terrace
+        ctx.fillStyle = '#65a30d';
+        ctx.fillRect(tx + 3, ty - 4, tw - 6, 5);
       }
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      // Sunset-gilded stone balustrade along top of viaduct
-      ctx.fillStyle = '#fed7aa';
-      ctx.fillRect(vdX, vdTopY - 4, vdW, 6);
+
+      // Harmonious Blend of Old Heritage Stone Houses & Modern Palestinian Villas + Trees & Gardens!
+      // Hill A Village Cluster
+      drawOldBattirHouse(vx + 310, 384, 68, 46, true);
+      drawModernBattirHouse(vx + 398, 384, 92, 62, true);
+      drawOldBattirHouse(vx + 512, 384, 62, 42, true);
+      drawModernBattirHouse(vx + 240, 434, 88, 58, false);
+      drawOldBattirHouse(vx + 468, 434, 74, 48, true);
+      drawModernBattirHouse(vx + 566, 434, 84, 56, true);
+
+      // Hill B Village Cluster
+      drawModernBattirHouse(vx + 1060, 398, 96, 64, true);
+      drawOldBattirHouse(vx + 1180, 398, 72, 48, true);
+      drawModernBattirHouse(vx + 1272, 398, 86, 56, false);
+      drawOldBattirHouse(vx + 978, 448, 76, 50, true);
+      drawModernBattirHouse(vx + 1165, 448, 92, 60, true);
+
+      // Distant Olive, Pomegranate & Slender Cypress Gardens Weaving Between the Homes!
+      for (const [cx0, cy0, ch] of [
+        [vx + 288, 384, 56], [vx + 592, 384, 62], [vx + 432, 434, 52],
+        [vx + 1034, 398, 58], [vx + 1262, 398, 54], [vx + 1138, 448, 56], [vx + 1378, 448, 64],
+      ]) {
+        drawCypressSilhouette(ctx, cx0, cy0, ch);
+      }
+      for (const [ox, oy, sc] of [
+        [vx + 205, 434, 0.44], [vx + 372, 434, 0.46], [vx + 678, 434, 0.48],
+        [vx + 315, 488, 0.50], [vx + 545, 488, 0.48], [vx + 932, 448, 0.46],
+        [vx + 1090, 448, 0.44], [vx + 1310, 448, 0.48], [vx + 1020, 502, 0.50], [vx + 1250, 502, 0.50],
+      ]) {
+        drawAncientOliveSunset(ctx, ox, oy, sc);
+      }
     }
 
     // =========================================================================
