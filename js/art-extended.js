@@ -26026,6 +26026,257 @@ window.Game = window.Game || {};
         c.restore();
       });
     }
+
+    // 3. Pre-baked 2x Retina Palestinian Blossoming Almond Tree Sprite (شجرة اللوز المزهرة بأزهار بيضاء ووردية رقيقة)
+    if (!tex.almondTreeSprite) {
+      tex.almondTreeSprite = makeOffscreen(248, 232, (c) => {
+        c.save();
+        c.scale(2, 2);
+        c.translate(62, 108);
+
+        // Ground shadow
+        c.fillStyle = 'rgba(28, 20, 12, 0.28)';
+        c.beginPath(); c.ellipse(0, 2, 24, 4.5, 0, 0, Math.PI * 2); c.fill();
+
+        // Slender dark-mahogany / ash-brown almond trunk splitting into graceful arching boughs
+        const trG = c.createLinearGradient(-8, -42, 8, 2);
+        trG.addColorStop(0.0, '#6e523e'); trG.addColorStop(0.5, '#4c3526'); trG.addColorStop(1.0, '#2a1b12');
+        c.fillStyle = trG; c.strokeStyle = '#1f130c'; c.lineWidth = 1.0;
+        c.beginPath();
+        c.moveTo(-7.5, 3);
+        c.quadraticCurveTo(-5.5, -18, -4.5, -36);
+        c.lineTo(4.0, -36);
+        c.quadraticCurveTo(5.2, -18, 7.5, 3);
+        c.closePath();
+        c.fill(); c.stroke();
+
+        // Delicate upward-arching almond branches & fine dark twigs
+        c.strokeStyle = '#3f2a1d'; c.lineCap = 'round';
+        const boughs = [
+          [-2, -32, -24, -52, -44, -68, 4.2],
+          [-1, -34, -14, -62, -28, -86, 3.6],
+          [0, -35, 2, -66, -4, -94, 3.4],
+          [1, -34, 18, -60, 34, -84, 3.6],
+          [2, -32, 26, -48, 46, -64, 4.0],
+          [-20, -52, -34, -62, -46, -54, 2.2],
+          [22, -52, 36, -60, 48, -50, 2.2],
+          [-12, -62, -22, -78, -16, -92, 2.0],
+          [14, -60, 22, -76, 18, -92, 2.0]
+        ];
+        for (const [x0, y0, cx, cy, x1, y1, lw] of boughs) {
+          c.lineWidth = lw;
+          c.beginPath(); c.moveTo(x0, y0); c.quadraticCurveTo(cx, cy, x1, y1); c.stroke();
+        }
+
+        // Soft shaded blush-pink under-canopy blossom clouds
+        const clouds = [
+          [-38, -64, 17, 12], [-22, -80, 19, 13], [0, -88, 21, 14],
+          [24, -78, 19, 13], [38, -62, 17, 12], [-16, -62, 16, 11],
+          [16, -60, 16, 11], [0, -70, 18, 12]
+        ];
+        for (const [bx, by, rx, ry] of clouds) {
+          const clG = c.createRadialGradient(bx - rx * 0.2, by - ry * 0.3, 2, bx, by, rx * 1.1);
+          clG.addColorStop(0.0, 'rgba(255, 248, 250, 0.96)');
+          clG.addColorStop(0.45, 'rgba(253, 224, 235, 0.92)');
+          clG.addColorStop(0.82, 'rgba(244, 182, 206, 0.85)');
+          clG.addColorStop(1.0, 'rgba(219, 138, 170, 0.30)');
+          c.fillStyle = clG;
+          c.beginPath(); c.ellipse(bx, by, rx, ry, 0, 0, Math.PI * 2); c.fill();
+        }
+
+        // Fresh tender spring-green budding almond leaves peeking between blossoms
+        c.fillStyle = '#65a30d';
+        for (let lv = 0; lv < 26; lv++) {
+          const ang = (lv * 2.39996);
+          const rad = 10 + (lv % 5) * 8.5;
+          const lx = Math.cos(ang) * rad * 1.15;
+          const ly = -72 + Math.sin(ang) * rad * 0.65;
+          c.beginPath(); c.ellipse(lx, ly, 3.6, 1.4, ang, 0, Math.PI * 2); c.fill();
+        }
+
+        // Crisp 5-petal snow-white & blush-pink almond blossoms with tiny crimson-gold centers!
+        for (let fl = 0; fl < 48; fl++) {
+          const ang = fl * 2.39996;
+          const rad = Math.sqrt((fl + 0.5) / 48) * 44;
+          const fx = Math.cos(ang) * rad * 1.12;
+          const fy = -72 + Math.sin(ang) * rad * 0.58;
+          const pr = 2.1 + (fl % 3) * 0.45;
+          c.fillStyle = fl % 3 === 0 ? '#ffffff' : (fl % 3 === 1 ? '#fff1f5' : '#fbcfe8');
+          for (let p = 0; p < 5; p++) {
+            const pa = (p / 5) * Math.PI * 2 + fl;
+            c.beginPath();
+            c.arc(fx + Math.cos(pa) * pr * 0.72, fy + Math.sin(pa) * pr * 0.72, pr * 0.65, 0, Math.PI * 2);
+            c.fill();
+          }
+          // Warm crimson-gold blossom stamen center
+          c.fillStyle = fl % 2 === 0 ? '#e11d48' : '#f59e0b';
+          c.beginPath(); c.arc(fx, fy, 0.95, 0, Math.PI * 2); c.fill();
+        }
+        c.restore();
+      });
+    }
+  }
+
+  function drawBlossomingAlmondTree(ctx, x, groundY, scale, time, seed) {
+    ensureBattirRealisticTrees();
+    ctx.save();
+    ctx.translate(x, groundY);
+    ctx.scale(scale, scale);
+    ctx.drawImage(tex.almondTreeSprite, -62, -108, 124, 116);
+    // Gentle fluttering almond blossom petals drifting in the breeze
+    const sHash = Math.abs(Math.floor(seed || 1));
+    for (let p = 0; p < 5; p++) {
+      const drop = ((time * (0.28 + (p % 3) * 0.08) + p * 0.21 + sHash * 0.17) % 1);
+      const px = -34 + ((p * 19 + sHash * 7) % 68) + Math.sin(time * 2.2 + p * 1.7) * 9;
+      const py = -80 + drop * 84;
+      ctx.fillStyle = p % 2 === 0 ? 'rgba(255, 248, 250, 0.85)' : 'rgba(251, 207, 232, 0.82)';
+      ctx.beginPath(); ctx.ellipse(px, py, 2.0, 1.1, time * 2.5 + p, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // Helper: Authentic Palestinian Prickly Pear Cactus (شجرة الصبر / التين الشوكي الفلسطيني بثماره الذهبية)
+  function drawPricklyPearCactus(ctx, x, groundY, scale, seed) {
+    ctx.save();
+    ctx.translate(x, groundY);
+    ctx.scale(scale, scale);
+    const sHash = Math.abs(Math.floor(seed || 1));
+    const flip = sHash % 2 === 0 ? 1 : -1;
+    ctx.scale(flip, 1);
+
+    // Ground shadow
+    ctx.fillStyle = 'rgba(28, 20, 12, 0.30)';
+    ctx.beginPath(); ctx.ellipse(0, 1.5, 22, 4.0, 0, 0, Math.PI * 2); ctx.fill();
+
+    const drawPad = (px, py, rx, ry, ang, tone, hasFruit) => {
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(ang);
+      const pG = ctx.createRadialGradient(-rx * 0.3, -ry * 0.35, 1, 0, 0, ry * 1.15);
+      if (tone === 0) {
+        pG.addColorStop(0, '#6a8e42'); pG.addColorStop(0.6, '#4a6b2c'); pG.addColorStop(1, '#2c421a');
+      } else {
+        pG.addColorStop(0, '#84ab52'); pG.addColorStop(0.58, '#587c33'); pG.addColorStop(1, '#344f1e');
+      }
+      ctx.fillStyle = pG; ctx.strokeStyle = '#1e3011'; ctx.lineWidth = 1.05;
+      ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Tiny pale spine areole dots across the cactus pad
+      ctx.fillStyle = 'rgba(245, 240, 215, 0.65)';
+      for (const [ax, ay] of [[-rx * 0.38, -ry * 0.25], [rx * 0.35, -ry * 0.3], [0, 0], [-rx * 0.3, ry * 0.32], [rx * 0.32, ry * 0.28]]) {
+        ctx.beginPath(); ctx.arc(ax, ay, 0.75, 0, Math.PI * 2); ctx.fill();
+      }
+      // Ripe golden-orange & crimson-blushed sabra fruits (ثمار الصبر) perched on upper rim!
+      if (hasFruit) {
+        for (const fx of [-rx * 0.42, rx * 0.35]) {
+          const fy = -ry - 2.2;
+          const fG = ctx.createRadialGradient(fx - 0.8, fy - 0.8, 0.4, fx, fy, 3.2);
+          fG.addColorStop(0, '#fde047'); fG.addColorStop(0.55, '#f97316'); fG.addColorStop(1, '#b91c1c');
+          ctx.fillStyle = fG; ctx.strokeStyle = '#5c190a'; ctx.lineWidth = 0.65;
+          ctx.beginPath(); ctx.ellipse(fx, fy, 2.3, 3.2, fx * 0.05, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        }
+      }
+      ctx.restore();
+    };
+
+    // Woody gnarled lower base pads + branching fleshy cladode pads
+    drawPad(-10, -7, 7.2, 9.5, -0.35, 0, false);
+    drawPad(10, -7, 7.0, 9.2, 0.38, 0, false);
+    drawPad(0, -10, 8.0, 11.0, 0.04, 0, false);
+    drawPad(-17, -18, 6.2, 9.0, -0.52, 1, true);
+    drawPad(-6, -24, 6.8, 9.8, -0.18, 1, true);
+    drawPad(8, -23, 6.6, 9.6, 0.22, 1, true);
+    drawPad(19, -17, 6.0, 8.6, 0.55, 1, false);
+    drawPad(1, -36, 5.8, 8.4, 0.05, 1, true);
+    drawPad(-13, -34, 5.2, 7.6, -0.34, 1, true);
+    ctx.restore();
+  }
+
+  // Helper: Graceful Swimming Duck on Roman Pool Water (بطة تسبح في البركة مع موجات الماء وانعكاسها)
+  function drawSwimmingDuck(ctx, x, y, scale, dir, time, seed, style) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale * (dir || 1), scale);
+    const bob = Math.sin(time * 3.8 + seed) * 0.7;
+    const headNod = Math.sin(time * 2.4 + seed * 1.7) * 0.10;
+
+    // 1. Expanding V-shaped water wake ripples trailing behind the swimming duck
+    const rip = (time * 1.4 + seed * 0.3) % 1;
+    ctx.strokeStyle = `rgba(224, 249, 255, ${(0.50 * (1 - rip)).toFixed(2)})`;
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.ellipse(-2, 1.8, 11 + rip * 9, 2.2 + rip * 1.4, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(224, 249, 255, 0.35)';
+    ctx.lineWidth = 0.95;
+    ctx.beginPath();
+    ctx.moveTo(-8, 1.2); ctx.lineTo(-22, -1.6);
+    ctx.moveTo(-8, 2.6); ctx.lineTo(-21, 5.2);
+    ctx.stroke();
+
+    // Soft shimmering water reflection beneath the duck
+    ctx.fillStyle = style === 'duckling' ? 'rgba(250, 204, 21, 0.22)' : 'rgba(241, 245, 249, 0.22)';
+    ctx.beginPath(); ctx.ellipse(0, 3.6, 9.5, 2.4, 0, 0, Math.PI * 2); ctx.fill();
+
+    // 2. Buoyant sculpted duck body & upturned tail feathers
+    const isMallard = style === 'mallard';
+    const isDuckling = style === 'duckling';
+    const bodyG = ctx.createLinearGradient(0, -7, 0, 2);
+    if (isDuckling) {
+      bodyG.addColorStop(0, '#fef08a'); bodyG.addColorStop(0.65, '#facc15'); bodyG.addColorStop(1, '#ca8a04');
+    } else if (isMallard) {
+      bodyG.addColorStop(0, '#cbd5e1'); bodyG.addColorStop(0.6, '#94a3b8'); bodyG.addColorStop(1, '#475569');
+    } else {
+      bodyG.addColorStop(0, '#ffffff'); bodyG.addColorStop(0.65, '#f1f5f9'); bodyG.addColorStop(1, '#cbd5e1');
+    }
+    ctx.fillStyle = bodyG; ctx.strokeStyle = '#334155'; ctx.lineWidth = 0.85;
+    ctx.beginPath();
+    ctx.moveTo(-11, -2.5 + bob);
+    ctx.quadraticCurveTo(-6, -7.5 + bob, 4, -6.5 + bob);
+    ctx.quadraticCurveTo(10, -5.5 + bob, 10.5, -0.2 + bob);
+    ctx.quadraticCurveTo(2, 2.2 + bob, -8.5, 1.5 + bob);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+
+    // Mallard chestnut breast & folded wing feather detail
+    if (isMallard) {
+      ctx.fillStyle = '#7c2d12';
+      ctx.beginPath(); ctx.ellipse(6.5, -2.2 + bob, 3.6, 3.0, -0.2, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.strokeStyle = isDuckling ? '#a16207' : (isMallard ? '#334155' : '#94a3b8');
+    ctx.lineWidth = 0.85;
+    ctx.beginPath();
+    ctx.moveTo(-6, -2.5 + bob);
+    ctx.quadraticCurveTo(0, -5.2 + bob, 5, -2.2 + bob);
+    ctx.quadraticCurveTo(0, 0.2 + bob, -6, -2.5 + bob);
+    ctx.stroke();
+
+    // 3. Curved S-neck, rounded head, dark eye & orange bill
+    ctx.save();
+    ctx.translate(6.8, -5.0 + bob);
+    ctx.rotate(headNod);
+    const headCol = isDuckling ? '#fde047' : (isMallard ? '#047857' : '#ffffff');
+    ctx.strokeStyle = headCol; ctx.lineWidth = 4.2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(0, 1); ctx.quadraticCurveTo(1.5, -3.5, 1.0, -6.2); ctx.stroke();
+    if (isMallard) {
+      // Crisp white mallard neck collar ring
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(-1.3, -1.6); ctx.lineTo(2.8, -1.6); ctx.stroke();
+    }
+    ctx.fillStyle = headCol; ctx.strokeStyle = '#334155'; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.arc(1.2, -7.2, 3.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    // Orange duck bill
+    ctx.fillStyle = isDuckling ? '#f97316' : '#ea580c';
+    ctx.strokeStyle = '#7c2d12'; ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(4.2, -7.8); ctx.quadraticCurveTo(8.5, -7.2, 8.6, -6.0); ctx.lineTo(4.0, -5.6); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    // Bright dark eye + tiny specular dot
+    ctx.fillStyle = '#09090b';
+    ctx.beginPath(); ctx.arc(2.4, -7.8, 0.85, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(2.6, -8.0, 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.restore();
   }
 
   function drawPomegranateTree(ctx, x, groundY, scale) {
@@ -26903,10 +27154,12 @@ window.Game = window.Game || {};
         drawSunsetVillageHouse(ctx, sx + 75, 496, 175, 122, { qantara: true, qantaraW: 28, qantaraH: 62, sideW: 18 });
         drawSunsetVillageHouse(ctx, sx + 285, 496, 195, 134, { domeR: 48, mashrabiya: true, pigeonTower: true, sideW: 18 });
 
-        // Tier 1 (Lower Courtyard Wall, Pomegranate & Ancient Olive Orchard)
+        // Tier 1 (Lower Courtyard Wall, Pomegranate, Blossoming Almond, Prickly Pear & Ancient Olive Orchard)
         drawFieldstoneRetainingWall(ctx, sx + 30, 558, 620, 36, 3);
+        drawPricklyPearCactus(ctx, sx + 635, 558, 0.96, blockIdx * 7 + 3);
         drawPomegranateTree(ctx, sx + 690, 560, 1.12);
         drawTerraceFarmer(ctx, sx + 755, 562, 0.94, time, 'pick', 1, blockIdx * 7 + 1);
+        drawBlossomingAlmondTree(ctx, sx + 792, 558, 1.06, time, blockIdx * 3 + 2);
         drawCypressSilhouette(ctx, sx + 835, 558, 162);
         drawAncientOliveSunset(ctx, sx + 985, 564, 1.22);
         drawOliveHarvestScene(ctx, sx + 985, 564, 1.22, time, blockIdx * 13 + 1);
@@ -27239,11 +27492,23 @@ window.Game = window.Game || {};
         }
         // Final organized stone spout pouring pure spring water from the lower terrace into the Roman Pool!
         drawPureStoneSpoutPour(plX - 4, plY + 52, plX + 14, plY + 62, 12);
+        // Swimming Ducks gliding across the Scene 1 Ain al-Balad Roman Pool!
+        for (let dk = 0; dk < 3; dk++) {
+          const ph = dk * 2.1 + blockIdx * 0.9;
+          const spd = 0.22 + dk * 0.04;
+          const wv = Math.sin(time * spd + ph);
+          const vl = Math.cos(time * spd + ph);
+          const dx = plX + plW * 0.52 + wv * (plW * 0.34);
+          const dy = plY + 57 + dk * 7.5 + Math.sin(time * 2.2 + dk) * 1.0;
+          drawSwimmingDuck(ctx, dx, dy, dk === 2 ? 0.62 : 0.80, vl >= 0 ? 1 : -1, time, blockIdx * 7 + dk, dk === 0 ? 'mallard' : (dk === 2 ? 'duckling' : 'white'));
+        }
 
+        drawBlossomingAlmondTree(ctx, sx + 860, 586, 1.02, time, blockIdx * 11 + 2);
         drawPomegranateTree(ctx, sx + 945, 588, 1.1);
         drawTerraceFarmer(ctx, sx + 1010, 590, 0.94, time, 'hoe', -1, blockIdx * 11 + 4);
         drawAncientOliveSunset(ctx, sx + 1115, 592, 1.2);
         drawOliveHarvestScene(ctx, sx + 1115, 592, 1.2, time, blockIdx * 19 + 2);
+        drawPricklyPearCactus(ctx, sx + 1218, 592, 0.92, blockIdx * 13 + 6);
 
       } else if (zoneIdx === 2) {
         // ---------------------------------------------------------------------
@@ -27558,51 +27823,88 @@ window.Game = window.Game || {};
           // 2. Grand Octagonal Drum & Ribbed Emerald-Green Main Mosque Dome (القبة الخضراء المضلّعة!)
           const domeR = 58;
           const domeBaseY = mqTop + 2;
-          // Stone drum with arched clerestory windows & carved cornice band
+          // Stepped octagonal dressed-limestone drum (رقبة القبة) with arched clerestory windows & carved cornice
           ctx.fillStyle = '#e5d9c4'; ctx.strokeStyle = '#54402e'; ctx.lineWidth = 1.2;
-          ctx.fillRect(mqCx - domeR - 4, domeBaseY - 18, (domeR + 4) * 2, 19);
-          ctx.strokeRect(mqCx - domeR - 4, domeBaseY - 18, (domeR + 4) * 2, 19);
-          ctx.fillStyle = '#efe5d4';
-          ctx.fillRect(mqCx - domeR - 7, domeBaseY - 21, (domeR + 7) * 2, 4);
-          for (let dw = -42; dw <= 42; dw += 14) {
-            ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#5c4530'; ctx.lineWidth = 0.8;
-            ctx.beginPath(); ctx.roundRect(mqCx + dw - 3.2, domeBaseY - 14, 6.4, 11, [3.2, 3.2, 1, 1]); ctx.fill(); ctx.stroke();
+          ctx.fillRect(mqCx - domeR - 6, domeBaseY - 22, (domeR + 6) * 2, 23);
+          ctx.strokeRect(mqCx - domeR - 6, domeBaseY - 22, (domeR + 6) * 2, 23);
+          // Subtle octagonal side-facet shading on drum
+          ctx.fillStyle = 'rgba(84, 64, 46, 0.16)';
+          ctx.fillRect(mqCx + domeR - 14, domeBaseY - 22, 20, 23);
+          ctx.fillStyle = 'rgba(255, 250, 240, 0.22)';
+          ctx.fillRect(mqCx - domeR - 6, domeBaseY - 22, 18, 23);
+          // Carved stepped stone cornice & decorative bronze base collar ring
+          ctx.fillStyle = '#f2e8d8'; ctx.strokeStyle = '#54402e'; ctx.lineWidth = 1.0;
+          ctx.fillRect(mqCx - domeR - 9, domeBaseY - 26, (domeR + 9) * 2, 5);
+          ctx.strokeRect(mqCx - domeR - 9, domeBaseY - 26, (domeR + 9) * 2, 5);
+          for (let dw = -44; dw <= 44; dw += 14.5) {
+            ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#5c4530'; ctx.lineWidth = 0.85;
+            ctx.beginPath(); ctx.roundRect(mqCx + dw - 3.4, domeBaseY - 17, 6.8, 12.5, [3.4, 3.4, 1, 1]); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#785a3a'; ctx.lineWidth = 0.6;
+            ctx.beginPath(); ctx.moveTo(mqCx + dw, domeBaseY - 17); ctx.lineTo(mqCx + dw, domeBaseY - 4.5); ctx.stroke();
           }
-          // Luminous emerald-green dome with metallic specular highlight & meridian ribs
+
+          // Sculpted Levantine Pointed Bulbous Emerald-Green Dome (قبة إسلامية مدبّبة متقنة ومضلّعة)
+          const domeSpringY = domeBaseY - 26;
+          const domeH = domeR * 1.24;
+          const domeApexY = domeSpringY - domeH;
+          const tracePointedDome = () => {
+            ctx.beginPath();
+            ctx.moveTo(mqCx - domeR - 1, domeSpringY);
+            ctx.bezierCurveTo(
+              mqCx - domeR - 7, domeSpringY - domeH * 0.42,
+              mqCx - domeR * 0.52, domeSpringY - domeH * 0.80,
+              mqCx, domeApexY
+            );
+            ctx.bezierCurveTo(
+              mqCx + domeR * 0.52, domeSpringY - domeH * 0.80,
+              mqCx + domeR + 7, domeSpringY - domeH * 0.42,
+              mqCx + domeR + 1, domeSpringY
+            );
+            ctx.closePath();
+          };
           ctx.save();
-          ctx.beginPath();
-          ctx.arc(mqCx, domeBaseY - 18, domeR, Math.PI, 0);
-          ctx.closePath();
-          const dgG = ctx.createRadialGradient(mqCx - 18, domeBaseY - 54, 4, mqCx, domeBaseY - 26, domeR + 10);
-          dgG.addColorStop(0.00, '#86efac');
-          dgG.addColorStop(0.28, '#22c55e');
-          dgG.addColorStop(0.65, '#15803d');
-          dgG.addColorStop(1.00, '#052e16');
+          tracePointedDome();
+          const dgG = ctx.createRadialGradient(mqCx - domeR * 0.34, domeSpringY - domeH * 0.58, 3, mqCx, domeSpringY - domeH * 0.36, domeR * 1.38);
+          dgG.addColorStop(0.00, '#bbf7d0');
+          dgG.addColorStop(0.22, '#34d399');
+          dgG.addColorStop(0.52, '#15803d');
+          dgG.addColorStop(0.82, '#065f46');
+          dgG.addColorStop(1.00, '#022c22');
           ctx.fillStyle = dgG; ctx.fill();
           ctx.clip();
-          for (const rx of [-44, -26, -9, 9, 26, 44]) {
-            ctx.strokeStyle = 'rgba(5, 46, 22, 0.42)'; ctx.lineWidth = 1.4;
+          // Curved converging standing-seam meridian ribs + sunlit green specular streaks
+          for (const rx of [-46, -30, -15, 0, 15, 30, 46]) {
+            ctx.strokeStyle = 'rgba(2, 44, 34, 0.45)'; ctx.lineWidth = 1.45;
             ctx.beginPath();
-            ctx.moveTo(mqCx, domeBaseY - 18 - domeR);
-            ctx.quadraticCurveTo(mqCx + rx * 0.72, domeBaseY - 46, mqCx + rx, domeBaseY - 18);
+            ctx.moveTo(mqCx, domeApexY);
+            ctx.bezierCurveTo(mqCx + rx * 0.55, domeSpringY - domeH * 0.68, mqCx + rx * 1.06, domeSpringY - domeH * 0.32, mqCx + rx, domeSpringY);
             ctx.stroke();
-            ctx.strokeStyle = 'rgba(187, 247, 208, 0.24)'; ctx.lineWidth = 0.8;
+            ctx.strokeStyle = 'rgba(187, 247, 208, 0.28)'; ctx.lineWidth = 0.8;
             ctx.beginPath();
-            ctx.moveTo(mqCx + 1, domeBaseY - 18 - domeR);
-            ctx.quadraticCurveTo(mqCx + rx * 0.72 + 1.4, domeBaseY - 46, mqCx + rx + 1.4, domeBaseY - 18);
+            ctx.moveTo(mqCx + 1.1, domeApexY);
+            ctx.bezierCurveTo(mqCx + rx * 0.55 + 1.3, domeSpringY - domeH * 0.68, mqCx + rx * 1.06 + 1.4, domeSpringY - domeH * 0.32, mqCx + rx + 1.4, domeSpringY);
             ctx.stroke();
           }
+          // Subtle horizontal decorative gilt-bronze band wrapping the lower dome skirt
+          ctx.fillStyle = 'rgba(251, 191, 36, 0.55)';
+          ctx.fillRect(mqCx - domeR - 8, domeSpringY - 5, (domeR + 8) * 2, 2.5);
           ctx.restore();
-          ctx.strokeStyle = '#052e16'; ctx.lineWidth = 1.5;
-          ctx.beginPath(); ctx.arc(mqCx, domeBaseY - 18, domeR, Math.PI, 0); ctx.closePath(); ctx.stroke();
-          // Golden dome finial & crescent (هلال القبة الذهبي)
-          const finY = domeBaseY - 18 - domeR;
-          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.0;
-          ctx.beginPath(); ctx.moveTo(mqCx, finY); ctx.lineTo(mqCx, finY - 16); ctx.stroke();
-          ctx.fillStyle = '#fde047';
-          ctx.beginPath(); ctx.arc(mqCx, finY - 20, 5.5, 0.25, Math.PI * 1.85); ctx.fill();
+          tracePointedDome();
+          ctx.strokeStyle = '#022c22'; ctx.lineWidth = 1.6; ctx.stroke();
+
+          // Ornate 3-Orb Golden Brass Spire (ألم القبة) & Gleaming Golden Crescent (هلال القبة الذهبي)
+          const finY = domeApexY;
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.2;
+          ctx.beginPath(); ctx.moveTo(mqCx, finY + 1); ctx.lineTo(mqCx, finY - 21); ctx.stroke();
+          ctx.fillStyle = '#fde047'; ctx.strokeStyle = '#92400e'; ctx.lineWidth = 0.8;
+          for (const [oy, or] of [[-3.5, 3.6], [-9.0, 2.8], [-13.8, 2.1]]) {
+            ctx.beginPath(); ctx.arc(mqCx, finY + oy, or, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          }
+          // Crisp open golden crescent facing skyward
+          ctx.fillStyle = '#fde047'; ctx.strokeStyle = '#92400e'; ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.arc(mqCx, finY - 23, 6.2, 0.32, Math.PI * 1.82); ctx.fill();
           ctx.fillStyle = '#3b2414';
-          ctx.beginPath(); ctx.arc(mqCx + 2.1, finY - 21, 4.2, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(mqCx + 2.3, finY - 24.2, 4.7, 0, Math.PI * 2); ctx.fill();
 
           // 3. Dressed Jerusalem-Limestone Prayer Hall with Carved Parapet, 3-Arch Riwaq & Stained-Glass Windows
           ctx.save();
@@ -27669,11 +27971,14 @@ window.Game = window.Game || {};
             ctx.beginPath(); ctx.arc(wx, mqTop + 37, 5.5, 0, Math.PI * 2); ctx.stroke();
           }
         }
+        drawPricklyPearCactus(ctx, sx + 590, 586, 0.95, blockIdx * 5 + 1);
         drawPomegranateTree(ctx, sx + 662, 588, 1.06);
+        drawBlossomingAlmondTree(ctx, sx + 748, 588, 1.06, time, blockIdx * 7 + 4);
         drawTerraceFarmer(ctx, sx + 310, 488, 0.88, time, 'hoe', 1, blockIdx * 7 + 2);
         drawTerraceFarmer(ctx, sx + 472, 540, 0.90, time, 'pick', -1, blockIdx * 9 + 5);
         drawAncientOliveSunset(ctx, sx + 1072, 590, 1.12);
         drawOliveHarvestScene(ctx, sx + 1072, 590, 1.12, time, blockIdx * 13 + 5);
+        drawPricklyPearCactus(ctx, sx + 1175, 592, 0.90, blockIdx * 17 + 3);
 
       } else if (zoneIdx === 3) {
         // ---------------------------------------------------------------------
@@ -27706,7 +28011,9 @@ window.Game = window.Game || {};
           ctx.beginPath(); ctx.arc(lx, 464, 5, 0, Math.PI * 2); ctx.fill();
         }
 
+        drawPricklyPearCactus(ctx, sx + 642, 560, 0.94, blockIdx * 13 + 4);
         drawCypressSilhouette(ctx, sx + 695, 558, 165);
+        drawBlossomingAlmondTree(ctx, sx + 758, 560, 1.08, time, blockIdx * 9 + 1);
         drawAncientOliveSunset(ctx, sx + 855, 564, 1.24);
         drawOliveHarvestScene(ctx, sx + 855, 564, 1.24, time, blockIdx * 11 + 3);
         drawTerraceFarmer(ctx, sx + 962, 564, 0.94, time, 'pick', -1, blockIdx * 13 + 7);
@@ -27782,11 +28089,14 @@ window.Game = window.Game || {};
 
         // Sunset-Gilded Ribbed Dome of Maqam Abu Yazeid Al-Bastami
         drawCypressSilhouette(ctx, sx + 585, 558, 164);
+        drawPricklyPearCactus(ctx, sx + 595, 558, 0.96, blockIdx * 7 + 2);
         drawSunsetVillageHouse(ctx, sx + 635, 558, 186, 122, { domeR: 58, mashrabiya: true, sideW: 18, topCol: '#f7d5a8' });
         drawCypressSilhouette(ctx, sx + 868, 558, 152);
+        drawBlossomingAlmondTree(ctx, sx + 942, 560, 1.06, time, blockIdx * 5 + 3);
         drawPomegranateTree(ctx, sx + 1015, 560, 1.12);
         drawTerraceFarmer(ctx, sx + 1085, 564, 0.96, time, 'hoe', 1, blockIdx * 17 + 9);
         drawAncientOliveSunset(ctx, sx + 1165, 564, 1.18);
+        drawPricklyPearCactus(ctx, sx + 1238, 564, 0.88, blockIdx * 11 + 5);
       }
     }
 
@@ -28226,6 +28536,22 @@ window.Game = window.Game || {};
           ctx.ellipse(rx, ry, rLen, 1.1 + u * 0.4, 0, 0, Math.PI * 2);
           ctx.fill();
         }
+      }
+
+      // Swimming Village Ducks & Duckling gliding peacefully across the Roman Pool! (بط يسبح في البركة)
+      const heroDucks = [
+        { u: 0.34, minX: pBackL + 58, maxX: pBackR - 52, spd: 0.22, ph: 0.4, style: 'mallard', sc: 0.86 },
+        { u: 0.56, minX: pBackL + 42, maxX: pBackR - 38, spd: 0.18, ph: 2.3, style: 'white', sc: 0.96 },
+        { u: 0.61, minX: pBackL + 42, maxX: pBackR - 38, spd: 0.18, ph: 2.12, style: 'duckling', sc: 0.64 },
+        { u: 0.78, minX: pFrontL + 68, maxX: pFrontR - 64, spd: 0.25, ph: 4.1, style: 'white', sc: 1.05 }
+      ];
+      for (let dk = 0; dk < heroDucks.length; dk++) {
+        const d = heroDucks[dk];
+        const wave = Math.sin(time * d.spd + d.ph);
+        const vel = Math.cos(time * d.spd + d.ph);
+        const dx = (d.minX + d.maxX) * 0.5 + wave * ((d.maxX - d.minX) * 0.46);
+        const dy = pBackY + d.u * (pFrontY - pBackY) + Math.sin(time * 2.1 + dk * 1.7) * 1.2;
+        drawSwimmingDuck(ctx, dx, dy, d.sc, vel >= 0 ? 1 : -1, time, dk * 7 + 3, d.style);
       }
       ctx.restore();
 
