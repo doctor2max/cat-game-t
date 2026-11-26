@@ -2466,111 +2466,154 @@ window.Game = window.Game || {};
     }
   }
 
-  function drawBackground(time) {
-    if (level && level.clearSkyOnly) {
-      const skyGrad = ctx.createLinearGradient(0, 0, 0, LOGICAL_H);
-      skyGrad.addColorStop(0, '#38bdf8');
-      skyGrad.addColorStop(0.55, '#7dd3fc');
-      skyGrad.addColorStop(1, '#e0f2fe');
-      ctx.fillStyle = skyGrad;
-      ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
-      if (dimBackground) {
-        ctx.fillStyle = 'rgba(6, 9, 18, 0.65)';
-        ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
-      }
-      return;
+  // Universal Dual-Layer Offscreen Canvas Background Cache (v165)
+  // Reuses only 2 bounded Offscreen Canvases (~8 MB total RAM) across all stages 1-25
+  // while Stage 13 (greenhouse) & Stage 26 (battir) also use bespoke 60fps Tile Baking!
+  const BG_MID_PAD = 128;
+  const BG_MID_PARALLAX = {
+    museum: 0.40, bridge: 0.40, oldtown: 0.40, harbor_storm: 0.40,
+    rooftop_neon: 0.40, homeward: 0.40, snow: 0.40, circus: 0.40,
+    desert: 0.38, japan: 0.40, steam_train: 0.40, venice: 0.40,
+    paris: 0.42, marrakech: 0.42, maya: 0.40, greece: 0.40,
+    construction: 0.40, subway: 0.45, rooftop: 0.42, harbor: 0.40,
+    park: 0.42, market: 0.40,
+  };
+  const bgSkyCache = { canvas: null, ctx: null, theme: '', camX: -99999, time: -99999 };
+  const bgMidCache = { canvas: null, ctx: null, theme: '', camX: -99999, actualPad: 0, time: -99999 };
+
+  function ensureBgCacheCanvases() {
+    if (!bgSkyCache.canvas && typeof document !== 'undefined' && document.createElement) {
+      const sc = document.createElement('canvas');
+      sc.width = LOGICAL_W;
+      sc.height = LOGICAL_H;
+      bgSkyCache.canvas = sc;
+      bgSkyCache.ctx = sc.getContext('2d', { alpha: false });
+      try { Object.defineProperty(bgSkyCache.ctx, 'shadowBlur', { get() { return 0; }, set() {}, configurable: true }); } catch (e) {}
+
+      const mc = document.createElement('canvas');
+      mc.width = LOGICAL_W + BG_MID_PAD * 2;
+      mc.height = LOGICAL_H;
+      bgMidCache.canvas = mc;
+      bgMidCache.ctx = mc.getContext('2d');
+      try { Object.defineProperty(bgMidCache.ctx, 'shadowBlur', { get() { return 0; }, set() {}, configurable: true }); } catch (e) {}
     }
-    const theme = level.theme;
-    const bgTime = level && level.staticBackground ? 0 : time;
-    if (theme === 'museum') {
-      Art.drawMuseumSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawMuseumMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'bridge') {
-      Art.drawBridgeSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawBridgeMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'oldtown') {
-      Art.drawOldTownSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawOldTownMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'harbor_storm') {
-      Art.drawHarborStormSkyAndSea(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawHarborStormMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'greenhouse') {
-      Art.drawGreenhouseSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawGreenhouseMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'rooftop_neon') {
-      Art.drawNeonRooftopSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawNeonRooftopMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'homeward') {
-      Art.drawHomewardSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawHomewardMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'snow') {
-      Art.drawSnowSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawSnowMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'circus') {
-      Art.drawCircusSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawCircusMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'desert') {
-      Art.drawDesertSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawDesertMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'japan') {
-      Art.drawJapanSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawJapanMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'steam_train') {
-      Art.drawSteamTrainSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawSteamTrainMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'venice') {
-      Art.drawVeniceSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawVeniceMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'paris') {
-      Art.drawParisSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawParisMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'marrakech') {
-      Art.drawMarrakechSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawMarrakechMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'maya') {
-      Art.drawMayaSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawMayaMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'greece') {
-      Art.drawGreeceSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawGreeceMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'battir') {
-      Art.drawBattirSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, bgTime);
-      Art.drawBattirMidground(ctx, camX, LOGICAL_W, LOGICAL_H, bgTime);
-    } else if (theme === 'construction') {
-      Art.drawConstructionSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawConstructionMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'subway') {
-      Art.drawSubwaySkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawSubwayMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'rooftop') {
-      Art.drawRooftopSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawRooftopMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'harbor') {
-      Art.drawHarborSkyAndSea(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawHarborMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-    } else if (theme === 'park') {
-      Art.drawParkSkyAndHorizon(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      Art.drawParkMidground(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+  }
+
+  function renderThemeSky(targetCtx, theme, cx, w, h, tSec) {
+    if (theme === 'museum') Art.drawMuseumSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'bridge') Art.drawBridgeSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'oldtown') Art.drawOldTownSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'harbor_storm') Art.drawHarborStormSkyAndSea(targetCtx, cx, w, h, tSec);
+    else if (theme === 'greenhouse') Art.drawGreenhouseSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'rooftop_neon') Art.drawNeonRooftopSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'homeward') Art.drawHomewardSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'snow') Art.drawSnowSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'circus') Art.drawCircusSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'desert') Art.drawDesertSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'japan') Art.drawJapanSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'steam_train') Art.drawSteamTrainSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'venice') Art.drawVeniceSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'paris') Art.drawParisSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'marrakech') Art.drawMarrakechSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'maya') Art.drawMayaSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'greece') Art.drawGreeceSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'battir') Art.drawBattirSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'construction') Art.drawConstructionSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'subway') Art.drawSubwaySkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'rooftop') Art.drawRooftopSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'harbor') Art.drawHarborSkyAndSea(targetCtx, cx, w, h, tSec);
+    else if (theme === 'park') Art.drawParkSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else Art.drawSkyAndFarCity(targetCtx, cx, w, h, tSec);
+  }
+
+  function renderThemeMidground(targetCtx, theme, cx, w, h, tSec) {
+    if (theme === 'museum') Art.drawMuseumMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'bridge') Art.drawBridgeMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'oldtown') Art.drawOldTownMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'harbor_storm') Art.drawHarborStormMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'greenhouse') Art.drawGreenhouseMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'rooftop_neon') Art.drawNeonRooftopMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'homeward') Art.drawHomewardMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'snow') Art.drawSnowMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'circus') Art.drawCircusMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'desert') Art.drawDesertMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'japan') Art.drawJapanMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'steam_train') Art.drawSteamTrainMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'venice') Art.drawVeniceMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'paris') Art.drawParisMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'marrakech') Art.drawMarrakechMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'maya') Art.drawMayaMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'greece') Art.drawGreeceMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'battir') Art.drawBattirMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'construction') Art.drawConstructionMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'subway') Art.drawSubwayMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'rooftop') Art.drawRooftopMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'harbor') Art.drawHarborMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'park') Art.drawParkMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'market') {
+      Art.drawMarketMidgroundBuildings(targetCtx, cx, w, h, tSec);
+      Art.drawMarketFestoonLanterns(targetCtx, cx, w, tSec);
     } else {
-      Art.drawSkyAndFarCity(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-      if (theme === 'market') {
-        Art.drawMarketMidgroundBuildings(ctx, camX, LOGICAL_W, LOGICAL_H, time);
-        Art.drawMarketFestoonLanterns(ctx, camX, LOGICAL_W, time);
+      Art.drawMidgroundCityBuildings(targetCtx, cx, w, h, tSec);
+    }
+  }
+
+  function drawBackground(time) {
+    const theme = level.theme;
+    ensureBgCacheCanvases();
+
+    // 1. Sky & Far Horizon Layer (cached at ~6 Hz or >=24px camera delta -> 1 drawImage blit!)
+    if (bgSkyCache.canvas) {
+      const skyDirty =
+        bgSkyCache.theme !== theme ||
+        Math.abs(camX - bgSkyCache.camX) >= 24 ||
+        Math.abs(time - bgSkyCache.time) >= 0.16;
+      if (skyDirty) {
+        bgSkyCache.theme = theme;
+        bgSkyCache.camX = camX;
+        bgSkyCache.time = time;
+        renderThemeSky(bgSkyCache.ctx, theme, camX, LOGICAL_W, LOGICAL_H, time);
+      }
+      ctx.drawImage(bgSkyCache.canvas, 0, 0);
+    } else {
+      renderThemeSky(ctx, theme, camX, LOGICAL_W, LOGICAL_H, time);
+    }
+
+    // 2. Midground Layer:
+    //    - Battir (Stage 26) & Greenhouse (Stage 13) run bespoke 60fps Offscreen Tile Baking directly.
+    //    - All other 24 stages use the overscanned sliding-window Offscreen Canvas cache (~8.3 Hz refresh + 60fps parallax blit!).
+    if (theme === 'battir' || theme === 'greenhouse' || !bgMidCache.canvas) {
+      renderThemeMidground(ctx, theme, camX, LOGICAL_W, LOGICAL_H, time);
+    } else {
+      const p = BG_MID_PARALLAX[theme] || 0.40;
+      const shiftX = (camX - bgMidCache.camX) * p;
+      const midDirty =
+        bgMidCache.theme !== theme ||
+        shiftX < -bgMidCache.actualPad + 12 ||
+        shiftX > BG_MID_PAD * 2 - bgMidCache.actualPad - 12 ||
+        Math.abs(time - bgMidCache.time) >= 0.12;
+      if (midDirty) {
+        const safeCamX = Math.max(0, camX - BG_MID_PAD / p);
+        bgMidCache.theme = theme;
+        bgMidCache.camX = camX;
+        bgMidCache.actualPad = (camX - safeCamX) * p;
+        bgMidCache.time = time;
+        bgMidCache.ctx.clearRect(0, 0, bgMidCache.canvas.width, bgMidCache.canvas.height);
+        renderThemeMidground(bgMidCache.ctx, theme, safeCamX, bgMidCache.canvas.width, LOGICAL_H, time);
+        ctx.drawImage(bgMidCache.canvas, -bgMidCache.actualPad, 0);
       } else {
-        Art.drawMidgroundCityBuildings(ctx, camX, LOGICAL_W, LOGICAL_H, time);
+        ctx.drawImage(bgMidCache.canvas, -bgMidCache.actualPad - shiftX, 0);
       }
     }
 
-    Art.drawStreetlamps(ctx, level.lamps, camX, bgTime);
+    Art.drawStreetlamps(ctx, level.lamps, camX, time);
 
-    // Lightweight floating dust motes (omitted when staticBackground is enabled)
-    if (!(level && level.staticBackground)) {
-      ctx.fillStyle = 'rgba(255, 226, 170, 0.25)';
-      for (let i = 0; i < 10; i++) {
-        const dx = (i * 197 + time * 18) % LOGICAL_W;
-        const dy = (i * 89 + Math.sin(time + i) * 25) % 600;
-        ctx.fillRect(dx, dy, 3, 3);
-      }
+    // Lightweight floating dust motes
+    ctx.fillStyle = 'rgba(255, 226, 170, 0.25)';
+    for (let i = 0; i < 10; i++) {
+      const dx = (i * 197 + time * 18) % LOGICAL_W;
+      const dy = (i * 89 + Math.sin(time + i) * 25) % 600;
+      ctx.fillRect(dx, dy, 3, 3);
     }
 
     if (dimBackground) {

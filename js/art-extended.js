@@ -1554,12 +1554,16 @@ window.Game = window.Game || {};
     ctx.restore();
   }
 
-  function drawGreenhouseMidground(ctx, camX, w, h, time) {
-    ensureTextures(ctx);
+  let greenhouseMidCache = null;
+
+  function drawGreenhouseMidground(mainCtx, camX, w, h, time) {
+    let ctx = mainCtx;
+    const liveTime = time;
+    ensureTextures(mainCtx);
     const span = 420;
     const parallax = 0.42;
-    const startIdx = Math.floor((camX * parallax) / span) - 1;
-    const endIdx = Math.ceil((camX * parallax + w) / span) + 1;
+    const tilePeriod = span * 2;
+    const tilePadX = 140;
 
     // Helper: True Photorealistic Pinnate Tropical Palm Tree (Ringed Diamond-Scarred Trunk + Green Crownshaft + 9 Curved Rachis Stems with 18 Individual Drooping Pinnate Leaflets Each!)
     const drawRealisticPalmTree = (baseX, baseY, topX, topY, scale, seed) => {
@@ -1694,8 +1698,13 @@ window.Game = window.Game || {};
       ctx.restore();
     };
 
-    for (let i = startIdx; i <= endIdx; i++) {
-      const px = i * span - camX * parallax;
+    if (!greenhouseMidCache && typeof document !== "undefined" && document.createElement) {
+      greenhouseMidCache = makeOffscreen(tilePeriod + tilePadX * 2, h, (bCtx) => {
+        ctx = bCtx;
+        time = 0;
+        try {
+          for (let i = 0; i < 2; i++) {
+            const px = tilePadX + i * span;
 
       // Secondary Background Canary Island Date Palm (adds deep botanical jungle layering)
       drawRealisticPalmTree(px + 205, h - 84, px + 188, 248, 0.76, i * 3 + 1);
@@ -1894,6 +1903,19 @@ window.Game = window.Game || {};
       ctx.fillStyle = '#064e3b'; ctx.strokeStyle = '#6ee7b7'; ctx.lineWidth = 1.6;
       ctx.beginPath(); ctx.moveTo(lx - 15, ly); ctx.lineTo(lx, ly - 17); ctx.lineTo(lx + 15, ly); ctx.lineTo(lx, ly + 19); ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.arc(lx, ly + 1, 5.5, 0, Math.PI * 2); ctx.fill();
+          }
+        } finally {
+          ctx = mainCtx;
+          time = liveTime;
+        }
+      });
+    }
+    if (greenhouseMidCache) {
+      const off = -(((camX * parallax) % tilePeriod) + tilePeriod) % tilePeriod;
+      for (let bx = off - tilePeriod; bx < w + tilePeriod; bx += tilePeriod) {
+        if (bx + tilePeriod + tilePadX < 0 || bx - tilePadX > w) continue;
+        mainCtx.drawImage(greenhouseMidCache, bx - tilePadX, 0);
+      }
     }
 
     for (let f = 0; f < 30; f++) {
