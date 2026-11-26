@@ -26790,6 +26790,289 @@ window.Game = window.Game || {};
       }
     }
 
+    // =========================================================================
+    // FINALE LANDMARK: REAL BATTIR ROMAN POOL, POINTED ARCH & SPRING WATERFALL
+    // (البركة الرومانية وقوس عين البلد والشلال الصغير — مباشرة قبل بوابة النهاية!)
+    // =========================================================================
+    const poolAnchorX = 14350 - camX;
+    if (poolAnchorX > -620 && poolAnchorX < w + 520) {
+      ctx.save();
+      const basePoolY = 548;
+      const poolTopY = 506;
+      const poolBotY = h;
+      const wallLeft = poolAnchorX - 180;
+      const wallW = 680;
+      const archCx = poolAnchorX + 78;
+      const stonePal = ['#dfd0b8', '#d3be9f', '#c7ad8a', '#e6d8c3', '#bca07c'];
+
+      // Helper: Zero-flicker hand-laid limestone wall segment
+      const drawTerraceMasonry = (x0, y0, w0, h0, rowH = 12, blkW = 24, seedBase = 17) => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(x0, y0, w0, h0, 3);
+        const bg = ctx.createLinearGradient(x0, y0, x0, y0 + h0);
+        bg.addColorStop(0, '#d8c2a4');
+        bg.addColorStop(1, '#9d7d5a');
+        ctx.fillStyle = bg;
+        ctx.fill();
+        ctx.clip();
+        const rows = Math.ceil(h0 / rowH);
+        for (let r = 0; r < rows; r++) {
+          const ry = y0 + r * rowH;
+          const off = (r % 2) * (blkW * 0.5);
+          for (let bx = -blkW + off; bx < w0 + blkW; bx += blkW) {
+            const idx = Math.abs(seedBase + r * 7 + Math.floor(bx / blkW) * 11) % stonePal.length;
+            ctx.fillStyle = stonePal[idx];
+            ctx.beginPath();
+            ctx.roundRect(x0 + bx + 0.8, ry + 0.8, blkW - 1.6, rowH - 1.6, 2.0);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 248, 232, 0.20)';
+            ctx.fillRect(x0 + bx + 2, ry + 1.2, blkW - 4, 1.3);
+            ctx.fillStyle = 'rgba(54, 34, 18, 0.18)';
+            ctx.fillRect(x0 + bx + 2, ry + rowH - 2.2, blkW - 4, 1.2);
+          }
+        }
+        ctx.restore();
+        ctx.strokeStyle = 'rgba(72, 46, 26, 0.72)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.roundRect(x0, y0, w0, h0, 3);
+        ctx.stroke();
+      };
+
+      // 1. Upper Battir Village Stone Houses & Cypress Trees perched above the spring terrace
+      // Tall dark-emerald Mediterranean cypress behind left house
+      ctx.fillStyle = '#1b3b28';
+      ctx.beginPath();
+      ctx.moveTo(archCx - 118, 222);
+      ctx.bezierCurveTo(archCx - 144, 285, archCx - 146, 355, archCx - 122, 395);
+      ctx.lineTo(archCx - 110, 395);
+      ctx.bezierCurveTo(archCx - 88, 355, archCx - 92, 285, archCx - 118, 222);
+      ctx.closePath();
+      ctx.fill();
+      // Rustic upper village stone house above the arch
+      drawTerraceMasonry(archCx - 56, 304, 118, 72, 11, 20, 31);
+      // Recessed dark window & wooden lintel on upper house
+      ctx.fillStyle = '#2d1c12';
+      ctx.beginPath();
+      ctx.roundRect(archCx - 42, 324, 15, 24, 2);
+      ctx.roundRect(archCx - 16, 326, 28, 16, 2);
+      ctx.fill();
+      ctx.strokeStyle = '#efe0c8';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(archCx - 16, 326, 28, 16);
+      ctx.beginPath(); ctx.moveTo(archCx - 2, 326); ctx.lineTo(archCx - 2, 342); ctx.stroke();
+      // Second higher stone house terrace on the right
+      drawTerraceMasonry(archCx + 76, 272, 132, 92, 11, 22, 47);
+      ctx.fillStyle = '#362216';
+      ctx.beginPath();
+      ctx.roundRect(archCx + 104, 294, 20, 26, [6, 6, 2, 2]);
+      ctx.roundRect(archCx + 150, 294, 20, 26, [6, 6, 2, 2]);
+      ctx.fill();
+
+      // 2. Lush Overhanging Citrus, Olive & Vineyard Greenery cascading across the right hillside
+      const foliageClusters = [
+        [archCx + 115, 366, 54, 34, '#244f28'], [archCx + 188, 358, 62, 38, '#2d622d'],
+        [archCx + 266, 364, 58, 34, '#214824'], [archCx + 335, 372, 52, 30, '#2a5c2a'],
+        [archCx + 148, 382, 46, 26, '#4d8232'], [archCx + 225, 378, 50, 28, '#659436'],
+        [archCx + 298, 386, 44, 24, '#4d8232'], [archCx - 102, 388, 44, 24, '#2d5c2b'],
+        [archCx - 152, 398, 38, 22, '#3d7232'],
+      ];
+      for (const [fx, fy, frx, fry, fcol] of foliageClusters) {
+        ctx.fillStyle = fcol;
+        ctx.beginPath();
+        ctx.ellipse(fx, fy, frx, fry, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Sunlit golden-green citrus leaves catching the Battir afternoon/sunset light
+      ctx.fillStyle = 'rgba(190, 224, 96, 0.35)';
+      for (const [fx, fy, frx, fry] of [[archCx + 152, 368, 30, 14], [archCx + 226, 362, 34, 16], [archCx + 286, 370, 28, 13]]) {
+        ctx.beginPath();
+        ctx.ellipse(fx, fy, frx, fry, -0.1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 3. Lower Weathered Stone Retaining Wall bordering the Roman Pool (جدار البركة الحجري)
+      drawTerraceMasonry(archCx + 42, 442, 365, 68, 12, 24, 63);
+      drawTerraceMasonry(wallLeft, 458, 178, 52, 12, 22, 79);
+
+      // 4. ICONIC BATTIR SPRING ARCH & DAMP MOSSY WATERFALL WALL (قوس عين البلد والشلال الصغير)
+      // Dark damp mossy stone chute pier on left of the arch
+      drawTerraceMasonry(archCx - 74, 378, 54, 132, 11, 18, 91);
+      // Damp darkened wet-stone overlay where the waterfall cascades down
+      const wetG = ctx.createLinearGradient(archCx - 74, 380, archCx - 20, 508);
+      wetG.addColorStop(0, 'rgba(34, 26, 18, 0.36)');
+      wetG.addColorStop(1, 'rgba(22, 36, 22, 0.50)');
+      ctx.fillStyle = wetG;
+      ctx.fillRect(archCx - 74, 380, 54, 128);
+
+      // Warm rough-hewn Pointed Stone Arch next to the waterfall
+      const aTopY = 374;
+      const aBotY = 508;
+      const aSpanW = 86;
+      const aLeftX = archCx - 22;
+      const aMidX = aLeftX + aSpanW * 0.5;
+      const aOpenR = 25;
+      const aSpringY = 446;
+      // Recessed dark shadowed vaulted interior of the spring arch
+      const innerG = ctx.createLinearGradient(aMidX, aSpringY - aOpenR, aMidX, aBotY);
+      innerG.addColorStop(0, '#2a1d14');
+      innerG.addColorStop(0.6, '#4f3a29');
+      innerG.addColorStop(1, '#36261a');
+      ctx.fillStyle = innerG;
+      ctx.beginPath();
+      ctx.moveTo(aMidX - aOpenR, aBotY);
+      ctx.lineTo(aMidX - aOpenR, aSpringY);
+      ctx.quadraticCurveTo(aMidX - aOpenR, aSpringY - 26, aMidX, aSpringY - 36);
+      ctx.quadraticCurveTo(aMidX + aOpenR, aSpringY - 26, aMidX + aOpenR, aSpringY);
+      ctx.lineTo(aMidX + aOpenR, aBotY);
+      ctx.closePath();
+      ctx.fill();
+
+      // Outer dressed-stone spandrel wall framing the pointed spring arch
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(aLeftX, aBotY);
+      ctx.lineTo(aLeftX, aTopY + 5);
+      ctx.quadraticCurveTo(aLeftX, aTopY, aLeftX + 5, aTopY);
+      ctx.lineTo(aLeftX + aSpanW - 5, aTopY);
+      ctx.quadraticCurveTo(aLeftX + aSpanW, aTopY, aLeftX + aSpanW, aTopY + 5);
+      ctx.lineTo(aLeftX + aSpanW, aBotY);
+      ctx.lineTo(aMidX + aOpenR, aBotY);
+      ctx.lineTo(aMidX + aOpenR, aSpringY);
+      ctx.quadraticCurveTo(aMidX + aOpenR, aSpringY - 26, aMidX, aSpringY - 36);
+      ctx.quadraticCurveTo(aMidX - aOpenR, aSpringY - 26, aMidX - aOpenR, aSpringY);
+      ctx.lineTo(aMidX - aOpenR, aBotY);
+      ctx.closePath();
+      ctx.fillStyle = '#d6be9e';
+      ctx.fill();
+      ctx.clip();
+      for (let r = 0; r < 11; r++) {
+        const ry = aTopY + r * 12;
+        const off = (r % 2) * 10;
+        for (let bx = -12 + off; bx < aSpanW + 12; bx += 20) {
+          ctx.fillStyle = stonePal[(r * 5 + Math.abs(Math.floor(bx / 20)) * 3) % stonePal.length];
+          ctx.beginPath();
+          ctx.roundRect(aLeftX + bx + 0.8, ry + 0.8, 18.4, 10.4, 2);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+      ctx.strokeStyle = '#5a3d24';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(aMidX - aOpenR, aBotY);
+      ctx.lineTo(aMidX - aOpenR, aSpringY);
+      ctx.quadraticCurveTo(aMidX - aOpenR, aSpringY - 26, aMidX, aSpringY - 36);
+      ctx.quadraticCurveTo(aMidX + aOpenR, aSpringY - 26, aMidX + aOpenR, aSpringY);
+      ctx.lineTo(aMidX + aOpenR, aBotY);
+      ctx.stroke();
+
+      // Lush green ivy & mossy shrubs sprouting from stone crevices along the pool retaining wall!
+      const bushSpots = [
+        [archCx - 30, 386, 13, 8], [archCx - 6, 488, 19, 14], [archCx + 16, 496, 15, 11],
+        [archCx + 68, 492, 18, 12], [archCx + 112, 444, 22, 11], [archCx + 178, 442, 26, 12],
+        [archCx + 245, 446, 22, 11], [archCx + 312, 444, 28, 13], [archCx - 115, 496, 16, 10],
+      ];
+      for (const [bx, by, brx, bry] of bushSpots) {
+        ctx.fillStyle = '#255c28';
+        ctx.beginPath();
+        ctx.ellipse(bx, by, brx, bry, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#4d8a34';
+        ctx.beginPath();
+        ctx.ellipse(bx - brx * 0.18, by - bry * 0.25, brx * 0.62, bry * 0.55, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 5. EMERALD-TURQUOISE ROMAN POOL (البركة الرومانية الصافية)
+      const poolG = ctx.createLinearGradient(wallLeft, poolTopY, wallLeft + wallW, poolBotY);
+      poolG.addColorStop(0.0, '#4ea39d');
+      poolG.addColorStop(0.28, '#2d7b77');
+      poolG.addColorStop(0.62, '#1a5656');
+      poolG.addColorStop(1.0, '#0f3638');
+      ctx.fillStyle = poolG;
+      ctx.beginPath();
+      ctx.moveTo(wallLeft, poolTopY + 4);
+      ctx.lineTo(wallLeft + wallW, poolTopY);
+      ctx.lineTo(wallLeft + wallW, poolBotY);
+      ctx.lineTo(wallLeft, poolBotY);
+      ctx.closePath();
+      ctx.fill();
+
+      // Soft reflected greenery & sunlit stone shimmer on pool surface
+      const refG = ctx.createLinearGradient(0, poolTopY, 0, poolTopY + 56);
+      refG.addColorStop(0, 'rgba(134, 198, 146, 0.26)');
+      refG.addColorStop(1, 'rgba(26, 86, 86, 0)');
+      ctx.fillStyle = refG;
+      ctx.fillRect(wallLeft, poolTopY, wallW, 56);
+
+      // Gentle sunlit pool water ripples
+      for (let rr = 0; rr < 7; rr++) {
+        const ry = poolTopY + 12 + rr * 14;
+        for (let k = 0; k < 6; k++) {
+          const rx = wallLeft + 34 + k * 108 + Math.sin(time * 1.6 + rr + k) * 9;
+          const rLen = 28 + ((k * 17 + rr * 11) % 30);
+          ctx.fillStyle = k < 2 ? 'rgba(214, 245, 242, 0.22)' : 'rgba(167, 232, 224, 0.14)';
+          ctx.beginPath();
+          ctx.ellipse(rx, ry, rLen, 1.3, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // 6. SPARKLING ARCHED SPRING WATERFALL POURING INTO THE ROMAN POOL (الشلال الصغير!)
+      const wfStartX = archCx - 42;
+      const wfStartY = 384;
+      const wfEndX = archCx - 66;
+      const wfEndY = poolTopY + 10;
+      // Translucent parabolic silver-white waterfall veil
+      const wfG = ctx.createLinearGradient(wfStartX, wfStartY, wfEndX, wfEndY);
+      wfG.addColorStop(0.0, 'rgba(255, 255, 255, 0.92)');
+      wfG.addColorStop(0.45, 'rgba(224, 247, 252, 0.72)');
+      wfG.addColorStop(1.0, 'rgba(186, 238, 248, 0.58)');
+      ctx.fillStyle = wfG;
+      ctx.beginPath();
+      ctx.moveTo(wfStartX - 3, wfStartY);
+      ctx.lineTo(wfStartX + 5, wfStartY + 1);
+      ctx.quadraticCurveTo(wfStartX - 10, (wfStartY + wfEndY) * 0.45, wfEndX + 9, wfEndY);
+      ctx.lineTo(wfEndX - 8, wfEndY);
+      ctx.quadraticCurveTo(wfStartX - 20, (wfStartY + wfEndY) * 0.45, wfStartX - 3, wfStartY);
+      ctx.closePath();
+      ctx.fill();
+
+      // Animated sparkling falling water droplets & frothy spray along the waterfall arc
+      for (let d = 0; d < 12; d++) {
+        const u = ((time * 1.55 + d / 12) % 1);
+        const inv = 1 - u;
+        const ctrlX = wfStartX - 15;
+        const ctrlY = (wfStartY + wfEndY) * 0.45;
+        const dx = inv * inv * wfStartX + 2 * inv * u * ctrlX + u * u * wfEndX + Math.sin(time * 9 + d * 2.1) * 2.4;
+        const dy = inv * inv * wfStartY + 2 * inv * u * ctrlY + u * u * wfEndY;
+        ctx.fillStyle = d % 2 === 0 ? 'rgba(255, 255, 255, 0.90)' : 'rgba(207, 250, 254, 0.72)';
+        ctx.beginPath();
+        ctx.arc(dx, dy, 1.5 + u * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Bright frothy white splash crown & expanding ripple rings on the emerald pool!
+      const spGlow = ctx.createRadialGradient(wfEndX, wfEndY + 2, 2, wfEndX, wfEndY + 2, 34);
+      spGlow.addColorStop(0, 'rgba(255, 255, 255, 0.92)');
+      spGlow.addColorStop(0.45, 'rgba(207, 250, 254, 0.48)');
+      spGlow.addColorStop(1, 'rgba(207, 250, 254, 0)');
+      ctx.fillStyle = spGlow;
+      ctx.beginPath();
+      ctx.ellipse(wfEndX, wfEndY + 2, 34, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+      const ripFrac = (time * 0.7) % 1;
+      ctx.strokeStyle = `rgba(240, 253, 250, ${((1 - ripFrac) * 0.55).toFixed(2)})`;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.ellipse(wfEndX, wfEndY + 3, 14 + ripFrac * 42, 3.2 + ripFrac * 8, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
     // Warm Golden Sunset Pollen & Firefly Motes Drifting Gently Across the Gorge!
     for (let m = 0; m < 18; m++) {
       const mx = ((m * 173 - camX * 0.34 + time * 18) % (w + 60) + (w + 60)) % (w + 60) - 30;
@@ -26802,140 +27085,309 @@ window.Game = window.Game || {};
 
   function drawBattirFinishGate(ctx, g, sx, sy, time, goalLabel) {
     // =========================================================================
-    // GRAND TWIN-DOMED SUNSET RIWAQ & TATREEZ PALACE GATE OF BATTIR
-    // (رواق وقنطرة عين البلد الملكية — قباب توأم، أبلق ناري، تطريز ونوافير أسود)
+    // MONUMENTAL BATTIR WATER-CROWNED AQUEDUCT ARCH GATE (قنطرة عين البلد المائية!)
+    // Dressed Jerusalem-limestone pointed archway crowned by a living open-top
+    // spring aqueduct channel with crystal-clear water flowing over the arch,
+    // cascading side water spouts into carved stone basins, lush trailing vines,
+    // ablaq voussoirs, glowing sanctuary portal & pierced brass lantern!
     // =========================================================================
     ctx.save();
     const cx = sx + g.w * 0.5;
     const baseY = sy + g.h;
-    const gateH = 242;
+    const gateH = 228;
     const topY = baseY - gateH;
-    const totalW = 228;
+    const totalW = 248;
     const leftX = cx - totalW * 0.5;
+    const archR = 52;
+    const archSpringY = baseY - 102;
+    const stonePal = ['#e8d6bc', '#dec5a4', '#d2b48f', '#efe1cb', '#c5a57e'];
 
-    // 1. Deep Shaded 3D Side Bastion
-    ctx.fillStyle = '#4a2812';
+    // Soft ground contact shadow
+    ctx.fillStyle = 'rgba(28, 16, 8, 0.34)';
     ctx.beginPath();
-    ctx.moveTo(leftX + totalW, topY + 24);
-    ctx.lineTo(leftX + totalW + 20, topY + 34);
-    ctx.lineTo(leftX + totalW + 20, baseY);
-    ctx.lineTo(leftX + totalW, baseY);
+    ctx.ellipse(cx, baseY + 1, totalW * 0.55, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 1. 3D Shaded Right Stone Depth Side
+    ctx.fillStyle = '#6b492c';
+    ctx.beginPath();
+    ctx.moveTo(leftX + totalW - 4, topY + 26);
+    ctx.lineTo(leftX + totalW + 16, topY + 34);
+    ctx.lineTo(leftX + totalW + 16, baseY);
+    ctx.lineTo(leftX + totalW - 4, baseY);
     ctx.closePath();
     ctx.fill();
 
-    // 2. TwinRibbed Sunset-Gold Palestinian Stone Domes Crowning the Left & Right Towers!
-    for (const dx of [-68, 68]) {
-      const dcx = cx + dx;
-      const dG = ctx.createRadialGradient(dcx - 10, topY + 2, 3, dcx, topY + 18, 36);
-      dG.addColorStop(0, '#fef08a');
-      dG.addColorStop(0.5, '#ea580c');
-      dG.addColorStop(1, '#7c2d12');
-      ctx.fillStyle = dG;
-      ctx.strokeStyle = '#3b1808';
-      ctx.lineWidth = 1.6;
+    // 2. Radiant Sunset-Gold & Turquoise Sanctuary Portal Glow Inside the Arch
+    const pGlow = ctx.createRadialGradient(cx, baseY - 68, 8, cx, baseY - 68, 78);
+    pGlow.addColorStop(0.0, 'rgba(255, 251, 215, 0.96)');
+    pGlow.addColorStop(0.45, 'rgba(103, 232, 249, 0.54)');
+    pGlow.addColorStop(0.82, 'rgba(251, 146, 60, 0.24)');
+    pGlow.addColorStop(1.0, 'rgba(251, 146, 60, 0)');
+    ctx.fillStyle = pGlow;
+    ctx.beginPath();
+    ctx.moveTo(cx - archR, baseY);
+    ctx.lineTo(cx - archR, archSpringY);
+    ctx.quadraticCurveTo(cx - archR, archSpringY - 42, cx, archSpringY - 58);
+    ctx.quadraticCurveTo(cx + archR, archSpringY - 42, cx + archR, archSpringY);
+    ctx.lineTo(cx + archR, baseY);
+    ctx.closePath();
+    ctx.fill();
+
+    // 3. Monumental Dressed Jerusalem-Limestone Aqueduct Arch Body (Zero-Flicker Courses!)
+    const traceArchFacade = () => {
       ctx.beginPath();
-      ctx.arc(dcx, topY + 24, 30, Math.PI, 0);
+      ctx.moveTo(leftX, baseY);
+      ctx.lineTo(leftX, topY + 28);
+      ctx.quadraticCurveTo(leftX, topY + 22, leftX + 6, topY + 22);
+      ctx.lineTo(leftX + totalW - 6, topY + 22);
+      ctx.quadraticCurveTo(leftX + totalW, topY + 22, leftX + totalW, topY + 28);
+      ctx.lineTo(leftX + totalW, baseY);
+      ctx.lineTo(cx + archR, baseY);
+      ctx.lineTo(cx + archR, archSpringY);
+      ctx.quadraticCurveTo(cx + archR, archSpringY - 42, cx, archSpringY - 58);
+      ctx.quadraticCurveTo(cx - archR, archSpringY - 42, cx - archR, archSpringY);
+      ctx.lineTo(cx - archR, baseY);
+      ctx.closePath();
+    };
+    ctx.save();
+    traceArchFacade();
+    const facG = ctx.createLinearGradient(leftX, topY + 22, leftX, baseY);
+    facG.addColorStop(0.0, '#ead8be');
+    facG.addColorStop(0.55, '#d1b38e');
+    facG.addColorStop(1.0, '#9e7a54');
+    ctx.fillStyle = facG;
+    ctx.fill();
+    ctx.clip();
+    const rowH = 14;
+    const blkW = 28;
+    const numRows = Math.ceil((baseY - (topY + 22)) / rowH);
+    for (let r = 0; r < numRows; r++) {
+      const ry = topY + 22 + r * rowH;
+      const off = (r % 2) * (blkW * 0.5);
+      for (let bx = -blkW + off; bx < totalW + blkW; bx += blkW) {
+        const idx = Math.abs(41 + r * 7 + Math.floor(bx / blkW) * 13) % stonePal.length;
+        ctx.fillStyle = stonePal[idx];
+        ctx.beginPath();
+        ctx.roundRect(leftX + bx + 0.9, ry + 0.9, blkW - 1.8, rowH - 1.8, 2.2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 249, 236, 0.24)';
+        ctx.fillRect(leftX + bx + 2, ry + 1.3, blkW - 4, 1.5);
+        ctx.fillStyle = 'rgba(54, 34, 18, 0.18)';
+        ctx.fillRect(leftX + bx + 2, ry + rowH - 2.3, blkW - 4, 1.3);
+      }
+    }
+    ctx.restore();
+    traceArchFacade();
+    ctx.strokeStyle = '#4e331f';
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+
+    // Carved Stone Impost Capitals & Base Plinths framing the Archway
+    ctx.fillStyle = '#efe1cb';
+    ctx.strokeStyle = '#4e331f';
+    ctx.lineWidth = 1.2;
+    for (const side of [-1, 1]) {
+      const px0 = side < 0 ? leftX - 3 : cx + archR - 2;
+      const pw0 = (cx - archR) - leftX + 5;
+      ctx.beginPath();
+      ctx.roundRect(px0, baseY - 12, pw0, 12, 2.5);
+      ctx.roundRect(side < 0 ? cx - archR - 14 : cx + archR - 2, archSpringY - 4, 16, 8, 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    // 4. Radiating Soft Ablaq Pointed Arch Voussoirs & Carved Keystone (حجارة العقد)
+    for (let v = 0; v < 13; v++) {
+      const u0 = v / 13;
+      const u1 = (v + 1) / 13;
+      const ptOnArch = (u, radOff) => {
+        const ang = Math.PI + u * Math.PI;
+        const xBase = cx + Math.cos(ang) * (archR + radOff);
+        const peakLift = Math.pow(Math.sin(u * Math.PI), 1.6) * 10;
+        const yBase = archSpringY + Math.sin(ang) * (archR + radOff) - peakLift;
+        return [xBase, yBase];
+      };
+      const isKey = v === 6;
+      const [x0i, y0i] = ptOnArch(u0, 0);
+      const [x1i, y1i] = ptOnArch(u1, 0);
+      const [x1o, y1o] = ptOnArch(u1, isKey ? 17 : 13);
+      const [x0o, y0o] = ptOnArch(u0, isKey ? 17 : 13);
+      ctx.fillStyle = isKey ? '#fef3c7' : (v % 2 === 0 ? '#c47b54' : '#f3e5cf');
+      ctx.strokeStyle = '#4e331f';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(x0i, y0i); ctx.lineTo(x0o, y0o); ctx.lineTo(x1o, y1o); ctx.lineTo(x1i, y1i);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-      ctx.fillStyle = '#fde047';
-      ctx.beginPath(); ctx.arc(dcx, topY - 9, 4, 0, Math.PI * 2); ctx.fill();
     }
 
-    // 3. Warm Sunset Terracotta-and-Honey Monumental Riwaq Facade
-    const facG = ctx.createLinearGradient(leftX, topY + 24, leftX, baseY);
-    facG.addColorStop(0.0, '#f5caa0');
-    facG.addColorStop(0.5, '#c98a55');
-    facG.addColorStop(1.0, '#784724');
-    ctx.fillStyle = facG;
-    ctx.strokeStyle = '#3b1d0b';
-    ctx.lineWidth = 1.8;
+    // 5. LIVING OPEN-TOP STONE AQUEDUCT CHANNEL FLOWING OVER THE ARCH (المياه الجارية فوق القوس!)
+    // Carved dentil cornice directly beneath the overhead aqueduct trough
+    ctx.fillStyle = '#d8be9e';
+    ctx.strokeStyle = '#5c3c24';
+    ctx.lineWidth = 0.9;
+    for (let dx = leftX + 6; dx < leftX + totalW - 10; dx += 15) {
+      ctx.fillRect(dx, topY + 23, 9, 5);
+      ctx.strokeRect(dx, topY + 23, 9, 5);
+    }
+    // Back stone parapet of the water channel
+    ctx.fillStyle = '#cbb08e';
+    ctx.strokeStyle = '#4e331f';
+    ctx.lineWidth = 1.4;
     ctx.beginPath();
-    ctx.moveTo(leftX, baseY);
-    ctx.lineTo(leftX, topY + 24);
-    ctx.lineTo(leftX + totalW, topY + 24);
-    ctx.lineTo(leftX + totalW, baseY);
-    ctx.lineTo(cx + 48, baseY);
-    ctx.lineTo(cx + 48, baseY - 106);
-    ctx.quadraticCurveTo(cx, baseY - 164, cx - 48, baseY - 106);
-    ctx.lineTo(cx - 48, baseY);
-    ctx.closePath();
+    ctx.roundRect(leftX - 10, topY + 4, totalW + 20, 19, 3);
     ctx.fill();
     ctx.stroke();
 
-    // 4. Full-Width Polychrome Palestinian Tatreez Geometric Frieze Across the Crown!
-    ctx.fillStyle = '#7f1d1d';
-    ctx.fillRect(leftX + 6, topY + 32, totalW - 12, 18);
-    for (let tx = leftX + 18; tx < leftX + totalW - 14; tx += 18) {
-      ctx.fillStyle = (Math.floor(tx / 18) % 2 === 0) ? '#fde047' : '#22c55e';
+    // Crystal-Clear Shimmering Turquoise Spring Water Flowing Across the Top of the Arch!
+    const topWaterG = ctx.createLinearGradient(leftX - 10, topY + 4, leftX - 10, topY + 18);
+    topWaterG.addColorStop(0.0, '#e0f2fe');
+    topWaterG.addColorStop(0.35, '#38bdf8');
+    topWaterG.addColorStop(0.8, '#0284c7');
+    topWaterG.addColorStop(1.0, '#0369a1');
+    ctx.fillStyle = topWaterG;
+    ctx.beginPath();
+    ctx.roundRect(leftX - 14, topY + 6, totalW + 28, 12, 4);
+    ctx.fill();
+    // Animated flowing current highlights & frothy silver ripples over the arch crown
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.lineWidth = 1.6;
+    ctx.lineCap = 'round';
+    for (let r = 0; r < 6; r++) {
+      const rx = leftX - 8 + ((time * 58 + r * 44) % (totalW + 6));
+      const ry = topY + 9.5 + (r % 2) * 3.2;
       ctx.beginPath();
-      ctx.moveTo(tx, topY + 35); ctx.lineTo(tx + 6, topY + 41);
-      ctx.lineTo(tx, topY + 47); ctx.lineTo(tx - 6, topY + 41);
-      ctx.closePath(); ctx.fill();
-    }
-
-    // 5. Alternating Crimson-Terracotta & Honey-Gold Ablaq Central Arch Voussoirs!
-    for (let v = 0; v < 13; v++) {
-      const a0 = Math.PI + (v / 13) * Math.PI;
-      const a1 = Math.PI + ((v + 1) / 13) * Math.PI;
-      const ay = baseY - 106;
-      ctx.fillStyle = v % 2 === 0 ? '#b91c1c' : '#fef3c7';
-      ctx.strokeStyle = '#3b1d0b';
-      ctx.lineWidth = 1.1;
-      ctx.beginPath();
-      ctx.moveTo(cx + Math.cos(a0) * 48, ay + Math.sin(a0) * 50);
-      ctx.lineTo(cx + Math.cos(a0) * 63, ay + Math.sin(a0) * 65);
-      ctx.lineTo(cx + Math.cos(a1) * 63, ay + Math.sin(a1) * 65);
-      ctx.lineTo(cx + Math.cos(a1) * 48, ay + Math.sin(a1) * 50);
-      ctx.closePath();
-      ctx.fill();
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(rx + 18, ry);
       ctx.stroke();
     }
+    // Low front carved stone channel lip framing the flowing water
+    ctx.fillStyle = '#efe0c8';
+    ctx.strokeStyle = '#4e331f';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.roundRect(leftX - 10, topY + 15, totalW + 20, 8, 2.5);
+    ctx.fill();
+    ctx.stroke();
 
-    // 6. Twin Bronze Lion-Spout Wall Fountains Pouring Turquoise-Gold Spring Water!
+    // 6. CASCADING CRYSTAL-CLEAR SIDE WATERFALLS POURING OFF BOTH AQUEDUCT ENDS INTO STONE BASINS!
     for (const side of [-1, 1]) {
-      const fx = cx + side * 82;
-      const fy = baseY - 36;
-      ctx.fillStyle = '#271308';
-      ctx.beginPath(); ctx.arc(fx, fy - 18, 15, Math.PI, 0); ctx.fillRect(fx - 15, fy - 18, 30, 18); ctx.fill();
-      ctx.fillStyle = '#f59e0b';
-      ctx.beginPath(); ctx.arc(fx, fy - 20, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3.2;
-      ctx.beginPath(); ctx.moveTo(fx, fy - 18); ctx.quadraticCurveTo(fx + side * 5, fy - 8, fx, fy + 2); ctx.stroke();
-      ctx.fillStyle = '#d9a472'; ctx.strokeStyle = '#3b1d0b'; ctx.lineWidth = 1.3;
-      ctx.beginPath(); ctx.roundRect(fx - 19, fy, 38, 12, [2, 2, 10, 10]); ctx.fill(); ctx.stroke();
+      const spoutX = side < 0 ? leftX - 10 : leftX + totalW + 10;
+      const basinCx = spoutX + side * 14;
+      const basinY = baseY - 12;
+      // Carved stone spillway spout protruding from the overhead channel
+      ctx.fillStyle = '#dec6a7';
+      ctx.strokeStyle = '#4e331f';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.roundRect(spoutX - 6, topY + 12, 12, 9, 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Graceful translucent parabolic water stream cascading down beside the arch
+      const streamG = ctx.createLinearGradient(spoutX, topY + 14, basinCx, basinY);
+      streamG.addColorStop(0.0, 'rgba(240, 249, 255, 0.90)');
+      streamG.addColorStop(0.45, 'rgba(103, 232, 249, 0.68)');
+      streamG.addColorStop(1.0, 'rgba(186, 230, 253, 0.56)');
+      ctx.fillStyle = streamG;
+      ctx.beginPath();
+      ctx.moveTo(spoutX - 2, topY + 14);
+      ctx.lineTo(spoutX + 4 * side, topY + 15);
+      ctx.quadraticCurveTo(spoutX + side * 15, (topY + basinY) * 0.45, basinCx + 6, basinY);
+      ctx.lineTo(basinCx - 6, basinY);
+      ctx.quadraticCurveTo(spoutX + side * 8, (topY + basinY) * 0.45, spoutX - 2, topY + 14);
+      ctx.closePath();
+      ctx.fill();
+
+      // Sparkling falling water beads along the side cascade
+      for (let d = 0; d < 6; d++) {
+        const u = ((time * 1.65 + d / 6 + (side > 0 ? 0.3 : 0)) % 1);
+        const inv = 1 - u;
+        const cX = spoutX + side * 12;
+        const cY = (topY + basinY) * 0.45;
+        const dx = inv * inv * spoutX + 2 * inv * u * cX + u * u * basinCx;
+        const dy = inv * inv * (topY + 15) + 2 * inv * u * cY + u * u * basinY;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+        ctx.beginPath();
+        ctx.arc(dx, dy, 1.4 + u * 1.1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Carved stone catch basin brimming with foamy turquoise spring water
+      ctx.fillStyle = '#d6be9e';
+      ctx.strokeStyle = '#4e331f';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(basinCx - 20, basinY - 2, 40, 14, [3, 3, 9, 9]);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.ellipse(basinCx, basinY, 16, 3.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.86)';
+      ctx.beginPath();
+      ctx.ellipse(basinCx, basinY - 1, 8 + Math.sin(time * 9 + side) * 1.5, 2.5, 0, 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    // 7. Radiant Sunset-and-Turquoise Sanctuary Portal & Pierced Brass Mosque Lamp!
-    const pGlow = ctx.createRadialGradient(cx, baseY - 70, 8, cx, baseY - 70, 68);
-    pGlow.addColorStop(0.0, 'rgba(254, 249, 195, 0.96)');
-    pGlow.addColorStop(0.45, 'rgba(56, 189, 248, 0.62)');
-    pGlow.addColorStop(1.0, 'rgba(234, 88, 12, 0)');
-    ctx.fillStyle = pGlow;
-    ctx.beginPath(); ctx.ellipse(cx, baseY - 70, 46, 70, 0, 0, Math.PI * 2); ctx.fill();
+    // 7. Lush Trailing Olive Vines, Moss Tufts & Swaying Pierced Brass Lantern
+    const vineSpots = [
+      [leftX + 12, topY + 25], [leftX + 22, topY + 31], [leftX + 16, topY + 39],
+      [leftX + totalW - 14, topY + 25], [leftX + totalW - 24, topY + 32], [leftX + totalW - 18, topY + 40],
+    ];
+    for (const [vx, vy] of vineSpots) {
+      ctx.fillStyle = '#2d6a36';
+      ctx.beginPath();
+      ctx.ellipse(vx, vy, 6.2, 3.2, 0.35, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#65a30d';
+      ctx.beginPath();
+      ctx.ellipse(vx + 2, vy + 2, 3.8, 2.0, -0.25, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
-    const sway = Math.sin(time * 2.7) * 2.4;
-    ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.6;
-    ctx.beginPath(); ctx.moveTo(cx, baseY - 152); ctx.lineTo(cx + sway, baseY - 128); ctx.stroke();
-    ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#b45309'; ctx.lineWidth = 1.4;
-    ctx.beginPath(); ctx.ellipse(cx + sway, baseY - 118, 7.5, 10.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    const sway = Math.sin(time * 2.5) * 2.4;
+    const lanTopY = archSpringY - 54;
+    ctx.strokeStyle = '#451a03';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx, lanTopY);
+    ctx.lineTo(cx + sway, lanTopY + 22);
+    ctx.stroke();
+    const lGlow = ctx.createRadialGradient(cx + sway, lanTopY + 32, 2, cx + sway, lanTopY + 32, 26);
+    lGlow.addColorStop(0, 'rgba(254, 249, 195, 0.72)');
+    lGlow.addColorStop(1, 'rgba(251, 146, 60, 0)');
+    ctx.fillStyle = lGlow;
+    ctx.beginPath();
+    ctx.arc(cx + sway, lanTopY + 32, 26, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fef08a';
+    ctx.strokeStyle = '#b45309';
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.ellipse(cx + sway, lanTopY + 32, 7.2, 10.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
 
-    // 8. Localized Stage Completion Banner
-    const rawLbl = goalLabel || 'رواق عين البلد • بتّير';
+    // 8. Localized Stage Completion Banner Floating Above the Water Channel
+    const rawLbl = goalLabel || 'عين البلد • بتّير';
     const labelText = (window.Game && window.Game.I18n) ? window.Game.I18n.translateDynamic(rawLbl) : rawLbl;
     const bob = Math.sin(time * 3.1) * 3;
     ctx.font = 'bold 13.5px sans-serif';
     ctx.textAlign = 'center';
     const tw = Math.max(206, ctx.measureText(labelText).width + 34);
-    ctx.fillStyle = 'rgba(124, 45, 18, 0.95)';
+    ctx.fillStyle = 'rgba(110, 44, 18, 0.94)';
     ctx.strokeStyle = '#fde047';
     ctx.lineWidth = 2.0;
     ctx.beginPath();
-    ctx.roundRect(cx - tw * 0.5, topY - 46 + bob, tw, 26, 8);
+    ctx.roundRect(cx - tw * 0.5, topY - 40 + bob, tw, 26, 8);
     ctx.fill();
     ctx.stroke();
     ctx.fillStyle = '#fef9c3';
-    ctx.fillText(labelText, cx, topY - 28 + bob);
+    ctx.fillText(labelText, cx, topY - 22 + bob);
     ctx.restore();
   }
 
