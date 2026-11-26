@@ -28135,35 +28135,143 @@ window.Game = window.Game || {};
       }
       ctx.stroke();
 
-      // Vintage 1892 Ottoman Steam Locomotive + 3 Warm-Lit Carriages curving along the valley!
-      const trainU = ((time * 0.055 + (rep + 2) * 0.37) % 1.24) - 0.12;
+      // Modern Sleek Regional Express Passenger Train (قطار ركاب حديث ومتطور أكبر حجماً — بديلاً عن البخاري!)
+      const trainU = ((time * 0.062 + (rep + 2) * 0.37) % 1.32) - 0.14;
       for (let car = 3; car >= 0; car--) {
-        const cu = trainU - car * 0.042;
-        if (cu < 0.0 || cu > 1.0) continue;
-        const [cx0, cy0] = valleyRailPt(cu);
-        const [cx1, cy1] = valleyRailPt(Math.min(1.0, cu + 0.01));
+        const cu = trainU - car * 0.062;
+        if (cu < -0.02 || cu > 1.02) continue;
+        const [cx0, cy0] = valleyRailPt(Math.max(0, Math.min(1, cu)));
+        const [cx1, cy1] = valleyRailPt(Math.max(0, Math.min(1, cu + 0.012)));
         const ang = Math.atan2(cy1 - cy0, cx1 - cx0);
         ctx.save();
-        ctx.translate(cx0, cy0 - 2);
+        ctx.translate(cx0, cy0 - 2.5);
         ctx.rotate(ang);
+
+        // Dark recessed dual rail bogies & steel wheels riding flush on the track
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(-25, -4, 15, 4);
+        ctx.fillRect(10, -4, 15, 4);
+        ctx.fillStyle = '#64748b';
+        for (const wx of [-22, -13, 13, 22]) {
+          ctx.beginPath(); ctx.arc(wx, -1.2, 2.3, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Articulated black accordion gangway coupler connecting coaches cleanly
+        if (car > 0) {
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(28, -21, 7, 17);
+          ctx.strokeStyle = '#334155'; ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.moveTo(30, -21); ctx.lineTo(30, -4); ctx.moveTo(33, -21); ctx.lineTo(33, -4); ctx.stroke();
+        }
+
         if (car === 0) {
-          ctx.fillStyle = '#1c1917'; ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.2;
-          ctx.beginPath(); ctx.roundRect(-22, -16, 42, 14, 3); ctx.fill(); ctx.stroke();
-          ctx.fillStyle = '#7f1d1d'; ctx.fillRect(-22, -22, 15, 14);
-          ctx.fillStyle = '#f59e0b'; ctx.fillRect(11, -24, 6, 10);
-          // Warm golden headlight glow & drifting sunset-tinted steam trail
-          ctx.fillStyle = 'rgba(254, 240, 138, 0.72)';
-          ctx.beginPath(); ctx.arc(21, -9, 3.2, 0, Math.PI * 2); ctx.fill();
-          for (let pf = 0; pf < 5; pf++) {
-            const pr = ((time * 1.45 + pf * 0.2) % 1);
-            ctx.fillStyle = `rgba(254, 226, 190, ${((1 - pr) * 0.62).toFixed(2)})`;
-            ctx.beginPath(); ctx.arc(14 - pr * 34, -27 - pr * 24, 3.5 + pr * 7.5, 0, Math.PI * 2); ctx.fill();
-          }
+          // Aerodynamic Lead Power Car with Sloped Nose, Panoramic Windshield & LED Headlight Beam
+          const bodyG = ctx.createLinearGradient(0, -24, 0, -3);
+          bodyG.addColorStop(0.0, '#f8fafc');
+          bodyG.addColorStop(0.42, '#e2e8f0');
+          bodyG.addColorStop(0.82, '#cbd5e1');
+          bodyG.addColorStop(1.0, '#64748b');
+          ctx.fillStyle = bodyG; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.25;
+          ctx.beginPath();
+          ctx.moveTo(-31, -3.5);
+          ctx.lineTo(-31, -22);
+          ctx.quadraticCurveTo(-31, -24, -27, -24);
+          ctx.lineTo(14, -24);
+          ctx.bezierCurveTo(25, -24, 34, -15, 37, -7);
+          ctx.quadraticCurveTo(37.5, -3.5, 33, -3.5);
+          ctx.closePath();
+          ctx.fill(); ctx.stroke();
+
+          // Modern crimson & cobalt aerodynamic express livery stripes
+          ctx.fillStyle = '#dc2626';
+          ctx.beginPath();
+          ctx.moveTo(-30.5, -10.5); ctx.lineTo(34.5, -10.5); ctx.lineTo(35.8, -7.8); ctx.lineTo(-30.5, -7.8);
+          ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#1d4ed8';
+          ctx.fillRect(-30.5, -7.8, 65, 2.2);
+
+          // Wrap-around dark tinted driver cockpit windshield with sunset reflection
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath();
+          ctx.moveTo(12, -21.5); ctx.bezierCurveTo(21, -21.5, 27, -16.5, 29.5, -12.5);
+          ctx.lineTo(12, -12.5); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = 'rgba(253, 224, 71, 0.34)';
+          ctx.beginPath(); ctx.moveTo(15, -20.5); ctx.lineTo(20, -20.5); ctx.lineTo(24, -13.5); ctx.lineTo(19, -13.5); ctx.closePath(); ctx.fill();
+
+          // Continuous tinted passenger window band on rear half of lead car + warm interior glow
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath(); ctx.roundRect(-27, -20.5, 36, 7.5, 2); ctx.fill();
+          ctx.fillStyle = 'rgba(254, 243, 199, 0.72)';
+          for (let wx = -25; wx <= 2; wx += 9) ctx.fillRect(wx, -19.2, 6.8, 5.0);
+
+          // Roof-mounted sleek HVAC unit & electric diamond pantograph
+          ctx.fillStyle = '#94a3b8'; ctx.strokeStyle = '#334155'; ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.roundRect(-12, -26.5, 18, 2.8, 1.2); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(-24, -24); ctx.lineTo(-19, -29.5); ctx.lineTo(-24, -33);
+          ctx.moveTo(-28, -33); ctx.lineTo(-20, -33);
+          ctx.stroke();
+
+          // Bright white-gold LED headlight & soft forward cone beam
+          const beamG = ctx.createLinearGradient(36, -6.5, 72, -6.5);
+          beamG.addColorStop(0, 'rgba(254, 249, 195, 0.52)');
+          beamG.addColorStop(1, 'rgba(254, 249, 195, 0)');
+          ctx.fillStyle = beamG;
+          ctx.beginPath(); ctx.moveTo(36, -8.5); ctx.lineTo(72, -14); ctx.lineTo(72, 1); ctx.lineTo(36, -4.5); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath(); ctx.arc(35.2, -6.5, 2.0, 0, Math.PI * 2); ctx.fill();
         } else {
-          ctx.fillStyle = '#6b2316'; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.1;
-          ctx.beginPath(); ctx.roundRect(-20, -16, 38, 14, 2.5); ctx.fill(); ctx.stroke();
-          ctx.fillStyle = '#fef08a';
-          for (let wx = -15; wx <= 10; wx += 8) ctx.fillRect(wx, -12.5, 5, 5);
+          // Modern Panoramic Express Passenger Coach (with streamlined rear tail on car 3)
+          const isTail = car === 3;
+          const bodyG = ctx.createLinearGradient(0, -24, 0, -3);
+          bodyG.addColorStop(0.0, '#f8fafc');
+          bodyG.addColorStop(0.45, '#e2e8f0');
+          bodyG.addColorStop(0.84, '#cbd5e1');
+          bodyG.addColorStop(1.0, '#64748b');
+          ctx.fillStyle = bodyG; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          if (isTail) {
+            ctx.moveTo(30, -3.5);
+            ctx.lineTo(30, -22);
+            ctx.quadraticCurveTo(30, -24, 26, -24);
+            ctx.lineTo(-16, -24);
+            ctx.bezierCurveTo(-26, -24, -33, -15, -35.5, -7);
+            ctx.quadraticCurveTo(-36, -3.5, -31.5, -3.5);
+            ctx.closePath();
+          } else {
+            ctx.roundRect(-30, -24, 60, 20.5, [3, 3, 2, 2]);
+          }
+          ctx.fill(); ctx.stroke();
+
+          // Continuous crimson & cobalt express livery stripes
+          ctx.fillStyle = '#dc2626';
+          ctx.fillRect(isTail ? -33 : -29.5, -10.5, isTail ? 62.5 : 59, 2.7);
+          ctx.fillStyle = '#1d4ed8';
+          ctx.fillRect(isTail ? -34 : -29.5, -7.8, isTail ? 63.5 : 59, 2.2);
+
+          // Panoramic dark-tinted window strip with warm glowing interior panes
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath(); ctx.roundRect(isTail ? -22 : -26, -20.5, isTail ? 48 : 52, 7.6, 2); ctx.fill();
+          ctx.fillStyle = 'rgba(254, 243, 199, 0.76)';
+          for (let wx = (isTail ? -19 : -24); wx <= 18; wx += 9.5) {
+            ctx.fillRect(wx, -19.2, 7.2, 5.1);
+          }
+
+          // Sliding stainless passenger door frames + roof HVAC pod
+          ctx.strokeStyle = '#64748b'; ctx.lineWidth = 0.85;
+          ctx.strokeRect(-26, -21, 5.5, 16.5);
+          ctx.strokeRect(20.5, -21, 5.5, 16.5);
+          ctx.fillStyle = '#94a3b8'; ctx.strokeStyle = '#334155'; ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.roundRect(-10, -26.5, 20, 2.6, 1.2); ctx.fill(); ctx.stroke();
+
+          // Glowing red LED tail lamp on rear car
+          if (isTail) {
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.45)';
+            ctx.beginPath(); ctx.arc(-34, -7.2, 4.5, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath(); ctx.arc(-34, -7.2, 1.8, 0, Math.PI * 2); ctx.fill();
+          }
         }
         ctx.restore();
       }
