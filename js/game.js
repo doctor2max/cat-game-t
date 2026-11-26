@@ -509,6 +509,7 @@ window.Game = window.Game || {};
       { list: lv.maya_jaguars }, { list: lv.maya_warriors }, { list: lv.maya_quetzals, swoop: 150 },
       { list: lv.greece_goats }, { list: lv.greece_hoplites }, { list: lv.greece_owls, swoop: 0 },
       { list: lv.battir_porcupines }, { list: lv.battir_hyraxes }, { list: lv.battir_kestrels, swoop: 0 },
+      { list: lv.istanbul_kangals }, { list: lv.istanbul_merchants }, { list: lv.istanbul_gulls, swoop: 0 },
       { list: lv.crows }, { list: lv.pigeons }, { list: lv.seagulls },
       { list: lv.falcons }, { list: lv.bats }, { list: lv.owls },
       { list: lv.pelicans }, { list: lv.hawks }, { list: lv.drones },
@@ -675,6 +676,7 @@ window.Game = window.Game || {};
     catCtrl.cat.mayaOutfit = !!level.mayaOutfit;
     catCtrl.cat.greeceOutfit = !!level.greeceOutfit;
     catCtrl.cat.battirOutfit = !!level.battirOutfit;
+    catCtrl.cat.istanbulOutfit = !!level.istanbulOutfit;
 
     Particles.clear();
     elapsedTime = 0;
@@ -1254,6 +1256,13 @@ window.Game = window.Game || {};
             p.boltTimer = 2.6;
             Particles.spawnDust(zCx, p.y - 40, 10, '#7dd3fc');
             Particles.spawnPopup(zCx, p.y - 16, isEn ? '⚡ Cloud Dispersed!' : '⚡ تبددت الصاعقة!', '#7dd3fc');
+          }
+        } else if (p.type === 'istanbul_samovar_vent') {
+          const sCx = p.x + p.w * 0.5, sCy = p.y + p.h - 32;
+          if (Math.hypot(mx - sCx, my - sCy) < range + 50) {
+            p.boostTimer = 3.6;
+            Particles.spawnDust(sCx, sCy - 20, 12, '#bae6fd');
+            Particles.spawnPopup(sCx, sCy - 40, isEn ? '♨️ Turkish Tea Steam!' : '♨️ بخار سماور الشاي التركي!', '#7dd3fc');
           }
         } else if (p.type === 'battir_roman_bath_vent') {
           const bCx = p.x + p.w * 0.5;
@@ -2062,7 +2071,7 @@ window.Game = window.Game || {};
           p.gateClose = Math.max(0, (p.gateClose || 0) - dt * 3.2);
           p.trainActive = false;
         }
-      } else if (p.type === 'battir_farmer_stall') {
+      } else if (p.type === 'battir_farmer_stall' || p.type === 'istanbul_simit_vendor') {
         // Palestinian village woman between the climbable columns grants Mashmasha an extra Purple Heart life!
         if (p.giftAnim > 0) p.giftAnim = Math.max(0, p.giftAnim - dt * 1.1);
         if (
@@ -2520,6 +2529,7 @@ window.Game = window.Game || {};
     else if (theme === 'maya') Art.drawMayaSkyAndHorizon(targetCtx, cx, w, h, tSec);
     else if (theme === 'greece') Art.drawGreeceSkyAndHorizon(targetCtx, cx, w, h, tSec);
     else if (theme === 'battir') Art.drawBattirSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'istanbul' && Art.drawIstanbulSkyAndHorizon) Art.drawIstanbulSkyAndHorizon(targetCtx, cx, w, h, tSec);
     else if (theme === 'construction') Art.drawConstructionSkyAndHorizon(targetCtx, cx, w, h, tSec);
     else if (theme === 'subway') Art.drawSubwaySkyAndHorizon(targetCtx, cx, w, h, tSec);
     else if (theme === 'rooftop') Art.drawRooftopSkyAndHorizon(targetCtx, cx, w, h, tSec);
@@ -2547,6 +2557,7 @@ window.Game = window.Game || {};
     else if (theme === 'maya') Art.drawMayaMidground(targetCtx, cx, w, h, tSec);
     else if (theme === 'greece') Art.drawGreeceMidground(targetCtx, cx, w, h, tSec);
     else if (theme === 'battir') Art.drawBattirMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'istanbul' && Art.drawIstanbulMidground) Art.drawIstanbulMidground(targetCtx, cx, w, h, tSec);
     else if (theme === 'construction') Art.drawConstructionMidground(targetCtx, cx, w, h, tSec);
     else if (theme === 'subway') Art.drawSubwayMidground(targetCtx, cx, w, h, tSec);
     else if (theme === 'rooftop') Art.drawRooftopMidground(targetCtx, cx, w, h, tSec);
@@ -2591,7 +2602,7 @@ window.Game = window.Game || {};
       // 2. Midground Layer:
       //    - Battir (Stage 26) & Greenhouse (Stage 13) run bespoke 60fps Offscreen Tile Baking directly.
       //    - All other 24 stages use the overscanned sliding-window Offscreen Canvas cache (~8.3 Hz refresh + 60fps parallax blit!).
-      if (theme === 'battir' || theme === 'greenhouse' || !bgMidCache.canvas || !bgMidCache.ctx) {
+      if (theme === 'battir' || theme === 'greenhouse' || theme === 'istanbul' || !bgMidCache.canvas || !bgMidCache.ctx) {
         renderThemeMidground(ctx, theme, camX, LOGICAL_W, LOGICAL_H, time);
       } else {
         const p = BG_MID_PARALLAX[theme] || 0.40;
@@ -2797,6 +2808,8 @@ window.Game = window.Game || {};
       Art.drawGreeceAcropolisGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
     } else if (level.theme === 'battir' && Art.drawBattirFinishGate) {
       Art.drawBattirFinishGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
+    } else if (level.theme === 'istanbul' && Art.drawIstanbulGalataGate) {
+      Art.drawIstanbulGalataGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
     } else {
       Art.drawMarketGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
     }

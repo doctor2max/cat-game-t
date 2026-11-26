@@ -750,7 +750,7 @@ window.Game.Audio = (function () {
         ? 'subway'
         : theme === 'rooftop' || theme === 'construction' || theme === 'rooftop_neon' || theme === 'paris'
         ? 'rooftop'
-        : theme === 'harbor' || theme === 'harbor_storm' || theme === 'bridge' || theme === 'venice'
+        : theme === 'harbor' || theme === 'harbor_storm' || theme === 'bridge' || theme === 'venice' || theme === 'istanbul'
         ? 'harbor'
         : theme === 'park' || theme === 'greenhouse'
         ? 'park'

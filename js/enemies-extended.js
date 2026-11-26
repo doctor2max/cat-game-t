@@ -60,6 +60,8 @@ window.Game.EnemiesExtended = (function () {
     repelPatrol(level.battir_porcupines, 2.4);
     repelPatrol(level.battir_boars, 2.5);
     repelPatrol(level.battir_scorpions, 2.3);
+    repelPatrol(level.istanbul_kangals, 2.5);
+    repelPatrol(level.istanbul_merchants, 2.4);
     if (level.mail_owls) {
       for (const ow of level.mail_owls) {
         const ox = ow.x + ow.w * 0.5, oy = ow.y + ow.h * 0.5;
@@ -142,6 +144,7 @@ window.Game.EnemiesExtended = (function () {
       level.maya_quetzals,
       level.greece_owls,
       level.battir_hoopoes,
+      level.istanbul_gulls,
     ]) {
       if (!list) continue;
       for (const f of list) {
@@ -1418,7 +1421,83 @@ window.Game.EnemiesExtended = (function () {
       }
     }
 
-    // Universal Runtime Checkpoint Sanctuary Barrier across all extended enemies (Stages 5-25)
+    // Stage 27: Istanbul — Anatolian Kangal Guard Dogs (Stealth-Aware AI + walkDist stride)
+    if (level.istanbul_kangals) {
+      for (const k of level.istanbul_kangals) {
+        const prevX = k.x;
+        if (k.repelTimer > 0) {
+          k.repelTimer -= dt;
+          k.facing = k.repelDir || 1;
+          k.x = Math.max(k.minX, Math.min(k.maxX, k.x + k.facing * 205 * dt));
+          k.walkDist = (k.walkDist || 0) + Math.abs(k.x - prevX);
+          continue;
+        }
+        const kCx = k.x + k.w * 0.5, kCy = k.y + k.h * 0.5;
+        const catCx = c.x + c.w * 0.5, catCy = c.y + c.h * 0.5;
+        const dist = Math.hypot(catCx - kCx, catCy - kCy);
+        const sight = c.crouching ? 120 : 215;
+        const sameH = Math.abs(catCy - kCy) < 82;
+        if (dist < sight && sameH && c.invulnTimer <= 0) {
+          if (k.state !== "alert") {
+            k.state = "alert";
+            if (Audio && Audio.playBark) Audio.playBark();
+            if (Particles && Particles.spawnPopup) Particles.spawnPopup(kCx, k.y - 12, "❗ WOOF!", "#fb7185");
+          }
+          anyChasing = true;
+          const dx = catCx - kCx;
+          if (Math.abs(dx) > 10) {
+            k.facing = dx > 0 ? 1 : -1;
+            k.x = Math.max(k.minX, Math.min(k.maxX, k.x + k.facing * (k.speed * 1.65) * dt));
+          }
+        } else {
+          k.state = "patrol";
+          k.x += k.facing * k.speed * dt;
+          if (k.x <= k.minX) { k.x = k.minX; k.facing = 1; }
+          else if (k.x >= k.maxX) { k.x = k.maxX; k.facing = -1; }
+        }
+        k.walkDist = (k.walkDist || 0) + Math.abs(k.x - prevX);
+        if (hitBox(k.x, k.y, k.w, k.h, 8)) onHit("كلب كانغال التركي! -1 ❤️");
+      }
+    }
+
+    // Stage 27: Istanbul — Grand Bazaar Spice Merchants (walkDist stride)
+    if (level.istanbul_merchants) {
+      for (const m of level.istanbul_merchants) {
+        const prevX = m.x;
+        if (m.repelTimer > 0) {
+          m.repelTimer -= dt;
+          m.facing = m.repelDir || 1;
+          m.x = Math.max(m.minX, Math.min(m.maxX, m.x + m.facing * 190 * dt));
+          m.walkDist = (m.walkDist || 0) + Math.abs(m.x - prevX);
+          continue;
+        }
+        m.x += m.facing * m.speed * dt;
+        if (m.x <= m.minX) { m.x = m.minX; m.facing = 1; }
+        else if (m.x >= m.maxX) { m.x = m.maxX; m.facing = -1; }
+        m.walkDist = (m.walkDist || 0) + Math.abs(m.x - prevX);
+        if (hitBox(m.x, m.y, m.w, m.h, 8)) onHit("تاجر البازار الكبير! -1 ❤️");
+      }
+    }
+
+    // Stage 27: Istanbul — Bosphorus Swooping Seagulls
+    if (level.istanbul_gulls) {
+      for (const g of level.istanbul_gulls) {
+        if (g.repelTimer > 0) {
+          g.repelTimer -= dt;
+          g.facing = g.repelDir || 1;
+          g.x = Math.max(g.minX, Math.min(g.maxX, g.x + g.facing * 210 * dt));
+          g.y = g.baseY - 60 + Math.sin(timeSec * 8) * 6;
+          continue;
+        }
+        g.x += g.facing * g.speed * dt;
+        if (g.x <= g.minX) { g.x = g.minX; g.facing = 1; }
+        else if (g.x >= g.maxX) { g.x = g.maxX; g.facing = -1; }
+        g.y = g.baseY + Math.sin(timeSec * 2.8 + (g.phase || 0)) * (g.ampY || 26);
+        if (hitBox(g.x, g.y, g.w, g.h, 6)) onHit("نورس البوسفور! -1 ❤️");
+      }
+    }
+
+    // Universal Runtime Checkpoint Sanctuary Barrier across all extended enemies (Stages 5-27)
     const guardCp = window.Game && window.Game.guardCheckpointZone;
     if (guardCp && level.checkpoints && level.checkpoints.length) {
       const boxLists = [
@@ -1434,6 +1513,7 @@ window.Game.EnemiesExtended = (function () {
         level.maya_jaguars, level.maya_warriors, level.maya_quetzals,
         level.greece_goats, level.greece_hoplites, level.greece_owls,
         level.battir_porcupines, level.battir_boars, level.battir_hoopoes, level.battir_scorpions,
+        level.istanbul_kangals, level.istanbul_merchants, level.istanbul_gulls,
       ];
       for (const list of boxLists) {
         if (!list) continue;
@@ -7698,9 +7778,121 @@ window.Game.EnemiesExtended = (function () {
     }
   }
 
+  function drawIstanbulEnemies(ctx, level, camX, camY, time, cullW) {
+    if (level.istanbul_kangals) {
+      for (const k of level.istanbul_kangals) {
+        const x = k.x - camX, y = k.y - camY;
+        if (x + k.w < -80 || x > cullW + 80) continue;
+        const stride = Math.sin((k.walkDist || 0) * 0.14);
+        const bob = Math.abs(stride) * 2.2;
+        ctx.save();
+        ctx.translate(x + k.w * 0.5, y + k.h);
+        ctx.scale(k.facing || 1, 1);
+        ctx.fillStyle = "rgba(15, 23, 42, 0.34)";
+        ctx.beginPath(); ctx.ellipse(0, -1, 30, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+        const drawLeg = (lx, ang, col) => {
+          ctx.save(); ctx.translate(lx, -22 - bob); ctx.rotate(ang);
+          ctx.fillStyle = col; ctx.strokeStyle = "#29180d"; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.roundRect(-4.5, 0, 9, 22, 4); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = "#fef3c7"; ctx.beginPath(); ctx.ellipse(2, 21, 5.5, 3, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.restore();
+        };
+        drawLeg(-16, -stride * 0.42, "#b48a5a");
+        drawLeg(16, stride * 0.42, "#b48a5a");
+        ctx.strokeStyle = "#29180d"; ctx.lineWidth = 6.5; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(-24, -26 - bob); ctx.bezierCurveTo(-40, -34 - bob, -38, -50 - bob, -26, -46 - bob); ctx.stroke();
+        ctx.strokeStyle = "#e7c99b"; ctx.lineWidth = 3.8;
+        ctx.beginPath(); ctx.moveTo(-24, -26 - bob); ctx.bezierCurveTo(-40, -34 - bob, -38, -50 - bob, -26, -46 - bob); ctx.stroke();
+        const bodyG = ctx.createLinearGradient(0, -40 - bob, 0, -14 - bob);
+        bodyG.addColorStop(0, "#f3dfb9"); bodyG.addColorStop(0.55, "#d6b078"); bodyG.addColorStop(1, "#a67c46");
+        ctx.fillStyle = bodyG; ctx.strokeStyle = "#29180d"; ctx.lineWidth = 1.9;
+        ctx.beginPath();
+        ctx.moveTo(-26, -24 - bob); ctx.bezierCurveTo(-24, -38 - bob, 18, -42 - bob, 26, -28 - bob);
+        ctx.bezierCurveTo(28, -16 - bob, 10, -14 - bob, -18, -16 - bob); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#991b1b"; ctx.strokeStyle = "#29180d"; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.roundRect(14, -34 - bob, 8, 16, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#fde047";
+        ctx.beginPath(); ctx.arc(18, -29 - bob, 2, 0, Math.PI * 2); ctx.arc(18, -23 - bob, 2, 0, Math.PI * 2); ctx.fill();
+        drawLeg(-12, stride * 0.46, "#e3c390");
+        drawLeg(12, -stride * 0.46, "#e3c390");
+        ctx.fillStyle = "#ebd0a0"; ctx.strokeStyle = "#29180d"; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.ellipse(26, -36 - bob, 12, 10.5, -0.1, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#1c1917"; ctx.beginPath(); ctx.ellipse(35, -33 - bob, 7.5, 5.2, 0.08, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#292524"; ctx.beginPath(); ctx.ellipse(20, -35 - bob, 5.2, 9.5, 0.35, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = k.state === "alert" ? "#ef4444" : "#f59e0b";
+        ctx.beginPath(); ctx.arc(30, -38 - bob, 2.4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#09090b"; ctx.beginPath(); ctx.arc(30.8, -38 - bob, 1.2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
+    if (level.istanbul_merchants) {
+      for (const m of level.istanbul_merchants) {
+        const x = m.x - camX, y = m.y - camY;
+        if (x + m.w < -80 || x > cullW + 80) continue;
+        const stride = Math.sin((m.walkDist || 0) * 0.16);
+        const bob = Math.abs(stride) * 2.0;
+        ctx.save();
+        ctx.translate(x + m.w * 0.5, y + m.h);
+        ctx.scale(m.facing || 1, 1);
+        ctx.fillStyle = "rgba(15, 23, 42, 0.32)";
+        ctx.beginPath(); ctx.ellipse(0, -1, 18, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+        for (const [ang, col] of [[-stride * 0.38, "#1e293b"], [stride * 0.38, "#334155"]]) {
+          ctx.save(); ctx.translate(0, -22 - bob); ctx.rotate(ang);
+          ctx.fillStyle = col; ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.roundRect(-5, 0, 10, 21, 4); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = "#78350f"; ctx.beginPath(); ctx.ellipse(2.5, 20.5, 6.5, 3.2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.restore();
+        }
+        ctx.fillStyle = "#fef3c7"; ctx.strokeStyle = "#3b1d0c"; ctx.lineWidth = 1.7;
+        ctx.beginPath(); ctx.roundRect(-13, -44 - bob, 26, 25, 7); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#9f1239"; ctx.beginPath(); ctx.roundRect(-12, -43 - bob, 24, 21, 5); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 1.5; ctx.strokeRect(-9, -40 - bob, 18, 15);
+        ctx.strokeStyle = "#fef3c7"; ctx.lineWidth = 5.5; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(8, -36 - bob); ctx.lineTo(22, -32 - bob); ctx.stroke();
+        ctx.fillStyle = "#f59e0b"; ctx.strokeStyle = "#78350f"; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.ellipse(24, -33 - bob, 12, 3.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#dc2626"; ctx.fillRect(18, -41 - bob, 4.5, 7); ctx.fillRect(25, -41 - bob, 4.5, 7);
+        ctx.fillStyle = "#f1c29b"; ctx.strokeStyle = "#3b1d0c"; ctx.lineWidth = 1.7;
+        ctx.beginPath(); ctx.arc(0, -51 - bob, 9.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#1c1917"; ctx.beginPath(); ctx.arc(4, -52 - bob, 1.6, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "#1c1917"; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.moveTo(2, -47 - bob); ctx.quadraticCurveTo(6, -49 - bob, 10, -47 - bob); ctx.stroke();
+        ctx.fillStyle = "#be123c"; ctx.strokeStyle = "#3b1d0c"; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(-8, -58 - bob); ctx.lineTo(-6, -68 - bob); ctx.lineTo(6, -68 - bob); ctx.lineTo(8, -58 - bob); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.restore();
+      }
+    }
+    if (level.istanbul_gulls) {
+      for (const g of level.istanbul_gulls) {
+        const x = g.x - camX, y = g.y - camY;
+        if (x + g.w < -80 || x > cullW + 80) continue;
+        const flap = Math.sin(time * 9.2 + (g.phase || 0));
+        ctx.save();
+        ctx.translate(x + g.w * 0.5, y + g.h * 0.5);
+        ctx.scale(g.facing || 1, 1);
+        ctx.fillStyle = "#cbd5e1"; ctx.strokeStyle = "#334155"; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(-4, -2); ctx.quadraticCurveTo(-10, -18 + flap * 16, -24, -10 + flap * 20); ctx.quadraticCurveTo(-12, -2 + flap * 8, 4, 2); ctx.closePath(); ctx.fill(); ctx.stroke();
+        const bG = ctx.createLinearGradient(0, -10, 0, 10);
+        bG.addColorStop(0, "#ffffff"); bG.addColorStop(0.7, "#e2e8f0"); bG.addColorStop(1, "#94a3b8");
+        ctx.fillStyle = bG; ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.ellipse(0, 1, 18, 8.5, -0.06, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#f8fafc"; ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(-2, -1); ctx.quadraticCurveTo(-4, -20 - flap * 16, -20, -12 - flap * 22); ctx.quadraticCurveTo(-8, 2 - flap * 8, 6, 3); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#334155"; ctx.beginPath(); ctx.arc(-18, -11 - flap * 20, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(15, -3, 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#f59e0b"; ctx.beginPath(); ctx.moveTo(21, -4); ctx.lineTo(29, -1.5); ctx.lineTo(21, 1); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = "#0f172a"; ctx.beginPath(); ctx.arc(17, -4.5, 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
+
   return {
     updateAll,
-    drawAll,
+    drawAll: function (ctx, level, camX, camY, time, cullW, nv) {
+      drawAll(ctx, level, camX, camY, time, cullW, nv);
+      drawIstanbulEnemies(ctx, level, camX, camY, time, cullW);
+    },
     applyMeowRepel,
   };
 })();

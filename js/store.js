@@ -3,7 +3,7 @@ window.Game = window.Game || {};
 window.Game.Store = (function () {
   const SAVE_KEY = 'theWayHome_saveData_v2';
   const LEGACY_UNLOCK_KEY = 'theWayHome_maxUnlockedStage';
-  const TOTAL_STAGES = 26;
+  const TOTAL_STAGES = 27;
   const SEASON1_STAGES = 15;
   const TEMP_UNLOCK_ALL = true; // وضع التجربة: فتح جميع المراحل تلقائياً
 

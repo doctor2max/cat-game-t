@@ -230,15 +230,15 @@ window.Game.Cat = function (startX, startY) {
         const stickTol = !wasAirborne ? 6 : 0;
         if (cat.vy >= 0 && prevBottom <= effY + 14 && cat.y + cat.h >= effY - stickTol) {
           cat.y = effY - cat.h;
-          if (p.bouncy || p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy') {
+          if (p.bouncy || p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy' || p.type === 'istanbul_bazaar_awning') {
             const mult = (p.type === 'circus_trampoline' || p.type === 'maya_bounce_drum') ? 1.44 : (p.type === 'paris_awning_spring' || p.type === 'souk_carpet_bounce') ? 1.42 : p.type === 'bamboo_spring' ? 1.40 : p.type === 'oasis_palm_bounce' ? 1.38 : p.type === 'flower_bounce' ? 1.36 : p.type === 'ice_bounce' ? 1.34 : 1.28;
-            cat.vy = (p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy') ? (p.bounceVy || -780) : (-cat.physics.jumpForce * mult);
+            cat.vy = (p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy' || p.type === 'istanbul_bazaar_awning') ? (p.bounceVy || -780) : (-cat.physics.jumpForce * mult);
             cat.scaleX = 0.94;
             cat.scaleY = 1.07;
             p.bounceAnim = 1;
             Audio.playJump();
-            if (p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy') {
-              Particles.spawnDust(cat.x + cat.w * 0.5, cat.y + cat.h, 12, p.type === 'battir_fig_canopy' ? '#22c55e' : '#84cc16');
+            if (p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy' || p.type === 'istanbul_bazaar_awning') {
+              Particles.spawnDust(cat.x + cat.w * 0.5, cat.y + cat.h, 12, p.type === 'istanbul_bazaar_awning' ? '#f59e0b' : (p.type === 'battir_fig_canopy' ? '#22c55e' : '#84cc16'));
             }
             if (p.type === 'flower_bounce') {
               // Firm, poised botanical cushion dip (sturdy, no wild shaking!) & lush nectar burst
@@ -1607,6 +1607,39 @@ window.Game.Cat = function (startX, startY) {
         if (p === standing) {
           cat.x += dx;
           cat.y = p.y - cat.h;
+        }
+      } else if (p.type === 'istanbul_tram_car' || p.type === 'istanbul_vapur_boat') {
+        if (p.baseY === undefined) p.baseY = p.y;
+        const prevX = p.x;
+        const sX = p.startX !== undefined ? p.startX : p.x;
+        const eX = p.endX !== undefined ? p.endX : p.x + 360;
+        const span = Math.max(40, eX - sX);
+        const spd = (p.speed || 130) / span;
+        const u = 0.5 - 0.5 * Math.cos(cat.animTime * spd * Math.PI + (p.phase || 0));
+        p.x = sX + u * span;
+        const dx = p.x - prevX;
+        p.moveDir = dx >= 0 ? 1 : -1;
+        if (p.type === 'istanbul_vapur_boat') {
+          p.y = p.baseY + Math.sin(cat.animTime * 2.6 + (p.phase || 0)) * 5.5;
+        }
+        if (p === standing) {
+          cat.x += dx;
+          cat.y = p.y - cat.h;
+        }
+      } else if (p.type === 'istanbul_samovar_vent') {
+        if (p.boostTimer > 0) p.boostTimer = Math.max(0, p.boostTimer - dt);
+        const cyc = (cat.animTime + (p.phase || 0)) % 3.4;
+        const active = (p.boostTimer > 0) || (cyc >= 0.7 && cyc <= 2.95);
+        p.steamActive = active;
+        p.steamWarn = !active && cyc >= 0.3 && cyc < 0.7;
+        if (active) {
+          const cx0 = p.x + p.w * 0.5;
+          const catCx = cat.x + cat.w * 0.5;
+          if (Math.abs(catCx - cx0) < 46 && cat.y + cat.h <= p.y + p.h + 10 && cat.y + cat.h >= p.y - 235) {
+            const lift = p.boostTimer > 0 ? -570 : -470;
+            cat.vy = Math.max(lift, Math.min(cat.vy, -360) - 960 * dt);
+            cat.onGround = false;
+          }
         }
       }
     }

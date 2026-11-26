@@ -2580,6 +2580,43 @@ window.Game.ProceduralCat = (function () {
       ctx.strokeStyle = '#3f3f46'; ctx.lineWidth = 3.2;
       ctx.beginPath(); ctx.ellipse(2, -15, 62, 12, 0.04, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
       ctx.restore();
+    } else if (catState.istanbulOutfit) {
+      // Authentic Ottoman Crimson Velvet Fez (طربوش عثماني إسطنبولي) with Gold Crescent & Turquoise Iznik Band + Silk Tassel!
+      const bagOn = !!catState.shieldActive;
+      const t = catState.animTime || 0;
+      const cx = MODEL.sockets.crown[0] + (bagOn ? 20 : 14);
+      const cy = bagOn ? -14 : (MODEL.sockets.crown[1] - 4);
+      const sway = Math.sin(t * 6.8) * 13;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(bagOn ? -0.04 : -0.14);
+      ctx.scale(1.26, 1.26);
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      const fG = ctx.createLinearGradient(-56, -98, 60, 14);
+      fG.addColorStop(0.0, '#f43f5e'); fG.addColorStop(0.3, '#be123c'); fG.addColorStop(0.75, '#881337'); fG.addColorStop(1.0, '#4c0519');
+      ctx.fillStyle = fG; ctx.strokeStyle = pal.outline; ctx.lineWidth = 7.6;
+      ctx.beginPath();
+      ctx.moveTo(-62, 12); ctx.lineTo(-46, -86); ctx.quadraticCurveTo(0, -100, 46, -86); ctx.lineTo(62, 12);
+      ctx.quadraticCurveTo(0, 26, -62, 12); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#0284c7'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 4.2;
+      ctx.beginPath();
+      ctx.moveTo(-59, -4); ctx.quadraticCurveTo(0, 9, 59, -4); ctx.lineTo(62, 11); ctx.quadraticCurveTo(0, 24, -62, 11);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fde047'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 2.6;
+      ctx.beginPath(); ctx.arc(-4, -46, 15, 0.45, Math.PI * 1.55, false); ctx.arc(3, -46, 12, Math.PI * 1.45, 0.55, true); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(12, -46, 4.8, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = pal.outline; ctx.lineWidth = 4.8;
+      ctx.beginPath(); ctx.ellipse(0, -90, 12, 7, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = pal.outline; ctx.lineWidth = 9.0;
+      ctx.beginPath(); ctx.moveTo(2, -90); ctx.quadraticCurveTo(56, -84, 68 + sway * 0.45, -14); ctx.stroke();
+      ctx.strokeStyle = '#18181b'; ctx.lineWidth = 4.8;
+      ctx.beginPath(); ctx.moveTo(2, -90); ctx.quadraticCurveTo(56, -84, 68 + sway * 0.45, -14); ctx.stroke();
+      const tx = 68 + sway * 0.45, ty = -14;
+      for (let s = -2; s <= 2; s++) {
+        ctx.strokeStyle = s % 2 === 0 ? '#09090b' : '#3f3f46'; ctx.lineWidth = 4.0;
+        ctx.beginPath(); ctx.moveTo(tx + s * 2.8, ty); ctx.quadraticCurveTo(tx + s * 5 + sway * 0.5, ty + 24, tx + s * 7 + sway, ty + 46); ctx.stroke();
+      }
+      ctx.restore();
     } else if (skin === 'crown') {
       drawCrownOutfit(ctx, catState, pal);
     } else if (skin === 'cyber') {
@@ -2805,6 +2842,32 @@ window.Game.ProceduralCat = (function () {
       ctx.fillStyle = '#84cc16';
       ctx.beginPath(); ctx.ellipse(366, 452, 7.5, 4, -0.45, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.ellipse(379, 455, 7.5, 4, 0.35, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    } else if (catState.istanbulOutfit) {
+      // Turquoise Iznik Silk Scarf with Gold Trim & Iconic Istanbul Blue Nazar Charm!
+      const t = catState.animTime || 0;
+      const flutter = Math.sin(t * 7.4) * 14;
+      ctx.save();
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.fillStyle = '#0369a1'; ctx.strokeStyle = pal.outline; ctx.lineWidth = 8.0;
+      ctx.beginPath();
+      ctx.moveTo(436, 382); ctx.quadraticCurveTo(498, 394 + flutter * 0.4, 558, 412 + flutter);
+      ctx.lineTo(528, 446 + flutter * 0.8); ctx.quadraticCurveTo(478, 430 + flutter * 0.3, 424, 412);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      const izG = ctx.createLinearGradient(286, 388, 460, 454);
+      izG.addColorStop(0, '#0284c7'); izG.addColorStop(0.5, '#06b6d4'); izG.addColorStop(1, '#0369a1');
+      ctx.fillStyle = izG; ctx.strokeStyle = pal.outline; ctx.lineWidth = 8.0;
+      ctx.beginPath();
+      ctx.moveTo(286, 404); ctx.quadraticCurveTo(372, 438, 456, 376);
+      ctx.quadraticCurveTo(468, 402, 454, 424); ctx.quadraticCurveTo(372, 480, 284, 444);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#fde047'; ctx.lineWidth = 4.0;
+      ctx.beginPath(); ctx.moveTo(298, 424); ctx.quadraticCurveTo(372, 454, 446, 398); ctx.stroke();
+      ctx.fillStyle = '#1d4ed8'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 4.6;
+      ctx.beginPath(); ctx.arc(372, 454, 15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(372, 454, 9.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(372, 454, 6.0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.arc(372, 454, 3.0, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     } else if (skin === 'scarf') {
       drawScarfCollarWrap(ctx, pal);
