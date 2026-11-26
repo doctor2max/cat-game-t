@@ -24123,14 +24123,28 @@ window.Game = window.Game || {};
             const py = baseY + Math.sin(u * Math.PI) * bulge + Math.sin(u * Math.PI * 2.3 + ph) * waveAmp;
             pts.push([px, py]);
           }
-          // Sunlit green garden terrace strip
-          const gCol = ctx.createLinearGradient(xL, baseY, xR, baseY);
-          gCol.addColorStop(0.0, '#365215'); gCol.addColorStop(0.5, '#658f22'); gCol.addColorStop(1.0, '#2a4010');
-          ctx.fillStyle = gCol;
+          // Warm tilled brown agricultural soil terrace strip with distant green crop rows (تراب بني ومشاكب بعيدة)
+          const soilCol = ctx.createLinearGradient(xL, baseY, xR, baseY);
+          soilCol.addColorStop(0.0, '#4a2e18'); soilCol.addColorStop(0.5, '#7c502c'); soilCol.addColorStop(1.0, '#3e2512');
+          ctx.fillStyle = soilCol;
           ctx.beginPath();
-          pts.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py - 7); else ctx.lineTo(px, py - 7); });
+          pts.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py - 15); else ctx.lineTo(px, py - 15); });
           for (let s = segs; s >= 0; s--) ctx.lineTo(pts[s][0], pts[s][1] + 2);
           ctx.closePath(); ctx.fill();
+          // Distant organized crop tufts (tomatoes, eggplants & mint) dotting the brown terraced soil
+          for (let s = 2; s < segs - 1; s++) {
+            const [px, py] = pts[s];
+            const kind = (s + k) % 3;
+            ctx.fillStyle = kind === 2 ? '#22c55e' : '#3f6e18';
+            ctx.beginPath(); ctx.ellipse(px, py - 5, 11, 3.6, 0, 0, Math.PI * 2); ctx.fill();
+            if (kind === 0) {
+              ctx.fillStyle = '#dc2626';
+              ctx.beginPath(); ctx.arc(px - 3, py - 6, 1.3, 0, Math.PI * 2); ctx.arc(px + 3, py - 5.5, 1.3, 0, Math.PI * 2); ctx.fill();
+            } else if (kind === 1) {
+              ctx.fillStyle = '#6b21a8';
+              ctx.beginPath(); ctx.ellipse(px + 2, py - 5, 1.2, 2.0, 0.15, 0, Math.PI * 2); ctx.fill();
+            }
+          }
 
           // Soft shadow beneath stone wall
           ctx.fillStyle = 'rgba(20, 30, 10, 0.28)';
@@ -24300,15 +24314,81 @@ window.Game = window.Game || {};
             const py = evalContourY(px, xL, xR, baseY, bulge, waveAmp, phase);
             ptsTop.push([px, py]);
           }
-          // 1. Soft sunlit terraced garden ledge above the stone wall
-          const gBed = ctx.createLinearGradient(xL, baseY, xR, baseY);
-          gBed.addColorStop(0.0, '#2a420f'); gBed.addColorStop(0.25, '#4c7519');
-          gBed.addColorStop(0.52, '#648f22'); gBed.addColorStop(0.8, '#416615'); gBed.addColorStop(1.0, '#22360b');
-          ctx.fillStyle = gBed;
+          // 1. Rich tilled brown agricultural soil terrace bed (تراب بني) with organized Mashaakeb!
+          const soilH = 22;
+          const soilG = ctx.createLinearGradient(xL, baseY, xR, baseY);
+          soilG.addColorStop(0.0, '#442814'); soilG.addColorStop(0.24, '#724624');
+          soilG.addColorStop(0.52, '#8b5730'); soilG.addColorStop(0.80, '#693f20'); soilG.addColorStop(1.0, '#3b2110');
+          ctx.fillStyle = soilG;
           ctx.beginPath();
-          ptsTop.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py - 9); else ctx.lineTo(px, py - 9); });
+          ptsTop.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py - soilH); else ctx.lineTo(px, py - soilH); });
           for (let s = segs; s >= 0; s--) ctx.lineTo(ptsTop[s][0], ptsTop[s][1] + 2);
           ctx.closePath(); ctx.fill();
+
+          // Subtle curved tilled soil furrow lines
+          ctx.strokeStyle = 'rgba(44, 22, 8, 0.28)'; ctx.lineWidth = 0.9;
+          for (const fOff of [-15, -9, -4]) {
+            ctx.beginPath();
+            ptsTop.forEach(([px, py], idx) => { if (idx === 0) ctx.moveTo(px, py + fOff); else ctx.lineTo(px, py + fOff); });
+            ctx.stroke();
+          }
+
+          // Organized Battir Mashaakeb (مشاكب البندورة والباذنجان البتيري والنعنع) across the brown soil!
+          const numPlots = 8;
+          for (let pIdx = 0; pIdx < numPlots; pIdx++) {
+            const uA = 0.08 + (pIdx / numPlots) * 0.84;
+            const uB = 0.08 + ((pIdx + 1) / numPlots) * 0.84;
+            const xDiv = xL + uA * (xR - xL);
+            const yDiv = evalContourY(xDiv, xL, xR, baseY, bulge, waveAmp, phase);
+            // Raised earthen ridge divider separating each maskab (حاجز ترابي بين المشاكب)
+            ctx.strokeStyle = 'rgba(54, 28, 12, 0.58)'; ctx.lineWidth = 1.6;
+            ctx.beginPath(); ctx.moveTo(xDiv - 2, yDiv - soilH + 3); ctx.lineTo(xDiv + 2, yDiv - 1); ctx.stroke();
+            ctx.strokeStyle = 'rgba(176, 124, 78, 0.35)'; ctx.lineWidth = 0.9;
+            ctx.beginPath(); ctx.moveTo(xDiv - 1, yDiv - soilH + 3); ctx.lineTo(xDiv + 3, yDiv - 1); ctx.stroke();
+
+            const cropType = (pIdx + seed) % 3; // 0 = Tomato (بندورة), 1 = Battiri Eggplant (باذنجان), 2 = Mint (نعنع)
+            const plantsInPlot = cropType === 2 ? 5 : 3;
+            for (let k = 0; k < plantsInPlot; k++) {
+              const uP = uA + ((k + 0.5) / plantsInPlot) * (uB - uA);
+              const px = xL + uP * (xR - xL);
+              const py = evalContourY(px, xL, xR, baseY, bulge, waveAmp, phase) - 4 - (k % 2) * 3;
+              if (cropType === 0) {
+                // Tomato vine on wooden stake with glossy red heirloom tomatoes (بندورة)
+                ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.1;
+                ctx.beginPath(); ctx.moveTo(px, py + 1); ctx.lineTo(px, py - 13); ctx.stroke();
+                ctx.fillStyle = '#166534';
+                ctx.beginPath(); ctx.arc(px - 2.5, py - 5, 4.2, 0, Math.PI * 2); ctx.arc(px + 2.5, py - 6.5, 4.0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#22c55e';
+                ctx.beginPath(); ctx.arc(px, py - 9.5, 3.6, 0, Math.PI * 2); ctx.fill();
+                for (const [ox, oy] of [[-2.4, -4.5], [2.4, -6.5], [-0.4, -9.2]]) {
+                  ctx.fillStyle = '#dc2626'; ctx.beginPath(); ctx.arc(px + ox, py + oy, 1.85, 0, Math.PI * 2); ctx.fill();
+                  ctx.fillStyle = '#fecaca'; ctx.beginPath(); ctx.arc(px + ox - 0.5, py + oy - 0.5, 0.55, 0, Math.PI * 2); ctx.fill();
+                }
+              } else if (cropType === 1) {
+                // Battiri Eggplant bush with glossy elongated purple eggplants (الباذنجان البتيري)
+                ctx.fillStyle = '#14532d';
+                ctx.beginPath(); ctx.ellipse(px, py - 4.5, 6.2, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#15803d';
+                ctx.beginPath(); ctx.ellipse(px - 2, py - 7, 4.2, 3.2, -0.2, 0, Math.PI * 2); ctx.ellipse(px + 2.5, py - 6.5, 3.8, 3.0, 0.2, 0, Math.PI * 2); ctx.fill();
+                for (const [ox, oy, rot] of [[-2.6, -3.5, 0.2], [2.4, -4.0, -0.2]]) {
+                  ctx.fillStyle = '#581c87';
+                  ctx.beginPath(); ctx.ellipse(px + ox, py + oy, 1.7, 3.1, rot, 0, Math.PI * 2); ctx.fill();
+                  ctx.fillStyle = '#a855f7';
+                  ctx.beginPath(); ctx.ellipse(px + ox - 0.4, py + oy - 0.6, 0.55, 1.2, rot, 0, Math.PI * 2); ctx.fill();
+                  ctx.fillStyle = '#4ade80';
+                  ctx.fillRect(px + ox - 0.8, py + oy - 3.2, 1.6, 1.1);
+                }
+              } else {
+                // Lush dense aromatic Mint carpet tuft (نعنع طازج)
+                ctx.fillStyle = '#15803d';
+                ctx.beginPath(); ctx.ellipse(px, py - 2.5, 5.2, 3.0, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#22c55e';
+                ctx.beginPath(); ctx.arc(px - 2.0, py - 4.0, 2.5, 0, Math.PI * 2); ctx.arc(px + 1.8, py - 3.8, 2.4, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#86efac';
+                ctx.beginPath(); ctx.arc(px, py - 5.2, 1.8, 0, Math.PI * 2); ctx.fill();
+              }
+            }
+          }
 
           // 2. Soft cast ground shadow beneath the stone retaining wall onto the terrace garden below
           ctx.fillStyle = 'rgba(18, 28, 8, 0.34)';
@@ -24585,15 +24665,81 @@ window.Game = window.Game || {};
             const px = s2L + (s / segs) * (s2R - s2L);
             pts.push([px, evalY2(px, t.y, t.bulge, t.wave, t.ph)]);
           }
-          // Lush terraced garden bed above wall
-          const gBed = ctx.createLinearGradient(s2L, t.y, s2R, t.y);
-          gBed.addColorStop(0.0, '#2a420f'); gBed.addColorStop(0.28, '#4c7519');
-          gBed.addColorStop(0.54, '#648f22'); gBed.addColorStop(0.82, '#416615'); gBed.addColorStop(1.0, '#22360b');
-          ctx.fillStyle = gBed;
+          // Rich tilled brown agricultural soil terrace bed (تراب بني) with organized Mashaakeb plots!
+          const soilH = 22;
+          const soilG = ctx.createLinearGradient(s2L, t.y, s2R, t.y);
+          soilG.addColorStop(0.0, '#442814'); soilG.addColorStop(0.24, '#724624');
+          soilG.addColorStop(0.52, '#8b5730'); soilG.addColorStop(0.80, '#693f20'); soilG.addColorStop(1.0, '#3b2110');
+          ctx.fillStyle = soilG;
           ctx.beginPath();
-          pts.forEach(([px, py], i) => { if (i === 0) ctx.moveTo(px, py - 9); else ctx.lineTo(px, py - 9); });
+          pts.forEach(([px, py], i) => { if (i === 0) ctx.moveTo(px, py - soilH); else ctx.lineTo(px, py - soilH); });
           for (let s = segs; s >= 0; s--) ctx.lineTo(pts[s][0], pts[s][1] + 2);
           ctx.closePath(); ctx.fill();
+
+          // Subtle curved tilled soil furrow lines following the terrace contour
+          ctx.strokeStyle = 'rgba(44, 22, 8, 0.28)'; ctx.lineWidth = 0.9;
+          for (const fOff of [-15, -9, -4]) {
+            ctx.beginPath();
+            pts.forEach(([px, py], i) => { if (i === 0) ctx.moveTo(px, py + fOff); else ctx.lineTo(px, py + fOff); });
+            ctx.stroke();
+          }
+
+          // Organized Battir Mashaakeb (مشاكب البندورة والباذنجان البتيري والنعنع) across the brown soil!
+          const numPlots2 = 9;
+          for (let pIdx = 0; pIdx < numPlots2; pIdx++) {
+            const uA = 0.08 + (pIdx / numPlots2) * 0.84;
+            const uB = 0.08 + ((pIdx + 1) / numPlots2) * 0.84;
+            const xDiv = s2L + uA * (s2R - s2L);
+            const yDiv = evalY2(xDiv, t.y, t.bulge, t.wave, t.ph);
+            // Raised earthen ridge divider separating each maskab (حاجز ترابي بين المشاكب)
+            ctx.strokeStyle = 'rgba(54, 28, 12, 0.58)'; ctx.lineWidth = 1.6;
+            ctx.beginPath(); ctx.moveTo(xDiv - 2, yDiv - soilH + 3); ctx.lineTo(xDiv + 2, yDiv - 1); ctx.stroke();
+            ctx.strokeStyle = 'rgba(176, 124, 78, 0.35)'; ctx.lineWidth = 0.9;
+            ctx.beginPath(); ctx.moveTo(xDiv - 1, yDiv - soilH + 3); ctx.lineTo(xDiv + 3, yDiv - 1); ctx.stroke();
+
+            const cropType = (pIdx + st) % 3; // 0 = Tomato (بندورة), 1 = Battiri Eggplant (باذنجان), 2 = Mint (نعنع)
+            const plantsInPlot = cropType === 2 ? 5 : 3;
+            for (let k = 0; k < plantsInPlot; k++) {
+              const uP = uA + ((k + 0.5) / plantsInPlot) * (uB - uA);
+              const px = s2L + uP * (s2R - s2L);
+              const py = evalY2(px, t.y, t.bulge, t.wave, t.ph) - 4 - (k % 2) * 3;
+              if (cropType === 0) {
+                // Tomato vine on wooden stake with glossy red heirloom tomatoes (بندورة)
+                ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.1;
+                ctx.beginPath(); ctx.moveTo(px, py + 1); ctx.lineTo(px, py - 13); ctx.stroke();
+                ctx.fillStyle = '#166534';
+                ctx.beginPath(); ctx.arc(px - 2.5, py - 5, 4.2, 0, Math.PI * 2); ctx.arc(px + 2.5, py - 6.5, 4.0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#22c55e';
+                ctx.beginPath(); ctx.arc(px, py - 9.5, 3.6, 0, Math.PI * 2); ctx.fill();
+                for (const [ox, oy] of [[-2.4, -4.5], [2.4, -6.5], [-0.4, -9.2]]) {
+                  ctx.fillStyle = '#dc2626'; ctx.beginPath(); ctx.arc(px + ox, py + oy, 1.85, 0, Math.PI * 2); ctx.fill();
+                  ctx.fillStyle = '#fecaca'; ctx.beginPath(); ctx.arc(px + ox - 0.5, py + oy - 0.5, 0.55, 0, Math.PI * 2); ctx.fill();
+                }
+              } else if (cropType === 1) {
+                // Battiri Eggplant bush with glossy elongated purple eggplants (الباذنجان البتيري)
+                ctx.fillStyle = '#14532d';
+                ctx.beginPath(); ctx.ellipse(px, py - 4.5, 6.2, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#15803d';
+                ctx.beginPath(); ctx.ellipse(px - 2, py - 7, 4.2, 3.2, -0.2, 0, Math.PI * 2); ctx.ellipse(px + 2.5, py - 6.5, 3.8, 3.0, 0.2, 0, Math.PI * 2); ctx.fill();
+                for (const [ox, oy, rot] of [[-2.6, -3.5, 0.2], [2.4, -4.0, -0.2]]) {
+                  ctx.fillStyle = '#581c87';
+                  ctx.beginPath(); ctx.ellipse(px + ox, py + oy, 1.7, 3.1, rot, 0, Math.PI * 2); ctx.fill();
+                  ctx.fillStyle = '#a855f7';
+                  ctx.beginPath(); ctx.ellipse(px + ox - 0.4, py + oy - 0.6, 0.55, 1.2, rot, 0, Math.PI * 2); ctx.fill();
+                  ctx.fillStyle = '#4ade80';
+                  ctx.fillRect(px + ox - 0.8, py + oy - 3.2, 1.6, 1.1);
+                }
+              } else {
+                // Lush dense aromatic Mint carpet tuft (نعنع طازج)
+                ctx.fillStyle = '#15803d';
+                ctx.beginPath(); ctx.ellipse(px, py - 2.5, 5.2, 3.0, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#22c55e';
+                ctx.beginPath(); ctx.arc(px - 2.0, py - 4.0, 2.5, 0, Math.PI * 2); ctx.arc(px + 1.8, py - 3.8, 2.4, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#86efac';
+                ctx.beginPath(); ctx.arc(px, py - 5.2, 1.8, 0, Math.PI * 2); ctx.fill();
+              }
+            }
+          }
 
           // Soft cast shadow under retaining wall
           ctx.fillStyle = 'rgba(18, 28, 8, 0.34)';
