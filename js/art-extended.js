@@ -26108,6 +26108,454 @@ window.Game = window.Game || {};
     const span = 1640;
     const off = -((camX * 0.22) % span);
 
+    // Helper: Animated Palestinian Village Farmer on Terraces (فلاحون يحفرون بمجرفة فوق الرأس أو يقطفون من شتلات المشاكب)
+    const drawTerraceFarmer = (ctx, x, y, scale, t, mode, facing, seed) => {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(scale * (facing || 1), scale);
+
+      const sHash = Math.abs(Math.floor(seed || 1));
+      const shirtCols = ['#f4ead8', '#d9e4d1', '#cbd9e8', '#efe0c4'];
+      const vestCols = ['#3f2e21', '#2c3d2f', '#382a22', '#263447'];
+      const shirtCol = shirtCols[sHash % shirtCols.length];
+      const vestCol = vestCols[(sHash + 1) % vestCols.length];
+
+      // Ground contact shadow
+      ctx.fillStyle = 'rgba(28, 18, 10, 0.34)';
+      ctx.beginPath(); ctx.ellipse(2, 1.5, 16, 3.6, 0, 0, Math.PI * 2); ctx.fill();
+
+      if (mode === 'hoe') {
+        // Overhead Mattock / Hoe Digging Cycle (يحفر بمجرفة يضرب من فوق رأسه)
+        const cyc = ((t * 1.15 + sHash * 0.37) % 1 + 1) % 1;
+        let swingT = 0; // 0 = struck into soil, 1 = high overhead windup
+        let impactPuff = 0;
+        if (cyc < 0.48) {
+          // Smooth effortful lift overhead
+          const u = cyc / 0.48;
+          swingT = u * u * (3 - 2 * u);
+        } else if (cyc < 0.64) {
+          // Rapid powerful downward strike from above head
+          const u = (cyc - 0.48) / 0.16;
+          swingT = 1 - u * u;
+        } else if (cyc < 0.84) {
+          // Impact hold & soil-crumb puff
+          swingT = 0;
+          impactPuff = 1 - (cyc - 0.64) / 0.20;
+        } else {
+          // Slight tug freeing blade from earth
+          const u = (cyc - 0.84) / 0.16;
+          swingT = u * 0.12;
+        }
+
+        const torsoLean = 0.38 - swingT * 0.56; // leans forward on strike, leans back on overhead raise
+        const hipX = 0, hipY = -16;
+
+        // Back & Front Legs (traditional dark baggy shirwal trousers + leather boots)
+        ctx.strokeStyle = '#1f2428'; ctx.lineWidth = 5.0; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(hipX - 2, hipY); ctx.lineTo(-6, -8); ctx.lineTo(-8, 0); ctx.stroke();
+        ctx.strokeStyle = '#2d353c'; ctx.lineWidth = 5.2;
+        ctx.beginPath(); ctx.moveTo(hipX + 2, hipY); ctx.lineTo(7, -8); ctx.lineTo(9, 0); ctx.stroke();
+        ctx.fillStyle = '#3b2414';
+        ctx.beginPath(); ctx.ellipse(-7, 0.5, 4.2, 2.0, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(10.5, 0.5, 4.4, 2.0, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Torso + Traditional Waistcoat + Head with Palestinian Keffiyeh & Agal
+        const shX = hipX + Math.sin(torsoLean) * 15;
+        const shY = hipY - Math.cos(torsoLean) * 15;
+        ctx.save();
+        ctx.translate(hipX, hipY);
+        ctx.rotate(torsoLean);
+        // Tunic & dark vest
+        ctx.fillStyle = shirtCol; ctx.strokeStyle = '#2b1d12'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.roundRect(-5.5, -16, 11, 17, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = vestCol;
+        ctx.beginPath(); ctx.roundRect(-4.8, -15, 9.6, 13, 2); ctx.fill();
+        // Woven waist sash
+        ctx.fillStyle = '#8b261d'; ctx.fillRect(-5.5, -3.5, 11, 3.2);
+        // Head & bearded face
+        ctx.fillStyle = '#d49b72'; ctx.strokeStyle = '#4a2e1a'; ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.arc(0.5, -21, 5.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#2b1d12';
+        ctx.beginPath(); ctx.arc(2.5, -19.2, 2.5, 0, Math.PI); ctx.fill();
+        // Palestinian Hatta / Keffiyeh draped over head & black Agal band
+        ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.arc(0, -22.2, 5.6, Math.PI * 0.95, Math.PI * 2.08);
+        ctx.lineTo(5.2, -16.5); ctx.lineTo(-5.8, -16.0); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#18181b'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(-4.8, -24.2); ctx.lineTo(4.8, -24.2); ctx.stroke();
+        ctx.restore();
+
+        // Articulated Arms + Long Wooden Hoe / Mattock Handle swung high OVERHEAD -> down into earth!
+        // Angle of handle: at swingT=1 (overhead), hands high at (shX-4, shY-14), blade behind/above head; at swingT=0 (strike), hands forward & blade dug into soil at (+23, 0)!
+        const handX = shX + (1 - swingT) * 11 - swingT * 3;
+        const handY = shY + (1 - swingT) * 7 - swingT * 15;
+        const toolAng = -2.25 * swingT + 0.72 * (1 - swingT); // overhead (-129 deg) -> downward strike (+41 deg)
+        const handleLen = 28;
+        const tipX = handX + Math.cos(toolAng) * handleLen;
+        const tipY = handY + Math.sin(toolAng) * handleLen;
+
+        // Back arm
+        ctx.strokeStyle = '#c5b9a3'; ctx.lineWidth = 3.2; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(shX - 1, shY + 1); ctx.lineTo((shX + handX) * 0.5 - 2, (shY + handY) * 0.5 + 3); ctx.lineTo(handX - 2, handY); ctx.stroke();
+
+        // Wooden hoe handle + forged steel blade (مجرفة / طورية)
+        ctx.strokeStyle = '#6b4222'; ctx.lineWidth = 2.6;
+        ctx.beginPath();
+        ctx.moveTo(handX - Math.cos(toolAng) * 7, handY - Math.sin(toolAng) * 7);
+        ctx.lineTo(tipX, tipY);
+        ctx.stroke();
+        // Forged iron mattock blade perpendicular to handle tip
+        const bladeAng = toolAng + Math.PI * 0.52;
+        ctx.strokeStyle = '#334155'; ctx.lineWidth = 4.0;
+        ctx.beginPath();
+        ctx.moveTo(tipX - Math.cos(bladeAng) * 3, tipY - Math.sin(bladeAng) * 3);
+        ctx.lineTo(tipX + Math.cos(bladeAng) * 9.5, tipY + Math.sin(bladeAng) * 9.5);
+        ctx.stroke();
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(tipX + Math.cos(bladeAng) * 6, tipY + Math.sin(bladeAng) * 6);
+        ctx.lineTo(tipX + Math.cos(bladeAng) * 9.5, tipY + Math.sin(bladeAng) * 9.5);
+        ctx.stroke();
+
+        // Front arm gripping handle
+        ctx.strokeStyle = shirtCol; ctx.lineWidth = 3.4;
+        ctx.beginPath(); ctx.moveTo(shX + 1, shY + 2); ctx.lineTo((shX + handX) * 0.5 + 2, (shY + handY) * 0.5 + 4); ctx.lineTo(handX, handY); ctx.stroke();
+        ctx.fillStyle = '#d49b72';
+        ctx.beginPath(); ctx.arc(handX, handY, 2.2, 0, Math.PI * 2); ctx.fill();
+
+        // Tilled dark-earth mound + flying soil crumbs on hoe impact!
+        ctx.fillStyle = '#4a2e18';
+        ctx.beginPath(); ctx.ellipse(23, 1.0, 9.5, 3.2, 0, Math.PI, Math.PI * 2); ctx.fill();
+        if (impactPuff > 0.05) {
+          for (let d = 0; d < 5; d++) {
+            const pProg = 1 - impactPuff;
+            const dx = 22 + (d - 2) * (3.5 + pProg * 7);
+            const dy = -1 - Math.sin(pProg * Math.PI) * (7 + (d % 3) * 4);
+            ctx.fillStyle = `rgba(92, 58, 30, ${(impactPuff * 0.85).toFixed(2)})`;
+            ctx.beginPath(); ctx.arc(dx, dy, 1.8 - pProg * 0.7, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+      } else {
+        // Picking Seedlings in Mashaakeb (يقطف من الشتلات في المشاكب)
+        const pickPhase = Math.sin(t * 2.8 + sHash * 1.9);
+        const reach = (pickPhase + 1) * 0.5; // 0 = dropping into basket, 1 = plucking from seedling
+
+        // Small raised soil bed & lush green seedlings (شتلات خضراء في المسكبة)
+        ctx.fillStyle = '#5c3c20';
+        ctx.beginPath(); ctx.ellipse(21, 1.5, 16, 3.6, 0, 0, Math.PI * 2); ctx.fill();
+        for (let pl = 0; pl < 4; pl++) {
+          const px = 11 + pl * 6.5;
+          const rustle = Math.sin(t * 4.5 + pl + sHash) * (0.7 + reach * 1.1);
+          ctx.strokeStyle = '#15803d'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.moveTo(px, 0); ctx.quadraticCurveTo(px - 2, -6, px - 4 + rustle, -9); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(px, 0); ctx.quadraticCurveTo(px + 2, -7, px + 4 + rustle, -10); ctx.stroke();
+          ctx.fillStyle = pl % 2 === 0 ? '#4ade80' : '#22c55e';
+          ctx.beginPath(); ctx.ellipse(px - 3 + rustle, -8, 3.2, 1.8, -0.4, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(px + 3 + rustle, -9, 3.2, 1.8, 0.4, 0, Math.PI * 2); ctx.fill();
+          // Tiny ripe Battir eggplant / tomato on seedling
+          ctx.fillStyle = pl % 2 === 0 ? '#7e22ce' : '#dc2626';
+          ctx.beginPath(); ctx.arc(px + rustle * 0.5, -5.5, 1.7, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Woven reed harvest basket behind/beside farmer
+        ctx.fillStyle = '#b88642'; ctx.strokeStyle = '#543818'; ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(-20, -9); ctx.lineTo(-9, -9); ctx.lineTo(-10.5, 1); ctx.lineTo(-18.5, 1); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#4ade80';
+        ctx.beginPath(); ctx.ellipse(-14.5, -9, 4.5, 2.2, 0, Math.PI, 0); ctx.fill();
+
+        // Crouching / Kneeling Villager Legs
+        ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 5.0; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-3, -11); ctx.lineTo(5, -7); ctx.lineTo(1, 0); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-4, -10); ctx.lineTo(-7, -3); ctx.lineTo(-3, 0); ctx.stroke();
+
+        // Gently Bending Torso (traditional Palestinian village dress or tunic)
+        const bendAng = 0.56 + reach * 0.16;
+        const shX = -2 + Math.sin(bendAng) * 14;
+        const shY = -11 - Math.cos(bendAng) * 14;
+        ctx.save();
+        ctx.translate(-2, -11);
+        ctx.rotate(bendAng);
+        const isWoman = sHash % 2 === 0;
+        ctx.fillStyle = isWoman ? '#1f1b24' : shirtCol;
+        ctx.strokeStyle = '#1a120b'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.roundRect(-5.5, -15, 11, 16, 3); ctx.fill(); ctx.stroke();
+        if (isWoman) {
+          // Crimson Palestinian tatreez embroidery panel
+          ctx.fillStyle = '#b91c1c'; ctx.fillRect(-2.6, -13, 5.2, 8);
+          ctx.fillStyle = '#fbbf24'; ctx.fillRect(-1.2, -11, 2.4, 1.5);
+        } else {
+          ctx.fillStyle = vestCol; ctx.fillRect(-4.5, -14, 9, 11);
+        }
+        // Head + White Embroidered Headscarf or Keffiyeh
+        ctx.fillStyle = '#d49b72'; ctx.strokeStyle = '#4a2e1a'; ctx.lineWidth = 0.85;
+        ctx.beginPath(); ctx.arc(0.8, -19.5, 4.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 0.75;
+        ctx.beginPath();
+        ctx.arc(0, -20.5, 5.3, Math.PI * 0.85, Math.PI * 2.05);
+        ctx.lineTo(4.2, -14.5); ctx.lineTo(-5.5, -13.5); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.restore();
+
+        // Picking Arms reaching between the green seedlings and the harvest basket
+        const hand1X = 14 + reach * 5;
+        const hand1Y = -7 + Math.sin(t * 5.6 + sHash) * 2.0;
+        const hand2X = reach > 0.45 ? 11 : -11;
+        const hand2Y = reach > 0.45 ? -9 : -10;
+        ctx.strokeStyle = (sHash % 2 === 0) ? '#2b2430' : shirtCol;
+        ctx.lineWidth = 3.0; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(shX, shY + 1); ctx.lineTo((shX + hand1X) * 0.5, shY + 6); ctx.lineTo(hand1X, hand1Y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(shX - 1, shY + 1); ctx.lineTo((shX + hand2X) * 0.5, shY + 5); ctx.lineTo(hand2X, hand2Y); ctx.stroke();
+        ctx.fillStyle = '#d49b72';
+        ctx.beginPath(); ctx.arc(hand1X, hand1Y, 2.0, 0, Math.PI * 2); ctx.arc(hand2X, hand2Y, 2.0, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    };
+
+    // Helper: Palestinian Olive Harvest Scene under Olive Tree
+    // (شرشف أخضر وأزرق تحت الشجرة + سلم خشبي + اثنان يجلسون على الشرشف + واحد على السلم + واحد فوق الشجرة بين الأغصان)
+    const drawOliveHarvestScene = (ctx, treeX, groundY, scale, t, seed) => {
+      ctx.save();
+      ctx.translate(treeX, groundY);
+      ctx.scale(scale, scale);
+      const sHash = Math.abs(Math.floor(seed || 1));
+
+      // 1. GREEN-AND-BLUE STRIPED HARVEST SHEET (شرشف أخضر وأزرق مفروش تحت شجرة الزيتون)
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(-60, 2);
+      ctx.quadraticCurveTo(-30, -4.5, 0, -2.8);
+      ctx.quadraticCurveTo(32, -4.5, 62, 2.5);
+      ctx.quadraticCurveTo(30, 10.5, 0, 9.2);
+      ctx.quadraticCurveTo(-32, 10.2, -60, 2);
+      ctx.closePath();
+      ctx.fillStyle = '#15803d';
+      ctx.fill();
+      ctx.clip();
+      // Alternating emerald-green & cobalt-blue woven stripes across the sheet
+      for (let st = -64; st < 68; st += 11) {
+        const isBlue = Math.abs(Math.floor(st / 11)) % 2 === 0;
+        ctx.fillStyle = isBlue ? '#1d4ed8' : '#16a34a';
+        ctx.fillRect(st, -7, 6.2, 20);
+        ctx.fillStyle = isBlue ? 'rgba(147, 197, 253, 0.35)' : 'rgba(187, 247, 208, 0.28)';
+        ctx.fillRect(st + 1, -6, 1.8, 18);
+      }
+      // Natural fabric fold shading
+      const shG = ctx.createLinearGradient(0, -5, 0, 10);
+      shG.addColorStop(0, 'rgba(255,255,255,0.16)');
+      shG.addColorStop(0.55, 'rgba(0,0,0,0.04)');
+      shG.addColorStop(1, 'rgba(15,23,42,0.28)');
+      ctx.fillStyle = shG;
+      ctx.fillRect(-64, -6, 130, 18);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(15, 23, 42, 0.45)'; ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(-60, 2); ctx.quadraticCurveTo(-30, -4.5, 0, -2.8); ctx.quadraticCurveTo(32, -4.5, 62, 2.5);
+      ctx.quadraticCurveTo(30, 10.5, 0, 9.2); ctx.quadraticCurveTo(-32, 10.2, -60, 2);
+      ctx.stroke();
+
+      // Scattered freshly picked green & black olives across the sheet
+      for (let ol = 0; ol < 22; ol++) {
+        const ox = -48 + ((ol * 29 + sHash * 13) % 96);
+        const oy = -1 + ((ol * 7 + sHash * 5) % 8);
+        ctx.fillStyle = ol % 3 === 0 ? '#1c1917' : (ol % 2 === 0 ? '#65a30d' : '#84cc16');
+        ctx.beginPath(); ctx.ellipse(ox, oy, 1.5, 1.0, 0.3, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Woven Reed Basket (سلة قش) brimming with olives in center of sheet
+      ctx.fillStyle = '#c4914a'; ctx.strokeStyle = '#5c3c18'; ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(-10, -5); ctx.lineTo(4, -5); ctx.lineTo(2.5, 5.5); ctx.lineTo(-8.5, 5.5); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#785022'; ctx.lineWidth = 0.7;
+      ctx.beginPath(); ctx.moveTo(-9.3, -1.5); ctx.lineTo(3.3, -1.5); ctx.moveTo(-8.9, 2); ctx.lineTo(2.9, 2); ctx.stroke();
+      // Mound of olives piled inside basket
+      for (let bo = 0; bo < 7; bo++) {
+        ctx.fillStyle = bo % 3 === 0 ? '#27272a' : '#65a30d';
+        ctx.beginPath(); ctx.arc(-7.5 + bo * 1.9, -5.8 - (bo % 2) * 1.3, 1.6, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // 2. WOODEN HARVEST LADDER (سلم خشبي مسنود على أغصان شجرة الزيتون)
+      const ladBotX = 40, ladBotY = 4;
+      const ladTopX = 18, ladTopY = -66;
+      const dxL = ladTopX - ladBotX, dyL = ladTopY - ladBotY;
+      ctx.strokeStyle = '#5c3416'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(ladBotX - 5, ladBotY); ctx.lineTo(ladTopX - 4.5, ladTopY);
+      ctx.moveTo(ladBotX + 5, ladBotY); ctx.lineTo(ladTopX + 4.5, ladTopY);
+      ctx.stroke();
+      ctx.strokeStyle = '#a46c36'; ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.moveTo(ladBotX - 5.4, ladBotY); ctx.lineTo(ladTopX - 4.9, ladTopY);
+      ctx.moveTo(ladBotX + 4.6, ladBotY); ctx.lineTo(ladTopX + 4.1, ladTopY);
+      ctx.stroke();
+      // 7 wooden ladder rungs
+      ctx.strokeStyle = '#7c4a21'; ctx.lineWidth = 1.9;
+      for (let r = 1; r <= 7; r++) {
+        const u = r / 8;
+        const rx = ladBotX + dxL * u;
+        const ry = ladBotY + dyL * u;
+        ctx.beginPath(); ctx.moveTo(rx - 4.8, ry); ctx.lineTo(rx + 4.8, ry); ctx.stroke();
+      }
+
+      // 3. TWO FARMERS SITTING ON THE GREEN-AND-BLUE SHEET (اثنان يجلسون على الشرشف يجمعون ويفرزون الزيتون)
+      const drawSeatedPicker = (px, py, dir, isWoman, phaseOff) => {
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.scale(dir, 1);
+        const work = Math.sin(t * 3.4 + phaseOff);
+        // Crossed seated legs on sheet
+        ctx.fillStyle = isWoman ? '#1f1b24' : '#263038';
+        ctx.beginPath(); ctx.ellipse(4, 0, 8.5, 3.2, 0.08, 0, Math.PI * 2); ctx.fill();
+        // Gently swaying torso leaning toward olives
+        const lean = 0.24 + work * 0.08;
+        ctx.save();
+        ctx.translate(0, -1);
+        ctx.rotate(lean);
+        ctx.fillStyle = isWoman ? '#1f1b24' : '#efe3cc';
+        ctx.strokeStyle = '#1f150e'; ctx.lineWidth = 0.9;
+        ctx.beginPath(); ctx.roundRect(-4.8, -14, 9.6, 14, 3); ctx.fill(); ctx.stroke();
+        if (isWoman) {
+          ctx.fillStyle = '#b91c1c'; ctx.fillRect(-2.0, -12, 4.2, 7.5);
+        } else {
+          ctx.fillStyle = '#3b2e22'; ctx.fillRect(-4.0, -13, 8.0, 10);
+        }
+        // Head + Scarf / Keffiyeh
+        ctx.fillStyle = '#d49b72';
+        ctx.beginPath(); ctx.arc(0.5, -18, 4.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.arc(0, -18.8, 4.6, Math.PI * 0.85, Math.PI * 2.08);
+        ctx.lineTo(3.6, -13.2); ctx.lineTo(-4.8, -12.6); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        if (!isWoman) {
+          ctx.strokeStyle = '#18181b'; ctx.lineWidth = 1.3;
+          ctx.beginPath(); ctx.moveTo(-3.8, -20.5); ctx.lineTo(3.8, -20.5); ctx.stroke();
+        }
+        ctx.restore();
+        // Animated gathering hands sorting olives into basket
+        const h1x = 9 + work * 3.2, h1y = -3.5 - Math.abs(work) * 2.2;
+        const h2x = 12 - work * 2.2, h2y = -1.5 - Math.max(0, -work) * 2.0;
+        ctx.strokeStyle = isWoman ? '#2a2430' : '#efe3cc'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(2, -10); ctx.lineTo(h1x, h1y); ctx.moveTo(1, -9); ctx.lineTo(h2x, h2y); ctx.stroke();
+        ctx.fillStyle = '#d49b72';
+        ctx.beginPath(); ctx.arc(h1x, h1y, 1.7, 0, Math.PI * 2); ctx.arc(h2x, h2y, 1.7, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      };
+      drawSeatedPicker(-28, 3.5, 1, true, sHash * 1.3);
+      drawSeatedPicker(15, 4.5, -1, false, sHash * 2.1 + 1.4);
+
+      // 4. ONE FARMER ON THE LADDER (واحد على السلم يقطف الزيتون من الأغصان)
+      {
+        const uLad = 0.56;
+        const lx = ladBotX + dxL * uLad;
+        const ly = ladBotY + dyL * uLad;
+        const pick = Math.sin(t * 3.8 + sHash * 1.7);
+        ctx.save();
+        ctx.translate(lx + 1, ly);
+        // Legs braced on two ladder rungs
+        ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 4.0; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(0, -10); ctx.lineTo(-4, -3); ctx.lineTo(-2, 4);
+        ctx.moveTo(1, -10); ctx.lineTo(3, -1); ctx.lineTo(2, 9);
+        ctx.stroke();
+        // Torso leaning slightly left toward the olive canopy
+        ctx.save();
+        ctx.translate(0, -10);
+        ctx.rotate(-0.18 + pick * 0.05);
+        ctx.fillStyle = '#e8dec8'; ctx.strokeStyle = '#291d12'; ctx.lineWidth = 0.85;
+        ctx.beginPath(); ctx.roundRect(-4.5, -14, 9, 14, 2.5); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#2c4232'; ctx.fillRect(-3.8, -13, 7.6, 10);
+        // Head + Keffiyeh looking up at branches
+        ctx.fillStyle = '#d49b72';
+        ctx.beginPath(); ctx.arc(-0.5, -18, 4.1, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.arc(0, -18.8, 4.5, Math.PI * 0.9, Math.PI * 2.15);
+        ctx.lineTo(4.2, -13.8); ctx.lineTo(-3.8, -14.2); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#18181b'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.moveTo(-3.6, -20.6); ctx.lineTo(3.6, -20.6); ctx.stroke();
+        ctx.restore();
+        // Both arms reaching up & left into the olive branches stripping olives!
+        const a1x = -12 + pick * 3.2, a1y = -29 + Math.cos(t * 4.2 + sHash) * 2.4;
+        const a2x = -8 - pick * 2.5, a2y = -24 + pick * 2.5;
+        ctx.strokeStyle = '#e8dec8'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-2, -21); ctx.lineTo(-7, -24); ctx.lineTo(a1x, a1y);
+        ctx.moveTo(-1, -20); ctx.lineTo(-5, -21); ctx.lineTo(a2x, a2y);
+        ctx.stroke();
+        ctx.fillStyle = '#d49b72';
+        ctx.beginPath(); ctx.arc(a1x, a1y, 1.7, 0, Math.PI * 2); ctx.arc(a2x, a2y, 1.7, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // 5. ONE FARMER PERCHED UP INSIDE THE OLIVE TREE BRANCHES (واحد فوق الشجرة بين الأغصان يقطف ويهز الأغصان)
+      {
+        const tx = -15, ty = -69;
+        const shake = Math.sin(t * 4.4 + sHash * 2.3);
+        ctx.save();
+        ctx.translate(tx, ty);
+        // Legs straddling a crooked olive bough
+        ctx.strokeStyle = '#252d36'; ctx.lineWidth = 3.8; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(0, 0); ctx.lineTo(-5, 6); ctx.lineTo(-3, 12);
+        ctx.moveTo(1, 0); ctx.lineTo(6, 5); ctx.lineTo(5, 11);
+        ctx.stroke();
+        // Torso & village vest swaying gently while harvesting
+        ctx.save();
+        ctx.rotate(0.14 + shake * 0.08);
+        ctx.fillStyle = '#dbe7f0'; ctx.strokeStyle = '#231b12'; ctx.lineWidth = 0.85;
+        ctx.beginPath(); ctx.roundRect(-4.2, -13, 8.4, 13, 2.5); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#4a3222'; ctx.fillRect(-3.6, -12, 7.2, 9.5);
+        // Head + Keffiyeh
+        ctx.fillStyle = '#d49b72';
+        ctx.beginPath(); ctx.arc(0.5, -16.8, 3.9, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.arc(0, -17.5, 4.3, Math.PI * 0.85, Math.PI * 2.08);
+        ctx.lineTo(3.5, -12.6); ctx.lineTo(-4.4, -12.4); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#18181b'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(-3.4, -19.2); ctx.lineTo(3.4, -19.2); ctx.stroke();
+        ctx.restore();
+        // Both arms animated reaching/shaking upper olive twigs
+        const h1x = 10 + shake * 3.0, h1y = -17 + Math.cos(t * 4.4 + sHash) * 2.2;
+        const h2x = -9 - shake * 2.4, h2y = -15 + shake * 2.0;
+        ctx.strokeStyle = '#dbe7f0'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(2, -10); ctx.lineTo(h1x, h1y);
+        ctx.moveTo(-2, -10); ctx.lineTo(h2x, h2y);
+        ctx.stroke();
+        ctx.fillStyle = '#d49b72';
+        ctx.beginPath(); ctx.arc(h1x, h1y, 1.6, 0, Math.PI * 2); ctx.arc(h2x, h2y, 1.6, 0, Math.PI * 2); ctx.fill();
+        // Foreground olive-leaf sprigs partially overlapping his legs so he sits authentically INSIDE the branches!
+        ctx.fillStyle = '#4f6d34';
+        for (const [lx, ly, ang] of [[-6, 4, -0.4], [-1, 6, 0.2], [5, 3, 0.5], [-8, -2, -0.7]]) {
+          ctx.beginPath(); ctx.ellipse(lx, ly, 4.2, 1.7, ang, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.fillStyle = '#8fa86e';
+        ctx.beginPath(); ctx.ellipse(-3, 5, 3.2, 1.3, -0.2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // 6. Animated Falling Olives dropping from the harvesters down onto the green-and-blue sheet!
+      for (let f = 0; f < 5; f++) {
+        const dropFrac = ((t * (0.68 + (f % 3) * 0.14) + f * 0.21 + sHash * 0.13) % 1);
+        const startX = f < 3 ? (-22 + f * 12) : (6 + (f - 3) * 10);
+        const startY = f < 3 ? -72 : -58;
+        const fy = startY + dropFrac * dropFrac * (2 - startY);
+        const fx = startX + Math.sin(dropFrac * 5 + f) * 2.5;
+        ctx.fillStyle = f % 2 === 0 ? '#65a30d' : '#1c1917';
+        ctx.beginPath(); ctx.ellipse(fx, fy, 1.4, 1.0, dropFrac * 4, 0, Math.PI * 2); ctx.fill();
+      }
+
+      ctx.restore();
+    };
+
     // Helper: Distant Modern Palestinian Jerusalem-Stone Home (منازل حديثة من الحجر القدسي)
     const drawModernBattirHouse = (x, botY, bw, bh, pitchedRoof) => {
       const y = botY - bh;
@@ -26457,8 +26905,11 @@ window.Game = window.Game || {};
         // Tier 1 (Lower Courtyard Wall, Pomegranate & Ancient Olive Orchard)
         drawFieldstoneRetainingWall(ctx, sx + 30, 558, 620, 36, 3);
         drawPomegranateTree(ctx, sx + 690, 560, 1.12);
+        drawTerraceFarmer(ctx, sx + 755, 562, 0.94, time, 'pick', 1, i * 7 + 1);
         drawCypressSilhouette(ctx, sx + 835, 558, 162);
         drawAncientOliveSunset(ctx, sx + 985, 564, 1.22);
+        drawOliveHarvestScene(ctx, sx + 985, 564, 1.22, time, i * 13 + 1);
+        drawTerraceFarmer(ctx, sx + 1090, 562, 0.92, time, 'hoe', -1, i * 11 + 6);
         drawPomegranateTree(ctx, sx + 1155, 558, 1.04);
 
       } else if (zoneIdx === 1) {
@@ -26789,7 +27240,9 @@ window.Game = window.Game || {};
         drawPureStoneSpoutPour(plX - 4, plY + 52, plX + 14, plY + 62, 12);
 
         drawPomegranateTree(ctx, sx + 945, 588, 1.1);
+        drawTerraceFarmer(ctx, sx + 1010, 590, 0.94, time, 'hoe', -1, i * 11 + 4);
         drawAncientOliveSunset(ctx, sx + 1115, 592, 1.2);
+        drawOliveHarvestScene(ctx, sx + 1115, 592, 1.2, time, i * 19 + 2);
 
       } else if (zoneIdx === 2) {
         // ---------------------------------------------------------------------
@@ -27020,113 +27473,141 @@ window.Game = window.Game || {};
         }
         ctx.restore();
 
-        // Traditional Palestinian Village Mosque with Emerald-Green Dome & Stone Minaret
-        // (مسجد القرية بقبة خضراء ومئذنة حجرية قدسية — بدلاً من البنايتين الهرميتين!)
+        // Upgraded Museum-Grade Traditional Palestinian Village Mosque with Emerald-Green Dome
+        // (مسجد القرية الفلسطيني بقبة خضراء مضلّعة ورواق مقوّس ومئذنة قدسية متقنة!)
         {
-          const mqX = sx + 740;
+          const mqX = sx + 732;
           const mqBot = 588;
-          const mqW = 192;
-          const mqH = 104;
+          const mqW = 206;
+          const mqH = 108;
           const mqTop = mqBot - mqH;
           const mqCx = mqX + mqW * 0.5;
-          const mPal = ['#e8dbc6', '#ddd0b9', '#d2c2a8', '#efe5d4', '#c8b69a'];
+          const mPal = ['#ebe0cc', '#dfd2bc', '#d3c3a9', '#f2e8d8', '#c9b79c'];
 
-          // Soft ground contact shadow
+          // Soft ground shadow & raised carved Jerusalem-stone courtyard terrace with front steps
           ctx.fillStyle = 'rgba(24, 16, 8, 0.30)';
-          ctx.beginPath(); ctx.ellipse(mqCx + 18, mqBot + 1, 128, 7, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(mqCx + 18, mqBot + 2, 138, 7.5, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#d7c8b0'; ctx.strokeStyle = '#5a4532'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.roundRect(mqX - 12, mqBot - 8, mqW + 52, 9, 2); ctx.fill(); ctx.stroke();
 
-          // 1. Slender Dressed-Stone Minaret on the Right (مئذنة حجرية قدسية بشرفة وقبة خضراء)
+          // 1. Tall Graceful Jerusalem-Stone Minaret on the Right (مئذنة قدسية بمقرنصات وشرفة وقبة خضراء)
           const mnX = mqX + mqW - 4;
-          const mnW = 30;
-          const mnTop = mqTop - 106;
-          const mnH = mqBot - mnTop;
+          const mnW = 32;
+          const mnTop = mqTop - 116;
+          const mnH = mqBot - mnTop - 6;
           const mnCx = mnX + mnW * 0.5;
           ctx.save();
           ctx.beginPath(); ctx.roundRect(mnX, mnTop, mnW, mnH, 2);
           const mnG = ctx.createLinearGradient(mnX, mnTop, mnX + mnW, mnTop);
-          mnG.addColorStop(0, '#cfc0a8'); mnG.addColorStop(0.45, '#ece2d0'); mnG.addColorStop(1, '#a8967d');
+          mnG.addColorStop(0, '#c7b8a0'); mnG.addColorStop(0.42, '#f0e6d5'); mnG.addColorStop(0.75, '#d8cab4'); mnG.addColorStop(1, '#9e8c74');
           ctx.fillStyle = mnG; ctx.fill(); ctx.clip();
-          for (let r = 0; r < Math.ceil(mnH / 12); r++) {
+          for (let r = 0; r < Math.ceil(mnH / 11); r++) {
             ctx.strokeStyle = 'rgba(72, 52, 34, 0.24)'; ctx.lineWidth = 0.8;
-            ctx.beginPath(); ctx.moveTo(mnX, mnTop + r * 12); ctx.lineTo(mnX + mnW, mnTop + r * 12); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(mnX, mnTop + r * 11); ctx.lineTo(mnX + mnW, mnTop + r * 11); ctx.stroke();
           }
+          // Decorative recessed vertical stone molding panels along minaret shaft
+          ctx.strokeStyle = 'rgba(90, 69, 50, 0.32)'; ctx.lineWidth = 1.0;
+          ctx.strokeRect(mnX + 5, mnTop + 60, mnW - 10, mnH - 70);
           ctx.restore();
-          ctx.strokeStyle = '#5a4532'; ctx.lineWidth = 1.2;
+          ctx.strokeStyle = '#54402e'; ctx.lineWidth = 1.2;
           ctx.strokeRect(mnX, mnTop, mnW, mnH);
-          // Carved stone Muezzin balcony (شرفة المؤذن)
-          const balY = mnTop + 42;
-          ctx.fillStyle = '#e5d8c2'; ctx.strokeStyle = '#5a4532'; ctx.lineWidth = 1.1;
-          ctx.beginPath(); ctx.roundRect(mnX - 7, balY, mnW + 14, 10, 2); ctx.fill(); ctx.stroke();
-          ctx.fillStyle = '#c4b39a';
-          ctx.beginPath(); ctx.roundRect(mnX - 4, balY + 10, mnW + 8, 5, 1.5); ctx.fill(); ctx.stroke();
-          // Arched lantern openings above balcony
-          ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#4a3524'; ctx.lineWidth = 0.9;
-          for (const ax of [mnCx - 6, mnCx + 6]) {
-            ctx.beginPath(); ctx.roundRect(ax - 3.2, mnTop + 16, 6.4, 16, [4, 4, 1, 1]); ctx.fill(); ctx.stroke();
+
+          // Sculpted stone muqarnas-style corbel brackets supporting the Muezzin balcony (شرفة المؤذن)
+          const balY = mnTop + 44;
+          ctx.fillStyle = '#c9b89e'; ctx.strokeStyle = '#54402e'; ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.moveTo(mnX - 7, balY + 10); ctx.lineTo(mnX + mnW + 7, balY + 10);
+          ctx.lineTo(mnX + mnW + 1, balY + 18); ctx.lineTo(mnX - 1, balY + 18);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          for (let mx0 = mnX - 4; mx0 <= mnX + mnW; mx0 += 7) {
+            ctx.fillStyle = '#efe5d4';
+            ctx.fillRect(mx0, balY + 11, 4, 5);
           }
-          // Emerald-green minaret dome cap + slender golden finial & crescent (هلال ذهبي)
-          const mdG = ctx.createRadialGradient(mnCx - 4, mnTop - 8, 2, mnCx, mnTop - 2, 18);
-          mdG.addColorStop(0, '#4ade80'); mdG.addColorStop(0.55, '#15803d'); mdG.addColorStop(1, '#064e3b');
+          // Carved stone balcony parapet with delicate pierced lattice
+          ctx.fillStyle = '#ece1ce'; ctx.strokeStyle = '#54402e'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.roundRect(mnX - 8, balY, mnW + 16, 10, 2); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#8b7359'; ctx.lineWidth = 0.9;
+          for (let rx0 = mnX - 4; rx0 < mnX + mnW + 6; rx0 += 6) {
+            ctx.beginPath(); ctx.moveTo(rx0, balY + 2); ctx.lineTo(rx0, balY + 8); ctx.stroke();
+          }
+          // Upper octagonal minaret lantern gallery with 3 glowing arched sound windows
+          ctx.fillStyle = '#e5d9c4'; ctx.strokeStyle = '#54402e'; ctx.lineWidth = 1.0;
+          ctx.fillRect(mnX + 3, mnTop + 4, mnW - 6, 40);
+          ctx.strokeRect(mnX + 3, mnTop + 4, mnW - 6, 40);
+          for (const ax of [mnCx - 7.5, mnCx, mnCx + 7.5]) {
+            ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#4a3524'; ctx.lineWidth = 0.85;
+            ctx.beginPath(); ctx.roundRect(ax - 2.6, mnTop + 14, 5.2, 18, [3, 3, 1, 1]); ctx.fill(); ctx.stroke();
+          }
+          // Ribbed emerald-green minaret dome cap + slender golden finial & crescent (هلال ذهبي)
+          const mdG = ctx.createRadialGradient(mnCx - 4, mnTop - 8, 2, mnCx, mnTop - 2, 19);
+          mdG.addColorStop(0, '#6ee7b7'); mdG.addColorStop(0.42, '#16a34a'); mdG.addColorStop(0.8, '#15803d'); mdG.addColorStop(1, '#064e3b');
           ctx.fillStyle = mdG; ctx.strokeStyle = '#052e16'; ctx.lineWidth = 1.1;
           ctx.beginPath();
-          ctx.moveTo(mnX + 2, mnTop);
-          ctx.quadraticCurveTo(mnCx - 13, mnTop - 16, mnCx, mnTop - 24);
-          ctx.quadraticCurveTo(mnCx + 13, mnTop - 16, mnX + mnW - 2, mnTop);
+          ctx.moveTo(mnX + 2, mnTop + 4);
+          ctx.quadraticCurveTo(mnCx - 14, mnTop - 16, mnCx, mnTop - 25);
+          ctx.quadraticCurveTo(mnCx + 14, mnTop - 16, mnX + mnW - 2, mnTop + 4);
           ctx.closePath(); ctx.fill(); ctx.stroke();
-          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.4;
-          ctx.beginPath(); ctx.moveTo(mnCx, mnTop - 24); ctx.lineTo(mnCx, mnTop - 34); ctx.stroke();
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.moveTo(mnCx, mnTop - 25); ctx.lineTo(mnCx, mnTop - 36); ctx.stroke();
           ctx.fillStyle = '#fde047';
-          ctx.beginPath(); ctx.arc(mnCx, mnTop - 37, 3.6, 0.3, Math.PI * 1.9); ctx.fill();
+          ctx.beginPath(); ctx.arc(mnCx, mnTop - 39, 3.8, 0.3, Math.PI * 1.9); ctx.fill();
           ctx.fillStyle = '#15803d';
-          ctx.beginPath(); ctx.arc(mnCx + 1.4, mnTop - 37.6, 2.8, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(mnCx + 1.5, mnTop - 39.6, 2.9, 0, Math.PI * 2); ctx.fill();
 
-          // 2. Ribbed Emerald-Green Main Mosque Dome (القبة الخضراء المضلّعة!)
-          const domeR = 54;
-          const domeBaseY = mqTop + 4;
-          ctx.fillStyle = '#dfd2bc'; ctx.strokeStyle = '#5a4532'; ctx.lineWidth = 1.2;
-          ctx.fillRect(mqCx - domeR - 4, domeBaseY - 14, (domeR + 4) * 2, 15);
-          ctx.strokeRect(mqCx - domeR - 4, domeBaseY - 14, (domeR + 4) * 2, 15);
-          // Small drum windows under the dome
-          ctx.fillStyle = '#fef08a';
-          for (let dw = -36; dw <= 36; dw += 18) {
-            ctx.beginPath(); ctx.roundRect(mqCx + dw - 3.5, domeBaseY - 11, 7, 9, [3.5, 3.5, 1, 1]); ctx.fill();
+          // 2. Grand Octagonal Drum & Ribbed Emerald-Green Main Mosque Dome (القبة الخضراء المضلّعة!)
+          const domeR = 58;
+          const domeBaseY = mqTop + 2;
+          // Stone drum with arched clerestory windows & carved cornice band
+          ctx.fillStyle = '#e5d9c4'; ctx.strokeStyle = '#54402e'; ctx.lineWidth = 1.2;
+          ctx.fillRect(mqCx - domeR - 4, domeBaseY - 18, (domeR + 4) * 2, 19);
+          ctx.strokeRect(mqCx - domeR - 4, domeBaseY - 18, (domeR + 4) * 2, 19);
+          ctx.fillStyle = '#efe5d4';
+          ctx.fillRect(mqCx - domeR - 7, domeBaseY - 21, (domeR + 7) * 2, 4);
+          for (let dw = -42; dw <= 42; dw += 14) {
+            ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#5c4530'; ctx.lineWidth = 0.8;
+            ctx.beginPath(); ctx.roundRect(mqCx + dw - 3.2, domeBaseY - 14, 6.4, 11, [3.2, 3.2, 1, 1]); ctx.fill(); ctx.stroke();
           }
+          // Luminous emerald-green dome with metallic specular highlight & meridian ribs
           ctx.save();
           ctx.beginPath();
-          ctx.arc(mqCx, domeBaseY - 12, domeR, Math.PI, 0);
+          ctx.arc(mqCx, domeBaseY - 18, domeR, Math.PI, 0);
           ctx.closePath();
-          const dgG = ctx.createRadialGradient(mqCx - 16, domeBaseY - 46, 5, mqCx, domeBaseY - 22, domeR + 8);
-          dgG.addColorStop(0.00, '#4ade80');
-          dgG.addColorStop(0.38, '#16a34a');
-          dgG.addColorStop(0.76, '#15803d');
-          dgG.addColorStop(1.00, '#064e3b');
+          const dgG = ctx.createRadialGradient(mqCx - 18, domeBaseY - 54, 4, mqCx, domeBaseY - 26, domeR + 10);
+          dgG.addColorStop(0.00, '#86efac');
+          dgG.addColorStop(0.28, '#22c55e');
+          dgG.addColorStop(0.65, '#15803d');
+          dgG.addColorStop(1.00, '#052e16');
           ctx.fillStyle = dgG; ctx.fill();
           ctx.clip();
-          // Graceful meridian dome ribs
-          ctx.strokeStyle = 'rgba(5, 46, 22, 0.38)'; ctx.lineWidth = 1.3;
-          for (const rx of [-36, -18, 0, 18, 36]) {
+          for (const rx of [-44, -26, -9, 9, 26, 44]) {
+            ctx.strokeStyle = 'rgba(5, 46, 22, 0.42)'; ctx.lineWidth = 1.4;
             ctx.beginPath();
-            ctx.moveTo(mqCx, domeBaseY - 12 - domeR);
-            ctx.quadraticCurveTo(mqCx + rx * 0.75, domeBaseY - 38, mqCx + rx, domeBaseY - 12);
+            ctx.moveTo(mqCx, domeBaseY - 18 - domeR);
+            ctx.quadraticCurveTo(mqCx + rx * 0.72, domeBaseY - 46, mqCx + rx, domeBaseY - 18);
+            ctx.stroke();
+            ctx.strokeStyle = 'rgba(187, 247, 208, 0.24)'; ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(mqCx + 1, domeBaseY - 18 - domeR);
+            ctx.quadraticCurveTo(mqCx + rx * 0.72 + 1.4, domeBaseY - 46, mqCx + rx + 1.4, domeBaseY - 18);
             ctx.stroke();
           }
           ctx.restore();
           ctx.strokeStyle = '#052e16'; ctx.lineWidth = 1.5;
-          ctx.beginPath(); ctx.arc(mqCx, domeBaseY - 12, domeR, Math.PI, 0); ctx.closePath(); ctx.stroke();
+          ctx.beginPath(); ctx.arc(mqCx, domeBaseY - 18, domeR, Math.PI, 0); ctx.closePath(); ctx.stroke();
           // Golden dome finial & crescent (هلال القبة الذهبي)
-          const finY = domeBaseY - 12 - domeR;
-          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
-          ctx.beginPath(); ctx.moveTo(mqCx, finY); ctx.lineTo(mqCx, finY - 14); ctx.stroke();
+          const finY = domeBaseY - 18 - domeR;
+          ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.0;
+          ctx.beginPath(); ctx.moveTo(mqCx, finY); ctx.lineTo(mqCx, finY - 16); ctx.stroke();
           ctx.fillStyle = '#fde047';
-          ctx.beginPath(); ctx.arc(mqCx, finY - 18, 5.2, 0.25, Math.PI * 1.85); ctx.fill();
+          ctx.beginPath(); ctx.arc(mqCx, finY - 20, 5.5, 0.25, Math.PI * 1.85); ctx.fill();
           ctx.fillStyle = '#3b2414';
-          ctx.beginPath(); ctx.arc(mqCx + 2.0, finY - 19, 4.0, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(mqCx + 2.1, finY - 21, 4.2, 0, Math.PI * 2); ctx.fill();
 
-          // 3. Dressed Jerusalem-Limestone Prayer Hall Body with Pointed Entrance Arch & Glowing Windows
+          // 3. Dressed Jerusalem-Limestone Prayer Hall with Carved Parapet, 3-Arch Riwaq & Stained-Glass Windows
           ctx.save();
-          ctx.beginPath(); ctx.roundRect(mqX, mqTop, mqW, mqH, [3, 3, 0, 0]);
-          ctx.fillStyle = '#e4d7c2'; ctx.fill(); ctx.clip();
-          const mRowH = 13, mBlkW = 24;
+          ctx.beginPath(); ctx.roundRect(mqX, mqTop, mqW, mqH - 7, [3, 3, 0, 0]);
+          ctx.fillStyle = '#e6dac5'; ctx.fill(); ctx.clip();
+          const mRowH = 12, mBlkW = 24;
           for (let r = 0; r < Math.ceil(mqH / mRowH); r++) {
             const ry = mqTop + r * mRowH;
             const off = (r % 2) * (mBlkW * 0.5);
@@ -27136,34 +27617,62 @@ window.Game = window.Game || {};
             }
           }
           ctx.restore();
-          ctx.strokeStyle = '#5a4532'; ctx.lineWidth = 1.4;
-          ctx.beginPath(); ctx.roundRect(mqX, mqTop, mqW, mqH, [3, 3, 0, 0]); ctx.stroke();
-          // Carved limestone cornice parapet along roof
-          ctx.fillStyle = '#efe5d4'; ctx.fillRect(mqX - 4, mqTop - 3, mqW + 8, 6);
+          ctx.strokeStyle = '#54402e'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.roundRect(mqX, mqTop, mqW, mqH - 7, [3, 3, 0, 0]); ctx.stroke();
+          // Decorative stepped stone crenellations / parapet molding along mosque roof
+          ctx.fillStyle = '#f2e8d8'; ctx.strokeStyle = '#54402e'; ctx.lineWidth = 1.0;
+          ctx.fillRect(mqX - 4, mqTop - 3, mqW + 8, 6);
           ctx.strokeRect(mqX - 4, mqTop - 3, mqW + 8, 6);
+          for (let crX = mqX + 4; crX < mqX + mqW - 8; crX += 16) {
+            ctx.fillStyle = '#ece1ce';
+            ctx.beginPath(); ctx.roundRect(crX, mqTop - 8, 9, 5, [3, 3, 0, 0]); ctx.fill(); ctx.stroke();
+          }
 
-          // Central Pointed Arch Mosque Portal (بوابة المسجد المقوّسة) + Twin Warm Glowing Arched Windows
-          const pR = 22, pSpY = mqBot - 36;
-          ctx.fillStyle = '#291b10';
+          // Central Grand Ablaq Pointed Portal (بوابة المسجد المقوّسة بالأبلق والباب الخشبي)
+          const pR = 23, pSpY = mqBot - 44;
+          ctx.fillStyle = '#291a0f';
           ctx.beginPath();
-          ctx.moveTo(mqCx - pR, mqBot); ctx.lineTo(mqCx - pR, pSpY);
-          ctx.quadraticCurveTo(mqCx - pR, pSpY - 22, mqCx, pSpY - 28);
+          ctx.moveTo(mqCx - pR, mqBot - 8); ctx.lineTo(mqCx - pR, pSpY);
+          ctx.quadraticCurveTo(mqCx - pR, pSpY - 22, mqCx, pSpY - 29);
           ctx.quadraticCurveTo(mqCx + pR, pSpY - 22, mqCx + pR, pSpY);
-          ctx.lineTo(mqCx + pR, mqBot); ctx.closePath(); ctx.fill();
-          ctx.strokeStyle = '#6b533b'; ctx.lineWidth = 1.3; ctx.stroke();
-          // Warm interior mosque glow
-          const mGlow = ctx.createRadialGradient(mqCx, mqBot - 24, 3, mqCx, mqBot - 24, 24);
-          mGlow.addColorStop(0, 'rgba(254, 240, 138, 0.72)'); mGlow.addColorStop(1, 'rgba(251, 146, 60, 0)');
-          ctx.fillStyle = mGlow; ctx.beginPath(); ctx.arc(mqCx, mqBot - 24, 24, 0, Math.PI * 2); ctx.fill();
-          for (const wx of [mqX + 34, mqX + mqW - 34]) {
-            ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#5a4532'; ctx.lineWidth = 1.2;
-            ctx.beginPath(); ctx.roundRect(wx - 12, mqTop + 26, 24, 34, [12, 12, 2, 2]); ctx.fill(); ctx.stroke();
-            ctx.strokeStyle = '#785a3a'; ctx.lineWidth = 1.0;
-            ctx.beginPath(); ctx.moveTo(wx, mqTop + 26); ctx.lineTo(wx, mqTop + 60); ctx.moveTo(wx - 12, mqTop + 44); ctx.lineTo(wx + 12, mqTop + 44); ctx.stroke();
+          ctx.lineTo(mqCx + pR, mqBot - 8); ctx.closePath(); ctx.fill();
+          // Recessed carved cedar mosque doors + warm glowing brass lantern
+          ctx.fillStyle = '#5c3318'; ctx.strokeStyle = '#2b1407'; ctx.lineWidth = 1.0;
+          ctx.fillRect(mqCx - 14, mqBot - 44, 28, 36); ctx.strokeRect(mqCx - 14, mqBot - 44, 28, 36);
+          ctx.beginPath(); ctx.moveTo(mqCx, mqBot - 44); ctx.lineTo(mqCx, mqBot - 8); ctx.stroke();
+          const mGlow = ctx.createRadialGradient(mqCx, pSpY - 6, 2, mqCx, pSpY - 6, 24);
+          mGlow.addColorStop(0, 'rgba(254, 240, 138, 0.78)'); mGlow.addColorStop(1, 'rgba(251, 146, 60, 0)');
+          ctx.fillStyle = mGlow; ctx.beginPath(); ctx.arc(mqCx, pSpY - 6, 24, 0, Math.PI * 2); ctx.fill();
+          // Alternating soft ablaq voussoirs around the central portal
+          for (let v = 0; v < 7; v++) {
+            const a0 = Math.PI + (v / 7) * Math.PI;
+            const a1 = Math.PI + ((v + 1) / 7) * Math.PI;
+            ctx.fillStyle = v % 2 === 0 ? '#c98a5b' : '#f4ead8';
+            ctx.strokeStyle = '#54402e'; ctx.lineWidth = 0.85;
+            ctx.beginPath();
+            ctx.arc(mqCx, pSpY, pR + 7, a0, a1);
+            ctx.arc(mqCx, pSpY, pR, a1, a0, true);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+          }
+          // Flanking Twin Arched Stained-Glass Mosque Windows with Geometric Mullions
+          for (const wx of [mqX + 36, mqX + mqW - 36]) {
+            const wg = ctx.createLinearGradient(wx, mqTop + 26, wx, mqTop + 68);
+            wg.addColorStop(0, '#fef9c3'); wg.addColorStop(0.55, '#fde047'); wg.addColorStop(1, '#d97706');
+            ctx.fillStyle = wg; ctx.strokeStyle = '#54402e'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.roundRect(wx - 14, mqTop + 26, 28, 42, [14, 14, 2, 2]); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#785a3a'; ctx.lineWidth = 0.95;
+            ctx.beginPath();
+            ctx.moveTo(wx, mqTop + 26); ctx.lineTo(wx, mqTop + 68);
+            ctx.moveTo(wx - 14, mqTop + 47); ctx.lineTo(wx + 14, mqTop + 47);
+            ctx.stroke();
+            ctx.beginPath(); ctx.arc(wx, mqTop + 37, 5.5, 0, Math.PI * 2); ctx.stroke();
           }
         }
-        drawPomegranateTree(ctx, sx + 668, 588, 1.08);
-        drawAncientOliveSunset(ctx, sx + 1068, 590, 1.12);
+        drawPomegranateTree(ctx, sx + 662, 588, 1.06);
+        drawTerraceFarmer(ctx, sx + 310, 488, 0.88, time, 'hoe', 1, i * 7 + 2);
+        drawTerraceFarmer(ctx, sx + 472, 540, 0.90, time, 'pick', -1, i * 9 + 5);
+        drawAncientOliveSunset(ctx, sx + 1072, 590, 1.12);
+        drawOliveHarvestScene(ctx, sx + 1072, 590, 1.12, time, i * 13 + 5);
 
       } else if (zoneIdx === 3) {
         // ---------------------------------------------------------------------
@@ -27198,6 +27707,8 @@ window.Game = window.Game || {};
 
         drawCypressSilhouette(ctx, sx + 695, 558, 165);
         drawAncientOliveSunset(ctx, sx + 855, 564, 1.24);
+        drawOliveHarvestScene(ctx, sx + 855, 564, 1.24, time, i * 11 + 3);
+        drawTerraceFarmer(ctx, sx + 962, 564, 0.94, time, 'pick', -1, i * 13 + 7);
         drawPomegranateTree(ctx, sx + 1045, 560, 1.14);
         drawCypressSilhouette(ctx, sx + 1190, 558, 148);
 
@@ -27273,6 +27784,7 @@ window.Game = window.Game || {};
         drawSunsetVillageHouse(ctx, sx + 635, 558, 186, 122, { domeR: 58, mashrabiya: true, sideW: 18, topCol: '#f7d5a8' });
         drawCypressSilhouette(ctx, sx + 868, 558, 152);
         drawPomegranateTree(ctx, sx + 1015, 560, 1.12);
+        drawTerraceFarmer(ctx, sx + 1085, 564, 0.96, time, 'hoe', 1, i * 17 + 9);
         drawAncientOliveSunset(ctx, sx + 1165, 564, 1.18);
       }
     }

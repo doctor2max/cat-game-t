@@ -7490,7 +7490,10 @@ window.Game.EnemiesExtended = (function () {
       }
     }
 
-    // 54. Palestinian Golden Cliff Scorpion (Stage 26: Battir — عقرب الصخور الجبلي الذهبي — segmented arched stinger & pincers!)
+    // 54. Palestinian Golden Cliff Scorpion (Stage 26: Battir — عقرب الصخور الجبلي الذهبي!)
+    // Museum-grade arachnid anatomy: 4 far & 4 near 3-segment legs, armored
+    // segmented tergite carapace, 5-bead arched metasoma tail with bulbous venom
+    // telson & curved obsidian stinger, plus twin articulated serrated pincers!
     if (level.battir_scorpions) {
       for (const sc of level.battir_scorpions) {
         const sx = sc.x - camX, sy = sc.y - camY;
@@ -7504,65 +7507,191 @@ window.Game.EnemiesExtended = (function () {
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
 
-        // Contact shadow
-        ctx.fillStyle = 'rgba(24, 16, 12, 0.28)';
-        ctx.beginPath(); ctx.ellipse(0, 0, 23, 3.6, 0, 0, Math.PI * 2); ctx.fill();
+        // Soft ground contact shadow
+        ctx.fillStyle = 'rgba(24, 16, 10, 0.30)';
+        ctx.beginPath(); ctx.ellipse(1, 0, 26, 4.0, 0, 0, Math.PI * 2); ctx.fill();
 
-        // 4 pairs of articulated amber walking legs
-        ctx.strokeStyle = '#b45309';
-        ctx.lineWidth = 2.2;
+        // 1. Far-side 4 jointed arachnid legs (darker shaded for 3D depth)
         for (let l = 0; l < 4; l++) {
-          const lx = -10 + l * 6;
-          const step = Math.sin(wPhase + l * 1.4) * 3.5;
+          const lx = -11 + l * 6.5;
+          const lift = Math.max(0, Math.sin(wPhase + l * 1.55 + Math.PI)) * 2.8;
+          const stride = Math.cos(wPhase + l * 1.55 + Math.PI) * 3.2;
+          const kneeX = lx - 1.5 + stride * 0.45;
+          const kneeY = -14.5 - lift * 0.4;
+          const footX = lx + 1.5 + stride;
+          const footY = -1.2 - lift;
+          ctx.strokeStyle = '#78350f';
+          ctx.lineWidth = 2.0;
           ctx.beginPath();
-          ctx.moveTo(lx, -8);
-          ctx.lineTo(lx - 2 + step * 0.5, -13);
-          ctx.lineTo(lx + step, -1);
+          ctx.moveTo(lx, -8.5);
+          ctx.lineTo(kneeX, kneeY);
+          ctx.lineTo(footX, footY);
           ctx.stroke();
         }
 
-        // Segmented golden-amber scorpion carapace
-        const scG = ctx.createLinearGradient(-14, -14, 14, -5);
-        scG.addColorStop(0, '#f59e0b');
-        scG.addColorStop(0.6, '#d97706');
-        scG.addColorStop(1, '#78350f');
+        // Far-side front pedipalp pincer (depth shadow)
+        const snap = Math.abs(Math.sin(time * 6.8 + sx * 0.015)) * (0.22 + threat * 0.42);
+        ctx.save();
+        ctx.translate(12, -10);
+        ctx.strokeStyle = '#92400e';
+        ctx.lineWidth = 2.8;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(7, -5); ctx.lineTo(13, -3.5); ctx.stroke();
+        ctx.fillStyle = '#b45309'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.ellipse(16, -5.5 - snap * 2.5, 5.2, 2.0, -0.35 - snap, 0, Math.PI * 2);
+        ctx.ellipse(16, -2.0 + snap * 2.0, 4.8, 1.8, 0.25 + snap, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+        ctx.restore();
+
+        // 2. Sculpted 5-Segment Tapered Interlocking Metasoma Tail + Venom Telson & Stinger
+        const tailCurl = threat * 0.26 + Math.sin(time * 4.8 + sx * 0.02) * 0.06;
+        let tx0 = -13.5, ty0 = -10.5;
+        const segLens = [7.0, 6.8, 6.6, 6.3, 6.0];
+        const segAngs = [-2.22, -1.68, -1.04 + tailCurl, -0.40 + tailCurl, 0.22 + tailCurl];
+        for (let s = 0; s < segAngs.length; s++) {
+          const ang = segAngs[s];
+          const len = segLens[s];
+          const nx = tx0 + Math.cos(ang) * len;
+          const ny = ty0 + Math.sin(ang) * len;
+          const mx = (tx0 + nx) * 0.5;
+          const my = (ty0 + ny) * 0.5;
+          const rx = len * 0.60;
+          const ry = 3.2 - s * 0.28;
+          ctx.save();
+          ctx.translate(mx, my);
+          ctx.rotate(ang);
+          const sgG = ctx.createLinearGradient(0, -ry, 0, ry);
+          if (s === 4) {
+            sgG.addColorStop(0, '#b45309'); sgG.addColorStop(0.55, '#78350f'); sgG.addColorStop(1, '#3b1506');
+          } else {
+            sgG.addColorStop(0, '#fde047'); sgG.addColorStop(0.42, '#f59e0b'); sgG.addColorStop(1, '#92400e');
+          }
+          ctx.fillStyle = sgG;
+          ctx.strokeStyle = '#451a03';
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          // Chitinous dorsal highlight & joint keel
+          ctx.fillStyle = 'rgba(255, 251, 235, 0.35)';
+          ctx.beginPath(); ctx.ellipse(0, -ry * 0.35, rx * 0.55, ry * 0.25, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+          tx0 = nx; ty0 = ny;
+        }
+        // Bulbous Venom Vesicle (Telson) + Razor-Sharp Curved Obsidian Stinger Barb
+        const telG = ctx.createRadialGradient(tx0 - 1, ty0 - 1, 0.6, tx0 + 1, ty0, 4.4);
+        telG.addColorStop(0, '#dc2626'); telG.addColorStop(0.55, '#7f1d1d'); telG.addColorStop(1, '#1c1917');
+        ctx.fillStyle = telG;
+        ctx.strokeStyle = '#09090b';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.ellipse(tx0 + 1.5, ty0 + 0.5, 4.0, 3.0, 0.25, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        // Curved stinger barb
+        ctx.fillStyle = '#09090b';
+        ctx.beginPath();
+        ctx.moveTo(tx0 + 4.5, ty0 - 0.8);
+        ctx.quadraticCurveTo(tx0 + 10.5, ty0 + 1.5, tx0 + 6.5, ty0 + 8.0);
+        ctx.quadraticCurveTo(tx0 + 6.8, ty0 + 3.0, tx0 + 3.5, ty0 + 2.2);
+        ctx.closePath();
+        ctx.fill();
+        if (threat > 0.15) {
+          ctx.fillStyle = '#bef264';
+          ctx.beginPath(); ctx.arc(tx0 + 6.5, ty0 + 8.2, 1.3, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // 3. Armored Segmented Mesosoma & Cephalothorax Carapace (درع العقرب المقسّم)
+        const scG = ctx.createLinearGradient(-16, -16, 16, -4);
+        scG.addColorStop(0.0, '#fcd34d');
+        scG.addColorStop(0.38, '#f59e0b');
+        scG.addColorStop(0.75, '#b45309');
+        scG.addColorStop(1.0, '#5c2408');
         ctx.fillStyle = scG;
         ctx.strokeStyle = '#451a03';
         ctx.lineWidth = 1.3;
         ctx.beginPath();
-        ctx.ellipse(0, -9, 15, 5.5, 0, 0, Math.PI * 2);
+        ctx.moveTo(-15.5, -9.5);
+        ctx.bezierCurveTo(-13, -15.5, 6, -16.0, 15.5, -10.5);
+        ctx.bezierCurveTo(16.5, -6.5, 10, -4.2, 0, -4.4);
+        ctx.bezierCurveTo(-10, -4.4, -15, -6.2, -15.5, -9.5);
+        ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Segmented overarching scorpion tail (metasoma) + dark venom telson stinger!
-        const tailCurl = threat * 0.25 + Math.sin(time * 5 + sx * 0.02) * 0.06;
-        let tx0 = -13, ty0 = -10;
-        const segAngles = [-2.2, -1.65, -1.05 + tailCurl, -0.45 + tailCurl, 0.15 + tailCurl];
-        for (let s = 0; s < segAngles.length; s++) {
-          const nx = tx0 + Math.cos(segAngles[s]) * 6.5;
-          const ny = ty0 + Math.sin(segAngles[s]) * 6.5;
-          ctx.strokeStyle = s === 4 ? '#78350f' : '#f59e0b';
-          ctx.lineWidth = 4.6 - s * 0.45;
-          ctx.beginPath(); ctx.moveTo(tx0, ty0); ctx.lineTo(nx, ny); ctx.stroke();
-          tx0 = nx; ty0 = ny;
+        // 5 Overlapping Chitinous Tergite Armor Ridges + Glossy Specular Sheen
+        ctx.strokeStyle = 'rgba(69, 26, 3, 0.65)';
+        ctx.lineWidth = 1.05;
+        for (const rx of [-9.5, -5.2, -1.0, 3.2, 7.4]) {
+          ctx.beginPath();
+          ctx.moveTo(rx, -14.2);
+          ctx.quadraticCurveTo(rx - 1.5, -9.5, rx + 0.5, -5.0);
+          ctx.stroke();
+          ctx.strokeStyle = 'rgba(254, 249, 195, 0.36)';
+          ctx.lineWidth = 0.7;
+          ctx.beginPath();
+          ctx.moveTo(rx + 1.1, -13.6);
+          ctx.quadraticCurveTo(rx - 0.3, -9.5, rx + 1.5, -5.8);
+          ctx.stroke();
+          ctx.strokeStyle = 'rgba(69, 26, 3, 0.65)';
+          ctx.lineWidth = 1.05;
         }
-        // Sharp curved dark-crimson stinger barb
-        ctx.fillStyle = '#1c1917';
+        // Gleaming tiny black median & lateral eyes on head shield + tiny chelicerae
+        ctx.fillStyle = '#09090b';
         ctx.beginPath();
-        ctx.arc(tx0 + 1, ty0, 3.2, 0, Math.PI * 2);
+        ctx.arc(10.5, -12.0, 1.3, 0, Math.PI * 2);
+        ctx.arc(13.5, -10.6, 1.0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = '#09090b'; ctx.lineWidth = 2.0;
-        ctx.beginPath(); ctx.moveTo(tx0 + 2, ty0); ctx.quadraticCurveTo(tx0 + 8, ty0 + 2, tx0 + 5, ty0 + 7); ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(10.8, -12.3, 0.45, 0, Math.PI * 2); ctx.fill();
 
-        // Twin snapping front pedipalp pincers (كلابات العقرب)
-        const snap = Math.abs(Math.sin(time * 7)) * (0.2 + threat * 0.35);
-        ctx.strokeStyle = '#d97706'; ctx.lineWidth = 3.0;
-        ctx.beginPath(); ctx.moveTo(12, -9); ctx.lineTo(20, -13); ctx.stroke();
-        ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.1;
+        // 4. Near-side 4 articulated 3-segment arachnid legs (femur -> tibia -> tarsus claw)
+        for (let l = 0; l < 4; l++) {
+          const lx = -10 + l * 6.5;
+          const lift = Math.max(0, Math.sin(wPhase + l * 1.55)) * 3.0;
+          const stride = Math.cos(wPhase + l * 1.55) * 3.6;
+          const kneeX = lx - 1.8 + stride * 0.4;
+          const kneeY = -13.5 - lift * 0.5;
+          const midX = lx + 0.5 + stride * 0.85;
+          const midY = -6.0 - lift * 0.7;
+          const footX = lx + 2.2 + stride;
+          const footY = -0.6 - lift;
+          ctx.strokeStyle = '#451a03';
+          ctx.lineWidth = 3.2;
+          ctx.beginPath(); ctx.moveTo(lx, -7.5); ctx.lineTo(kneeX, kneeY); ctx.lineTo(midX, midY); ctx.lineTo(footX, footY); ctx.stroke();
+          ctx.strokeStyle = '#f59e0b';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath(); ctx.moveTo(lx, -7.5); ctx.lineTo(kneeX, kneeY); ctx.lineTo(midX, midY); ctx.lineTo(footX, footY); ctx.stroke();
+        }
+
+        // 5. Near-side Sculpted Front Pedipalp Arm, Armored Manus & Crescent Pincers (الكلابات الأمامية)
+        ctx.save();
+        ctx.translate(12, -8.5);
+        ctx.strokeStyle = '#451a03'; ctx.lineWidth = 4.2;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(6.5, -3.2); ctx.lineTo(12.5, -1.5); ctx.stroke();
+        ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2.4;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(6.5, -3.2); ctx.lineTo(12.5, -1.5); ctx.stroke();
+        // Swollen armored manus (pincer palm)
+        const mnG = ctx.createRadialGradient(13.5, -2.5, 0.8, 14, -1.5, 4.8);
+        mnG.addColorStop(0, '#fde047'); mnG.addColorStop(0.55, '#d97706'); mnG.addColorStop(1, '#78350f');
+        ctx.fillStyle = mnG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.ellipse(14.0, -1.5, 4.4, 3.3, -0.1, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Upper & lower curved crescent pincer blades snapping!
+        ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.0;
         ctx.beginPath();
-        ctx.ellipse(23, -15 - snap * 3, 5.5, 2.2, -0.25 - snap, 0, Math.PI * 2);
-        ctx.ellipse(23, -11 + snap * 2, 5.2, 2.0, 0.25 + snap, 0, Math.PI * 2);
+        ctx.moveTo(16.5, -3.2);
+        ctx.quadraticCurveTo(22.5, -7.2 - snap * 3.5, 25.5, -2.6 - snap * 3.2);
+        ctx.quadraticCurveTo(21.2, -3.5 - snap * 1.8, 17.0, -1.5);
+        ctx.closePath();
         ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(16.5, 0.2);
+        ctx.quadraticCurveTo(22.5, 3.8 + snap * 3.0, 25.2, -0.4 + snap * 2.5);
+        ctx.quadraticCurveTo(21.0, 0.8 + snap * 1.4, 17.0, -0.8);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.restore();
 
         ctx.restore();
       }
