@@ -2467,6 +2467,19 @@ window.Game = window.Game || {};
   }
 
   function drawBackground(time) {
+    if (level && level.clearSkyOnly) {
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, LOGICAL_H);
+      skyGrad.addColorStop(0, '#38bdf8');
+      skyGrad.addColorStop(0.55, '#7dd3fc');
+      skyGrad.addColorStop(1, '#e0f2fe');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+      if (dimBackground) {
+        ctx.fillStyle = 'rgba(6, 9, 18, 0.65)';
+        ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+      }
+      return;
+    }
     const theme = level.theme;
     const bgTime = level && level.staticBackground ? 0 : time;
     if (theme === 'museum') {
@@ -2571,7 +2584,7 @@ window.Game = window.Game || {};
     const cullW = viewW || LOGICAL_W;
 
     // Atmospheric World Teasers (drawn right BEHIND wooden piers/rooftops & water for true occlusion!)
-    if (Art.drawWorldTeasers) {
+    if (Art.drawWorldTeasers && !(level && level.clearSkyOnly)) {
       Art.drawWorldTeasers(ctx, level, catCtrl ? catCtrl.cat : null, camX, camY, level && level.staticBackground ? 0 : time, cullW);
     }
 
