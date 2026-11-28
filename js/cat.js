@@ -46,6 +46,7 @@ window.Game.Cat = function (startX, startY) {
     jumpBufferTimer: 0,
     wagasaBoostTimer: 0,
     meowCooldown: 0,
+    playWithCatTimer: 0,
     animTime: 0,
     walkTime: 0,
     crouchTime: 0,
@@ -114,7 +115,7 @@ window.Game.Cat = function (startX, startY) {
       if (p.hiddenInDay && !cat.nightVision) continue;
       if (p.broken || p.nonSolid) continue;
       if (p.type === 'maya_vault_door' && (p.openAnim || 0) >= 0.78) continue;
-      if (p.type === 'wind_zone' || p.type === 'blizzard_zone' || p.type === 'thermal_updraft' || p.type === 'steam_ramen_vent' || p.type === 'pendulum_censer' || p.type === 'wagasa_ricochet' || p.type === 'tunnel_clearance' || p.type === 'track_switch_lever' || p.type === 'carnival_bell_swing' || p.type === 'canal_tide_gate' || p.type === 'venice_water_spout' || p.type === 'paris_chimney_updraft' || p.type === 'paris_bridge_crank' || p.type === 'moulin_sail_wheel' || p.type === 'morocco_fountain_geyser' || p.type === 'morocco_cedar_lever' || p.type === 'morocco_lantern_swing' || p.type === 'maya_cenote_geyser' || p.type === 'maya_jade_switch' || p.type === 'maya_vine_swing' || p.type === 'greece_sun_mirror' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk' || p.type === 'battir_madud_gate' || p.type === 'battir_roman_bath_vent') continue;
+      if (p.type === 'wind_zone' || p.type === 'blizzard_zone' || p.type === 'thermal_updraft' || p.type === 'steam_ramen_vent' || p.type === 'pendulum_censer' || p.type === 'wagasa_ricochet' || p.type === 'tunnel_clearance' || p.type === 'track_switch_lever' || p.type === 'carnival_bell_swing' || p.type === 'canal_tide_gate' || p.type === 'venice_water_spout' || p.type === 'paris_chimney_updraft' || p.type === 'paris_bridge_crank' || p.type === 'moulin_sail_wheel' || p.type === 'morocco_fountain_geyser' || p.type === 'morocco_cedar_lever' || p.type === 'morocco_lantern_swing' || p.type === 'maya_cenote_geyser' || p.type === 'maya_jade_switch' || p.type === 'maya_vine_swing' || p.type === 'greece_sun_mirror' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk' || p.type === 'battir_madud_gate' || p.type === 'battir_roman_bath_vent' || p.type === 'battir_noria_wheel' || p.type === 'istanbul_samovar_vent' || p.type === 'istanbul_hammam_valve' || p.type === 'istanbul_simit_vendor' || p.type === 'istanbul_tram_crossing' || p.type === 'istanbul_balik_grill' || p.type === 'istanbul_medusa_cistern' || p.type === 'istanbul_whirling_censer' || p.type === 'istanbul_dondurma_trick' || p.type === 'istanbul_kestane_cart' || p.type === 'swiss_cheese_wheel' || p.type === 'swiss_cuckoo_clock' || p.type === 'swiss_waterwheel_mill' || p.type === 'swiss_alphorn_gust' || p.type === 'swiss_rescue_hut' || p.type === 'swiss_fondue_cauldron' || p.type === 'swiss_avalanche_bell') continue;
       if (p.type === 'greece_light_bridge' && (p.activeTimer || 0) <= 0) continue;
       if (p.type === 'phase_platform' && p.phaseSolid === false) continue;
       if (p.type === 'jump_flip_panel' && p.flipActive === false) continue;
@@ -162,9 +163,33 @@ window.Game.Cat = function (startX, startY) {
 
     for (const p of platforms) {
       if (p.hiddenInDay && !cat.nightVision) continue;
-      if (p.broken || p.nonSolid) continue;
+      if (p.broken || (p.nonSolid && p.type !== 'swiss_waterwheel_mill' && p.type !== 'swiss_cuckoo_clock' && p.type !== 'swiss_fondue_cauldron')) continue;
       if (p.type === 'maya_vault_door' && (p.openAnim || 0) >= 0.78) continue;
-      if (p.type === 'wind_zone' || p.type === 'blizzard_zone' || p.type === 'thermal_updraft' || p.type === 'steam_ramen_vent' || p.type === 'pendulum_censer' || p.type === 'wagasa_ricochet' || p.type === 'tunnel_clearance' || p.type === 'track_switch_lever' || p.type === 'carnival_bell_swing' || p.type === 'canal_tide_gate' || p.type === 'venice_water_spout' || p.type === 'paris_chimney_updraft' || p.type === 'paris_bridge_crank' || p.type === 'morocco_fountain_geyser' || p.type === 'morocco_cedar_lever' || p.type === 'maya_cenote_geyser' || p.type === 'maya_jade_switch' || p.type === 'greece_sun_mirror' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk' || p.type === 'battir_madud_gate' || p.type === 'battir_roman_bath_vent' || p.type === 'battir_taboon_oven' || p.type === 'battir_sabr_hedge' || p.type === 'battir_flash_sluice' || p.type === 'battir_locomotive_crossing' || p.type === 'battir_beehive_swarm') continue;
+      if (p.type === 'swiss_avalanche_bell') continue;
+      if (p.type === 'wind_zone' || p.type === 'blizzard_zone' || p.type === 'thermal_updraft' || p.type === 'steam_ramen_vent' || p.type === 'pendulum_censer' || p.type === 'wagasa_ricochet' || p.type === 'tunnel_clearance' || p.type === 'track_switch_lever' || p.type === 'carnival_bell_swing' || p.type === 'canal_tide_gate' || p.type === 'venice_water_spout' || p.type === 'paris_chimney_updraft' || p.type === 'paris_bridge_crank' || p.type === 'morocco_fountain_geyser' || p.type === 'morocco_cedar_lever' || p.type === 'maya_cenote_geyser' || p.type === 'maya_jade_switch' || p.type === 'greece_sun_mirror' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk' || p.type === 'battir_madud_gate' || p.type === 'battir_roman_bath_vent' || p.type === 'battir_taboon_oven' || p.type === 'battir_sabr_hedge' || p.type === 'battir_flash_sluice' || p.type === 'battir_locomotive_crossing' || p.type === 'battir_beehive_swarm' || p.type === 'istanbul_samovar_vent' || p.type === 'istanbul_hammam_valve' || p.type === 'istanbul_simit_vendor' || p.type === 'istanbul_tram_crossing' || p.type === 'istanbul_balik_grill' || p.type === 'istanbul_medusa_cistern' || p.type === 'istanbul_whirling_censer' || p.type === 'istanbul_dondurma_trick' || p.type === 'istanbul_kestane_cart' || p.type === 'swiss_cheese_wheel' || p.type === 'swiss_alphorn_gust' || p.type === 'swiss_rescue_hut') continue;
+      if (p.type === 'istanbul_drawbridge_leaf') {
+        const bOverlapX = cat.x + 6 < p.x + p.w - 6 && cat.x + cat.w - 6 > p.x + 6;
+        if (bOverlapX) {
+          const baseY = p.baseY !== undefined ? p.baseY : p.y;
+          const openT = Math.max(0, Math.min(1, p.liftT || 0));
+          const tiltAng = openT * 0.52;
+          const halfW = p.w * 0.5;
+          const catCx = cat.x + cat.w * 0.5;
+          const distEdge = Math.max(0, Math.min(halfW, Math.min(catCx - p.x, (p.x + p.w) - catCx)));
+          // Center ship-channel gap opens when twin bascule leaves rotate past 55%
+          if (!(openT >= 0.55 && distEdge > halfW - 38)) {
+            const leafTopY = baseY - Math.sin(tiltAng) * distEdge;
+            const stickTol = !wasAirborne ? 14 : 3;
+            if (cat.vy >= 0 && prevBottom <= leafTopY + 18 && cat.y + cat.h >= leafTopY - stickTol) {
+              cat.y = leafTopY - cat.h;
+              cat.vy = 0;
+              landed = true;
+              standingPlatform = p;
+            }
+          }
+        }
+        continue;
+      }
       if (p.type === 'greece_light_bridge' && (p.activeTimer || 0) <= 0) continue;
       if (p.type === 'maya_rolling_wheel') {
         const wOverlapX = cat.x + 8 < p.x + p.w - 8 && cat.x + cat.w - 8 > p.x + 8;
@@ -181,7 +206,39 @@ window.Game.Cat = function (startX, startY) {
         }
         continue;
       }
-      if (p.type === 'moulin_sail_wheel' || p.type === 'battir_noria_wheel') {
+      if (p.type === 'swiss_fondue_cauldron') {
+        if ((p.bridgeTimer || 0) > 0) {
+          const stickTol = !wasAirborne ? 12 : 2;
+          const bw = p.bridgeW || 138;
+          const px0 = p.x + p.w * 0.5 - bw * 0.5;
+          const py0 = p.y + p.h - 108;
+          const fOverlapX = cat.x + 4 < px0 + bw && cat.x + cat.w - 4 > px0;
+          if (fOverlapX && cat.vy >= 0 && prevBottom <= py0 + 18 && cat.y + cat.h >= py0 - stickTol) {
+            cat.y = py0 - cat.h;
+            cat.vy = 0;
+            landed = true;
+            standingPlatform = p;
+          }
+        }
+        continue;
+      }
+      if (p.type === 'swiss_cuckoo_clock') {
+        if ((p.cuckooOut || 0) >= 0.45) {
+          const stickTol = !wasAirborne ? 12 : 2;
+          const px0 = p.x + p.w * 0.5 - 42;
+          const pw0 = 84;
+          const py0 = p.y - 29;
+          const cOverlapX = cat.x + 4 < px0 + pw0 && cat.x + cat.w - 4 > px0;
+          if (cOverlapX && cat.vy >= 0 && prevBottom <= py0 + 18 && cat.y + cat.h >= py0 - stickTol) {
+            cat.y = py0 - cat.h;
+            cat.vy = 0;
+            landed = true;
+            standingPlatform = p;
+          }
+        }
+        continue;
+      }
+      if (p.type === 'moulin_sail_wheel' || p.type === 'battir_noria_wheel' || p.type === 'swiss_waterwheel_mill') {
         if (p.blades) {
           const stickTol = !wasAirborne ? 12 : 2;
           for (let bi = 0; bi < p.blades.length; bi++) {
@@ -230,15 +287,15 @@ window.Game.Cat = function (startX, startY) {
         const stickTol = !wasAirborne ? 6 : 0;
         if (cat.vy >= 0 && prevBottom <= effY + 14 && cat.y + cat.h >= effY - stickTol) {
           cat.y = effY - cat.h;
-          if (p.bouncy || p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy' || p.type === 'istanbul_bazaar_awning') {
+      if (p.bouncy || p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy' || p.type === 'istanbul_bazaar_awning' || p.type === 'swiss_hay_bounce' || p.type === 'airport_suitcase_bounce') {
             const mult = (p.type === 'circus_trampoline' || p.type === 'maya_bounce_drum') ? 1.44 : (p.type === 'paris_awning_spring' || p.type === 'souk_carpet_bounce') ? 1.42 : p.type === 'bamboo_spring' ? 1.40 : p.type === 'oasis_palm_bounce' ? 1.38 : p.type === 'flower_bounce' ? 1.36 : p.type === 'ice_bounce' ? 1.34 : 1.28;
-            cat.vy = (p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy' || p.type === 'istanbul_bazaar_awning') ? (p.bounceVy || -780) : (-cat.physics.jumpForce * mult);
+            cat.vy = (p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy' || p.type === 'istanbul_bazaar_awning' || p.type === 'swiss_hay_bounce' || p.type === 'airport_suitcase_bounce') ? (p.bounceVy || -780) : (-cat.physics.jumpForce * mult);
             cat.scaleX = 0.94;
             cat.scaleY = 1.07;
             p.bounceAnim = 1;
             Audio.playJump();
-            if (p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy' || p.type === 'istanbul_bazaar_awning') {
-              Particles.spawnDust(cat.x + cat.w * 0.5, cat.y + cat.h, 12, p.type === 'istanbul_bazaar_awning' ? '#f59e0b' : (p.type === 'battir_fig_canopy' ? '#22c55e' : '#84cc16'));
+            if (p.type === 'battir_olive_bough' || p.type === 'battir_fig_canopy' || p.type === 'istanbul_bazaar_awning' || p.type === 'swiss_hay_bounce' || p.type === 'airport_suitcase_bounce') {
+              Particles.spawnDust(cat.x + cat.w * 0.5, cat.y + cat.h, 12, p.type === 'airport_suitcase_bounce' ? '#fbbf24' : p.type === 'swiss_hay_bounce' ? '#fde047' : p.type === 'istanbul_bazaar_awning' ? '#f59e0b' : (p.type === 'battir_fig_canopy' ? '#22c55e' : '#84cc16'));
             }
             if (p.type === 'flower_bounce') {
               // Firm, poised botanical cushion dip (sturdy, no wild shaking!) & lush nectar burst
@@ -345,6 +402,12 @@ window.Game.Cat = function (startX, startY) {
     if (cat.respawnLockTimer > 0) cat.respawnLockTimer = Math.max(0, cat.respawnLockTimer - dt);
     if (cat.landTimer > 0) cat.landTimer = Math.max(0, cat.landTimer - dt);
     if (cat.meowCooldown > 0) cat.meowCooldown = Math.max(0, cat.meowCooldown - dt);
+    if (cat.playWithCatTimer > 0) {
+      cat.playWithCatTimer = Math.max(0, cat.playWithCatTimer - dt);
+      if (cat.playWithCatTimer < 2.05 && (input.left || input.right || input.jumpPressed || !cat.onGround)) {
+        cat.playWithCatTimer = 0;
+      }
+    }
 
     // Shield automatic recharge
     if (cat.shieldEnabled && !cat.shieldActive) {
@@ -473,7 +536,7 @@ window.Game.Cat = function (startX, startY) {
     }
 
     let moveDir = 0;
-    if (!lockedByRespawn) {
+    if (!lockedByRespawn && !(cat.playWithCatTimer > 0 && cat.onGround)) {
       if (input.left) moveDir -= 1;
       if (input.right) moveDir += 1;
     }
@@ -1067,14 +1130,14 @@ window.Game.Cat = function (startX, startY) {
           cat.onGround = false;
           cat.coyoteTimer = Math.max(cat.coyoteTimer || 0, 0.14);
         }
-      } else if (p.type === 'moulin_sail_wheel' || p.type === 'battir_noria_wheel') {
-        const r = p.radius || (p.type === 'battir_noria_wheel' ? 108 : 130);
+      } else if (p.type === 'moulin_sail_wheel' || p.type === 'battir_noria_wheel' || p.type === 'swiss_waterwheel_mill') {
+        const r = p.radius || (p.type === 'swiss_waterwheel_mill' ? 114 : p.type === 'battir_noria_wheel' ? 108 : 130);
         if (p.wheelAngle === undefined) p.wheelAngle = p.phase || 0;
         p.wheelAngle += (p.rotSpeed || 0.76) * dt;
         const ang0 = p.wheelAngle;
         if (!p.blades) p.blades = [{}, {}, {}, {}];
-        const orbitR = p.type === 'battir_noria_wheel' ? (r * 0.88) : (r * 0.76);
-        const bw = p.type === 'battir_noria_wheel' ? 86 : 78;
+        const orbitR = (p.type === 'battir_noria_wheel' || p.type === 'swiss_waterwheel_mill') ? (r * 0.88) : (r * 0.76);
+        const bw = (p.type === 'battir_noria_wheel' || p.type === 'swiss_waterwheel_mill') ? 86 : 78;
         for (let bi = 0; bi < 4; bi++) {
           const b = p.blades[bi];
           const prevBx = b.x !== undefined ? b.x : p.x;
@@ -1087,6 +1150,7 @@ window.Game.Cat = function (startX, startY) {
           if (p === standing && p.standingBladeIdx === bi) {
             cat.x += (b.x - prevBx);
             cat.y = b.y - cat.h;
+            cat.coyoteTimer = Math.max(cat.coyoteTimer || 0, 0.14);
           }
         }
       } else if (p.type === 'paris_chimney_updraft') {
@@ -1568,7 +1632,8 @@ window.Game.Cat = function (startX, startY) {
             if (p !== standing && !catAboveBasket && p.holdTimer <= 0) p.riding = false;
           }
         } else if (p.zipT > 0 && !catAboveBasket) {
-          p.zipT = Math.max(0, p.zipT - rate * 0.72 * dt);
+          const nearStart = Math.abs((cat.x + cat.w * 0.5) - (p.startX + p.w * 0.5)) < 290;
+          p.zipT = Math.max(0, p.zipT - rate * (nearStart ? 1.75 : 0.85) * dt);
         }
         const ease = p.zipT * p.zipT * (3 - 2 * p.zipT);
         p.x = p.startX + (p.endX - p.startX) * ease;
@@ -1577,6 +1642,7 @@ window.Game.Cat = function (startX, startY) {
         if (p === standing) {
           cat.x += (p.x - prevX);
           cat.y = p.y - cat.h;
+          cat.coyoteTimer = Math.max(cat.coyoteTimer || 0, 0.14);
         } else if (Math.abs(p.y - prevY) > 0.01 && cat.x + cat.w > p.x && cat.x < p.x + p.w && Math.abs((cat.y + cat.h) - p.y) < 10) {
           cat.y = p.y - cat.h;
         }
@@ -1593,6 +1659,7 @@ window.Game.Cat = function (startX, startY) {
         p.y = p.restY - (p.liftHeight || 120) * ease;
         if (p === standing) {
           cat.y = p.y - cat.h;
+          cat.coyoteTimer = Math.max(cat.coyoteTimer || 0, 0.14);
         }
       } else if (p.type === 'battir_hosh_arch_swing') {
         if (p.anchorX === undefined) p.anchorX = p.x + p.w * 0.5;
@@ -1626,6 +1693,137 @@ window.Game.Cat = function (startX, startY) {
           cat.x += dx;
           cat.y = p.y - cat.h;
         }
+      } else if (p.type === 'istanbul_mosaic_chandelier') {
+        // Swinging Grand Bazaar Mosaic Chandelier Pendulum (physical momentum transfer!)
+        if (p.anchorX === undefined) p.anchorX = p.x + p.w * 0.5;
+        if (p.anchorY === undefined) p.anchorY = p.y - (p.chainLen || 165);
+        const len = p.chainLen || 165;
+        const prevX = p.x;
+        const ang = Math.sin(cat.animTime * (p.swingSpeed || 1.45) + (p.phase || 0)) * (p.swingAmp || 0.48);
+        p.swingAngle = ang;
+        p.x = p.anchorX + Math.sin(ang) * len - p.w * 0.5;
+        p.y = p.anchorY + Math.cos(ang) * len;
+        const dx = p.x - prevX;
+        if (p === standing) {
+          cat.x += dx;
+          cat.y = p.y - cat.h;
+        }
+      } else if (p.type === 'istanbul_drawbridge_leaf') {
+        // Galata Bascule Drawbridge Leaf (rhythmic maritime signal: flat green -> amber warning -> raised sky-deck!)
+        if (p.baseY === undefined) p.baseY = p.y;
+        if (p.holdTimer > 0) p.holdTimer = Math.max(0, p.holdTimer - dt);
+        const cyc = (cat.animTime + (p.phase || 0)) % 7.2;
+        let targetT = 0;
+        if (p.holdTimer > 0) {
+          targetT = p.holdRaised ? 1 : 0;
+          p.bridgeWarn = false;
+          p.bridgeRaised = !!p.holdRaised;
+        } else if (cyc < 2.6) {
+          targetT = 0; p.bridgeWarn = false; p.bridgeRaised = false;
+        } else if (cyc < 3.4) {
+          targetT = 0; p.bridgeWarn = true; p.bridgeRaised = false;
+        } else if (cyc < 6.2) {
+          targetT = 1; p.bridgeWarn = false; p.bridgeRaised = true;
+        } else {
+          targetT = 0; p.bridgeWarn = true; p.bridgeRaised = false;
+        }
+        p.liftT = (p.liftT || 0) + (targetT - (p.liftT || 0)) * Math.min(1, dt * 2.6);
+        if (p === standing) {
+          const openT = Math.max(0, Math.min(1, p.liftT || 0));
+          const tiltAng = openT * 0.52;
+          const halfW = p.w * 0.5;
+          const catCx = cat.x + cat.w * 0.5;
+          const distEdge = Math.max(0, Math.min(halfW, Math.min(catCx - p.x, (p.x + p.w) - catCx)));
+          cat.y = p.baseY - Math.sin(tiltAng) * distEdge - cat.h;
+        }
+      } else if (p.type === 'istanbul_hammam_valve') {
+        // Bidirectional Ottoman Hammam Brass Steam Valve (walk-through or Meow toggles ON/OFF with cooldown!)
+        if (p.cooldown > 0) p.cooldown = Math.max(0, p.cooldown - dt);
+        const targetRot = p.active ? Math.PI * 1.5 : 0;
+        p.wheelRot = (p.wheelRot || 0) + (targetRot - (p.wheelRot || 0)) * Math.min(1, dt * 6);
+        const vCx = p.x + p.w * 0.5, vCy = p.y + p.h * 0.5;
+        const catCx = cat.x + cat.w * 0.5, catCy = cat.y + cat.h * 0.5;
+        if (p.cooldown <= 0 && Math.abs(catCx - vCx) < 34 && Math.abs(catCy - vCy) < 42) {
+          p.active = !p.active;
+          p.cooldown = 1.1;
+          if (Audio.playSteamHiss) Audio.playSteamHiss();
+          else if (Audio.playBridgeCrank) Audio.playBridgeCrank();
+          Particles.spawnDust(vCx, p.y + 18, 10, p.active ? '#38bdf8' : '#fbbf24');
+          const isEn = window.Game.I18n && window.Game.I18n.isEn();
+          Particles.spawnPopup(vCx, p.y - 12, p.active ? (isEn ? '♨️ Hammam Lift UP!' : '♨️ صعود مصعد الحمام!') : (isEn ? '⚙ Hammam Lift DOWN' : '⚙ نزول مصعد الحمام'), p.active ? '#38bdf8' : '#fbbf24');
+        }
+      } else if (p.type === 'istanbul_hammam_lift') {
+        // Pressurized Carved-Marble Ottoman Hammam Lift controlled by matching valveId
+        if (p.baseY === undefined) p.baseY = p.y;
+        let isOn = false;
+        for (const vp of level.platforms) {
+          if (vp.type === 'istanbul_hammam_valve' && vp.valveId === p.valveId) {
+            isOn = !!vp.active;
+            break;
+          }
+        }
+        p.liftActive = isOn;
+        const targetT = isOn ? 1 : 0;
+        p.liftT = (p.liftT || 0) + (targetT - (p.liftT || 0)) * Math.min(1, dt * 2.2);
+        p.y = p.baseY - (p.liftH || 180) * p.liftT;
+        if (p === standing) {
+          cat.y = p.y - cat.h;
+        }
+      } else if (p.type === 'istanbul_fishing_float') {
+        // Galata Bridge Angler Reeling Giant Cork Float (bobbing on Bosphorus -> rhythmic upward reel!)
+        if (p.baseY === undefined) p.baseY = p.y;
+        const cyc = (cat.animTime + (p.phase || 0)) % 4.6;
+        let targetY = p.baseY + Math.sin(cat.animTime * 3.8 + (p.phase || 0)) * 4;
+        if (cyc >= 1.6 && cyc < 3.6) {
+          const u = Math.sin(((cyc - 1.6) / 2.0) * Math.PI);
+          targetY = p.baseY - (p.liftH || 128) * u;
+        }
+        p.y = p.y + (targetY - p.y) * Math.min(1, dt * 6.5);
+        if (p === standing) {
+          cat.y = p.y - cat.h;
+        }
+      } else if (p.type === 'istanbul_dondurma_trick') {
+        // Interactive Maraş Dondurma Trickster Cart: charmed stretchy spring cushion OR sweeping brass paddle!
+        if (p.charmedTimer > 0) {
+          p.charmedTimer = Math.max(0, p.charmedTimer - dt);
+          const sCx = p.x + p.w * 0.5;
+          const catCx = cat.x + cat.w * 0.5;
+          if (Math.abs(catCx - sCx) < 52 && cat.vy >= -40 && cat.y + cat.h >= p.y + 18 && cat.y + cat.h <= p.y + 66) {
+            cat.vy = -850;
+            cat.onGround = false;
+            if (Audio.playJump) Audio.playJump();
+            Particles.spawnDust(sCx, p.y + 34, 14, '#f9a8d4');
+            Particles.spawnDust(sCx, p.y + 34, 8, '#86efac');
+            Particles.spawnPopup(sCx, p.y + 6, '🍦 BOING!', '#fef08a');
+          }
+        }
+      } else if (p.type === 'istanbul_floating_pontoon') {
+        // Buoyant Bosphorus Cedar Dock Pontoon: bobs on water, dips & tilts smoothly under Mashmasha's weight!
+        const waveBob = Math.sin(cat.animTime * 2.6 + (p.phase || 0)) * 3.5;
+        const targetSink = p === standing ? 18 + waveBob : waveBob;
+        p.sinkOffset = (p.sinkOffset || 0) + (targetSink - (p.sinkOffset || 0)) * Math.min(1, dt * (p === standing ? 7.5 : 5.0));
+        let targetTilt = Math.cos(cat.animTime * 2.2 + (p.phase || 0)) * 0.025;
+        if (p === standing) {
+          const off = Math.max(-1, Math.min(1, ((cat.x + cat.w * 0.5) - (p.x + p.w * 0.5)) / (p.w * 0.5)));
+          targetTilt = off * 0.14;
+          cat.vx += Math.sin(p.pontoonTilt || 0) * 165 * dt;
+          cat.y = p.y + p.sinkOffset - cat.h;
+        }
+        p.pontoonTilt = (p.pontoonTilt || 0) + (targetTilt - (p.pontoonTilt || 0)) * Math.min(1, dt * 6.5);
+      } else if (p.type === 'istanbul_tulip_fountain') {
+        // Carved Marmara-Marble Sultanahmet Tulip Fountain whose pressurized water jet lifts a gilded lotus disc!
+        if (p.baseY === undefined) p.baseY = p.y;
+        const cyc = (cat.animTime + (p.phase || 0)) % 4.8;
+        let jetU = 0;
+        if (cyc >= 1.1 && cyc < 3.9) {
+          jetU = Math.sin(((cyc - 1.1) / 2.8) * Math.PI);
+        }
+        p.jetRatio = jetU;
+        const targetY = p.baseY - (p.liftH || 145) * jetU;
+        p.y = p.y + (targetY - p.y) * Math.min(1, dt * 7.5);
+        if (p === standing) {
+          cat.y = p.y - cat.h;
+        }
       } else if (p.type === 'istanbul_samovar_vent') {
         if (p.boostTimer > 0) p.boostTimer = Math.max(0, p.boostTimer - dt);
         const cyc = (cat.animTime + (p.phase || 0)) % 3.4;
@@ -1639,6 +1837,44 @@ window.Game.Cat = function (startX, startY) {
             const lift = p.boostTimer > 0 ? -570 : -470;
             cat.vy = Math.max(lift, Math.min(cat.vy, -360) - 960 * dt);
             cat.onGround = false;
+          }
+        }
+      } else if (p.type === 'swiss_cable_car' || p.type === 'swiss_funicular_car' || p.type === 'airport_baggage_shuttle' || p.type === 'airport_cargo_scissor_lift') {
+        if (p.startX === undefined) p.startX = p.x;
+        if (p.startY === undefined) p.startY = p.y;
+        if (p.endX === undefined) p.endX = p.startX + 420;
+        if (p.endY === undefined) p.endY = p.startY;
+        const prevX = p.x;
+        const span = Math.max(80, Math.hypot(p.endX - p.startX, p.endY - p.startY));
+        const rawSpd = p.speed || 0.45;
+        const omega = rawSpd > 5 ? ((rawSpd * 1.45) / span) : rawSpd;
+        const u = 0.5 - 0.5 * Math.cos(cat.animTime * omega + (p.phase || 0));
+        p.x = p.startX + (p.endX - p.startX) * u;
+        p.y = p.startY + (p.endY - p.startY) * u;
+        p.moveDir = p.x >= prevX ? 1 : -1;
+        if (p === standing) {
+          cat.x += (p.x - prevX);
+          cat.y = p.y - cat.h;
+        }
+      } else if (p.type === 'airport_conveyor_belt') {
+        if (p === standing) {
+          cat.x += (p.beltDir || 1) * (p.beltSpeed || 95) * dt;
+        }
+      } else if (p.type === 'swiss_alphorn_gust') {
+        if (p.boostTimer > 0) p.boostTimer = Math.max(0, p.boostTimer - dt);
+        const cyc = (cat.animTime + (p.phase || 0)) % 3.8;
+        const active = (p.boostTimer > 0) || (cyc >= 0.7 && cyc <= 3.05);
+        p.hornActive = active;
+        p.hornWarn = !active && cyc >= 0.25 && cyc < 0.7;
+        if (active) {
+          const cx0 = p.x + p.w * 0.5;
+          const catCx = cat.x + cat.w * 0.5;
+          if (Math.abs(catCx - cx0) < 52 && cat.y + cat.h <= p.y + p.h + 12 && cat.y + cat.h >= p.y - 255) {
+            const lift = p.boostTimer > 0 ? -590 : -495;
+            cat.vy = Math.max(lift, Math.min(cat.vy, -370) - 980 * dt);
+            cat.onGround = false;
+            cat.coyoteTimer = Math.max(cat.coyoteTimer || 0, 0.14);
+            if (Math.random() < dt * 16) Particles.spawnTrailDot(cat.x + cat.w * 0.5, cat.y + cat.h, '#fde047');
           }
         }
       }

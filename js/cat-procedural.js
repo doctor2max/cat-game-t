@@ -1979,6 +1979,45 @@ window.Game.ProceduralCat = (function () {
       };
     }
 
+    // Affectionate Sit-and-Play pose when Mashmasha meows & plays paw-to-paw with a friendly cat!
+    if (!isHurt && !isAir && (cat.playWithCatTimer || 0) > 0) {
+      const playWave = Math.sin(t * 10.5);
+      const playCos = Math.cos(t * 10.5);
+      return {
+        crouchBlend: 0,
+        crouchStepL: 0,
+        crouchStepR: 0,
+        bodyDx: 10,
+        bodyDy: 34 + Math.sin(t * 5.2) * 2.5,
+        torsoAng: 0.40 + Math.sin(t * 5.2) * 0.03,
+        torsoSx: 0.96,
+        torsoSy: 1.03,
+        headDx: -4 + playCos * 4,
+        headDy: -8 + Math.sin(t * 5.2) * 4,
+        headAng: -0.34 + Math.sin(t * 7.2) * 0.08,
+        headScale: 1.02,
+        tailDx: 4,
+        tailDy: 6,
+        tailScale: 1,
+        tailAng: -0.22 + Math.sin(t * 6.8) * 0.28,
+        bellAng: -0.18 + playWave * 0.16,
+        nfU: 0.72 + playWave * 0.36,
+        nfL: -0.46 + playCos * 0.28,
+        ffU: -0.36,
+        ffL: -0.06,
+        nhU: 0.46,
+        nhL: -0.74,
+        fhU: 0.38,
+        fhL: -0.66,
+        wingFlap: Math.sin(t * 8.0) * 0.16,
+        wingFold: 0.3,
+        wingSpread: 1.02,
+        scarfLift: 6 + playWave * 6,
+        eyeSy: 0.18,
+        isHurt: false,
+      };
+    }
+
     if (isCrouch) {
       const sneaking = speed > 14;
       const crouchSpeed = clamp(speed / 170, 0, 1);
@@ -2617,6 +2656,48 @@ window.Game.ProceduralCat = (function () {
         ctx.beginPath(); ctx.moveTo(tx + s * 2.8, ty); ctx.quadraticCurveTo(tx + s * 5 + sway * 0.5, ty + 24, tx + s * 7 + sway, ty + 46); ctx.stroke();
       }
       ctx.restore();
+    } else if (catState.swissOutfit) {
+      // Authentic Swiss Alpine Forest-Green Wool Felt Hat with Braided Red-Gold Cord, White Edelweiss Blossom & Pheasant Feather!
+      const bagOn = !!catState.shieldActive;
+      const t = catState.animTime || 0;
+      const cx = MODEL.sockets.crown[0] + (bagOn ? 20 : 12);
+      const cy = bagOn ? -12 : (MODEL.sockets.crown[1] + 2);
+      const fSway = Math.sin(t * 6.5) * 0.08;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(bagOn ? -0.04 : -0.14);
+      ctx.scale(1.22, 1.22);
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.save();
+      ctx.translate(46, -16); ctx.rotate(0.32 + fSway);
+      const fpG = ctx.createLinearGradient(0, 0, 18, -80);
+      fpG.addColorStop(0, '#92400e'); fpG.addColorStop(0.55, '#d97706'); fpG.addColorStop(1, '#fef3c7');
+      ctx.fillStyle = fpG; ctx.strokeStyle = pal.outline; ctx.lineWidth = 5.5;
+      ctx.beginPath(); ctx.moveTo(0, 8); ctx.bezierCurveTo(22, -18, 28, -56, 10, -86); ctx.bezierCurveTo(-6, -56, -8, -20, 0, 8); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      const brG = ctx.createLinearGradient(-92, 0, 92, 22);
+      brG.addColorStop(0, '#14532d'); brG.addColorStop(0.5, '#166534'); brG.addColorStop(1, '#052e16');
+      ctx.fillStyle = brG; ctx.strokeStyle = pal.outline; ctx.lineWidth = 7.8;
+      ctx.beginPath(); ctx.ellipse(0, 8, 92, 22, -0.04, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      const crG = ctx.createLinearGradient(-56, -82, 58, 12);
+      crG.addColorStop(0, '#22c55e'); crG.addColorStop(0.32, '#15803d'); crG.addColorStop(0.75, '#14532d'); crG.addColorStop(1, '#052e16');
+      ctx.fillStyle = crG; ctx.strokeStyle = pal.outline; ctx.lineWidth = 7.8;
+      ctx.beginPath();
+      ctx.moveTo(-58, 6); ctx.quadraticCurveTo(-56, -54, -22, -78);
+      ctx.quadraticCurveTo(0, -64, 24, -76); ctx.quadraticCurveTo(56, -52, 58, 6);
+      ctx.quadraticCurveTo(0, 20, -58, 6); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 3.8;
+      ctx.beginPath(); ctx.moveTo(-56, -12); ctx.quadraticCurveTo(0, 2, 56, -12); ctx.lineTo(58, 4); ctx.quadraticCurveTo(0, 18, -58, 4); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.save(); ctx.translate(-22, -8);
+      ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2.2;
+      for (let p = 0; p < 7; p++) {
+        const a = (p / 7) * Math.PI * 2;
+        ctx.beginPath(); ctx.ellipse(Math.cos(a) * 11, Math.sin(a) * 11, 7.5, 4.0, a, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      ctx.fillStyle = '#facc15'; ctx.strokeStyle = '#a16207'; ctx.lineWidth = 2.0;
+      ctx.beginPath(); ctx.arc(0, 0, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      ctx.restore();
     } else if (skin === 'crown') {
       drawCrownOutfit(ctx, catState, pal);
     } else if (skin === 'cyber') {
@@ -2868,6 +2949,31 @@ window.Game.ProceduralCat = (function () {
       ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(372, 454, 9.5, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(372, 454, 6.0, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.arc(372, 454, 3.0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    } else if (catState.swissOutfit) {
+      // Cozy Red-and-White Swiss Alpine Wool Scarf with Swiss Cross Emblem & Brass Mini Cowbell!
+      const t = catState.animTime || 0;
+      const flutter = Math.sin(t * 7.2) * 14;
+      ctx.save();
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.fillStyle = '#dc2626'; ctx.strokeStyle = pal.outline; ctx.lineWidth = 8.0;
+      ctx.beginPath();
+      ctx.moveTo(436, 382); ctx.quadraticCurveTo(498, 394 + flutter * 0.4, 558, 412 + flutter);
+      ctx.lineTo(528, 446 + flutter * 0.8); ctx.quadraticCurveTo(478, 430 + flutter * 0.3, 424, 412);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 5.5;
+      ctx.beginPath(); ctx.moveTo(492, 398 + flutter * 0.45); ctx.lineTo(480, 434 + flutter * 0.42); ctx.stroke();
+      const swG = ctx.createLinearGradient(286, 388, 460, 454);
+      swG.addColorStop(0, '#ef4444'); swG.addColorStop(0.5, '#dc2626'); swG.addColorStop(1, '#991b1b');
+      ctx.fillStyle = swG; ctx.strokeStyle = pal.outline; ctx.lineWidth = 8.0;
+      ctx.beginPath();
+      ctx.moveTo(286, 404); ctx.quadraticCurveTo(372, 438, 456, 376);
+      ctx.quadraticCurveTo(468, 402, 454, 424); ctx.quadraticCurveTo(372, 480, 284, 444);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(365, 434, 14, 24); ctx.fillRect(360, 439, 24, 14);
+      ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 4.2;
+      ctx.beginPath(); ctx.moveTo(362, 462); ctx.lineTo(382, 462); ctx.lineTo(386, 478); ctx.lineTo(358, 478); ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.restore();
     } else if (skin === 'scarf') {
       drawScarfCollarWrap(ctx, pal);

@@ -86,19 +86,29 @@ window.Game.Audio = (function () {
   const htmlPoolIdx = {};
   let audioUnlocked = false;
 
-  // 1. Pre-create a 3-slot reusable HTMLAudio pool per sample (never cloneNode()!)
+  // 1. Lightweight 1-slot lazy HTMLAudio fallback per sample (preload='none' — zero duplicate RAM when Web Audio is active!)
   Object.keys(SAMPLE_URLS).forEach((key) => {
     const url = SAMPLE_URLS[key];
-    const pool = [];
-    for (let i = 0; i < 3; i++) {
-      const a = new Audio(url);
-      a.preload = 'auto';
-      a.playsInline = true;
-      pool.push(a);
-    }
-    htmlPools[key] = pool;
+    const a = new Audio(url);
+    a.preload = 'none';
+    a.playsInline = true;
+    htmlPools[key] = [a];
     htmlPoolIdx[key] = 0;
   });
+
+  function releaseDuplicateMediaForKey(key) {
+    delete rawBuffers[key];
+    if (htmlPools[key]) {
+      htmlPools[key].forEach((clip) => {
+        try {
+          clip.pause();
+          clip.removeAttribute('src');
+          if (typeof clip.load === 'function') clip.load();
+        } catch (e) {}
+      });
+      delete htmlPools[key];
+    }
+  }
 
   // 2. Immediately fetch raw WAV bytes into memory for zero-latency Web Audio decoding
   function preloadSampleBytes(key) {
@@ -108,6 +118,7 @@ window.Game.Audio = (function () {
       .then((res) => (res.ok ? res.arrayBuffer() : null))
       .then((buf) => {
         if (!buf) return;
+        if (decodedBuffers[key]) return;
         rawBuffers[key] = buf;
         if (ctx) decodeSampleKey(key);
       })
@@ -118,26 +129,23 @@ window.Game.Audio = (function () {
     if (!ctx || decodedBuffers[key] || decodingKeys[key] || !rawBuffers[key]) return;
     decodingKeys[key] = true;
     try {
-      const copy = rawBuffers[key].slice(0);
+      const bufToDecode = rawBuffers[key];
+      const onDecoded = (audioBuf) => {
+        decodedBuffers[key] = audioBuf;
+        decodingKeys[key] = false;
+        releaseDuplicateMediaForKey(key);
+      };
       const result = ctx.decodeAudioData(
-        copy,
-        (audioBuf) => {
-          decodedBuffers[key] = audioBuf;
-          decodingKeys[key] = false;
-        },
+        bufToDecode.slice(0),
+        onDecoded,
         () => {
           decodingKeys[key] = false;
         }
       );
       if (result && typeof result.then === 'function') {
-        result
-          .then((audioBuf) => {
-            decodedBuffers[key] = audioBuf;
-            decodingKeys[key] = false;
-          })
-          .catch(() => {
-            decodingKeys[key] = false;
-          });
+        result.then(onDecoded).catch(() => {
+          decodingKeys[key] = false;
+        });
       }
     } catch (e) {
       decodingKeys[key] = false;
@@ -567,6 +575,191 @@ window.Game.Audio = (function () {
     osc.start(t); osc.stop(t + 0.35);
   }
 
+  function playCuckooChime() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    // Classic Swiss Black-Forest/Alpine two-note cuckoo call (E5 -> C5)
+    const notes = [[659.25, 0, 0.14], [523.25, 0.17, 0.20]];
+    for (const [f, dt0, dur] of notes) {
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f * 1.04, t + dt0);
+      osc.frequency.exponentialRampToValueAtTime(f, t + dt0 + 0.03);
+      gain.gain.setValueAtTime(0.001, t + dt0);
+      gain.gain.linearRampToValueAtTime(0.16, t + dt0 + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + dt0 + dur);
+      osc.connect(gain); gain.connect(c.destination);
+      osc.start(t + dt0); osc.stop(t + dt0 + dur + 0.02);
+    }
+  }
+
+  function playAlphornNote() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    // Warm resonant wooden Swiss Alphorn harmonic chord (F3 + C4 + F4)
+    for (const [freq, vol] of [[174.61, 0.11], [261.63, 0.07], [349.23, 0.045]]) {
+      const osc = c.createOscillator();
+      const filt = c.createBiquadFilter();
+      const gain = c.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, t);
+      filt.type = 'lowpass'; filt.frequency.setValueAtTime(720, t);
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.linearRampToValueAtTime(vol, t + 0.09);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.62);
+      osc.connect(filt); filt.connect(gain); gain.connect(c.destination);
+      osc.start(t); osc.stop(t + 0.65);
+    }
+  }
+
+  function playMarmotWhistle() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    // Crisp high Alpine marmot warning chirp
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(2150, t);
+    osc.frequency.exponentialRampToValueAtTime(2680, t + 0.06);
+    osc.frequency.exponentialRampToValueAtTime(1920, t + 0.18);
+    gain.gain.setValueAtTime(0.001, t);
+    gain.gain.linearRampToValueAtTime(0.11, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.19);
+    osc.connect(gain); gain.connect(c.destination);
+    osc.start(t); osc.stop(t + 0.20);
+  }
+
+  function playCowbell() {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const t = c.currentTime;
+    // Warm bronze Alpine Treichel cowbell clang
+    for (const [freq, vol] of [[560, 0.08], [845, 0.045]]) {
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(vol, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+      osc.connect(gain); gain.connect(c.destination);
+      osc.start(t); osc.stop(t + 0.34);
+    }
+  }
+
+  function playCowMoo(pitchScale = 1.0) {
+    if (sfxMuted) return;
+    const c = ensureCtx();
+    if (!c) return;
+    const startMoo = () => {
+      try {
+        const t = c.currentTime;
+        const dur = 1.06;
+        const f0 = 122 * pitchScale;
+
+        // Glottal vocal cord source + warm sub-octave chest resonance
+        const oscMain = c.createOscillator();
+        const oscSub = c.createOscillator();
+        oscMain.type = 'sawtooth';
+        oscSub.type = 'triangle';
+
+        // Natural bovine pitch contour: closed-mouth "Mmm" -> warm arched "Ooooo" -> gentle fall "uh"
+        oscMain.frequency.setValueAtTime(f0 * 0.92, t);
+        oscMain.frequency.linearRampToValueAtTime(f0 * 1.19, t + 0.24);
+        oscMain.frequency.setValueAtTime(f0 * 1.17, t + 0.56);
+        oscMain.frequency.exponentialRampToValueAtTime(f0 * 0.88, t + dur);
+
+        oscSub.frequency.setValueAtTime(f0 * 0.46, t);
+        oscSub.frequency.linearRampToValueAtTime(f0 * 0.595, t + 0.24);
+        oscSub.frequency.exponentialRampToValueAtTime(f0 * 0.44, t + dur);
+
+        // Subtle natural vocal vibrato (4.8 Hz)
+        const vib = c.createOscillator();
+        const vibGain = c.createGain();
+        vib.type = 'sine';
+        vib.frequency.setValueAtTime(4.8, t);
+        vibGain.gain.setValueAtTime(0.5, t);
+        vibGain.gain.linearRampToValueAtTime(3.2, t + 0.35);
+        vibGain.gain.linearRampToValueAtTime(1.2, t + dur);
+        vib.connect(vibGain);
+        vibGain.connect(oscMain.frequency);
+
+        const srcMix = c.createGain();
+        const subMix = c.createGain();
+        srcMix.gain.setValueAtTime(0.85, t);
+        subMix.gain.setValueAtTime(0.45, t);
+        oscMain.connect(srcMix);
+        oscSub.connect(subMix);
+
+        // Parallel bovine vocal-tract formant filters (F1 chest/pharynx + F2 oral "oo" vowel) + warm lowpass
+        const f1 = c.createBiquadFilter();
+        f1.type = 'bandpass';
+        f1.Q.setValueAtTime(3.8, t);
+        f1.frequency.setValueAtTime(235 * pitchScale, t);
+        f1.frequency.linearRampToValueAtTime(365 * pitchScale, t + 0.26);
+        f1.frequency.linearRampToValueAtTime(285 * pitchScale, t + dur);
+
+        const f2 = c.createBiquadFilter();
+        f2.type = 'bandpass';
+        f2.Q.setValueAtTime(4.6, t);
+        f2.frequency.setValueAtTime(510 * pitchScale, t);
+        f2.frequency.linearRampToValueAtTime(760 * pitchScale, t + 0.28);
+        f2.frequency.linearRampToValueAtTime(590 * pitchScale, t + dur);
+
+        const warmLp = c.createBiquadFilter();
+        warmLp.type = 'lowpass';
+        warmLp.frequency.setValueAtTime(1280, t);
+
+        const masterGain = c.createGain();
+        masterGain.gain.setValueAtTime(0.001, t);
+        masterGain.gain.linearRampToValueAtTime(0.18, t + 0.14);
+        masterGain.gain.setValueAtTime(0.22, t + 0.52);
+        masterGain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+
+        srcMix.connect(f1);
+        srcMix.connect(f2);
+        subMix.connect(f1);
+        f1.connect(warmLp);
+        f2.connect(warmLp);
+        warmLp.connect(masterGain);
+        masterGain.connect(c.destination);
+
+        oscMain.start(t);
+        oscSub.start(t);
+        vib.start(t);
+        oscMain.stop(t + dur + 0.04);
+        oscSub.stop(t + dur + 0.04);
+        vib.stop(t + dur + 0.04);
+
+        // Soft accompanying Swiss pasture Treichel bell clink as the cow lifts its head
+        for (const [bf, bv] of [[554, 0.036], [832, 0.020]]) {
+          const bOsc = c.createOscillator();
+          const bGain = c.createGain();
+          bOsc.type = 'triangle';
+          bOsc.frequency.setValueAtTime(bf * pitchScale, t + 0.08);
+          bGain.gain.setValueAtTime(bv, t + 0.08);
+          bGain.gain.exponentialRampToValueAtTime(0.0008, t + 0.38);
+          bOsc.connect(bGain);
+          bGain.connect(c.destination);
+          bOsc.start(t + 0.08);
+          bOsc.stop(t + 0.40);
+        }
+      } catch (e) {}
+    };
+    if (c.state === 'suspended') {
+      c.resume().then(startMoo).catch(startMoo);
+    } else {
+      startMoo();
+    }
+  }
+
   function playStoneThud() {
     if (sfxMuted) return;
     const c = ensureCtx();
@@ -584,34 +777,11 @@ window.Game.Audio = (function () {
     playNoise(0.14, 240, 0.16);
   }
 
+  let lastPurrAt = 0;
   function playPurrSynth() {
     if (sfxMuted) return;
-    const c = ensureCtx();
-    if (!c) return;
-    const now = c.currentTime;
-    const osc = c.createOscillator();
-    const lfo = c.createOscillator();
-    const lfoGain = c.createGain();
-    const gain = c.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(58, now);
-    lfo.frequency.setValueAtTime(24, now);
-    lfoGain.gain.setValueAtTime(0.08, now);
-
-    gain.gain.setValueAtTime(0.001, now);
-    gain.gain.linearRampToValueAtTime(0.14, now + 0.12);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
-
-    lfo.connect(lfoGain);
-    lfoGain.connect(gain.gain);
-    osc.connect(gain);
-    gain.connect(c.destination);
-
-    osc.start(now);
-    lfo.start(now);
-    osc.stop(now + 0.72);
-    lfo.stop(now + 0.72);
+    playTone(520, 690, 0.11, 'sine', 0.055);
+    setTimeout(() => playTone(620, 820, 0.13, 'sine', 0.05), 85);
   }
 
   function playCheckpoint() {
@@ -619,7 +789,11 @@ window.Game.Audio = (function () {
   }
 
   function playPurr() {
-    playCheckpoint();
+    if (sfxMuted) return;
+    const nowMs = Date.now();
+    if (nowMs - lastPurrAt < 1400) return;
+    lastPurrAt = nowMs;
+    playPurrSynth();
   }
 
   function playTreat() {
@@ -748,11 +922,11 @@ window.Game.Audio = (function () {
         ? 'desert'
         : theme === 'subway' || theme === 'museum' || theme === 'steam_train'
         ? 'subway'
-        : theme === 'rooftop' || theme === 'construction' || theme === 'rooftop_neon' || theme === 'paris'
+        : theme === 'rooftop' || theme === 'construction' || theme === 'rooftop_neon' || theme === 'paris' || theme === 'airport'
         ? 'rooftop'
-        : theme === 'harbor' || theme === 'harbor_storm' || theme === 'bridge' || theme === 'venice' || theme === 'istanbul'
+        : theme === 'harbor' || theme === 'harbor_storm' || theme === 'bridge' || theme === 'venice'
         ? 'harbor'
-        : theme === 'park' || theme === 'greenhouse'
+        : theme === 'park' || theme === 'greenhouse' || theme === 'istanbul' || theme === 'swiss'
         ? 'park'
         : 'city';
     if (nextKey === activeTrackKey) return;
@@ -863,6 +1037,11 @@ window.Game.Audio = (function () {
     playVeniceBell,
     playWaterLock,
     playBridgeCrank,
+    playCuckooChime,
+    playAlphornNote,
+    playMarmotWhistle,
+    playCowbell,
+    playCowMoo,
     playPurr,
     playCheckpoint,
     playTreat,

@@ -11072,12 +11072,16 @@ window.Game = window.Game || {};
       // Khirbet al-Yahud / Ancient Battir Citadel Sunset-Lit Megalithic Bastion (قلعة بتّير الأثرية)
       ctx.save();
       const isGround = p.h >= 60;
-      const fG = ctx.createLinearGradient(px, py, px, py + p.h);
+      const viewW = ctx._viewW || 1024;
+      const visL = Math.max(px - 8, -48);
+      const visR = Math.min(px + p.w + 8, viewW + 48);
+      const visW = Math.max(1, visR - visL);
+      const fG = ctx.createLinearGradient(0, py, 0, py + p.h);
       fG.addColorStop(0, '#d8aa7d'); fG.addColorStop(0.45, '#9c6e46'); fG.addColorStop(1, '#4a2e19');
       ctx.fillStyle = fG;
       ctx.beginPath(); ctx.roundRect(px, py + 5, p.w, p.h - 5, 4); ctx.fill();
       ctx.save();
-      ctx.beginPath(); ctx.roundRect(px, py + 5, p.w, p.h - 5, 4); ctx.clip();
+      ctx.beginPath(); ctx.roundRect(visL, py + 5, visW, p.h - 5, 4); ctx.clip();
       const rowH = isGround ? 28 : 13;
       for (let r = 0; r < Math.ceil(p.h / rowH); r++) {
         const ry = py + 7 + r * rowH;
@@ -11085,28 +11089,32 @@ window.Game = window.Game || {};
         let idx = r * 5 + Math.floor(p.x * 0.03);
         while (bx < px + p.w) {
           const bw = 54 + ((idx * 19) % 28);
-          ctx.fillStyle = (idx % 3 === 0) ? '#dfb489' : (idx % 3 === 1) ? '#bc8c61' : '#966842';
-          ctx.strokeStyle = 'rgba(38, 22, 11, 0.72)'; ctx.lineWidth = 1.6;
-          ctx.beginPath(); ctx.roundRect(bx + 1.5, ry + 1.5, bw - 3, rowH - 3, 4); ctx.fill(); ctx.stroke();
-          if (isGround) {
-            ctx.fillStyle = 'rgba(254, 215, 170, 0.24)';
-            ctx.fillRect(bx + 6, ry + 4, bw - 12, rowH - 9);
+          if (bx + bw >= -36 && bx <= viewW + 36) {
+            ctx.fillStyle = (idx % 3 === 0) ? '#dfb489' : (idx % 3 === 1) ? '#bc8c61' : '#966842';
+            ctx.strokeStyle = 'rgba(38, 22, 11, 0.72)'; ctx.lineWidth = 1.6;
+            ctx.beginPath(); ctx.roundRect(bx + 1.5, ry + 1.5, bw - 3, rowH - 3, 4); ctx.fill(); ctx.stroke();
+            if (isGround) {
+              ctx.fillStyle = 'rgba(254, 215, 170, 0.24)';
+              ctx.fillRect(bx + 6, ry + 4, bw - 12, rowH - 9);
+            }
           }
           bx += bw; idx++;
         }
       }
       ctx.restore();
       // Sunset-gilded sandstone coping + wild thyme & crimson ivy
-      const cpG = ctx.createLinearGradient(px, py, px, py + 9);
+      const cpG = ctx.createLinearGradient(0, py, 0, py + 9);
       cpG.addColorStop(0, '#fed7aa'); cpG.addColorStop(1, '#9a643a');
       ctx.fillStyle = cpG; ctx.strokeStyle = '#382010'; ctx.lineWidth = 1.6;
       ctx.beginPath(); ctx.roundRect(px - 1, py, p.w + 2, 8, 3); ctx.fill(); ctx.stroke();
       if (isGround) {
         for (let ix = 48; ix < p.w - 48; ix += 150) {
+          const drawX = px + ix;
+          if (drawX < -32 || drawX > viewW + 32) continue;
           ctx.strokeStyle = '#365314'; ctx.lineWidth = 1.6;
-          ctx.beginPath(); ctx.moveTo(px + ix, py + 3); ctx.quadraticCurveTo(px + ix + 12, py + 18, px + ix + 4, py + 34); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(drawX, py + 3); ctx.quadraticCurveTo(drawX + 12, py + 18, drawX + 4, py + 34); ctx.stroke();
           ctx.fillStyle = '#4d7c0f';
-          ctx.beginPath(); ctx.arc(px + ix + 6, py + 13, 4, 0, Math.PI * 2); ctx.arc(px + ix + 3, py + 24, 3.4, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(drawX + 6, py + 13, 4, 0, Math.PI * 2); ctx.arc(drawX + 3, py + 24, 3.4, 0, Math.PI * 2); ctx.fill();
         }
         // Randomly distributed Battiri eggplant seedlings along fortress stone path (skip climbable shaft 12780..13015)
         let eOff = 95;
@@ -11114,8 +11122,9 @@ window.Game = window.Game || {};
         while (eOff < p.w - 90) {
           const hSeed = Math.abs(Math.imul(Math.floor(p.x) + eIdx * 733, 2654435761)) >>> 0;
           const worldX = p.x + eOff;
-          if ((hSeed % 10) < 6 && !(worldX > 12770 && worldX < 13030) && !(worldX > 13320 && worldX < 13700)) {
-            drawBattiriEggplantSeedling(ctx, px + eOff, py + 1, hSeed, time);
+          const sxSeedling = px + eOff;
+          if (sxSeedling >= -48 && sxSeedling <= viewW + 48 && (hSeed % 10) < 6 && !(worldX > 12770 && worldX < 13030) && !(worldX > 13320 && worldX < 13700)) {
+            drawBattiriEggplantSeedling(ctx, sxSeedling, py + 1, hSeed, time);
           }
           eOff += 185 + (hSeed % 165);
           eIdx++;
@@ -11126,22 +11135,129 @@ window.Game = window.Game || {};
     }
 
     if (p.type === 'battir_alley_wall') {
-      // Climbable Jerusalem-Stone Courtyard Alley Wall (أزقة القناطر — Wall-Jump!)
+      // Museum-Grade Climbable Jerusalem-Stone Qantara Courtyard Column (عمود أزقة القناطر الحجري المتسلّق!)
       ctx.save();
+      const seed = Math.abs(Math.floor((p.x || 0) * 0.17 + (p.y || 0) * 3));
+      const stCols = ['#f5ead6', '#ead8bc', '#dcc5a2', '#cfb38b', '#efe0c6'];
+
+      // 1. Molded Dressed-Limestone Base Plinth & Corbelled Capital
       const aG = ctx.createLinearGradient(px, py, px + p.w, py);
-      aG.addColorStop(0, '#f5ead6'); aG.addColorStop(0.6, '#d5c3a3'); aG.addColorStop(1, '#9c8360');
-      ctx.fillStyle = aG; ctx.strokeStyle = '#473824'; ctx.lineWidth = 1.6;
-      ctx.beginPath(); ctx.roundRect(px, py, p.w, p.h, 3); ctx.fill(); ctx.stroke();
-      // Dressed ashlar courses & subtle iron grip rings for wall-jumping
-      ctx.strokeStyle = 'rgba(71, 56, 36, 0.45)'; ctx.lineWidth = 1.1;
-      for (let ry = py + 18; ry < py + p.h - 6; ry += 18) {
-        ctx.beginPath(); ctx.moveTo(px + 2, ry); ctx.lineTo(px + p.w - 2, ry); ctx.stroke();
+      aG.addColorStop(0, '#f7ecd8');
+      aG.addColorStop(0.55, '#dac6a5');
+      aG.addColorStop(1, '#967c58');
+      ctx.fillStyle = aG;
+      ctx.strokeStyle = '#473824';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(px, py + 6, p.w, p.h - 6, 3);
+      ctx.fill();
+
+      // Zero-flicker individual ashlar stone courses & alternating corner quoins
+      ctx.save();
+      ctx.clip();
+      const rowH = 16;
+      let rIdx = 0;
+      for (let ry = py + 6; ry < py + p.h; ry += rowH) {
+        const splitX = px + (rIdx % 2 === 0 ? p.w * 0.58 : p.w * 0.42);
+        ctx.fillStyle = stCols[(seed + rIdx * 5) % stCols.length];
+        ctx.fillRect(px + 1, ry + 0.8, splitX - px - 1.6, rowH - 1.6);
+        ctx.fillStyle = stCols[(seed + rIdx * 5 + 2) % stCols.length];
+        ctx.fillRect(splitX + 0.6, ry + 0.8, px + p.w - splitX - 1.6, rowH - 1.6);
+        ctx.fillStyle = 'rgba(255, 250, 238, 0.28)';
+        ctx.fillRect(px + 1.5, ry + 1, p.w - 3, 1.3);
+        ctx.strokeStyle = 'rgba(71, 56, 36, 0.46)';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(px + 1, ry); ctx.lineTo(px + p.w - 1, ry);
+        ctx.moveTo(splitX, ry); ctx.lineTo(splitX, ry + rowH);
+        ctx.stroke();
+        rIdx++;
       }
-      // Glowing warm wall-lantern near top & trailing magenta bougainvillea
-      ctx.fillStyle = '#be185d';
-      ctx.beginPath(); ctx.arc(px + p.w * 0.5, py + 12, 8, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.1;
-      ctx.beginPath(); ctx.arc(px + p.w * 0.5, py + 44, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Subtle 3D cylindrical side shadow
+      const shG = ctx.createLinearGradient(px, py, px + p.w, py);
+      shG.addColorStop(0, 'rgba(255, 248, 230, 0.14)');
+      shG.addColorStop(0.65, 'rgba(0, 0, 0, 0)');
+      shG.addColorStop(1, 'rgba(46, 30, 14, 0.28)');
+      ctx.fillStyle = shG;
+      ctx.fillRect(px, py + 6, p.w, p.h - 6);
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.roundRect(px, py + 6, p.w, p.h - 6, 3);
+      ctx.stroke();
+
+      // Carved Levantine stone cornice cap & base plinth
+      ctx.fillStyle = '#efe1c8';
+      ctx.strokeStyle = '#473824';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.roundRect(px - 4, py, p.w + 8, 8, 2.5);
+      ctx.roundRect(px - 3, py + p.h - 8, p.w + 6, 8, 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // 2. Forged-Iron Wall-Jump Climbing Rings / Timber Scaffold Grips along both edges!
+      for (let gy = py + 34; gy < py + p.h - 20; gy += 36) {
+        for (const side of [-1, 1]) {
+          const gx = side < 0 ? px - 2.2 : px + p.w + 2.2;
+          ctx.strokeStyle = '#334155';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.arc(gx, gy, 3.2, side < 0 ? Math.PI * 0.5 : -Math.PI * 0.5, side < 0 ? Math.PI * 1.5 : Math.PI * 0.5);
+          ctx.stroke();
+        }
+      }
+
+      // 3. Cascading Palestinian Bougainvillea (المجنونة) Vines & Blossoms Crowning the Capital!
+      const cx = px + p.w * 0.5;
+      ctx.strokeStyle = '#365314';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(cx - 8, py + 4);
+      ctx.quadraticCurveTo(cx - 14, py + 18, cx - 10, py + 30);
+      ctx.moveTo(cx + 6, py + 4);
+      ctx.quadraticCurveTo(cx + 12, py + 15, cx + 8, py + 24);
+      ctx.stroke();
+      const bougClusters = [
+        [cx - 9, py + 7, 5.5, '#be185d'], [cx + 2, py + 5, 6.2, '#db2777'],
+        [cx + 10, py + 9, 5.0, '#9d174d'], [cx - 11, py + 17, 4.8, '#e11d48'],
+        [cx - 3, py + 13, 5.2, '#f43f5e'], [cx + 8, py + 18, 4.2, '#be185d'],
+      ];
+      for (const [bx0, by0, br, bCol] of bougClusters) {
+        ctx.fillStyle = '#3f6212';
+        ctx.beginPath(); ctx.ellipse(bx0 + 2, by0 + 2, br * 0.7, br * 0.4, 0.4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = bCol;
+        ctx.beginPath(); ctx.arc(bx0, by0, br, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fef9c3';
+        ctx.beginPath(); ctx.arc(bx0 - 0.5, by0 - 0.5, 1.1, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // 4. Wrought-Iron Scroll Bracket & Glowing Hexagonal Brass Heritage Wall-Lantern!
+      const lanY = py + 50;
+      const sway = Math.sin(time * 2.2 + seed) * 0.9;
+      const lx = cx + sway;
+      const lGlow = ctx.createRadialGradient(lx, lanY + 4, 1.5, lx, lanY + 4, 18);
+      lGlow.addColorStop(0, 'rgba(254, 240, 138, 0.72)');
+      lGlow.addColorStop(1, 'rgba(249, 115, 22, 0)');
+      ctx.fillStyle = lGlow;
+      ctx.beginPath(); ctx.arc(lx, lanY + 4, 18, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#291a10';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(cx, lanY - 8); ctx.lineTo(lx, lanY - 2);
+      ctx.stroke();
+      ctx.fillStyle = '#92400e';
+      ctx.beginPath();
+      ctx.moveTo(lx - 5, lanY); ctx.lineTo(lx, lanY - 4.5); ctx.lineTo(lx + 5, lanY); ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#fef08a';
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 1.0;
+      ctx.beginPath();
+      ctx.roundRect(lx - 3.8, lanY, 7.6, 9, 1.8);
+      ctx.fill();
+      ctx.stroke();
+
       ctx.restore();
       return;
     }
@@ -12113,17 +12229,21 @@ window.Game = window.Game || {};
       // with Sculpted Polygonal Jerusalem Limestone, Mossy Crevices & Narrow Flowing Ma'dud Water Channel!
       ctx.save();
       const isGround = p.h >= 60;
+      const viewW = ctx._viewW || 1024;
+      const visL = Math.max(px, -48);
+      const visR = Math.min(px + p.w, viewW + 48);
+      const visW = Math.max(1, visR - visL);
       // Deep fertile Terra-Rossa backing & shadow mortarless joints
-      const trG = ctx.createLinearGradient(px, py, px, py + p.h);
+      const trG = ctx.createLinearGradient(0, py, 0, py + p.h);
       trG.addColorStop(0.0, '#6e341e');
       trG.addColorStop(0.42, '#4a2113');
       trG.addColorStop(1.0, '#291008');
       ctx.fillStyle = trG;
       ctx.beginPath(); ctx.roundRect(px, py + 6, p.w, p.h - 6, isGround ? 4 : 7); ctx.fill();
 
-      // Interlocking rough-hewn Jerusalem limestone boulders with 3D sunlit tops & shaded undersides
+      // Interlocking rough-hewn Jerusalem limestone boulders with 3D sunlit tops & shaded undersides (viewport-culled, zero flicker!)
       ctx.save();
-      ctx.beginPath(); ctx.roundRect(px, py + 6, p.w, p.h - 6, isGround ? 4 : 7); ctx.clip();
+      ctx.beginPath(); ctx.roundRect(visL, py + 6, visW, p.h - 6, isGround ? 4 : 7); ctx.clip();
       const stoneCols = ['#eed0a8', '#dfb482', '#c89863', '#b3804e', '#e5c195', '#9f7045'];
       const rows = isGround ? 4 : 1;
       const rowStep = isGround ? 23 : 13;
@@ -12133,29 +12253,31 @@ window.Game = window.Game || {};
         const ry = py + (isGround ? 20 : 9) + r * rowStep;
         while (sx0 < px + p.w - 2) {
           const sw = 26 + ((idx * 17) % 24);
-          const sh = isGround ? (19 + (idx % 4)) : 12;
-          const col = stoneCols[Math.abs(idx) % stoneCols.length];
-          ctx.fillStyle = col;
-          ctx.strokeStyle = 'rgba(34, 15, 7, 0.76)';
-          ctx.lineWidth = 1.35;
-          ctx.beginPath();
-          ctx.moveTo(sx0 + 3, ry);
-          ctx.lineTo(sx0 + sw - 4, ry + (idx % 2 === 0 ? 1.4 : -1.0));
-          ctx.quadraticCurveTo(sx0 + sw + 0.5, ry + sh * 0.52, sx0 + sw - 3, ry + sh);
-          ctx.lineTo(sx0 + 3, ry + sh - (idx % 3 === 0 ? 1.4 : 0));
-          ctx.quadraticCurveTo(sx0 - 1, ry + sh * 0.48, sx0 + 3, ry);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-          // Warm golden-hour upper facet bevel + cool lower shadow lip
-          ctx.strokeStyle = 'rgba(255, 245, 225, 0.56)'; ctx.lineWidth = 1.1;
-          ctx.beginPath(); ctx.moveTo(sx0 + 5, ry + 2.0); ctx.lineTo(sx0 + sw - 6, ry + 2.3); ctx.stroke();
-          ctx.strokeStyle = 'rgba(41, 18, 8, 0.34)'; ctx.lineWidth = 1.2;
-          ctx.beginPath(); ctx.moveTo(sx0 + 4, ry + sh - 1.5); ctx.lineTo(sx0 + sw - 4, ry + sh - 1.5); ctx.stroke();
-          // Occasional lush moss tuft tucked in dry-stone crevice
-          if (idx % 5 === 0 && r > 0) {
-            ctx.fillStyle = 'rgba(101, 163, 13, 0.65)';
-            ctx.beginPath(); ctx.ellipse(sx0 + sw, ry + sh - 1, 4.5, 2.2, 0.1, 0, Math.PI * 2); ctx.fill();
+          if (sx0 + sw >= -36 && sx0 <= viewW + 36) {
+            const sh = isGround ? (19 + (idx % 4)) : 12;
+            const col = stoneCols[Math.abs(idx) % stoneCols.length];
+            ctx.fillStyle = col;
+            ctx.strokeStyle = 'rgba(34, 15, 7, 0.76)';
+            ctx.lineWidth = 1.35;
+            ctx.beginPath();
+            ctx.moveTo(sx0 + 3, ry);
+            ctx.lineTo(sx0 + sw - 4, ry + (idx % 2 === 0 ? 1.4 : -1.0));
+            ctx.quadraticCurveTo(sx0 + sw + 0.5, ry + sh * 0.52, sx0 + sw - 3, ry + sh);
+            ctx.lineTo(sx0 + 3, ry + sh - (idx % 3 === 0 ? 1.4 : 0));
+            ctx.quadraticCurveTo(sx0 - 1, ry + sh * 0.48, sx0 + 3, ry);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            // Warm golden-hour upper facet bevel + cool lower shadow lip
+            ctx.strokeStyle = 'rgba(255, 245, 225, 0.56)'; ctx.lineWidth = 1.1;
+            ctx.beginPath(); ctx.moveTo(sx0 + 5, ry + 2.0); ctx.lineTo(sx0 + sw - 6, ry + 2.3); ctx.stroke();
+            ctx.strokeStyle = 'rgba(41, 18, 8, 0.34)'; ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(sx0 + 4, ry + sh - 1.5); ctx.lineTo(sx0 + sw - 4, ry + sh - 1.5); ctx.stroke();
+            // Occasional lush moss tuft tucked in dry-stone crevice
+            if (idx % 5 === 0 && r > 0) {
+              ctx.fillStyle = 'rgba(101, 163, 13, 0.65)';
+              ctx.beginPath(); ctx.ellipse(sx0 + sw, ry + sh - 1, 4.5, 2.2, 0.1, 0, Math.PI * 2); ctx.fill();
+            }
           }
           sx0 += sw + 2;
           idx++;
@@ -12178,19 +12300,25 @@ window.Game = window.Game || {};
         // Delicate shimmering water glints gliding along the narrow channel
         ctx.strokeStyle = 'rgba(254, 249, 195, 0.85)'; ctx.lineWidth = 1.1;
         const flowShift = (time * 42) % 44;
+        ctx.beginPath();
         for (let wx = px + 8 + flowShift; wx < px + p.w - 18; wx += 44) {
-          ctx.beginPath(); ctx.moveTo(wx, chY + 3.5); ctx.lineTo(wx + 12, chY + 3.5); ctx.stroke();
+          if (wx + 12 < -20 || wx > viewW + 20) continue;
+          ctx.moveTo(wx, chY + 3.5); ctx.lineTo(wx + 12, chY + 3.5);
         }
+        ctx.stroke();
       }
 
       // Lush Terraced Garden Topsoil & Grass Verge + Battiri Eggplants, Pomegranates & Poppies!
-      const turfG = ctx.createLinearGradient(px, py - 1, px, py + 11);
+      const turfG = ctx.createLinearGradient(0, py - 1, 0, py + 11);
       turfG.addColorStop(0, '#84cc16'); turfG.addColorStop(0.5, '#4d7c0f'); turfG.addColorStop(1, '#2b4709');
       ctx.fillStyle = turfG;
       ctx.beginPath();
-      ctx.moveTo(px - 2, py + 4); ctx.lineTo(px + p.w + 2, py + 4); ctx.lineTo(px + p.w + 2, py + 9);
-      for (let wx = px + p.w; wx >= px; wx -= 22) {
-        ctx.quadraticCurveTo(wx - 11, py + 13 + ((Math.floor(wx) % 3) * 1.6), wx - 22, py + 8.5);
+      ctx.moveTo(visL - 2, py + 4); ctx.lineTo(visR + 2, py + 4); ctx.lineTo(visR + 2, py + 9);
+      const startWx = px + Math.ceil((visR - px) / 22) * 22;
+      const minWx = Math.max(px, visL - 22);
+      for (let wx = Math.min(px + p.w, startWx); wx >= minWx; wx -= 22) {
+        const worldWx = p.x + (wx - px);
+        ctx.quadraticCurveTo(wx - 11, py + 13 + ((Math.abs(Math.floor(worldWx)) % 3) * 1.6), wx - 22, py + 8.5);
       }
       ctx.closePath(); ctx.fill();
       ctx.fillStyle = '#a3e635';
@@ -12198,21 +12326,23 @@ window.Game = window.Game || {};
 
       const step = isGround ? 86 : 58;
       for (let gx = 28; gx < p.w - 28; gx += step) {
+        const drawGx = px + gx;
+        if (drawGx < -24 || drawGx > viewW + 24) continue;
         const seed = Math.abs(Math.floor(p.x + gx));
         if (seed % 2 === 0) {
           // Ruby Palestinian Pomegranate resting on terrace
           ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#7f1d1d'; ctx.lineWidth = 0.9;
-          ctx.beginPath(); ctx.arc(px + gx, py - 3.5, 4.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.beginPath(); ctx.arc(drawGx, py - 3.5, 4.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
           ctx.fillStyle = '#fbbf24';
-          ctx.fillRect(px + gx - 1.5, py - 9.5, 3, 2);
+          ctx.fillRect(drawGx - 1.5, py - 9.5, 3, 2);
         } else {
           // Wild Scarlet Palestinian Poppy (الدحنون)
           ctx.strokeStyle = '#3f6212'; ctx.lineWidth = 1.1;
-          ctx.beginPath(); ctx.moveTo(px + gx, py + 1); ctx.lineTo(px + gx, py - 7); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(drawGx, py + 1); ctx.lineTo(drawGx, py - 7); ctx.stroke();
           ctx.fillStyle = '#ef4444';
-          ctx.beginPath(); ctx.arc(px + gx, py - 8, 3.6, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(drawGx, py - 8, 3.6, 0, Math.PI * 2); ctx.fill();
           ctx.fillStyle = '#18181b';
-          ctx.beginPath(); ctx.arc(px + gx, py - 8, 1.2, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(drawGx, py - 8, 1.2, 0, Math.PI * 2); ctx.fill();
         }
       }
       // Randomly distributed museum-grade Battiri eggplant seedlings (2-3 eggplants each) along the cat's ground path!
@@ -12221,8 +12351,9 @@ window.Game = window.Game || {};
         let eIdx = 1;
         while (eOff < p.w - 64) {
           const hSeed = Math.abs(Math.imul(Math.floor(p.x) + eIdx * 919, 2654435761)) >>> 0;
-          if ((hSeed % 10) < 7) {
-            drawBattiriEggplantSeedling(ctx, px + eOff, py + 1, hSeed, time);
+          const sxSeedling = px + eOff;
+          if (sxSeedling >= -48 && sxSeedling <= viewW + 48 && (hSeed % 10) < 7) {
+            drawBattiriEggplantSeedling(ctx, sxSeedling, py + 1, hSeed, time);
           }
           eOff += 155 + (hSeed % 165);
           eIdx++;
@@ -12239,9 +12370,10 @@ window.Game = window.Game || {};
       // =====================================================================
       ctx.save();
       const isGround = p.h >= 60;
+      const viewW = ctx._viewW || 1024;
       const seed = Math.abs(Math.floor((p.x || 0) * 0.13 + (p.y || 0) * 3));
 
-      // 1. Softly Rounded Dressed-Limestone Bridge Body (Zero-Flicker World-Seeded Masonry!)
+      // 1. Softly Rounded Dressed-Limestone Bridge Body (Zero-Flicker World-Seeded Masonry + Viewport Culled!)
       const bodyPath = () => {
         ctx.beginPath(); ctx.roundRect(px, py + 9, p.w, p.h - 9, [4, 4, 3, 3]);
       };
@@ -12258,20 +12390,22 @@ window.Game = window.Game || {};
         const xOff = (rIdx % 2) * (stW * 0.5);
         let cIdx = 0;
         for (let sx0 = px - xOff; sx0 < px + p.w; sx0 += stW) {
-          const sw = stW - 1.2 + ((seed + rIdx * 5 + cIdx * 3) % 3 - 1) * 1.0;
-          const pIdx = (seed + rIdx * 7 + cIdx * 11) % stPal.length;
-          ctx.fillStyle = stPal[pIdx];
-          ctx.beginPath(); ctx.roundRect(sx0 + 0.6, sy + 0.6, sw, rowH - 1.2, 2.0); ctx.fill();
-          ctx.fillStyle = 'rgba(255, 249, 234, 0.18)';
-          ctx.fillRect(sx0 + 1.2, sy + 0.8, sw - 1.4, 1.4);
-          ctx.fillStyle = 'rgba(62, 38, 18, 0.16)';
-          ctx.fillRect(sx0 + 1.2, sy + rowH - 1.6, sw - 1.4, 1.1);
+          if (sx0 + stW >= -32 && sx0 <= viewW + 32) {
+            const sw = stW - 1.2 + ((seed + rIdx * 5 + cIdx * 3) % 3 - 1) * 1.0;
+            const pIdx = (seed + rIdx * 7 + cIdx * 11) % stPal.length;
+            ctx.fillStyle = stPal[pIdx];
+            ctx.beginPath(); ctx.roundRect(sx0 + 0.6, sy + 0.6, sw, rowH - 1.2, 2.0); ctx.fill();
+            ctx.fillStyle = 'rgba(255, 249, 234, 0.18)';
+            ctx.fillRect(sx0 + 1.2, sy + 0.8, sw - 1.4, 1.4);
+            ctx.fillStyle = 'rgba(62, 38, 18, 0.16)';
+            ctx.fillRect(sx0 + 1.2, sy + rowH - 1.6, sw - 1.4, 1.1);
+          }
           cIdx++;
         }
         rIdx++;
       }
       // Warm depth shading from sunlit bridge deck to cool lower stone piers
-      const depthG = ctx.createLinearGradient(px, py + 9, px, py + p.h);
+      const depthG = ctx.createLinearGradient(0, py + 9, 0, py + p.h);
       depthG.addColorStop(0.0, 'rgba(68, 40, 18, 0.24)'); // Cast shadow directly under projecting deck cornice
       depthG.addColorStop(0.14, 'rgba(255, 244, 222, 0.06)');
       depthG.addColorStop(0.7, 'rgba(0, 0, 0, 0)');
@@ -12283,6 +12417,7 @@ window.Game = window.Game || {};
       if (isGround) {
         // 2. Sculpted Pointed Stone Qantara Arches with Voussoir Stones, Keystones & Hanging Brass Lanterns!
         for (let ax = px + 84; ax < px + p.w - 76; ax += 160) {
+          if (ax + 96 < -32 || ax - 40 > viewW + 32) continue;
           // Outer carved stone arch surround (أحجار عقد القنطرة)
           ctx.fillStyle = '#ebd4b0'; ctx.strokeStyle = 'rgba(68, 42, 22, 0.62)'; ctx.lineWidth = 1.1;
           ctx.beginPath();
@@ -12293,13 +12428,13 @@ window.Game = window.Game || {};
 
           // Subtle radial voussoir joint marks & projecting keystone (حجر المفتاح)
           ctx.strokeStyle = 'rgba(74, 46, 22, 0.35)'; ctx.lineWidth = 0.9;
+          ctx.beginPath();
           for (let v = -3; v <= 3; v++) {
             const ang = -Math.PI * 0.5 + v * 0.32;
-            ctx.beginPath();
             ctx.moveTo(ax + Math.cos(ang) * 24, py + 48 + Math.sin(ang) * 24);
             ctx.lineTo(ax + Math.cos(ang) * 32, py + 48 + Math.sin(ang) * 32);
-            ctx.stroke();
           }
+          ctx.stroke();
           ctx.fillStyle = '#f5e2c2'; ctx.strokeStyle = 'rgba(68, 42, 22, 0.55)'; ctx.lineWidth = 0.9;
           ctx.beginPath(); ctx.roundRect(ax - 4, py + 15, 8, 9, 1.5); ctx.fill(); ctx.stroke();
 
@@ -12314,7 +12449,8 @@ window.Game = window.Game || {};
           ctx.lineTo(ax + 24, py + p.h); ctx.closePath(); ctx.fill();
 
           // Hanging forged-brass Arabic lantern swaying gently inside the stone arch!
-          const lSway = Math.sin(time * 1.6 + ax * 0.02) * 1.4;
+          const worldAx = p.x + (ax - px);
+          const lSway = Math.sin(time * 1.6 + worldAx * 0.02) * 1.4;
           const lx = ax + lSway, ly = py + 44;
           ctx.strokeStyle = '#331c0e'; ctx.lineWidth = 1.1;
           ctx.beginPath(); ctx.moveTo(ax, py + 24); ctx.lineTo(lx, ly - 5); ctx.stroke();
@@ -12345,6 +12481,7 @@ window.Game = window.Game || {};
       } else {
         // Sculpted stone corbel brackets (كوابيل حجرية) supporting elevated walkway balconies
         for (let cx0 = px + 20; cx0 < px + p.w - 16; cx0 += 48) {
+          if (cx0 < -16 || cx0 > viewW + 16) continue;
           ctx.fillStyle = '#c9a67d'; ctx.strokeStyle = 'rgba(68, 42, 22, 0.55)'; ctx.lineWidth = 1.0;
           ctx.beginPath();
           ctx.moveTo(cx0 - 6, py + p.h); ctx.lineTo(cx0 + 6, py + p.h);
@@ -12355,7 +12492,7 @@ window.Game = window.Game || {};
       }
 
       // 3. Sunlit Chiseled Jerusalem-Stone Paving Slab Deck & Molded Cornice Lip (السطح الحجري الجميل الذي تسير عليه القطة!)
-      const capG = ctx.createLinearGradient(px, py, px, py + 11);
+      const capG = ctx.createLinearGradient(0, py, 0, py + 11);
       capG.addColorStop(0.0, '#f7e5c6');
       capG.addColorStop(0.55, '#dfc196');
       capG.addColorStop(1.0, '#b58d60');
@@ -12365,20 +12502,25 @@ window.Game = window.Game || {};
       ctx.beginPath(); ctx.roundRect(px - 3, py, p.w + 6, 10.5, [4, 4, 2, 2]); ctx.fill(); ctx.stroke();
       // Individual dressed paving flagstone seams & sunlit top rim gleam
       ctx.strokeStyle = 'rgba(92, 62, 34, 0.34)'; ctx.lineWidth = 0.95;
+      ctx.beginPath();
       for (let tx = px + 22; tx < px + p.w - 12; tx += 26) {
-        ctx.beginPath(); ctx.moveTo(tx, py + 1); ctx.lineTo(tx, py + 10); ctx.stroke();
+        if (tx < -10 || tx > viewW + 10) continue;
+        ctx.moveTo(tx, py + 1); ctx.lineTo(tx, py + 10);
       }
+      ctx.stroke();
       ctx.fillStyle = 'rgba(255, 252, 240, 0.45)';
       ctx.fillRect(px, py + 1, p.w, 1.8);
       // Decorative carved stone dentil molding directly beneath the bridge cornice
       ctx.fillStyle = 'rgba(122, 86, 52, 0.42)';
       for (let dx = px + 6; dx < px + p.w - 8; dx += 14) {
+        if (dx + 6 < -10 || dx > viewW + 10) continue;
         ctx.fillRect(dx, py + 10.5, 6, 3);
       }
 
       // Subtle trailing green olive/ivy leaf sprigs + randomly distributed Battiri eggplant seedlings along the path
       if (isGround) {
         for (let vx = px + 46; vx < px + p.w - 40; vx += 195) {
+          if (vx < -20 || vx > viewW + 20) continue;
           ctx.fillStyle = '#3f6e18';
           ctx.beginPath();
           ctx.ellipse(vx, py + 12, 6.5, 2.8, 0.25, 0, Math.PI * 2);
@@ -12392,10 +12534,11 @@ window.Game = window.Game || {};
         while (eOff < p.w - 80) {
           const hSeed = Math.abs(Math.imul(Math.floor(p.x) + eIdx * 827, 2654435761)) >>> 0;
           const worldX = p.x + eOff;
+          const sxSeedling = px + eOff;
           // Keep clear of the foreground Palestinian woman & climbable columns (1515..1745) and taboon/beehives
           const clearOfProps = !(worldX > 1505 && worldX < 1755) && !(worldX > 610 && worldX < 745) && !(worldX > 9520 && worldX < 9880);
-          if (clearOfProps && (hSeed % 10) < 6) {
-            drawBattiriEggplantSeedling(ctx, px + eOff, py + 1, hSeed, time);
+          if (sxSeedling >= -48 && sxSeedling <= viewW + 48 && clearOfProps && (hSeed % 10) < 6) {
+            drawBattiriEggplantSeedling(ctx, sxSeedling, py + 1, hSeed, time);
           }
           eOff += 180 + (hSeed % 175);
           eIdx++;
@@ -13253,7 +13396,8 @@ window.Game = window.Game || {};
 
     if (p.type === 'battir_grape_zipline') {
       // =====================================================================
-      // OVERHEAD VINEYARD HARVEST BASKET ZIPLINE RIDE (سلك سلال قطاف العنب المعلّق!)
+      // MUSEUM-GRADE OVERHEAD VINEYARD HARVEST BASKET ZIPLINE RIDE
+      // (سلك سلال قطاف العنب المعلّق — أبراج حجرية على حافة الوادي، بكرة نحاسية دوّارة، وسلة قش مضفورة بالعنب!)
       // =====================================================================
       ctx.save();
       const camOffX = p.x - px;
@@ -13264,47 +13408,210 @@ window.Game = window.Game || {};
       const ey0 = (p.endY !== undefined ? p.endY : p.y - 60) - camOffY - 46;
       const curCx = px + p.w * 0.5;
       const curTopY = py - 46;
+      const groundScreenY = 615 - camOffY;
 
-      // 1. Stone & Timber Vineyard Cable Anchor Posts at both ends + Taut Overhead Cable!
-      for (const [ax, ay] of [[sx0, sy0], [ex0, ey0]]) {
-        ctx.fillStyle = '#5c3419'; ctx.strokeStyle = '#271105'; ctx.lineWidth = 1.5;
-        ctx.fillRect(ax - 5, ay - 8, 10, 74);
-        ctx.strokeRect(ax - 5, ay - 8, 10, 74);
-        ctx.fillStyle = '#f59e0b';
-        ctx.beginPath(); ctx.arc(ax, ay, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // 1. Grounded Dressed-Stone & Olive-Timber Vineyard Anchor Towers on Left & Right Cliff Edges!
+      const anchors = [
+        [sx0 - p.w * 0.5 - 28, sy0, 1],
+        [ex0 + p.w * 0.5 + 38, ey0, -1],
+      ];
+      for (const [towerX, capY, armDir] of anchors) {
+        const baseY = Math.max(groundScreenY + 4, capY + 86);
+        // Chiseled Jerusalem-stone lower plinth anchored into the cliff edge
+        const plG = ctx.createLinearGradient(towerX - 14, baseY - 38, towerX + 14, baseY);
+        plG.addColorStop(0, '#e5cfb0');
+        plG.addColorStop(0.55, '#c4a178');
+        plG.addColorStop(1, '#7c5838');
+        ctx.fillStyle = plG;
+        ctx.strokeStyle = '#3b210e';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.roundRect(towerX - 13, baseY - 38, 26, 40, 3);
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(59, 33, 14, 0.42)';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(towerX - 12, baseY - 25); ctx.lineTo(towerX + 12, baseY - 25);
+        ctx.moveTo(towerX - 12, baseY - 12); ctx.lineTo(towerX + 12, baseY - 12);
+        ctx.stroke();
+
+        // Sturdy weathered olive-wood mast & projecting cantilever cross-arm reaching cable end!
+        const cableEndX = armDir > 0 ? sx0 : ex0;
+        const postG = ctx.createLinearGradient(towerX - 6, capY, towerX + 6, capY);
+        postG.addColorStop(0, '#9a5b2c');
+        postG.addColorStop(0.5, '#6b3b19');
+        postG.addColorStop(1, '#361a08');
+        ctx.fillStyle = postG;
+        ctx.strokeStyle = '#241004';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.roundRect(towerX - 5.5, capY - 10, 11, baseY - 36 - (capY - 10), 2);
+        ctx.fill();
+        ctx.stroke();
+        // Cantilever horizontal arm + diagonal knee-brace
+        ctx.strokeStyle = '#5c3114';
+        ctx.lineWidth = 5.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(towerX - armDir * 6, capY);
+        ctx.lineTo(cableEndX, capY);
+        ctx.stroke();
+        ctx.strokeStyle = '#7c451e';
+        ctx.lineWidth = 3.6;
+        ctx.beginPath();
+        ctx.moveTo(towerX, capY + 28);
+        ctx.lineTo(towerX + (cableEndX - towerX) * 0.55, capY + 1);
+        ctx.stroke();
+
+        // Climbing emerald grapevine leaves & small purple grape cluster on the timber post!
+        ctx.fillStyle = '#3f6212';
+        ctx.beginPath();
+        ctx.ellipse(towerX - 6, capY + 18, 6, 3.2, -0.4, 0, Math.PI * 2);
+        ctx.ellipse(towerX + 6, capY + 26, 6, 3.2, 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fbbf24';
+        ctx.strokeStyle = '#451a03';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(cableEndX, capY, 5.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
       }
-      ctx.strokeStyle = '#334155'; ctx.lineWidth = 3.0;
+
+      // 2. Dual-Strand Braided Steel Overhead Cable Spanning the Gorge!
+      const midCableX = (sx0 + ex0) * 0.5;
+      const midCableY = (sy0 + ey0) * 0.5 + 12;
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 3.4;
       ctx.beginPath();
       ctx.moveTo(sx0, sy0);
-      ctx.quadraticCurveTo((sx0 + ex0) * 0.5, (sy0 + ey0) * 0.5 + 14, ex0, ey0);
+      ctx.quadraticCurveTo(midCableX, midCableY, ex0, ey0);
       ctx.stroke();
-
-      // 2. Spinning Brass Pulley Wheel & Hemp Suspension Ropes
-      ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.6;
-      ctx.beginPath(); ctx.arc(curCx, curTopY, 8.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 2.2;
+      ctx.strokeStyle = 'rgba(226, 232, 240, 0.52)';
+      ctx.lineWidth = 1.1;
       ctx.beginPath();
-      ctx.moveTo(curCx, curTopY + 6); ctx.lineTo(px + 18, py + 4);
-      ctx.moveTo(curCx, curTopY + 6); ctx.lineTo(px + p.w - 18, py + 4);
+      ctx.moveTo(sx0, sy0 - 0.8);
+      ctx.quadraticCurveTo(midCableX, midCableY - 0.8, ex0, ey0 - 0.8);
       ctx.stroke();
 
-      // 3. Hand-Woven Reed Vineyard Basket Overflowing with Purple & Green Battir Grapes!
-      const bkG = ctx.createLinearGradient(px, py, px, py + 26);
-      bkG.addColorStop(0, '#f59e0b'); bkG.addColorStop(0.55, '#b45309'); bkG.addColorStop(1, '#6c2e09');
-      ctx.fillStyle = bkG; ctx.strokeStyle = '#291205'; ctx.lineWidth = 1.6;
-      ctx.beginPath(); ctx.roundRect(px, py, p.w, 24, [4, 4, 12, 12]); ctx.fill(); ctx.stroke();
-      // Woven basket cross-ribs
-      ctx.strokeStyle = 'rgba(254, 243, 199, 0.45)'; ctx.lineWidth = 1.2;
-      for (let wx = px + 14; wx < px + p.w - 12; wx += 14) {
-        ctx.beginPath(); ctx.moveTo(wx, py + 3); ctx.lineTo(wx, py + 22); ctx.stroke();
+      // 3. Rotating Spoked Brass Pulley Sheave (driven by p.pulleySpin!), Iron Yoke & Braided Hemp Ropes!
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(curCx - 4, curTopY + 7); ctx.lineTo(px + 16, py + 3);
+      ctx.moveTo(curCx + 4, curTopY + 7); ctx.lineTo(px + p.w - 16, py + 3);
+      ctx.stroke();
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 0.95;
+      ctx.beginPath();
+      ctx.moveTo(curCx - 4, curTopY + 7); ctx.lineTo(px + 16, py + 3);
+      ctx.moveTo(curCx + 4, curTopY + 7); ctx.lineTo(px + p.w - 16, py + 3);
+      ctx.stroke();
+
+      // Spoked brass pulley wheel
+      ctx.save();
+      ctx.translate(curCx, curTopY);
+      ctx.save();
+      ctx.rotate(p.pulleySpin || 0);
+      const pwG = ctx.createRadialGradient(-2, -2, 1, 0, 0, 9.5);
+      pwG.addColorStop(0, '#fef08a');
+      pwG.addColorStop(0.6, '#f59e0b');
+      pwG.addColorStop(1, '#92400e');
+      ctx.fillStyle = pwG;
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(0, 0, 9.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 1.3;
+      for (let sp = 0; sp < 6; sp++) {
+        const a = (sp * Math.PI) / 3;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 8, Math.sin(a) * 8); ctx.stroke();
       }
-      // Hanging purple & emerald grape bunches along basket rim!
-      for (const [gx, col] of [[px + 22, '#7e22ce'], [px + p.w * 0.5, '#84cc16'], [px + p.w - 22, '#6b21a8']]) {
-        ctx.fillStyle = col;
-        for (const [dx, dy] of [[-3, 0], [3, 0], [0, 4], [-2, 7], [2, 7]]) {
-          ctx.beginPath(); ctx.arc(gx + dx, py + 2 + dy, 2.8, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      // Forged iron hanger yoke strap
+      ctx.fillStyle = '#334155';
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.roundRect(-3.2, -2, 6.4, 11, 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath(); ctx.arc(0, 0, 2.0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+
+      // 4.Lush Vine Leaves & Overflowing Clusters of Purple & Golden-Emerald Battir Grapes Inside Basket!
+      for (const lx of [px + 18, px + 48, px + p.w - 48, px + p.w - 18]) {
+        ctx.fillStyle = '#3f6212';
+        ctx.beginPath(); ctx.ellipse(lx, py - 1.5, 9, 4.5, lx < curCx ? -0.22 : 0.22, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#65a30d';
+        ctx.beginPath(); ctx.ellipse(lx, py - 2.2, 5.5, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+      }
+      const topBunches = [
+        [px + 30, '#7e22ce', '#d8b4fe'],
+        [curCx - 16, '#84cc16', '#ecfccb'],
+        [curCx + 16, '#6b21a8', '#e9d5ff'],
+        [px + p.w - 30, '#65a30d', '#fef9c3'],
+      ];
+      for (const [bx0, col, hiCol] of topBunches) {
+        for (const [dx, dy] of [[-5, 0], [0, -2.5], [5, 0], [-2.5, -4], [2.5, -4]]) {
+          ctx.fillStyle = col;
+          ctx.beginPath(); ctx.arc(bx0 + dx, py + dy, 3.3, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = hiCol;
+          ctx.beginPath(); ctx.arc(bx0 + dx - 1, py + dy - 1, 1.0, 0, Math.PI * 2); ctx.fill();
         }
       }
+
+      // 5. Hand-Woven Palestinian Split-Reed Harvest Basket (سلة قطاف مضفورة بالقش)!
+      const bkG = ctx.createLinearGradient(px, py, px, py + 25);
+      bkG.addColorStop(0, '#eab308');
+      bkG.addColorStop(0.45, '#b45309');
+      bkG.addColorStop(1, '#5c2408');
+      ctx.fillStyle = bkG;
+      ctx.strokeStyle = '#291205';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(px + 2, py + 2);
+      ctx.lineTo(px + p.w - 2, py + 2);
+      ctx.quadraticCurveTo(px + p.w - 5, py + 23, px + p.w - 18, py + 24);
+      ctx.lineTo(px + 18, py + 24);
+      ctx.quadraticCurveTo(px + 5, py + 23, px + 2, py + 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Crisscrossing wicker weave ribs & horizontal reed bands
+      ctx.strokeStyle = 'rgba(254, 243, 199, 0.44)';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(px + 6, py + 10); ctx.lineTo(px + p.w - 6, py + 10);
+      ctx.moveTo(px + 10, py + 17); ctx.lineTo(px + p.w - 10, py + 17);
+      for (let wx = px + 14; wx < px + p.w - 12; wx += 13) {
+        ctx.moveTo(wx, py + 4); ctx.lineTo(wx + (wx < curCx ? 3 : -3), py + 22);
+      }
+      ctx.stroke();
+
+      // Rolled braided reed top rim collar + iron rope rings
+      const rimG = ctx.createLinearGradient(px, py - 2, px, py + 5);
+      rimG.addColorStop(0, '#fef08a');
+      rimG.addColorStop(0.55, '#d97706');
+      rimG.addColorStop(1, '#78350f');
+      ctx.fillStyle = rimG;
+      ctx.strokeStyle = '#3b1506';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.roundRect(px - 1, py - 1, p.w + 2, 5.5, 3);
+      ctx.fill();
+      ctx.stroke();
+
+      // Cascading grape bunches draping gracefully over the front rim!
+      for (const [gx, col, hi] of [[px + 25, '#7e22ce', '#e9d5ff'], [curCx, '#65a30d', '#ecfccb'], [px + p.w - 25, '#581c87', '#d8b4fe']]) {
+        for (const [dx, dy] of [[-3.2, 2.5], [3.2, 2.5], [0, 5.5], [-2.2, 8.8], [2.2, 8.8], [0, 12.0]]) {
+          ctx.fillStyle = col;
+          ctx.beginPath(); ctx.arc(gx + dx, py + dy, 2.7, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = hi;
+          ctx.beginPath(); ctx.arc(gx + dx - 0.8, py + dy - 0.8, 0.85, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
       ctx.restore();
       return;
     }
@@ -14018,57 +14325,139 @@ window.Game = window.Game || {};
 
     if (p.type === 'battir_sabr_hedge') {
       // =====================================================================
-      // NEW OBSTACLE #2: PALESTINIAN PRICKLY-PEAR CACTUS HEDGE (الصبر الفلسطيني!)
+      // MUSEUM-GRADE PALESTINIAN PRICKLY-PEAR CACTUS HEDGE (ألواح الصبر والتين الشوكي الفلسطيني!)
+      // Grounded dry-stone Sanasel curb, woody lower stem, 7 layered 3D cladode
+      // paddles with diamond areoles & spines, crowned ruby-amber Sabr fruits,
+      // golden cactus blossoms & subtle Meow-harvest sparkle cue!
       // =====================================================================
       ctx.save();
       const floorY = py + p.h;
       const cx = px + p.w * 0.5;
       const harvested = (p.bloomTimer || 0) > 0;
+      const sway = Math.sin(time * 1.9 + (p.x || 0) * 0.01) * 0.025;
 
-      // Segmented emerald-sage cactus paddles (ألواح الصبر)
-      const paddles = [
-        [-22, -13, 13, 16, -0.35],
-        [22, -13, 13, 16, 0.35],
-        [0, -16, 15, 19, 0],
-        [-14, -29, 11, 14, -0.25],
-        [15, -29, 11, 14, 0.28],
-      ];
-      for (const [dx, dy, rx, ry, rot] of paddles) {
+      // 1. Grounded Contact Shadow, Terra-Rossa Soil Mound & Rustic Dry-Stone Sanasel Curb
+      ctx.fillStyle = 'rgba(24, 14, 6, 0.30)';
+      ctx.beginPath(); ctx.ellipse(cx, floorY, 44, 4.8, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#5c3218';
+      ctx.beginPath(); ctx.ellipse(cx, floorY - 2, 36, 5.5, 0, Math.PI, Math.PI * 2); ctx.fill();
+      const curbCols = ['#d8c2a3', '#c2a682', '#e4d2b8', '#b59670', '#d1b795'];
+      for (let i = 0; i < 5; i++) {
+        const rx0 = cx - 30 + i * 15;
+        ctx.fillStyle = curbCols[i];
+        ctx.strokeStyle = '#3b2412';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.ellipse(rx0, floorY - 3.2, 7.6, 4.0, (i % 2 === 0 ? 0.08 : -0.08), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      // 2. Helper: Draw Sculpted 3D Cactus Cladode Paddle with Sunlit Rim, Areoles & Spines
+      const drawSabrPaddle = (dx, dy, rx, ry, rot, woody, fruits) => {
         ctx.save();
         ctx.translate(cx + dx, floorY + dy);
-        ctx.rotate(rot);
+        ctx.rotate(rot + (woody ? 0 : sway));
         const pdG = ctx.createLinearGradient(-rx, -ry, rx, ry);
-        pdG.addColorStop(0, '#65a30d');
-        pdG.addColorStop(0.55, '#3f6212');
-        pdG.addColorStop(1, '#1a2e05');
+        if (woody) {
+          pdG.addColorStop(0, '#78716c');
+          pdG.addColorStop(0.5, '#57534e');
+          pdG.addColorStop(1, '#292524');
+        } else {
+          pdG.addColorStop(0, '#84cc16');
+          pdG.addColorStop(0.45, '#4d7c0f');
+          pdG.addColorStop(1, '#1a2e05');
+        }
         ctx.fillStyle = pdG;
         ctx.strokeStyle = '#142603';
-        ctx.lineWidth = 1.4;
-        ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(0, ry);
+        ctx.bezierCurveTo(-rx * 1.12, ry * 0.55, -rx * 1.08, -ry * 0.85, 0, -ry);
+        ctx.bezierCurveTo(rx * 1.08, -ry * 0.85, rx * 1.12, ry * 0.55, 0, ry);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
 
-        // Sharp pale cactus spines (hidden when harvested with Meow!)
-        if (!harvested) {
-          ctx.strokeStyle = '#fef9c3';
-          ctx.lineWidth = 1.2;
-          for (const [sx0, sy0] of [[-5, -5], [5, -4], [0, 3], [-6, 5], [6, 4]]) {
+        // Subtle sunlit waxy cuticle highlight along upper-left edge
+        ctx.strokeStyle = woody ? 'rgba(214, 211, 209, 0.25)' : 'rgba(217, 249, 157, 0.42)';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.arc(0, -ry * 0.1, rx * 0.72, Math.PI * 0.95, Math.PI * 1.55);
+        ctx.stroke();
+
+        // Geometric diamond areole nodes & radiating pale spines (hidden safely when harvested!)
+        const areoles = [[-rx * 0.42, -ry * 0.34], [rx * 0.42, -ry * 0.30], [0, -ry * 0.02], [-rx * 0.36, ry * 0.34], [rx * 0.36, ry * 0.32]];
+        for (const [ax, ay] of areoles) {
+          ctx.fillStyle = '#fef3c7';
+          ctx.beginPath(); ctx.arc(ax, ay, 1.05, 0, Math.PI * 2); ctx.fill();
+          if (!harvested && !woody) {
+            ctx.strokeStyle = 'rgba(254, 249, 195, 0.88)';
+            ctx.lineWidth = 1.05;
             ctx.beginPath();
-            ctx.moveTo(sx0, sy0); ctx.lineTo(sx0 * 1.45, sy0 - 4.5);
+            ctx.moveTo(ax, ay); ctx.lineTo(ax - 3.6, ay - 3.8);
+            ctx.moveTo(ax, ay); ctx.lineTo(ax + 3.6, ay - 3.5);
             ctx.stroke();
           }
         }
+
+        // Juicy Crowned Palestinian Sabr Prickly-Pear Fruits & Golden Cactus Blossom!
+        if (fruits) {
+          for (const [fx, fy, fAng, isFlower] of fruits) {
+            ctx.save();
+            ctx.translate(fx, fy);
+            ctx.rotate(fAng);
+            if (isFlower) {
+              ctx.fillStyle = '#facc15';
+              for (let pIdx = 0; pIdx < 5; pIdx++) {
+                const pa = -Math.PI * 0.85 + pIdx * 0.35;
+                ctx.beginPath();
+                ctx.ellipse(Math.cos(pa) * 2.5, Math.sin(pa) * 2.5 - 2, 1.8, 3.0, pa + Math.PI * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+              }
+              ctx.fillStyle = '#ea580c';
+              ctx.beginPath(); ctx.arc(0, -2, 1.5, 0, Math.PI * 2); ctx.fill();
+            } else if (!harvested) {
+              const fG = ctx.createRadialGradient(-1.2, -1.5, 0.5, 0, 0, 5.2);
+              fG.addColorStop(0, '#fde047');
+              fG.addColorStop(0.5, '#f97316');
+              fG.addColorStop(1, '#be123c');
+              ctx.fillStyle = fG;
+              ctx.strokeStyle = '#7c2d12';
+              ctx.lineWidth = 0.95;
+              ctx.beginPath(); ctx.ellipse(0, 0, 3.9, 5.2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+              // Recessed ruby blossom scar crown at top of Sabr fruit
+              ctx.fillStyle = '#881337';
+              ctx.beginPath(); ctx.ellipse(0, -4.4, 2.1, 0.95, 0, 0, Math.PI * 2); ctx.fill();
+            } else {
+              // Harvested sweet golden-amber Sabr bud glow
+              ctx.fillStyle = '#fef08a';
+              ctx.beginPath(); ctx.arc(0, -1, 2.2, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.restore();
+          }
+        }
         ctx.restore();
+      };
+
+      // Layered 3D prickly-pear bush composition
+      drawSabrPaddle(-22, -14, 11.5, 14.5, -0.42, false, [[-5, -16, -0.25, false], [5, -15, 0.2, true]]);
+      drawSabrPaddle(22, -14, 11.5, 14.5, 0.42, false, [[5, -16, 0.25, false]]);
+      drawSabrPaddle(0, -13, 12.5, 15.0, 0.02, true, null);
+      drawSabrPaddle(-13, -27, 11.2, 14.8, -0.24, false, [[-4, -16.5, -0.18, false], [4, -16, 0.18, false]]);
+      drawSabrPaddle(13, -27, 11.2, 14.8, 0.26, false, [[-3, -16, -0.12, true], [5, -16.5, 0.22, false]]);
+      drawSabrPaddle(0, -30, 10.5, 13.8, 0.0, false, [[0, -16, 0, false]]);
+
+      // Subtle golden interactive glints inviting Meow harvest!
+      if (!harvested) {
+        const gl = 0.35 + 0.35 * Math.sin(time * 4.2 + (p.x || 0));
+        ctx.fillStyle = `rgba(254, 240, 138, ${gl.toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(cx - 16, floorY - 46, 2.0, 0, Math.PI * 2);
+        ctx.arc(cx + 17, floorY - 45, 1.8, 0, Math.PI * 2);
+        ctx.fill();
       }
 
-      // Juicy Orange-Crimson Sabr Prickly-Pear Fruits crowning the paddles!
-      const fruitPts = [[-22, -42], [-8, -37], [8, -37], [23, -41]];
-      for (const [fx, fy] of fruitPts) {
-        ctx.fillStyle = harvested ? '#fde047' : '#f97316';
-        ctx.strokeStyle = '#9a3412';
-        ctx.lineWidth = 1.1;
-        ctx.beginPath(); ctx.ellipse(cx + fx, floorY + fy, 4.4, 5.8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#be123c';
-        ctx.beginPath(); ctx.arc(cx + fx, floorY + fy - 4.5, 2.2, 0, Math.PI * 2); ctx.fill();
-      }
       ctx.restore();
       return;
     }
@@ -14341,11 +14730,12 @@ window.Game = window.Game || {};
       ctx.translate(vx, vy);
       const wheelRot = state === 'shut' ? 1.8 : (state === 'warn' ? Math.sin(time * 16) * 0.14 : time * 0.4 * pwr);
       ctx.rotate(wheelRot);
-      // Subtle cyan/gold interactive halo when shut or active
-      if (state === 'shut') {
-        ctx.fillStyle = 'rgba(56, 189, 248, 0.28)';
+      // Subtle cyan/gold interactive halo so player notices Meow can shut the valve wheel!
+      if (state === 'shut' || state === 'warn' || state === 'cascade') {
+        const haloPulse = state === 'shut' ? 0.30 : (0.18 + 0.12 * Math.sin(time * 5.2));
+        ctx.fillStyle = state === 'shut' ? `rgba(56, 189, 248, ${haloPulse.toFixed(2)})` : `rgba(254, 240, 138, ${haloPulse.toFixed(2)})`;
         ctx.beginPath();
-        ctx.arc(0, 0, 14, 0, Math.PI * 2);
+        ctx.arc(0, 0, 14.5, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.strokeStyle = '#451a03';
@@ -14696,18 +15086,20 @@ window.Game = window.Game || {};
       const nozzleX = smX + 10;
       const nozzleY = smBaseY - 27;
       if (smoked) {
-        for (let s = 0; s < 14; s++) {
-          const frac = ((time * 0.65 + s / 14) % 1);
+        // Zero-gradient-allocation layered translucent smoke clouds for silky 60fps mobile performance!
+        for (let s = 0; s < 10; s++) {
+          const frac = ((time * 0.65 + s / 10) % 1);
           const sx = nozzleX + frac * 265;
           const sy = nozzleY - 8 - Math.sin(frac * Math.PI) * 28 + Math.sin(time * 3.5 + s * 1.3) * 7;
-          const sr = 7 + frac * 18;
-          const alpha = Math.sin(frac * Math.PI) * 0.42;
-          const smG = ctx.createRadialGradient(sx, sy, 1, sx, sy, sr);
-          smG.addColorStop(0, `rgba(248, 250, 252, ${alpha.toFixed(2)})`);
-          smG.addColorStop(1, 'rgba(226, 232, 240, 0)');
-          ctx.fillStyle = smG;
+          const sr = 7 + frac * 17;
+          const alpha = Math.sin(frac * Math.PI) * 0.28;
+          ctx.fillStyle = `rgba(241, 245, 249, ${(alpha * 0.65).toFixed(2)})`;
           ctx.beginPath();
           ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha.toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(sx - 1.5, sy - 1.5, sr * 0.58, 0, Math.PI * 2);
           ctx.fill();
         }
       } else {
@@ -14912,6 +15304,9 @@ window.Game = window.Game || {};
       }
       ctx.restore();
       return;
+    }
+    if (origDrawPlatform) {
+      origDrawPlatform(ctx, p, px, py, nv, time);
     }
     if (p.climbable) {
       drawClimbWallSign(ctx, p, px, py, time);
@@ -25872,105 +26267,114 @@ window.Game = window.Game || {};
       ctx.fill();
     }
 
-    // 4. Distant Sunset Crag Ridge with Silhouetted JERUSALEM (القدس) & BETHLEHEM (بيت لحم)!
+    // 4 & 5. Distant Sunset Crag Ridge (JERUSALEM & BETHLEHEM) + Gorge Sandstone Ridges (Baked Offscreen for 60fps!)
     const ridgeSpan = 1560;
     const ridgeOff = -((camX * 0.036) % ridgeSpan);
-    const farG = ctx.createLinearGradient(0, 275, 0, 500);
-    farG.addColorStop(0.0, '#4c2640');
-    farG.addColorStop(0.55, '#7c3d48');
-    farG.addColorStop(1.0, '#b8684b');
-    for (let rep = -1; rep <= 1; rep++) {
-      const bx = ridgeOff + rep * ridgeSpan;
-      // Angular rocky mountain ridge profile (NOT sine wave!)
-      const pts = [
-        [0, 368], [140, 342], [290, 318], [430, 304], [560, 326],
-        [720, 356], [880, 330], [1040, 298], [1210, 308], [1380, 344], [1560, 368],
-      ];
-      ctx.fillStyle = farG;
-      ctx.beginPath();
-      ctx.moveTo(bx, h);
-      for (const [px0, py0] of pts) ctx.lineTo(bx + px0, py0);
-      ctx.lineTo(bx + ridgeSpan, h);
-      ctx.closePath();
-      ctx.fill();
+    if (!tex.battirSkyRidgeCache && typeof document !== 'undefined' && document.createElement) {
+      tex.battirSkyRidgeCache = makeOffscreen(ridgeSpan, h, (rCtx) => {
+        const farG = rCtx.createLinearGradient(0, 275, 0, 500);
+        farG.addColorStop(0.0, '#4c2640');
+        farG.addColorStop(0.55, '#7c3d48');
+        farG.addColorStop(1.0, '#b8684b');
+        const pts = [
+          [0, 368], [140, 342], [290, 318], [430, 304], [560, 326],
+          [720, 356], [880, 330], [1040, 298], [1210, 308], [1380, 344], [1560, 368],
+        ];
+        rCtx.fillStyle = farG;
+        rCtx.beginPath();
+        rCtx.moveTo(0, h);
+        for (const [px0, py0] of pts) rCtx.lineTo(px0, py0);
+        rCtx.lineTo(ridgeSpan, h);
+        rCtx.closePath();
+        rCtx.fill();
 
-      // (A) JERUSALEM OLD CITY Sunset Silhouette + Radiant Golden Dome of the Rock!
-      const jx = bx + 420, jy = 306;
-      ctx.save();
-      ctx.fillStyle = '#3b1d33';
-      ctx.fillRect(jx - 106, jy - 12, 212, 22);
-      for (let m = -102; m <= 98; m += 10) ctx.fillRect(jx + m, jy - 16, 6, 4.5);
-      // Citadel Tower of David
-      ctx.fillRect(jx - 90, jy - 34, 15, 24);
-      // Octagonal shrine & Sunset-Blazing Golden Dome of the Rock!
-      ctx.fillStyle = '#4c2848';
-      ctx.fillRect(jx - 28, jy - 24, 56, 12);
-      const dGlow = ctx.createRadialGradient(jx, jy - 32, 3, jx, jy - 32, 38);
-      dGlow.addColorStop(0, 'rgba(254, 240, 138, 0.82)');
-      dGlow.addColorStop(1, 'rgba(251, 146, 60, 0)');
-      ctx.fillStyle = dGlow;
-      ctx.beginPath(); ctx.arc(jx, jy - 32, 38, 0, Math.PI * 2); ctx.fill();
-      const gdG = ctx.createLinearGradient(jx - 16, jy - 44, jx + 16, jy - 24);
-      gdG.addColorStop(0, '#fef08a'); gdG.addColorStop(0.5, '#f59e0b'); gdG.addColorStop(1, '#9a3412');
-      ctx.fillStyle = gdG;
-      ctx.beginPath(); ctx.arc(jx, jy - 24, 17, Math.PI, 0); ctx.fill();
-      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(jx, jy - 41); ctx.lineTo(jx, jy - 49); ctx.stroke();
-      // Al-Aqsa Dome & Old City minarets
-      ctx.fillStyle = '#64415a';
-      ctx.beginPath(); ctx.arc(jx + 56, jy - 16, 11, Math.PI, 0); ctx.fill();
-      ctx.fillStyle = '#3b1d33';
-      ctx.fillRect(jx - 50, jy - 36, 4.5, 24);
-      ctx.fillRect(jx + 78, jy - 33, 4.5, 21);
-      ctx.restore();
+        // (A) JERUSALEM OLD CITY Sunset Silhouette + Radiant Golden Dome of the Rock!
+        const jx = 420, jy = 306;
+        rCtx.save();
+        rCtx.fillStyle = '#3b1d33';
+        rCtx.fillRect(jx - 106, jy - 12, 212, 22);
+        for (let m = -102; m <= 98; m += 10) rCtx.fillRect(jx + m, jy - 16, 6, 4.5);
+        rCtx.fillRect(jx - 90, jy - 34, 15, 24);
+        rCtx.fillStyle = '#4c2848';
+        rCtx.fillRect(jx - 28, jy - 24, 56, 12);
+        const dGlow = rCtx.createRadialGradient(jx, jy - 32, 3, jx, jy - 32, 38);
+        dGlow.addColorStop(0, 'rgba(254, 240, 138, 0.82)');
+        dGlow.addColorStop(1, 'rgba(251, 146, 60, 0)');
+        rCtx.fillStyle = dGlow;
+        rCtx.beginPath(); rCtx.arc(jx, jy - 32, 38, 0, Math.PI * 2); rCtx.fill();
+        const gdG = rCtx.createLinearGradient(jx - 16, jy - 44, jx + 16, jy - 24);
+        gdG.addColorStop(0, '#fef08a'); gdG.addColorStop(0.5, '#f59e0b'); gdG.addColorStop(1, '#9a3412');
+        rCtx.fillStyle = gdG;
+        rCtx.beginPath(); rCtx.arc(jx, jy - 24, 17, Math.PI, 0); rCtx.fill();
+        rCtx.strokeStyle = '#fef08a'; rCtx.lineWidth = 1.5;
+        rCtx.beginPath(); rCtx.moveTo(jx, jy - 41); rCtx.lineTo(jx, jy - 49); rCtx.stroke();
+        rCtx.fillStyle = '#64415a';
+        rCtx.beginPath(); rCtx.arc(jx + 56, jy - 16, 11, Math.PI, 0); rCtx.fill();
+        rCtx.fillStyle = '#3b1d33';
+        rCtx.fillRect(jx - 50, jy - 36, 4.5, 24);
+        rCtx.fillRect(jx + 78, jy - 33, 4.5, 21);
+        rCtx.restore();
 
-      // (B) BETHLEHEM Sunset Hilltop Silhouette + Nativity Bell-Tower & Glowing Windows!
-      const btx = bx + 1120, bty = 304;
-      ctx.save();
-      ctx.fillStyle = '#3b1d33';
-      for (const [dx, dy, dw, dh] of [[-68, 6, 24, 14], [-42, 0, 28, 18], [-12, -5, 32, 20], [22, 1, 26, 16], [50, 7, 22, 14]]) {
-        ctx.fillRect(btx + dx, bty + dy, dw, dh);
-        ctx.fillStyle = '#fde047';
-        ctx.fillRect(btx + dx + 6, bty + dy + 4, 3, 3);
-        ctx.fillStyle = '#3b1d33';
+        // (B) BETHLEHEM Sunset Hilltop Silhouette + Nativity Bell-Tower & Glowing Windows!
+        const btx = 1120, bty = 304;
+        rCtx.save();
+        rCtx.fillStyle = '#3b1d33';
+        for (const [dx, dy, dw, dh] of [[-68, 6, 24, 14], [-42, 0, 28, 18], [-12, -5, 32, 20], [22, 1, 26, 16], [50, 7, 22, 14]]) {
+          rCtx.fillRect(btx + dx, bty + dy, dw, dh);
+          rCtx.fillStyle = '#fde047';
+          rCtx.fillRect(btx + dx + 6, bty + dy + 4, 3, 3);
+          rCtx.fillStyle = '#3b1d33';
+        }
+        rCtx.fillRect(btx - 24, bty - 28, 12, 24);
+        rCtx.beginPath(); rCtx.moveTo(btx - 25, bty - 28); rCtx.lineTo(btx - 18, bty - 37); rCtx.lineTo(btx - 11, bty - 28); rCtx.closePath(); rCtx.fill();
+        rCtx.fillRect(btx + 32, bty - 30, 5, 28);
+        rCtx.restore();
+      });
+    }
+    if (tex.battirSkyRidgeCache) {
+      for (let rep = -1; rep <= 1; rep++) {
+        const bx = ridgeOff + rep * ridgeSpan;
+        if (bx + ridgeSpan < 0 || bx > w) continue;
+        ctx.drawImage(tex.battirSkyRidgeCache, bx, 0);
       }
-      ctx.fillRect(btx - 24, bty - 28, 12, 24);
-      ctx.beginPath(); ctx.moveTo(btx - 25, bty - 28); ctx.lineTo(btx - 18, bty - 37); ctx.lineTo(btx - 11, bty - 28); ctx.closePath(); ctx.fill();
-      ctx.fillRect(btx + 32, bty - 30, 5, 28);
-      ctx.restore();
     }
 
-    // 5. Angular Terraced Sunset-Ochre & Sienna Limestone Gorge Ridges (NO green sine hills!)
     const gorgeSpan = 1480;
     const gorgeOff = -((camX * 0.10) % gorgeSpan);
-    const gG = ctx.createLinearGradient(0, 340, 0, 580);
-    gG.addColorStop(0.0, '#6e3832');
-    gG.addColorStop(0.52, '#8c4b34');
-    gG.addColorStop(1.0, '#47261a');
-    for (let rep = -1; rep <= 1; rep++) {
-      const gx = gorgeOff + rep * gorgeSpan;
-      const crags = [
-        [0, 442], [160, 412], [240, 412], [350, 374], [490, 374], [610, 422],
-        [780, 438], [930, 386], [1090, 386], [1220, 418], [1360, 418], [1480, 442],
-      ];
-      ctx.fillStyle = gG;
-      ctx.beginPath();
-      ctx.moveTo(gx, h);
-      for (const [cx0, cy0] of crags) ctx.lineTo(gx + cx0, cy0);
-      ctx.lineTo(gx + gorgeSpan, h);
-      ctx.closePath();
-      ctx.fill();
-
-      // Sunlit golden sandstone cliff rim-lines & twinkling distant mountain hamlet lights
-      ctx.strokeStyle = 'rgba(253, 186, 116, 0.42)';
-      ctx.lineWidth = 2.4;
-      for (let t = 0; t < 3; t++) {
-        ctx.beginPath();
-        ctx.moveTo(gx + 140 + t * 40, 424 + t * 24);
-        ctx.lineTo(gx + 540 - t * 30, 396 + t * 24);
-        ctx.moveTo(gx + 880 + t * 35, 408 + t * 22);
-        ctx.lineTo(gx + 1320 - t * 35, 428 + t * 22);
-        ctx.stroke();
+    if (!tex.battirGorgeRidgeCache && typeof document !== 'undefined' && document.createElement) {
+      tex.battirGorgeRidgeCache = makeOffscreen(gorgeSpan, h, (gCtx) => {
+        const gG = gCtx.createLinearGradient(0, 340, 0, 580);
+        gG.addColorStop(0.0, '#6e3832');
+        gG.addColorStop(0.52, '#8c4b34');
+        gG.addColorStop(1.0, '#47261a');
+        const crags = [
+          [0, 442], [160, 412], [240, 412], [350, 374], [490, 374], [610, 422],
+          [780, 438], [930, 386], [1090, 386], [1220, 418], [1360, 418], [1480, 442],
+        ];
+        gCtx.fillStyle = gG;
+        gCtx.beginPath();
+        gCtx.moveTo(0, h);
+        for (const [cx0, cy0] of crags) gCtx.lineTo(cx0, cy0);
+        gCtx.lineTo(gorgeSpan, h);
+        gCtx.closePath();
+        gCtx.fill();
+        gCtx.strokeStyle = 'rgba(253, 186, 116, 0.42)';
+        gCtx.lineWidth = 2.4;
+        for (let t = 0; t < 3; t++) {
+          gCtx.beginPath();
+          gCtx.moveTo(140 + t * 40, 424 + t * 24);
+          gCtx.lineTo(540 - t * 30, 396 + t * 24);
+          gCtx.moveTo(880 + t * 35, 408 + t * 22);
+          gCtx.lineTo(1320 - t * 35, 428 + t * 22);
+          gCtx.stroke();
+        }
+      });
+    }
+    if (tex.battirGorgeRidgeCache) {
+      for (let rep = -1; rep <= 1; rep++) {
+        const gx = gorgeOff + rep * gorgeSpan;
+        if (gx + gorgeSpan < 0 || gx > w) continue;
+        ctx.drawImage(tex.battirGorgeRidgeCache, gx, 0);
       }
     }
   }
@@ -29286,240 +29690,198 @@ window.Game = window.Game || {};
 
     // =========================================================================
     // FINALE LANDMARK: REAL BATTIR ROMAN POOL, POINTED ARCH & SPRING WATERFALL
-    // (البركة الرومانية وقوس عين البلد والشلال الصغير — مباشرة قبل بوابة النهاية!)
+    // (البركة الرومانية وقوس عين البلد والشلال الصغير — مخبأة مسبقاً لأداء 60fps فائق السلاسة!)
     // =========================================================================
     const poolAnchorX = 14350 - camX;
     if (poolAnchorX > -620 && poolAnchorX < w + 520) {
       ctx.save();
-      const basePoolY = 548;
-      const poolTopY = 506;
-      const poolBotY = h;
-      const wallLeft = poolAnchorX - 180;
-      const wallW = 680;
       const archCx = poolAnchorX + 78;
-      const stonePal = ['#dfd0b8', '#d3be9f', '#c7ad8a', '#e6d8c3', '#bca07c'];
-
-      // Helper: Zero-flicker hand-laid limestone wall segment
-      const drawTerraceMasonry = (x0, y0, w0, h0, rowH = 12, blkW = 24, seedBase = 17) => {
-        ctx.save();
-        ctx.beginPath();
-        ctx.roundRect(x0, y0, w0, h0, 3);
-        const bg = ctx.createLinearGradient(x0, y0, x0, y0 + h0);
-        bg.addColorStop(0, '#d8c2a4');
-        bg.addColorStop(1, '#9d7d5a');
-        ctx.fillStyle = bg;
-        ctx.fill();
-        ctx.clip();
-        const rows = Math.ceil(h0 / rowH);
-        for (let r = 0; r < rows; r++) {
-          const ry = y0 + r * rowH;
-          const off = (r % 2) * (blkW * 0.5);
-          for (let bx = -blkW + off; bx < w0 + blkW; bx += blkW) {
-            const idx = Math.abs(seedBase + r * 7 + Math.floor(bx / blkW) * 11) % stonePal.length;
-            ctx.fillStyle = stonePal[idx];
-            ctx.beginPath();
-            ctx.roundRect(x0 + bx + 0.8, ry + 0.8, blkW - 1.6, rowH - 1.6, 2.0);
-            ctx.fill();
-            ctx.fillStyle = 'rgba(255, 248, 232, 0.20)';
-            ctx.fillRect(x0 + bx + 2, ry + 1.2, blkW - 4, 1.3);
-            ctx.fillStyle = 'rgba(54, 34, 18, 0.18)';
-            ctx.fillRect(x0 + bx + 2, ry + rowH - 2.2, blkW - 4, 1.2);
-          }
-        }
-        ctx.restore();
-        ctx.strokeStyle = 'rgba(72, 46, 26, 0.72)';
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.roundRect(x0, y0, w0, h0, 3);
-        ctx.stroke();
-      };
-
-      // 1. Upper Battir Village Stone Houses & Cypress Trees perched above the spring terrace
-      // Tall dark-emerald Mediterranean cypress behind left house
-      ctx.fillStyle = '#1b3b28';
-      ctx.beginPath();
-      ctx.moveTo(archCx - 118, 222);
-      ctx.bezierCurveTo(archCx - 144, 285, archCx - 146, 355, archCx - 122, 395);
-      ctx.lineTo(archCx - 110, 395);
-      ctx.bezierCurveTo(archCx - 88, 355, archCx - 92, 285, archCx - 118, 222);
-      ctx.closePath();
-      ctx.fill();
-      // Rustic upper village stone house above the arch
-      drawTerraceMasonry(archCx - 56, 304, 118, 72, 11, 20, 31);
-      // Recessed dark window & wooden lintel on upper house
-      ctx.fillStyle = '#2d1c12';
-      ctx.beginPath();
-      ctx.roundRect(archCx - 42, 324, 15, 24, 2);
-      ctx.roundRect(archCx - 16, 326, 28, 16, 2);
-      ctx.fill();
-      ctx.strokeStyle = '#efe0c8';
-      ctx.lineWidth = 1.2;
-      ctx.strokeRect(archCx - 16, 326, 28, 16);
-      ctx.beginPath(); ctx.moveTo(archCx - 2, 326); ctx.lineTo(archCx - 2, 342); ctx.stroke();
-      // Second higher stone house terrace on the right
-      drawTerraceMasonry(archCx + 76, 272, 132, 92, 11, 22, 47);
-      ctx.fillStyle = '#362216';
-      ctx.beginPath();
-      ctx.roundRect(archCx + 104, 294, 20, 26, [6, 6, 2, 2]);
-      ctx.roundRect(archCx + 150, 294, 20, 26, [6, 6, 2, 2]);
-      ctx.fill();
-
-      // 2. Lush Overhanging Citrus, Olive & Vineyard Greenery cascading across the right hillside
-      const foliageClusters = [
-        [archCx + 115, 366, 54, 34, '#244f28'], [archCx + 188, 358, 62, 38, '#2d622d'],
-        [archCx + 266, 364, 58, 34, '#214824'], [archCx + 335, 372, 52, 30, '#2a5c2a'],
-        [archCx + 148, 382, 46, 26, '#4d8232'], [archCx + 225, 378, 50, 28, '#659436'],
-        [archCx + 298, 386, 44, 24, '#4d8232'], [archCx - 102, 388, 44, 24, '#2d5c2b'],
-        [archCx - 152, 398, 38, 22, '#3d7232'],
-      ];
-      for (const [fx, fy, frx, fry, fcol] of foliageClusters) {
-        ctx.fillStyle = fcol;
-        ctx.beginPath();
-        ctx.ellipse(fx, fy, frx, fry, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      // Sunlit golden-green citrus leaves catching the Battir afternoon/sunset light
-      ctx.fillStyle = 'rgba(190, 224, 96, 0.35)';
-      for (const [fx, fy, frx, fry] of [[archCx + 152, 368, 30, 14], [archCx + 226, 362, 34, 16], [archCx + 286, 370, 28, 13]]) {
-        ctx.beginPath();
-        ctx.ellipse(fx, fy, frx, fry, -0.1, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // 3. Lower Weathered Stone Retaining Wall bordering the Roman Pool (جدار البركة الحجري)
-      drawTerraceMasonry(archCx + 42, 442, 365, 68, 12, 24, 63);
-      drawTerraceMasonry(wallLeft, 458, 178, 52, 12, 22, 79);
-
-      // 4. ICONIC BATTIR SPRING ARCH & DAMP MOSSY WATERFALL WALL (قوس عين البلد والشلال الصغير)
-      // Dark damp mossy stone chute pier on left of the arch
-      drawTerraceMasonry(archCx - 74, 378, 54, 132, 11, 18, 91);
-      // Damp darkened wet-stone overlay where the waterfall cascades down
-      const wetG = ctx.createLinearGradient(archCx - 74, 380, archCx - 20, 508);
-      wetG.addColorStop(0, 'rgba(34, 26, 18, 0.36)');
-      wetG.addColorStop(1, 'rgba(22, 36, 22, 0.50)');
-      ctx.fillStyle = wetG;
-      ctx.fillRect(archCx - 74, 380, 54, 128);
-
-      // Warm rough-hewn Pointed Stone Arch next to the waterfall
-      const aTopY = 374;
-      const aBotY = 508;
-      const aSpanW = 86;
-      const aLeftX = archCx - 22;
-      const aMidX = aLeftX + aSpanW * 0.5;
-      const aOpenR = 25;
-      const aSpringY = 446;
-      // Recessed dark shadowed vaulted interior of the spring arch
-      const innerG = ctx.createLinearGradient(aMidX, aSpringY - aOpenR, aMidX, aBotY);
-      innerG.addColorStop(0, '#2a1d14');
-      innerG.addColorStop(0.6, '#4f3a29');
-      innerG.addColorStop(1, '#36261a');
-      ctx.fillStyle = innerG;
-      ctx.beginPath();
-      ctx.moveTo(aMidX - aOpenR, aBotY);
-      ctx.lineTo(aMidX - aOpenR, aSpringY);
-      ctx.quadraticCurveTo(aMidX - aOpenR, aSpringY - 26, aMidX, aSpringY - 36);
-      ctx.quadraticCurveTo(aMidX + aOpenR, aSpringY - 26, aMidX + aOpenR, aSpringY);
-      ctx.lineTo(aMidX + aOpenR, aBotY);
-      ctx.closePath();
-      ctx.fill();
-
-      // Outer dressed-stone spandrel wall framing the pointed spring arch
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(aLeftX, aBotY);
-      ctx.lineTo(aLeftX, aTopY + 5);
-      ctx.quadraticCurveTo(aLeftX, aTopY, aLeftX + 5, aTopY);
-      ctx.lineTo(aLeftX + aSpanW - 5, aTopY);
-      ctx.quadraticCurveTo(aLeftX + aSpanW, aTopY, aLeftX + aSpanW, aTopY + 5);
-      ctx.lineTo(aLeftX + aSpanW, aBotY);
-      ctx.lineTo(aMidX + aOpenR, aBotY);
-      ctx.lineTo(aMidX + aOpenR, aSpringY);
-      ctx.quadraticCurveTo(aMidX + aOpenR, aSpringY - 26, aMidX, aSpringY - 36);
-      ctx.quadraticCurveTo(aMidX - aOpenR, aSpringY - 26, aMidX - aOpenR, aSpringY);
-      ctx.lineTo(aMidX - aOpenR, aBotY);
-      ctx.closePath();
-      ctx.fillStyle = '#d6be9e';
-      ctx.fill();
-      ctx.clip();
-      for (let r = 0; r < 11; r++) {
-        const ry = aTopY + r * 12;
-        const off = (r % 2) * 10;
-        for (let bx = -12 + off; bx < aSpanW + 12; bx += 20) {
-          ctx.fillStyle = stonePal[(r * 5 + Math.abs(Math.floor(bx / 20)) * 3) % stonePal.length];
-          ctx.beginPath();
-          ctx.roundRect(aLeftX + bx + 0.8, ry + 0.8, 18.4, 10.4, 2);
-          ctx.fill();
-        }
-      }
-      ctx.restore();
-      ctx.strokeStyle = '#5a3d24';
-      ctx.lineWidth = 1.4;
-      ctx.beginPath();
-      ctx.moveTo(aMidX - aOpenR, aBotY);
-      ctx.lineTo(aMidX - aOpenR, aSpringY);
-      ctx.quadraticCurveTo(aMidX - aOpenR, aSpringY - 26, aMidX, aSpringY - 36);
-      ctx.quadraticCurveTo(aMidX + aOpenR, aSpringY - 26, aMidX + aOpenR, aSpringY);
-      ctx.lineTo(aMidX + aOpenR, aBotY);
-      ctx.stroke();
-
-      // Lush green ivy & mossy shrubs sprouting from stone crevices along the pool retaining wall!
-      const bushSpots = [
-        [archCx - 30, 386, 13, 8], [archCx - 6, 488, 19, 14], [archCx + 16, 496, 15, 11],
-        [archCx + 68, 492, 18, 12], [archCx + 112, 444, 22, 11], [archCx + 178, 442, 26, 12],
-        [archCx + 245, 446, 22, 11], [archCx + 312, 444, 28, 13], [archCx - 115, 496, 16, 10],
-      ];
-      for (const [bx, by, brx, bry] of bushSpots) {
-        ctx.fillStyle = '#255c28';
-        ctx.beginPath();
-        ctx.ellipse(bx, by, brx, bry, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#4d8a34';
-        ctx.beginPath();
-        ctx.ellipse(bx - brx * 0.18, by - bry * 0.25, brx * 0.62, bry * 0.55, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // 5. COMPACT 3D PERSPECTIVE SLANTED EMERALD-TURQUOISE ROMAN POOL (البركة الرومانية بالبُعد الحقيقي)
       const pBackY = 492;
       const pFrontY = 546;
       const pBackL = archCx - 124;
       const pBackR = archCx + 236;
       const pFrontL = archCx - 172;
       const pFrontR = archCx + 276;
+      const stonePal = ['#dfd0b8', '#d3be9f', '#c7ad8a', '#e6d8c3', '#bca07c'];
+      const capCols = ['#dfd5c5', '#d2c5b2', '#c7b8a2', '#e6ddd0'];
+      const cacheOriginX = 240; // local X corresponding to poolAnchorX = 0
 
-      // Water polygon clipped cleanly inside the perspective trapezoid
-      const tracePoolWater = () => {
-        ctx.beginPath();
-        ctx.moveTo(pBackL, pBackY);
-        ctx.lineTo(pBackR, pBackY);
-        ctx.lineTo(pFrontR, pFrontY);
-        ctx.lineTo(pFrontL, pFrontY);
-        ctx.closePath();
+      // Helper: Zero-flicker hand-laid limestone wall segment on any target context
+      const drawTerraceMasonryOn = (tCtx, x0, y0, w0, h0, rowH = 12, blkW = 24, seedBase = 17) => {
+        tCtx.save();
+        tCtx.beginPath();
+        tCtx.roundRect(x0, y0, w0, h0, 3);
+        const bg = tCtx.createLinearGradient(x0, y0, x0, y0 + h0);
+        bg.addColorStop(0, '#d8c2a4');
+        bg.addColorStop(1, '#9d7d5a');
+        tCtx.fillStyle = bg;
+        tCtx.fill();
+        tCtx.clip();
+        const rows = Math.ceil(h0 / rowH);
+        for (let r = 0; r < rows; r++) {
+          const ry = y0 + r * rowH;
+          const off = (r % 2) * (blkW * 0.5);
+          for (let bx = -blkW + off; bx < w0 + blkW; bx += blkW) {
+            const idx = Math.abs(seedBase + r * 7 + Math.floor(bx / blkW) * 11) % stonePal.length;
+            tCtx.fillStyle = stonePal[idx];
+            tCtx.beginPath();
+            tCtx.roundRect(x0 + bx + 0.8, ry + 0.8, blkW - 1.6, rowH - 1.6, 2.0);
+            tCtx.fill();
+            tCtx.fillStyle = 'rgba(255, 248, 232, 0.20)';
+            tCtx.fillRect(x0 + bx + 2, ry + 1.2, blkW - 4, 1.3);
+            tCtx.fillStyle = 'rgba(54, 34, 18, 0.18)';
+            tCtx.fillRect(x0 + bx + 2, ry + rowH - 2.2, blkW - 4, 1.2);
+          }
+        }
+        tCtx.restore();
+        tCtx.strokeStyle = 'rgba(72, 46, 26, 0.72)';
+        tCtx.lineWidth = 1.2;
+        tCtx.beginPath();
+        tCtx.roundRect(x0, y0, w0, h0, 3);
+        tCtx.stroke();
       };
+
+      // Lazy-bake Back Static Layer (Upper Village Houses, Cypress, Foliage, Retaining Walls, Pointed Arch & Pool Base)
+      if (!tex.battirRomanPoolBackCache && typeof document !== 'undefined' && document.createElement) {
+        tex.battirRomanPoolBackCache = makeOffscreen(780, 560, (bCtx) => {
+          const locAnchor = cacheOriginX;
+          const locArchCx = locAnchor + 78;
+          const locWallLeft = locAnchor - 180;
+          const locBackL = locArchCx - 124, locBackR = locArchCx + 236;
+          const locFrontL = locArchCx - 172, locFrontR = locArchCx + 276;
+
+          bCtx.fillStyle = '#1b3b28';
+          bCtx.beginPath();
+          bCtx.moveTo(locArchCx - 118, 222);
+          bCtx.bezierCurveTo(locArchCx - 144, 285, locArchCx - 146, 355, locArchCx - 122, 395);
+          bCtx.lineTo(locArchCx - 110, 395);
+          bCtx.bezierCurveTo(locArchCx - 88, 355, locArchCx - 92, 285, locArchCx - 118, 222);
+          bCtx.closePath();
+          bCtx.fill();
+
+          drawTerraceMasonryOn(bCtx, locArchCx - 56, 304, 118, 72, 11, 20, 31);
+          bCtx.fillStyle = '#2d1c12';
+          bCtx.beginPath();
+          bCtx.roundRect(locArchCx - 42, 324, 15, 24, 2);
+          bCtx.roundRect(locArchCx - 16, 326, 28, 16, 2);
+          bCtx.fill();
+          bCtx.strokeStyle = '#efe0c8';
+          bCtx.lineWidth = 1.2;
+          bCtx.strokeRect(locArchCx - 16, 326, 28, 16);
+          bCtx.beginPath(); bCtx.moveTo(locArchCx - 2, 326); bCtx.lineTo(locArchCx - 2, 342); bCtx.stroke();
+
+          drawTerraceMasonryOn(bCtx, locArchCx + 76, 272, 132, 92, 11, 22, 47);
+          bCtx.fillStyle = '#362216';
+          bCtx.beginPath();
+          bCtx.roundRect(locArchCx + 104, 294, 20, 26, [6, 6, 2, 2]);
+          bCtx.roundRect(locArchCx + 150, 294, 20, 26, [6, 6, 2, 2]);
+          bCtx.fill();
+
+          const foliageClusters = [
+            [locArchCx + 115, 366, 54, 34, '#244f28'], [locArchCx + 188, 358, 62, 38, '#2d622d'],
+            [locArchCx + 266, 364, 58, 34, '#214824'], [locArchCx + 335, 372, 52, 30, '#2a5c2a'],
+            [locArchCx + 148, 382, 46, 26, '#4d8232'], [locArchCx + 225, 378, 50, 28, '#659436'],
+            [locArchCx + 298, 386, 44, 24, '#4d8232'], [locArchCx - 102, 388, 44, 24, '#2d5c2b'],
+            [locArchCx - 152, 398, 38, 22, '#3d7232'],
+          ];
+          for (const [fx, fy, frx, fry, fcol] of foliageClusters) {
+            bCtx.fillStyle = fcol;
+            bCtx.beginPath(); bCtx.ellipse(fx, fy, frx, fry, 0, 0, Math.PI * 2); bCtx.fill();
+          }
+          bCtx.fillStyle = 'rgba(190, 224, 96, 0.35)';
+          for (const [fx, fy, frx, fry] of [[locArchCx + 152, 368, 30, 14], [locArchCx + 226, 362, 34, 16], [locArchCx + 286, 370, 28, 13]]) {
+            bCtx.beginPath(); bCtx.ellipse(fx, fy, frx, fry, -0.1, 0, Math.PI * 2); bCtx.fill();
+          }
+
+          drawTerraceMasonryOn(bCtx, locArchCx + 42, 442, 365, 68, 12, 24, 63);
+          drawTerraceMasonryOn(bCtx, locWallLeft, 458, 178, 52, 12, 22, 79);
+          drawTerraceMasonryOn(bCtx, locArchCx - 74, 378, 54, 132, 11, 18, 91);
+          const wetG = bCtx.createLinearGradient(locArchCx - 74, 380, locArchCx - 20, 508);
+          wetG.addColorStop(0, 'rgba(34, 26, 18, 0.36)');
+          wetG.addColorStop(1, 'rgba(22, 36, 22, 0.50)');
+          bCtx.fillStyle = wetG;
+          bCtx.fillRect(locArchCx - 74, 380, 54, 128);
+
+          const aTopY = 374, aBotY = 508, aSpanW = 86;
+          const aLeftX = locArchCx - 22, aMidX = aLeftX + aSpanW * 0.5, aOpenR = 25, aSpringY = 446;
+          const innerG = bCtx.createLinearGradient(aMidX, aSpringY - aOpenR, aMidX, aBotY);
+          innerG.addColorStop(0, '#2a1d14'); innerG.addColorStop(0.6, '#4f3a29'); innerG.addColorStop(1, '#36261a');
+          bCtx.fillStyle = innerG;
+          bCtx.beginPath();
+          bCtx.moveTo(aMidX - aOpenR, aBotY); bCtx.lineTo(aMidX - aOpenR, aSpringY);
+          bCtx.quadraticCurveTo(aMidX - aOpenR, aSpringY - 26, aMidX, aSpringY - 36);
+          bCtx.quadraticCurveTo(aMidX + aOpenR, aSpringY - 26, aMidX + aOpenR, aSpringY);
+          bCtx.lineTo(aMidX + aOpenR, aBotY); bCtx.closePath(); bCtx.fill();
+
+          bCtx.save();
+          bCtx.beginPath();
+          bCtx.moveTo(aLeftX, aBotY); bCtx.lineTo(aLeftX, aTopY + 5);
+          bCtx.quadraticCurveTo(aLeftX, aTopY, aLeftX + 5, aTopY);
+          bCtx.lineTo(aLeftX + aSpanW - 5, aTopY);
+          bCtx.quadraticCurveTo(aLeftX + aSpanW, aTopY, aLeftX + aSpanW, aTopY + 5);
+          bCtx.lineTo(aLeftX + aSpanW, aBotY); bCtx.lineTo(aMidX + aOpenR, aBotY);
+          bCtx.lineTo(aMidX + aOpenR, aSpringY);
+          bCtx.quadraticCurveTo(aMidX + aOpenR, aSpringY - 26, aMidX, aSpringY - 36);
+          bCtx.quadraticCurveTo(aMidX - aOpenR, aSpringY - 26, aMidX - aOpenR, aSpringY);
+          bCtx.lineTo(aMidX - aOpenR, aBotY); bCtx.closePath();
+          bCtx.fillStyle = '#d6be9e'; bCtx.fill(); bCtx.clip();
+          for (let r = 0; r < 11; r++) {
+            const ry = aTopY + r * 12, off = (r % 2) * 10;
+            for (let bx = -12 + off; bx < aSpanW + 12; bx += 20) {
+              bCtx.fillStyle = stonePal[(r * 5 + Math.abs(Math.floor(bx / 20)) * 3) % stonePal.length];
+              bCtx.beginPath(); bCtx.roundRect(aLeftX + bx + 0.8, ry + 0.8, 18.4, 10.4, 2); bCtx.fill();
+            }
+          }
+          bCtx.restore();
+          bCtx.strokeStyle = '#5a3d24'; bCtx.lineWidth = 1.4;
+          bCtx.beginPath();
+          bCtx.moveTo(aMidX - aOpenR, aBotY); bCtx.lineTo(aMidX - aOpenR, aSpringY);
+          bCtx.quadraticCurveTo(aMidX - aOpenR, aSpringY - 26, aMidX, aSpringY - 36);
+          bCtx.quadraticCurveTo(aMidX + aOpenR, aSpringY - 26, aMidX + aOpenR, aSpringY);
+          bCtx.lineTo(aMidX + aOpenR, aBotY); bCtx.stroke();
+
+          const bushSpots = [
+            [locArchCx - 30, 386, 13, 8], [locArchCx - 6, 488, 19, 14], [locArchCx + 16, 496, 15, 11],
+            [locArchCx + 68, 492, 18, 12], [locArchCx + 112, 444, 22, 11], [locArchCx + 178, 442, 26, 12],
+            [locArchCx + 245, 446, 22, 11], [locArchCx + 312, 444, 28, 13], [locArchCx - 115, 496, 16, 10],
+          ];
+          for (const [bx, by, brx, bry] of bushSpots) {
+            bCtx.fillStyle = '#255c28'; bCtx.beginPath(); bCtx.ellipse(bx, by, brx, bry, 0, 0, Math.PI * 2); bCtx.fill();
+            bCtx.fillStyle = '#4d8a34'; bCtx.beginPath(); bCtx.ellipse(bx - brx * 0.18, by - bry * 0.25, brx * 0.62, bry * 0.55, 0, 0, Math.PI * 2); bCtx.fill();
+          }
+
+          // Pool water base + inner shadow + reflected greenery
+          bCtx.save();
+          bCtx.beginPath();
+          bCtx.moveTo(locBackL, pBackY); bCtx.lineTo(locBackR, pBackY);
+          bCtx.lineTo(locFrontR, pFrontY); bCtx.lineTo(locFrontL, pFrontY);
+          bCtx.closePath();
+          const poolG = bCtx.createLinearGradient(locFrontL, pBackY, locFrontR, pFrontY);
+          poolG.addColorStop(0.0, '#4ea9a2'); poolG.addColorStop(0.32, '#2c7d78');
+          poolG.addColorStop(0.68, '#1a5a5a'); poolG.addColorStop(1.0, '#103b3e');
+          bCtx.fillStyle = poolG; bCtx.fill(); bCtx.clip();
+          const edgeShG = bCtx.createLinearGradient(0, pBackY, 0, pBackY + 18);
+          edgeShG.addColorStop(0, 'rgba(12, 36, 36, 0.45)'); edgeShG.addColorStop(1, 'rgba(12, 36, 36, 0)');
+          bCtx.fillStyle = edgeShG; bCtx.fillRect(locFrontL, pBackY, locFrontR - locFrontL, 18);
+          const refG = bCtx.createLinearGradient(0, pBackY + 4, 0, pFrontY);
+          refG.addColorStop(0, 'rgba(134, 198, 146, 0.24)'); refG.addColorStop(1, 'rgba(26, 86, 86, 0)');
+          bCtx.fillStyle = refG; bCtx.fillRect(locFrontL, pBackY + 4, locFrontR - locFrontL, pFrontY - pBackY);
+          bCtx.restore();
+        });
+      }
+      if (tex.battirRomanPoolBackCache) {
+        ctx.drawImage(tex.battirRomanPoolBackCache, poolAnchorX - cacheOriginX, 0);
+      }
+
+      // Live Animated Pool Ripples & 4 Swimming Village Ducks Clipped Cleanly Inside the Pool!
       ctx.save();
-      tracePoolWater();
-      const poolG = ctx.createLinearGradient(pFrontL, pBackY, pFrontR, pFrontY);
-      poolG.addColorStop(0.0, '#4ea9a2');
-      poolG.addColorStop(0.32, '#2c7d78');
-      poolG.addColorStop(0.68, '#1a5a5a');
-      poolG.addColorStop(1.0, '#103b3e');
-      ctx.fillStyle = poolG;
-      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(pBackL, pBackY);
+      ctx.lineTo(pBackR, pBackY);
+      ctx.lineTo(pFrontR, pFrontY);
+      ctx.lineTo(pFrontL, pFrontY);
+      ctx.closePath();
       ctx.clip();
-
-      // Subtle dark inner waterline shadow under the back & side walls
-      const edgeShG = ctx.createLinearGradient(0, pBackY, 0, pBackY + 18);
-      edgeShG.addColorStop(0, 'rgba(12, 36, 36, 0.45)');
-      edgeShG.addColorStop(1, 'rgba(12, 36, 36, 0)');
-      ctx.fillStyle = edgeShG;
-      ctx.fillRect(pFrontL, pBackY, pFrontR - pFrontL, 18);
-
-      // Soft reflected greenery & sunlit stone shimmer on the pool surface
-      const refG = ctx.createLinearGradient(0, pBackY + 4, 0, pFrontY);
-      refG.addColorStop(0, 'rgba(134, 198, 146, 0.24)');
-      refG.addColorStop(1, 'rgba(26, 86, 86, 0)');
-      ctx.fillStyle = refG;
-      ctx.fillRect(pFrontL, pBackY + 4, pFrontR - pFrontL, pFrontY - pBackY);
 
       // Perspective-scaled gentle pool ripples
       for (let rr = 0; rr < 5; rr++) {
@@ -29573,7 +29935,6 @@ window.Game = window.Game || {};
       ctx.closePath();
       ctx.fill();
 
-      // Animated sparkling falling water droplets & frothy spray along the waterfall arc
       for (let d = 0; d < 10; d++) {
         const u = ((time * 1.55 + d / 10) % 1);
         const inv = 1 - u;
@@ -29587,7 +29948,6 @@ window.Game = window.Game || {};
         ctx.fill();
       }
 
-      // Bright frothy white splash crown & expanding ripple rings on the emerald pool!
       const spGlow = ctx.createRadialGradient(wfEndX, wfEndY + 2, 2, wfEndX, wfEndY + 2, 28);
       spGlow.addColorStop(0, 'rgba(255, 255, 255, 0.92)');
       spGlow.addColorStop(0.45, 'rgba(207, 250, 254, 0.48)');
@@ -29603,256 +29963,190 @@ window.Game = window.Game || {};
       ctx.ellipse(wfEndX, wfEndY + 3, 12 + ripFrac * 34, 2.8 + ripFrac * 6.5, 0, 0, Math.PI * 2);
       ctx.stroke();
 
-      // 7. REALISTIC 3D PERSPECTIVE DRESSED-LIMESTONE POOL WALL & COPING (جدار مائل واقعي حول البركة)
-      const capCols = ['#dfd5c5', '#d2c5b2', '#c7b8a2', '#e6ddd0'];
-      // 7a. Back low stone curb along back waterline
-      for (let rx = pBackL - 6; rx < pBackR + 6; rx += 24) {
-        const rw = Math.min(23, pBackR + 6 - rx);
-        ctx.fillStyle = capCols[Math.abs(Math.floor(rx / 24) * 5) % capCols.length];
-        ctx.strokeStyle = 'rgba(72, 54, 38, 0.52)';
-        ctx.lineWidth = 0.9;
-        ctx.beginPath();
-        ctx.roundRect(rx, pBackY - 5, rw, 7, 1.5);
-        ctx.fill();
-        ctx.stroke();
+      // Lazy-bake Front Static Layer (3D Perspective Coping Walls + Stepped Terraced Gardens + 3 Lemon Trees)
+      if (!tex.battirRomanPoolFrontCache && typeof document !== 'undefined' && document.createElement) {
+        tex.battirRomanPoolFrontCache = makeOffscreen(780, 170, (fCtx) => {
+          const yShift = 480;
+          fCtx.translate(0, -yShift);
+          const locArchCx = cacheOriginX + 78;
+          const locBackL = locArchCx - 124, locBackR = locArchCx + 236;
+          const locFrontL = locArchCx - 172, locFrontR = locArchCx + 276;
+
+          for (let rx = locBackL - 6; rx < locBackR + 6; rx += 24) {
+            const rw = Math.min(23, locBackR + 6 - rx);
+            fCtx.fillStyle = capCols[Math.abs(Math.floor((rx - locArchCx) / 24) * 5) % capCols.length];
+            fCtx.strokeStyle = 'rgba(72, 54, 38, 0.52)';
+            fCtx.lineWidth = 0.9;
+            fCtx.beginPath(); fCtx.roundRect(rx, pBackY - 5, rw, 7, 1.5); fCtx.fill(); fCtx.stroke();
+          }
+          fCtx.fillStyle = '#d4c7b4'; fCtx.strokeStyle = '#5c4632'; fCtx.lineWidth = 1.1;
+          fCtx.beginPath();
+          fCtx.moveTo(locBackL - 10, pBackY - 5); fCtx.lineTo(locBackL + 1, pBackY - 5);
+          fCtx.lineTo(locFrontL + 2, pFrontY + 1); fCtx.lineTo(locFrontL - 13, pFrontY + 1);
+          fCtx.closePath(); fCtx.fill(); fCtx.stroke();
+          fCtx.fillStyle = '#8f7d69';
+          fCtx.beginPath();
+          fCtx.moveTo(locBackL - 10, pBackY - 5); fCtx.lineTo(locFrontL - 13, pFrontY + 1);
+          fCtx.lineTo(locFrontL - 13, pFrontY + 23); fCtx.lineTo(locBackL - 10, pBackY + 14);
+          fCtx.closePath(); fCtx.fill(); fCtx.stroke();
+
+          fCtx.fillStyle = '#d8ccb9';
+          fCtx.beginPath();
+          fCtx.moveTo(locBackR - 1, pBackY - 5); fCtx.lineTo(locBackR + 10, pBackY - 5);
+          fCtx.lineTo(locFrontR + 13, pFrontY + 1); fCtx.lineTo(locFrontR - 2, pFrontY + 1);
+          fCtx.closePath(); fCtx.fill(); fCtx.stroke();
+          fCtx.fillStyle = '#998773';
+          fCtx.beginPath();
+          fCtx.moveTo(locBackR + 10, pBackY - 5); fCtx.lineTo(locFrontR + 13, pFrontY + 1);
+          fCtx.lineTo(locFrontR + 13, pFrontY + 23); fCtx.lineTo(locBackR + 10, pBackY + 14);
+          fCtx.closePath(); fCtx.fill(); fCtx.stroke();
+
+          const frontWallL = locFrontL - 13;
+          const frontWallW = (locFrontR + 13) - frontWallL;
+          const frontWallH = 22;
+          drawTerraceMasonryOn(fCtx, frontWallL, pFrontY + 2, frontWallW, frontWallH, 11, 26, 107);
+          for (let fx = frontWallL; fx < frontWallL + frontWallW; fx += 28) {
+            const fw = Math.min(27, frontWallL + frontWallW - fx);
+            fCtx.fillStyle = capCols[Math.abs(Math.floor((fx - frontWallL) / 28) * 3 + 2) % capCols.length];
+            fCtx.strokeStyle = 'rgba(72, 54, 38, 0.55)';
+            fCtx.lineWidth = 0.9;
+            fCtx.beginPath(); fCtx.roundRect(fx, pFrontY - 3, fw, 7, 1.6); fCtx.fill(); fCtx.stroke();
+            fCtx.fillStyle = 'rgba(255, 252, 245, 0.25)';
+            fCtx.fillRect(fx + 2, pFrontY - 2, Math.max(2, fw - 4), 1.5);
+          }
+
+          const gTopY = pFrontY + frontWallH + 2;
+          const gBotY = 635;
+          const gLeft = frontWallL - 18;
+          const gRight = frontWallL + frontWallW + 18;
+          const gW = gRight - gLeft;
+          const gardenCurveY = (u, baseY, amp) => baseY + Math.sin(u * Math.PI) * amp;
+
+          const soilG1 = fCtx.createLinearGradient(0, gTopY, 0, gTopY + 32);
+          soilG1.addColorStop(0.0, '#5a3b22'); soilG1.addColorStop(0.45, '#714c2d'); soilG1.addColorStop(1.0, '#4f331d');
+          fCtx.fillStyle = soilG1;
+          fCtx.beginPath();
+          fCtx.moveTo(frontWallL - 4, gTopY); fCtx.lineTo(frontWallL + frontWallW + 4, gTopY);
+          for (let s = 14; s >= 0; s--) {
+            const u = s / 14;
+            fCtx.lineTo(gLeft + 6 + u * (gW - 12), gardenCurveY(u, 600, 4.5));
+          }
+          fCtx.closePath(); fCtx.fill();
+
+          fCtx.strokeStyle = 'rgba(36, 20, 10, 0.34)'; fCtx.lineWidth = 1.0;
+          for (const fOff of [8, 16, 24]) {
+            fCtx.beginPath();
+            for (let s = 0; s <= 14; s++) {
+              const u = s / 14;
+              const fx = gLeft + 12 + u * (gW - 24), fy = gardenCurveY(u, gTopY + fOff, 3.2);
+              if (s === 0) fCtx.moveTo(fx, fy); else fCtx.lineTo(fx, fy);
+            }
+            fCtx.stroke();
+          }
+          for (let i = 0; i < 20; i++) {
+            const u = (i + 0.5) / 20;
+            const px0 = gLeft + 18 + u * (gW - 36);
+            const py0 = gardenCurveY(u, gTopY + 18, 3.5) + ((i % 2) * 3 - 1.5);
+            const crop = i < 7 ? 'mint' : (i < 13 ? 'tomato' : 'eggplant');
+            fCtx.fillStyle = crop === 'mint' ? '#22c55e' : '#1e6b34';
+            fCtx.beginPath(); fCtx.ellipse(px0, py0, 7.5, 3.0, 0, 0, Math.PI * 2); fCtx.fill();
+            fCtx.fillStyle = crop === 'mint' ? '#86efac' : '#4ade80';
+            fCtx.beginPath(); fCtx.ellipse(px0 - 1.5, py0 - 1.0, 4.0, 1.5, 0, 0, Math.PI * 2); fCtx.fill();
+            if (crop === 'tomato') {
+              fCtx.fillStyle = '#ef4444'; fCtx.beginPath(); fCtx.arc(px0 + 2.4, py0, 1.8, 0, Math.PI * 2); fCtx.fill();
+            } else if (crop === 'eggplant') {
+              fCtx.fillStyle = '#581c87'; fCtx.beginPath(); fCtx.ellipse(px0 + 2.2, py0 + 0.6, 1.5, 2.3, 0.2, 0, Math.PI * 2); fCtx.fill();
+            }
+          }
+
+          const stepCols = ['#c7b7a0', '#b8a58c', '#d4c6b1', '#a6937a', '#cfc0aa'];
+          let stX = gLeft + 4, stIdx = 0;
+          while (stX < gRight - 6) {
+            const hh = Math.abs(83 + stIdx * 13);
+            const rx = 5.5 + (hh % 5) * 1.1, ry = 3.2 + (hh % 3) * 0.45;
+            const u = Math.max(0, Math.min(1, (stX + rx - gLeft) / gW));
+            const sy0 = gardenCurveY(u, 602, 4.5);
+            fCtx.fillStyle = stepCols[hh % stepCols.length];
+            fCtx.strokeStyle = 'rgba(38, 25, 14, 0.62)'; fCtx.lineWidth = 0.8;
+            fCtx.beginPath(); fCtx.ellipse(stX + rx, sy0, rx, ry, ((hh % 5) - 2) * 0.04, 0, Math.PI * 2); fCtx.fill(); fCtx.stroke();
+            stX += rx * 1.82; stIdx++;
+          }
+
+          const soilG2 = fCtx.createLinearGradient(0, 604, 0, gBotY);
+          soilG2.addColorStop(0.0, '#4f331c'); soilG2.addColorStop(0.55, '#664326');
+          soilG2.addColorStop(0.88, '#46381e'); soilG2.addColorStop(1.0, '#3a4a21');
+          fCtx.fillStyle = soilG2;
+          fCtx.beginPath();
+          for (let s = 0; s <= 14; s++) {
+            const u = s / 14;
+            const fx = gLeft + 4 + u * (gW - 8), fy = gardenCurveY(u, 605, 4.5);
+            if (s === 0) fCtx.moveTo(fx, fy); else fCtx.lineTo(fx, fy);
+          }
+          fCtx.lineTo(gRight, gBotY); fCtx.lineTo(gLeft, gBotY); fCtx.closePath(); fCtx.fill();
+
+          fCtx.strokeStyle = 'rgba(34, 18, 8, 0.32)'; fCtx.lineWidth = 1.0;
+          for (const fOff of [9, 18]) {
+            fCtx.beginPath();
+            for (let s = 0; s <= 14; s++) {
+              const u = s / 14;
+              const fx = gLeft + 10 + u * (gW - 20), fy = gardenCurveY(u, 606 + fOff, 3.0);
+              if (s === 0) fCtx.moveTo(fx, fy); else fCtx.lineTo(fx, fy);
+            }
+            fCtx.stroke();
+          }
+          for (let i = 0; i < 18; i++) {
+            const u = (i + 0.5) / 18;
+            const px0 = gLeft + 16 + u * (gW - 32);
+            const py0 = gardenCurveY(u, 621, 3.2) + ((i % 2) * 2.5 - 1.2);
+            const crop = i % 3 === 0 ? 'mint' : (i % 3 === 1 ? 'eggplant' : 'tomato');
+            fCtx.fillStyle = crop === 'mint' ? '#22c55e' : '#1b6430';
+            fCtx.beginPath(); fCtx.ellipse(px0, py0, 8.2, 3.2, 0, 0, Math.PI * 2); fCtx.fill();
+            fCtx.fillStyle = crop === 'mint' ? '#86efac' : '#4ade80';
+            fCtx.beginPath(); fCtx.ellipse(px0 - 1.5, py0 - 1.0, 4.2, 1.5, 0, 0, Math.PI * 2); fCtx.fill();
+            if (crop === 'tomato') {
+              fCtx.fillStyle = '#ef4444'; fCtx.beginPath(); fCtx.arc(px0 + 2.5, py0, 1.8, 0, Math.PI * 2); fCtx.fill();
+            } else if (crop === 'eggplant') {
+              fCtx.fillStyle = '#581c87'; fCtx.beginPath(); fCtx.ellipse(px0 + 2.2, py0 + 0.6, 1.5, 2.3, 0.2, 0, Math.PI * 2); fCtx.fill();
+            }
+          }
+
+          const drawGardenLemonTree = (lx, ly, sc) => {
+            fCtx.save();
+            fCtx.translate(lx, ly);
+            fCtx.scale(sc, sc);
+            fCtx.fillStyle = 'rgba(20, 14, 8, 0.28)';
+            fCtx.beginPath(); fCtx.ellipse(0, 1, 20, 3.8, 0, 0, Math.PI * 2); fCtx.fill();
+            fCtx.strokeStyle = '#5c3c22'; fCtx.lineWidth = 4.0; fCtx.lineCap = 'round';
+            fCtx.beginPath();
+            fCtx.moveTo(0, 0); fCtx.quadraticCurveTo(-2, -14, 0, -24);
+            fCtx.moveTo(0, -18); fCtx.lineTo(-10, -28);
+            fCtx.moveTo(0, -18); fCtx.lineTo(10, -27);
+            fCtx.stroke();
+            for (const [cx0, cy0, rx, ry, col] of [
+              [-14, -30, 12, 9, '#1b4d24'], [14, -29, 12, 9, '#1b4d24'], [0, -34, 16, 11, '#225d29'],
+              [-9, -36, 11, 8, '#387d32'], [10, -35, 11, 8, '#387d32'], [0, -40, 13, 8, '#5a9b3c'],
+            ]) {
+              fCtx.fillStyle = col; fCtx.beginPath(); fCtx.ellipse(cx0, cy0, rx, ry, 0, 0, Math.PI * 2); fCtx.fill();
+            }
+            for (const [fx, fy] of [[-13, -30], [-4, -36], [6, -32], [14, -28], [1, -41]]) {
+              fCtx.fillStyle = '#facc15'; fCtx.strokeStyle = '#a16207'; fCtx.lineWidth = 0.6;
+              fCtx.beginPath(); fCtx.ellipse(fx, fy, 2.3, 3.0, 0.3, 0, Math.PI * 2); fCtx.fill(); fCtx.stroke();
+              fCtx.fillStyle = '#fef9c3'; fCtx.beginPath(); fCtx.arc(fx - 0.7, fy - 0.8, 0.7, 0, Math.PI * 2); fCtx.fill();
+            }
+            fCtx.restore();
+          };
+          drawGardenLemonTree(gLeft + 88, 599, 0.94);
+          drawGardenLemonTree(gLeft + 258, 603, 1.02);
+          drawGardenLemonTree(gRight - 46, 622, 0.96);
+
+          fCtx.fillStyle = '#475c26';
+          for (let gx = gLeft + 14; gx < gRight - 10; gx += 34) {
+            fCtx.beginPath(); fCtx.ellipse(gx, gBotY - 1, 16, 4.2, 0, 0, Math.PI * 2); fCtx.fill();
+          }
+        });
       }
-      // 7b. Slanted Left & Right Perspective Coping Walls (top cap face + angled outer wall face)
-      // Left slanted wall
-      ctx.fillStyle = '#d4c7b4';
-      ctx.strokeStyle = '#5c4632';
-      ctx.lineWidth = 1.1;
-      ctx.beginPath();
-      ctx.moveTo(pBackL - 10, pBackY - 5);
-      ctx.lineTo(pBackL + 1, pBackY - 5);
-      ctx.lineTo(pFrontL + 2, pFrontY + 1);
-      ctx.lineTo(pFrontL - 13, pFrontY + 1);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      // Left outer side thickness (3D depth face)
-      ctx.fillStyle = '#8f7d69';
-      ctx.beginPath();
-      ctx.moveTo(pBackL - 10, pBackY - 5);
-      ctx.lineTo(pFrontL - 13, pFrontY + 1);
-      ctx.lineTo(pFrontL - 13, pFrontY + 23);
-      ctx.lineTo(pBackL - 10, pBackY + 14);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      // Right slanted wall
-      ctx.fillStyle = '#d8ccb9';
-      ctx.beginPath();
-      ctx.moveTo(pBackR - 1, pBackY - 5);
-      ctx.lineTo(pBackR + 10, pBackY - 5);
-      ctx.lineTo(pFrontR + 13, pFrontY + 1);
-      ctx.lineTo(pFrontR - 2, pFrontY + 1);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      // Right outer side thickness
-      ctx.fillStyle = '#998773';
-      ctx.beginPath();
-      ctx.moveTo(pBackR + 10, pBackY - 5);
-      ctx.lineTo(pFrontR + 13, pFrontY + 1);
-      ctx.lineTo(pFrontR + 13, pFrontY + 23);
-      ctx.lineTo(pBackR + 10, pBackY + 14);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      // 7c. Front Low Dressed-Limestone Pool Coping & Retaining Wall (y = 545..569, clean & compact!)
-      const frontWallL = pFrontL - 13;
-      const frontWallW = (pFrontR + 13) - frontWallL;
-      const frontWallH = 22;
-      drawTerraceMasonry(frontWallL, pFrontY + 2, frontWallW, frontWallH, 11, 26, 107);
-      // Beveled front top coping cap stones
-      for (let fx = frontWallL; fx < frontWallL + frontWallW; fx += 28) {
-        const fw = Math.min(27, frontWallL + frontWallW - fx);
-        ctx.fillStyle = capCols[Math.abs(Math.floor(fx / 28) * 3 + 2) % capCols.length];
-        ctx.strokeStyle = 'rgba(72, 54, 38, 0.55)';
-        ctx.lineWidth = 0.9;
-        ctx.beginPath();
-        ctx.roundRect(fx, pFrontY - 3, fw, 7, 1.6);
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = 'rgba(255, 252, 245, 0.25)';
-        ctx.fillRect(fx + 2, pFrontY - 2, Math.max(2, fw - 4), 1.5);
-      }
-
-      // 8. LOWER FLOWING TERRACED BATTIR GARDEN (مدرّجات ومشاكب انسيابية طبيعية فوق النهر مباشرة!)
-      const gTopY = pFrontY + frontWallH + 2; // y = 570
-      const gBotY = 635; // meets the valley riverbank seamlessly at y = 635!
-      const gLeft = frontWallL - 18;
-      const gRight = frontWallL + frontWallW + 18;
-      const gW = gRight - gLeft;
-
-      // Helper: Gentle horizontal terrace contour Y across the lower garden
-      const gardenCurveY = (u, baseY, amp) => baseY + Math.sin(u * Math.PI) * amp;
-
-      // 8a. Upper Flowing Terrace Bed (y = 570..601) — natural side-perspective fertile brown soil
-      const soilG1 = ctx.createLinearGradient(0, gTopY, 0, gTopY + 32);
-      soilG1.addColorStop(0.0, '#5a3b22');
-      soilG1.addColorStop(0.45, '#714c2d');
-      soilG1.addColorStop(1.0, '#4f331d');
-      ctx.fillStyle = soilG1;
-      ctx.beginPath();
-      ctx.moveTo(frontWallL - 4, gTopY);
-      ctx.lineTo(frontWallL + frontWallW + 4, gTopY);
-      for (let s = 14; s >= 0; s--) {
-        const u = s / 14;
-        ctx.lineTo(gLeft + 6 + u * (gW - 12), gardenCurveY(u, 600, 4.5));
-      }
-      ctx.closePath();
-      ctx.fill();
-
-      // Subtle flowing horizontal irrigation soil furrows on Upper Terrace
-      ctx.strokeStyle = 'rgba(36, 20, 10, 0.34)';
-      ctx.lineWidth = 1.0;
-      for (const fOff of [8, 16, 24]) {
-        ctx.beginPath();
-        for (let s = 0; s <= 14; s++) {
-          const u = s / 14;
-          const fx = gLeft + 12 + u * (gW - 24);
-          const fy = gardenCurveY(u, gTopY + fOff, 3.2);
-          if (s === 0) ctx.moveTo(fx, fy); else ctx.lineTo(fx, fy);
-        }
-        ctx.stroke();
-      }
-
-      // Flowing planted rows of Mint, Tomatoes & Battiri Eggplants along Upper Terrace
-      for (let i = 0; i < 20; i++) {
-        const u = (i + 0.5) / 20;
-        const px0 = gLeft + 18 + u * (gW - 36);
-        const py0 = gardenCurveY(u, gTopY + 18, 3.5) + ((i % 2) * 3 - 1.5);
-        const crop = i < 7 ? 'mint' : (i < 13 ? 'tomato' : 'eggplant');
-        ctx.fillStyle = crop === 'mint' ? '#22c55e' : '#1e6b34';
-        ctx.beginPath(); ctx.ellipse(px0, py0, 7.5, 3.0, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = crop === 'mint' ? '#86efac' : '#4ade80';
-        ctx.beginPath(); ctx.ellipse(px0 - 1.5, py0 - 1.0, 4.0, 1.5, 0, 0, Math.PI * 2); ctx.fill();
-        if (crop === 'tomato') {
-          ctx.fillStyle = '#ef4444';
-          ctx.beginPath(); ctx.arc(px0 + 2.4, py0, 1.8, 0, Math.PI * 2); ctx.fill();
-        } else if (crop === 'eggplant') {
-          ctx.fillStyle = '#581c87';
-          ctx.beginPath(); ctx.ellipse(px0 + 2.2, py0 + 0.6, 1.5, 2.3, 0.2, 0, Math.PI * 2); ctx.fill();
-        }
-      }
-
-      // 8b. Low Rustic Hand-Stacked Dry-Stone Sanasel Retaining Edge separating Upper & Lower Garden Terraces!
-      const stepCols = ['#c7b7a0', '#b8a58c', '#d4c6b1', '#a6937a', '#cfc0aa'];
-      let stX = gLeft + 4;
-      let stIdx = 0;
-      while (stX < gRight - 6) {
-        const h = Math.abs(83 + stIdx * 13);
-        const rx = 5.5 + (h % 5) * 1.1;
-        const ry = 3.2 + (h % 3) * 0.45;
-        const u = Math.max(0, Math.min(1, (stX + rx - gLeft) / gW));
-        const sy0 = gardenCurveY(u, 602, 4.5);
-        ctx.fillStyle = stepCols[h % stepCols.length];
-        ctx.strokeStyle = 'rgba(38, 25, 14, 0.62)';
-        ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        ctx.ellipse(stX + rx, sy0, rx, ry, ((h % 5) - 2) * 0.04, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        stX += rx * 1.82;
-        stIdx++;
-      }
-
-      // 8c. Lower Riverbank Garden Terrace Bed (y = 605..635) flowing smoothly down to the river!
-      const soilG2 = ctx.createLinearGradient(0, 604, 0, gBotY);
-      soilG2.addColorStop(0.0, '#4f331c');
-      soilG2.addColorStop(0.55, '#664326');
-      soilG2.addColorStop(0.88, '#46381e');
-      soilG2.addColorStop(1.0, '#3a4a21');
-      ctx.fillStyle = soilG2;
-      ctx.beginPath();
-      for (let s = 0; s <= 14; s++) {
-        const u = s / 14;
-        const fx = gLeft + 4 + u * (gW - 8);
-        const fy = gardenCurveY(u, 605, 4.5);
-        if (s === 0) ctx.moveTo(fx, fy); else ctx.lineTo(fx, fy);
-      }
-      ctx.lineTo(gRight, gBotY);
-      ctx.lineTo(gLeft, gBotY);
-      ctx.closePath();
-      ctx.fill();
-
-      // Gentle curved furrows & lush herb/vegetable tufts along the Lower Terrace
-      ctx.strokeStyle = 'rgba(34, 18, 8, 0.32)';
-      ctx.lineWidth = 1.0;
-      for (const fOff of [9, 18]) {
-        ctx.beginPath();
-        for (let s = 0; s <= 14; s++) {
-          const u = s / 14;
-          const fx = gLeft + 10 + u * (gW - 20);
-          const fy = gardenCurveY(u, 606 + fOff, 3.0);
-          if (s === 0) ctx.moveTo(fx, fy); else ctx.lineTo(fx, fy);
-        }
-        ctx.stroke();
-      }
-      for (let i = 0; i < 18; i++) {
-        const u = (i + 0.5) / 18;
-        const px0 = gLeft + 16 + u * (gW - 32);
-        const py0 = gardenCurveY(u, 621, 3.2) + ((i % 2) * 2.5 - 1.2);
-        const crop = i % 3 === 0 ? 'mint' : (i % 3 === 1 ? 'eggplant' : 'tomato');
-        ctx.fillStyle = crop === 'mint' ? '#22c55e' : '#1b6430';
-        ctx.beginPath(); ctx.ellipse(px0, py0, 8.2, 3.2, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = crop === 'mint' ? '#86efac' : '#4ade80';
-        ctx.beginPath(); ctx.ellipse(px0 - 1.5, py0 - 1.0, 4.2, 1.5, 0, 0, Math.PI * 2); ctx.fill();
-        if (crop === 'tomato') {
-          ctx.fillStyle = '#ef4444';
-          ctx.beginPath(); ctx.arc(px0 + 2.5, py0, 1.8, 0, Math.PI * 2); ctx.fill();
-        } else if (crop === 'eggplant') {
-          ctx.fillStyle = '#581c87';
-          ctx.beginPath(); ctx.ellipse(px0 + 2.2, py0 + 0.6, 1.5, 2.3, 0.2, 0, Math.PI * 2); ctx.fill();
-        }
-      }
-
-      // 8d. 3 Fruiting Palestinian Lemon Trees (أشجار ليمون مثمرة) rooted naturally along the stepped terraces!
-      const drawGardenLemonTree = (lx, ly, sc) => {
-        ctx.save();
-        ctx.translate(lx, ly);
-        ctx.scale(sc, sc);
-        ctx.fillStyle = 'rgba(20, 14, 8, 0.28)';
-        ctx.beginPath(); ctx.ellipse(0, 1, 20, 3.8, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#5c3c22';
-        ctx.lineWidth = 4.0;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(0, 0); ctx.quadraticCurveTo(-2, -14, 0, -24);
-        ctx.moveTo(0, -18); ctx.lineTo(-10, -28);
-        ctx.moveTo(0, -18); ctx.lineTo(10, -27);
-        ctx.stroke();
-        const lPuffs = [
-          [-14, -30, 12, 9, '#1b4d24'], [14, -29, 12, 9, '#1b4d24'], [0, -34, 16, 11, '#225d29'],
-          [-9, -36, 11, 8, '#387d32'], [10, -35, 11, 8, '#387d32'], [0, -40, 13, 8, '#5a9b3c'],
-        ];
-        for (const [cx0, cy0, rx, ry, col] of lPuffs) {
-          ctx.fillStyle = col;
-          ctx.beginPath(); ctx.ellipse(cx0, cy0, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
-        }
-        for (const [fx, fy] of [[-13, -30], [-4, -36], [6, -32], [14, -28], [1, -41]]) {
-          ctx.fillStyle = '#facc15';
-          ctx.strokeStyle = '#a16207';
-          ctx.lineWidth = 0.6;
-          ctx.beginPath(); ctx.ellipse(fx, fy, 2.3, 3.0, 0.3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-          ctx.fillStyle = '#fef9c3';
-          ctx.beginPath(); ctx.arc(fx - 0.7, fy - 0.8, 0.7, 0, Math.PI * 2); ctx.fill();
-        }
-        ctx.restore();
-      };
-      drawGardenLemonTree(gLeft + 88, 599, 0.94);
-      drawGardenLemonTree(gLeft + 258, 603, 1.02);
-      drawGardenLemonTree(gRight - 46, 622, 0.96);
-
-      // Soft grassy & stone riverbank border blending cleanly into the crystal-clear river at y = 635!
-      ctx.fillStyle = '#475c26';
-      for (let gx = gLeft + 14; gx < gRight - 10; gx += 34) {
-        ctx.beginPath();
-        ctx.ellipse(gx, gBotY - 1, 16, 4.2, 0, 0, Math.PI * 2);
-        ctx.fill();
+      if (tex.battirRomanPoolFrontCache) {
+        ctx.drawImage(tex.battirRomanPoolFrontCache, poolAnchorX - cacheOriginX, 480);
       }
 
       ctx.restore();
@@ -30205,5 +30499,53 @@ window.Game = window.Game || {};
   Art.drawCheckpoint = drawCheckpointExtended;
   Art.drawPlatform = drawPlatformExtended;
   Art.drawWorldTeasers = drawWorldTeasersExtended;
+  function freeOffscreen(c) {
+    if (c && typeof c.width === 'number') {
+      c.width = 0;
+      c.height = 0;
+    }
+  }
+
+  const prevPurgeCaches = Art.purgeInactiveStageCaches;
+  Art.purgeInactiveStageCaches = function (activeTheme) {
+    if (typeof prevPurgeCaches === 'function') prevPurgeCaches(activeTheme);
+    if (activeTheme !== 'greenhouse' && greenhouseMidCache) {
+      freeOffscreen(greenhouseMidCache);
+      greenhouseMidCache = null;
+    }
+    if (activeTheme !== 'desert' && tex.pyramids) {
+      for (const k of Object.keys(tex.pyramids)) {
+        const item = tex.pyramids[k];
+        freeOffscreen(item && item.spr ? item.spr : item);
+      }
+      tex.pyramids = null;
+    }
+    if (activeTheme !== 'battir') {
+      if (battirFarCache) {
+        freeOffscreen(battirFarCache);
+        battirFarCache = null;
+      }
+      for (const k of Object.keys(battirSceneCache)) {
+        freeOffscreen(battirSceneCache[k]);
+        delete battirSceneCache[k];
+      }
+      const battirTexKeys = [
+        'battirSkyRidgeCache',
+        'battirGorgeRidgeCache',
+        'battirRomanPoolBackCache',
+        'battirRomanPoolFrontCache',
+        'pomegranateTreeSprite',
+        'oliveTreeSprite',
+        'almondTreeSprite',
+      ];
+      for (const k of battirTexKeys) {
+        if (tex[k]) {
+          freeOffscreen(tex[k]);
+          tex[k] = null;
+        }
+      }
+    }
+  };
+
   Art.ensureTextures = ensureTextures;
 })();

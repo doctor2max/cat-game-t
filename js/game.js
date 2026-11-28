@@ -5,12 +5,19 @@ window.Game = window.Game || {};
   const LOGICAL_W = 1280;
   const LOGICAL_H = 720;
   const DEVICE_DPR = Math.min(window.devicePixelRatio || 1, 2);
-  const RENDER_SCALE = Math.min(1.5, Math.max(1.15, DEVICE_DPR * 0.75)); // High-clarity Retina canvas while keeping smooth 60fps
-  canvas.width = Math.round(LOGICAL_W * RENDER_SCALE);
-  canvas.height = Math.round(LOGICAL_H * RENDER_SCALE);
+  const BASE_RENDER_SCALE = Math.min(1.35, Math.max(1.0, DEVICE_DPR * 0.68)); // Crisp Retina clarity with 20% lower GPU pixel load
+  let RENDER_SCALE = BASE_RENDER_SCALE;
   const ctx = canvas.getContext('2d', { alpha: false });
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
+  function applyCanvasScale(newScale) {
+    RENDER_SCALE = newScale;
+    canvas.width = Math.round(LOGICAL_W * RENDER_SCALE);
+    canvas.height = Math.round(LOGICAL_H * RENDER_SCALE);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'medium'; // Hardware GPU bilinear texture filtering (3-5x faster than software bicubic 'high')
+  }
+  applyCanvasScale(BASE_RENDER_SCALE);
+  let needsStaticFrame = true;
+  let slowFrameStreak = 0;
   try {
     // Disable expensive Canvas 2D Gaussian shadowBlur on mobile GPUs
     Object.defineProperty(ctx, 'shadowBlur', {
@@ -508,8 +515,11 @@ window.Game = window.Game || {};
       { list: lv.morocco_monkeys }, { list: lv.morocco_merchants }, { list: lv.morocco_storks },
       { list: lv.maya_jaguars }, { list: lv.maya_warriors }, { list: lv.maya_quetzals, swoop: 150 },
       { list: lv.greece_goats }, { list: lv.greece_hoplites }, { list: lv.greece_owls, swoop: 0 },
-      { list: lv.battir_porcupines }, { list: lv.battir_hyraxes }, { list: lv.battir_kestrels, swoop: 0 },
-      { list: lv.istanbul_kangals }, { list: lv.istanbul_merchants }, { list: lv.istanbul_gulls, swoop: 0 },
+      { list: lv.battir_porcupines }, { list: lv.battir_boars }, { list: lv.battir_hoopoes, swoop: 0 }, { list: lv.battir_scorpions },
+      { list: lv.battir_hyraxes }, { list: lv.battir_kestrels, swoop: 0 },
+      { list: lv.istanbul_kangals }, { list: lv.istanbul_merchants }, { list: lv.istanbul_gulls, swoop: 110 }, { list: lv.istanbul_janissaries }, { list: lv.istanbul_alley_cats },
+      { list: lv.swiss_ibex }, { list: lv.swiss_marmots }, { list: lv.swiss_eagles, swoop: 120 }, { list: lv.swiss_nutcrackers }, { list: lv.swiss_snow_foxes }, { list: lv.swiss_clockwork_owls },
+      { list: lv.airport_luggage_bots }, { list: lv.airport_runaway_carts }, { list: lv.airport_customs_dogs }, { list: lv.airport_tarmac_drones, swoop: 26 }, { list: lv.airport_ground_marshals },
       { list: lv.crows }, { list: lv.pigeons }, { list: lv.seagulls },
       { list: lv.falcons }, { list: lv.bats }, { list: lv.owls },
       { list: lv.pelicans }, { list: lv.hawks }, { list: lv.drones },
@@ -677,7 +687,9 @@ window.Game = window.Game || {};
     catCtrl.cat.greeceOutfit = !!level.greeceOutfit;
     catCtrl.cat.battirOutfit = !!level.battirOutfit;
     catCtrl.cat.istanbulOutfit = !!level.istanbulOutfit;
+    catCtrl.cat.swissOutfit = !!level.swissOutfit;
 
+    if (Art && Art.purgeInactiveStageCaches) Art.purgeInactiveStageCaches(level.theme);
     Particles.clear();
     elapsedTime = 0;
     collectedTreats = 0;
@@ -690,12 +702,12 @@ window.Game = window.Game || {};
     camY = 0;
     bgSkyCache.theme = '';
     bgMidCache.theme = '';
+    needsStaticFrame = true;
+    slowFrameStreak = 0;
 
-    // Reset touch button visuals
-    const nvBtn = document.querySelector('.touch-skill[data-action="nightvision"]');
-    if (nvBtn) nvBtn.classList.remove('active');
-    const meowBtn = document.querySelector('.touch-skill[data-action="meow"]');
-    if (meowBtn) meowBtn.classList.remove('cooldown');
+    // Reset touch button visuals (cached refs)
+    if (nvTouchBtn) nvTouchBtn.classList.remove('active');
+    if (meowTouchBtn) meowTouchBtn.classList.remove('cooldown');
 
     hudState.lives = -1;
     hudState.maxLives = -1;
@@ -710,6 +722,8 @@ window.Game = window.Game || {};
 
   const hudState = { lives: -1, maxLives: -1, purpleLives: -1, treats: -1, nv: null, meowCd: null, shield: null };
   let lifeSegs = [];
+  const nvTouchBtn = typeof document !== 'undefined' ? document.querySelector('.touch-skill[data-action="nightvision"]') : null;
+  const meowTouchBtn = typeof document !== 'undefined' ? document.querySelector('.touch-skill[data-action="meow"]') : null;
 
   function updateHUD() {
     if (!catCtrl) return;
@@ -749,15 +763,13 @@ window.Game = window.Game || {};
     if (hudState.nv !== c.nightVision) {
       hudState.nv = c.nightVision;
       if (skillNightVision) skillNightVision.classList.toggle('active', c.nightVision);
-      const nvBtn = document.querySelector('.touch-skill[data-action="nightvision"]');
-      if (nvBtn) nvBtn.classList.toggle('active', c.nightVision);
+      if (nvTouchBtn) nvTouchBtn.classList.toggle('active', c.nightVision);
     }
     const isMeowCd = c.meowCooldown > 0;
     if (hudState.meowCd !== isMeowCd) {
       hudState.meowCd = isMeowCd;
       if (skillMeow) skillMeow.classList.toggle('cooldown', isMeowCd);
-      const meowBtn = document.querySelector('.touch-skill[data-action="meow"]');
-      if (meowBtn) meowBtn.classList.toggle('cooldown', isMeowCd);
+      if (meowTouchBtn) meowTouchBtn.classList.toggle('cooldown', isMeowCd);
     }
   }
 
@@ -848,6 +860,7 @@ window.Game = window.Game || {};
   function closeShop() {
     Audio.playUiClick();
     shopOverlay.classList.add('hidden');
+    needsStaticFrame = true;
     // Live-apply any purchased upgrades/skins if mid-game!
     if (catCtrl) {
       catCtrl.applyUpgrades(Store.getBonuses(), true);
@@ -1173,8 +1186,25 @@ window.Game = window.Game || {};
     const mx = c.x + c.w / 2;
     const my = c.y + c.h / 2;
     const range = Math.max(280, bonuses.meowRange || 280);
-    Particles.spawnMeowRing(mx, my);
-    Particles.spawnPopup(mx, c.y - 16, t('popup_meow'), '#ffd60a');
+    let nearFriendlyBuddy = false;
+    if (c.onGround) {
+      for (const list of [level.istanbul_alley_cats, level.swiss_st_bernards, level.airport_travel_cats]) {
+        if (!list) continue;
+        for (const bd of list) {
+          const bx = bd.x + bd.w * 0.5, by = bd.y + bd.h * 0.5;
+          if (Math.hypot(mx - bx, my - by) < range + 35 && Math.abs(my - by) < 92) {
+            nearFriendlyBuddy = true;
+            break;
+          }
+        }
+        if (nearFriendlyBuddy) break;
+      }
+    }
+
+    if (!nearFriendlyBuddy) {
+      Particles.spawnMeowRing(mx, my);
+      Particles.spawnPopup(mx, c.y - 16, t('popup_meow'), '#ffd60a');
+    }
 
     // Repel & push back nearby dogs away from Mashmasha!
     for (const dog of level.dogs) {
@@ -1264,6 +1294,101 @@ window.Game = window.Game || {};
             Particles.spawnDust(sCx, sCy - 20, 12, '#bae6fd');
             Particles.spawnPopup(sCx, sCy - 40, isEn ? '♨️ Turkish Tea Steam!' : '♨️ بخار سماور الشاي التركي!', '#7dd3fc');
           }
+        } else if (p.type === 'istanbul_dondurma_trick') {
+          const dCx = p.x + p.w * 0.5, dCy = p.y + p.h - 44;
+          if (Math.hypot(mx - dCx, my - dCy) < range + 75) {
+            p.charmedTimer = 6.5;
+            if (Audio.playCollect) Audio.playCollect();
+            Particles.spawnDust(dCx, dCy - 12, 14, '#f9a8d4');
+            Particles.spawnPopup(dCx, dCy - 42, isEn ? '🍦 Stretchy Dondurma Bounce!' : '🍦 وسادة بوظة مرعش المطاطية!', '#fef08a');
+          }
+        } else if (p.type === 'istanbul_kestane_cart') {
+          const kCx = p.x + p.w * 0.5, kCy = p.y + p.h - 36;
+          if (Math.hypot(mx - kCx, my - kCy) < range + 55 && !(p.dampedTimer > 0.2)) {
+            p.dampedTimer = 4.0;
+            p.kestaneWarn = false;
+            p.embers = [];
+            Particles.spawnDust(kCx, kCy - 14, 12, '#fde047');
+            Particles.spawnPopup(kCx, p.y - 6, isEn ? '🌰 Chestnut Brazier Closed!' : '🌰 أُغلق غطاء جمر الكستناء!', '#fed7aa');
+          }
+        } else if (p.type === 'swiss_cheese_wheel') {
+          const wCx = p.wheelX !== undefined ? p.wheelX : (p.x + p.w * 0.5);
+          const wCy = p.y + p.h - (p.wheelR || 26);
+          if (Math.hypot(mx - wCx, my - wCy) < range + 85) {
+            p.wedgedTimer = 4.5;
+            if (Audio.playCollect) Audio.playCollect();
+            Particles.spawnDust(wCx, wCy, 12, '#fde047');
+            Particles.spawnPopup(wCx, wCy - 36, isEn ? '🧀 Emmental Wheel Wedged!' : '🧀 توقف دولاب الجبن السويسري!', '#fef08a');
+          }
+        } else if (p.type === 'swiss_cuckoo_clock') {
+          const ckCx = p.x + p.w * 0.5, ckCy = p.y + 44;
+          if (Math.hypot(mx - ckCx, my - ckCy) < range + 70) {
+            p.cuckooBoostTimer = 4.2;
+            p.cuckooOut = 1;
+            if (Audio.playCuckooChime) Audio.playCuckooChime();
+            Particles.spawnDust(ckCx, ckCy, 12, '#fde047');
+            Particles.spawnPopup(ckCx, ckCy - 30, isEn ? '🕰️ Cuckoo Perch Extended!' : '🕰️ امتدّ جسر طائر الوقواق!', '#fde047');
+          }
+        } else if (p.type === 'swiss_alphorn_gust') {
+          const aCx = p.x + p.w * 0.5, aCy = p.y + p.h - 24;
+          if (Math.hypot(mx - aCx, my - aCy) < range + 65) {
+            p.boostTimer = 3.8;
+            if (Audio.playAlphornNote) Audio.playAlphornNote();
+            Particles.spawnDust(aCx, aCy - 18, 14, '#fef08a');
+            Particles.spawnPopup(aCx, aCy - 42, isEn ? '🎺 Alphorn Thermal Boost!' : '🎺 تيار هواء بوق الألب!', '#fde047');
+          }
+        } else if (p.type === 'swiss_fondue_cauldron') {
+          const fCx = p.x + p.w * 0.5, fCy = p.y + p.h - 46;
+          if (Math.hypot(mx - fCx, my - fCy) < range + 70) {
+            p.bridgeTimer = 4.8;
+            p.fondueErupting = false;
+            p.fondueWarn = false;
+            if (Audio.playCollect) Audio.playCollect();
+            Particles.spawnDust(fCx, fCy - 24, 14, '#fde047');
+            Particles.spawnPopup(fCx, fCy - 66, isEn ? '🫕 Cheese Bridge Formed!' : '🫕 تشكّل جسر جبن الفوندو!', '#fef08a');
+          }
+        } else if (p.type === 'swiss_avalanche_bell') {
+          const bCx = p.x + p.w * 0.5, bCy = p.y + 34;
+          if (Math.hypot(mx - bCx, my - bCy) < range + 60) {
+            p.ringTrigger = true;
+            if (Audio.playCowbell) Audio.playCowbell();
+            Particles.spawnPopup(bCx, bCy + 10, isEn ? '🔔 Snow Shaken Loose!' : '🔔 اهتزّ الجرس وتدحرج الثلج!', '#bae6fd');
+          }
+        } else if (p.type === 'istanbul_hammam_valve') {
+          const vCx = p.x + p.w * 0.5, vCy = p.y + p.h - 32;
+          if (Math.hypot(mx - vCx, my - vCy) < range + 55 && !(p.cooldown > 0.2)) {
+            p.active = !p.active;
+            p.cooldown = 0.9;
+            if (Audio.playSteamHiss) Audio.playSteamHiss();
+            Particles.spawnDust(vCx, vCy - 14, 12, p.active ? '#38bdf8' : '#fbbf24');
+            Particles.spawnPopup(vCx, vCy - 36, p.active ? (isEn ? '♨️ Hammam Lift UP!' : '♨️ صعود مصعد الحمام!') : (isEn ? '⚙ Hammam Lift DOWN' : '⚙ نزول مصعد الحمام'), p.active ? '#38bdf8' : '#fbbf24');
+          }
+        } else if (p.type === 'istanbul_drawbridge_leaf') {
+          const bCx = p.x + p.w * 0.5, bCy = p.baseY || p.y;
+          if (Math.hypot(mx - bCx, my - bCy) < range + 150) {
+            p.holdRaised = !p.bridgeRaised;
+            p.holdTimer = 4.4;
+            if (Audio.playBridgeCrank) Audio.playBridgeCrank();
+            Particles.spawnPopup(bCx, bCy - 28, p.holdRaised ? (isEn ? '🌉 Bascule Ramp UP!' : '🌉 رفع جناحي جسر غلطة!') : (isEn ? '🌉 Bascule Bridge FLAT!' : '🌉 إغلاق جسر غلطة!'), '#fbbf24');
+          }
+        } else if (p.type === 'istanbul_balik_grill') {
+          const gCx = p.x + p.w * 0.5, gCy = p.y + p.h - 32;
+          if (Math.hypot(mx - gCx, my - gCy) < range + 45 && !(p.dampedTimer > 0.2)) {
+            p.dampedTimer = 3.8;
+            p.grillState = 'damped';
+            catCtrl.cat.eggplantBoostTimer = 2.6;
+            if (Audio.playCollect) Audio.playCollect();
+            Particles.spawnDust(gCx, gCy - 18, 12, '#fdba74');
+            Particles.spawnPopup(gCx, p.y - 8, isEn ? '🐟 Grilled Bosphorus Fish Boost!' : '🐟 نشاط سمك البوسفور المشوي!', '#fef08a');
+          }
+        } else if (p.type === 'istanbul_medusa_cistern') {
+          const mCx = p.x + p.w * 0.5, mCy = p.y + p.h - 28;
+          if (Math.hypot(mx - mCx, my - mCy) < range + 55 && !(p.stunTimer > 0.2)) {
+            p.stunTimer = 3.8;
+            p.cisternState = 'stunned';
+            Particles.spawnDust(mCx, mCy - 14, 12, '#34d399');
+            Particles.spawnPopup(mCx, p.y - 10, isEn ? '🐍 Medusa Column Silenced!' : '🐍 هدأ عمود ميدوسا الأثري!', '#6ee7b7');
+          }
         } else if (p.type === 'battir_roman_bath_vent') {
           const bCx = p.x + p.w * 0.5;
           const bCy = p.y + p.h - 24;
@@ -1322,14 +1447,138 @@ window.Game = window.Game || {};
             Particles.spawnDust(smX + 18, smY - 12, 16, '#f1f5f9');
             Particles.spawnPopup(hiveCx, p.y + 10, isEn ? '🍯 Bees Calmed by Smoker!' : '🍯 هدأ النحل بدخان المدخنة!', '#fde68a');
           }
+        } else if (p.type === 'battir_farmer_stall') {
+          const stCx = p.x + p.w * 0.5, stCy = p.y + p.h - 36;
+          if (Math.hypot(mx - stCx, my - stCy) < range + 45 && !(p.waveReplyCd > 0.2)) {
+            p.waveReplyCd = 3.2;
+            p.giftAnim = Math.max(p.giftAnim || 0, 0.85);
+            if (Audio.playPurr) Audio.playPurr();
+            Particles.spawnDust(stCx, stCy - 18, 10, '#f0abfc');
+            Particles.spawnPopup(stCx, p.y - 4, isEn ? '🌿 Welcome to Battir, Mashmasha!' : '🌿 يسعد مساكِ يا مشمشة!', '#f5d0fe');
+          }
+        } else if (p.type === 'airport_security_scanner') {
+          const sCx = p.x + p.w * 0.5, sCy = p.y + p.h * 0.5;
+          if (Math.hypot(mx - sCx, my - sCy) < range + 45 && !(p.clearTimer > 0.3)) {
+            p.clearTimer = 4.2;
+            p.scanActive = false;
+            p.scanWarn = false;
+            Particles.spawnDust(sCx, p.y + 24, 12, '#4ade80');
+            Particles.spawnPopup(sCx, p.y - 8, isEn ? '🛂 VIP Scanner Cleared!' : '🛂 ممر VIP مفتوح!', '#4ade80');
+          }
+        } else if (p.type === 'airport_jet_blast') {
+          const jCx = p.x + p.w * 0.5, jCy = p.y + p.h * 0.5;
+          if (Math.hypot(mx - jCx, my - jCy) < range + 70 && !(p.baffleTimer > 0.3)) {
+            p.baffleTimer = 4.5;
+            p.jetFiring = false;
+            p.jetWarn = false;
+            Particles.spawnDust(jCx, jCy - 12, 12, '#facc15');
+            Particles.spawnPopup(jCx, p.y - 12, isEn ? '🛡️ Jet Blast Shield UP!' : '🛡️ حاجز التوربين مرفوع!', '#fde047');
+          }
+        } else if (p.type === 'airport_conveyor_belt') {
+          const bCx = p.x + p.w * 0.5, bCy = p.y + p.h * 0.5;
+          if (Math.hypot(mx - bCx, my - bCy) < range + 35 && !(p.revCd > 0.2)) {
+            p.revCd = 0.6;
+            p.beltDir = -(p.beltDir || 1);
+            Particles.spawnDust(bCx, p.y, 10, '#38bdf8');
+            Particles.spawnPopup(bCx, p.y - 16, isEn ? '🔄 Conveyor Reversed!' : '🔄 عكس اتجاه سير الحقائب!', '#7dd3fc');
+          }
+        } else if (
+          p.h >= 60 &&
+          (p.type === 'battir_cliff_terrace' || p.type === 'battir_qantara_arcade' || p.type === 'battir_fortress_wall') &&
+          Math.abs(my - p.y) < 75 &&
+          mx >= p.x && mx <= p.x + p.w &&
+          !(p.eggplantMeowCd > 0.2)
+        ) {
+          // Check if Mashmasha meowed right beside one of Battir's purple eggplant seedlings!
+          let eOff = p.type === 'battir_cliff_terrace'
+            ? (68 + (Math.abs(Math.floor(p.x * 0.17)) % 55))
+            : p.type === 'battir_qantara_arcade'
+              ? (130 + (Math.abs(Math.floor(p.x * 0.13)) % 50))
+              : 95;
+          const mult = p.type === 'battir_cliff_terrace' ? 919 : (p.type === 'battir_qantara_arcade' ? 827 : 733);
+          const stepBase = p.type === 'battir_cliff_terrace' ? 155 : (p.type === 'battir_qantara_arcade' ? 180 : 185);
+          const stepMod = p.type === 'battir_qantara_arcade' ? 175 : 165;
+          const thresh = p.type === 'battir_cliff_terrace' ? 7 : 6;
+          let eIdx = 1;
+          while (eOff < p.w - 64) {
+            const hSeed = Math.abs(Math.imul(Math.floor(p.x) + eIdx * mult, 2654435761)) >>> 0;
+            const worldX = p.x + eOff;
+            const clearProps = p.type === 'battir_cliff_terrace'
+              ? true
+              : p.type === 'battir_qantara_arcade'
+                ? (!(worldX > 1505 && worldX < 1755) && !(worldX > 610 && worldX < 745) && !(worldX > 9520 && worldX < 9880))
+                : (!(worldX > 12770 && worldX < 13030) && !(worldX > 13320 && worldX < 13700));
+            if (clearProps && (hSeed % 10) < thresh && Math.abs(mx - worldX) < 72) {
+              p.eggplantMeowCd = 4.0;
+              catCtrl.cat.eggplantBoostTimer = 2.8;
+              if (Audio.playCollect) Audio.playCollect();
+              Particles.spawnDust(worldX, p.y - 10, 12, '#c084fc');
+              Particles.spawnPopup(worldX, p.y - 28, isEn ? '🍆 Battiri Eggplant Boost!' : '🍆 نشاط الباذنجان البتيري!', '#e9d5ff');
+              break;
+            }
+            eOff += stepBase + (hSeed % stepMod);
+            eIdx++;
+          }
         }
       }
     }
+
+    // Mutual Sit-and-Play when Mashmasha meows near a friendly White Istanbul Cat or Swiss St. Bernard (NO flash/blink!)
+    if (catCtrl && catCtrl.cat.onGround) {
+      const isEnCat = window.Game.I18n && window.Game.I18n.isEn();
+      if (level.istanbul_alley_cats) {
+        for (const ac of level.istanbul_alley_cats) {
+          const ax = ac.x + ac.w * 0.5, ay = ac.y + ac.h * 0.5;
+          if (Math.hypot(mx - ax, my - ay) < range + 35 && Math.abs(my - ay) < 88) {
+            catCtrl.cat.playWithCatTimer = 2.8;
+            catCtrl.cat.vx = 0;
+            catCtrl.cat.facing = ax >= mx ? 1 : -1;
+            ac.playingTimer = 2.8;
+            ac.loving = true;
+            ac.rubbing = true;
+            Particles.spawnPopup((mx + ax) * 0.5, Math.min(my, ay) - 28, isEnCat ? '🐾 Playing Together! 💕' : '🐾 ملاطفة ولعب معاً! 💕', '#f472b6');
+            break;
+          }
+        }
+      }
+      if (level.swiss_st_bernards) {
+        for (const sb of level.swiss_st_bernards) {
+          const bx = sb.x + sb.w * 0.5, by = sb.y + sb.h * 0.5;
+          if (Math.hypot(mx - bx, my - by) < range + 35 && Math.abs(my - by) < 92) {
+            catCtrl.cat.playWithCatTimer = 2.8;
+            catCtrl.cat.vx = 0;
+            catCtrl.cat.facing = bx >= mx ? 1 : -1;
+            sb.playingTimer = 2.8;
+            sb.loving = true;
+            Particles.spawnPopup((mx + bx) * 0.5, Math.min(my, by) - 30, isEnCat ? '🐶 Alpine Friends! 💕' : '🐶 صداقة جبال الألب! 💕', '#fbbf24');
+            break;
+          }
+        }
+      }
+      if (level.airport_travel_cats) {
+        for (const tc of level.airport_travel_cats) {
+          const tx = tc.x + tc.w * 0.5, ty = tc.y + tc.h * 0.5;
+          if (Math.hypot(mx - tx, my - ty) < range + 35 && Math.abs(my - ty) < 92) {
+            catCtrl.cat.playWithCatTimer = 2.8;
+            catCtrl.cat.vx = 0;
+            catCtrl.cat.facing = tx >= mx ? 1 : -1;
+            tc.playingTimer = 2.8;
+            tc.loving = true;
+            Particles.spawnPopup((mx + tx) * 0.5, Math.min(my, ty) - 28, isEnCat ? '🐾 Travel Buddies! 💕' : '🐾 رفقاء السفر! 💕', '#f472b6');
+            break;
+          }
+        }
+      }
+    }
+
 
     updateHUD();
   }
 
   function onCatHit(reason, isFall = false) {
+    if (!isFall && catCtrl && (catCtrl.cat.playWithCatTimer || 0) > 0) {
+      return;
+    }
     if (!isFall && catCtrl && isInCheckpointSafeZone(level, catCtrl.cat.x, catCtrl.cat.y, catCtrl.cat.w, catCtrl.cat.h)) {
       return;
     }
@@ -2071,9 +2320,10 @@ window.Game = window.Game || {};
           p.gateClose = Math.max(0, (p.gateClose || 0) - dt * 3.2);
           p.trainActive = false;
         }
-      } else if (p.type === 'battir_farmer_stall' || p.type === 'istanbul_simit_vendor') {
-        // Palestinian village woman between the climbable columns grants Mashmasha an extra Purple Heart life!
+      } else if (p.type === 'battir_farmer_stall') {
+        // Exclusive to Stage 26 (Battir): Palestinian village woman grants Mashmasha an extra Purple Heart life!
         if (p.giftAnim > 0) p.giftAnim = Math.max(0, p.giftAnim - dt * 1.1);
+        if (p.waveReplyCd > 0) p.waveReplyCd = Math.max(0, p.waveReplyCd - dt);
         if (
           !p.gifted &&
           c.x + c.w > p.x + 10 &&
@@ -2090,8 +2340,423 @@ window.Game = window.Game || {};
           Particles.spawnDust(p.x + p.w * 0.5, p.y + 34, 14, '#c084fc');
           Particles.spawnCoinSparkle(p.x + p.w * 0.5, p.y + 24);
           const isEn = window.Game.I18n && window.Game.I18n.isEn();
-          Particles.spawnPopup(p.x + p.w * 0.5, p.y + 8, isEn ? '+1 💜 Extra Life!' : '+1 💜 روح إضافية!', '#d8b4fe');
+          Particles.spawnPopup(p.x + p.w * 0.5, p.y + 8, isEn ? '+1 💜 Battir Blessing Life!' : '+1 💜 روح إضافية من خيرات بتّير!', '#d8b4fe');
           updateHUD();
+        }
+      } else if ((p.type === 'battir_cliff_terrace' || p.type === 'battir_qantara_arcade' || p.type === 'battir_fortress_wall') && p.eggplantMeowCd > 0) {
+        p.eggplantMeowCd = Math.max(0, p.eggplantMeowCd - dt);
+      } else if (p.type === 'istanbul_simit_vendor' || p.type === 'swiss_rescue_hut') {
+        // Warm local hospitality stall (heals 1 regular heart if injured + bonus coins — NO purple heart!)
+        if (p.giftAnim > 0) p.giftAnim = Math.max(0, p.giftAnim - dt * 1.1);
+        if (
+          !p.gifted &&
+          c.x + c.w > p.x + 10 &&
+          c.x < p.x + p.w - 10 &&
+          c.y + c.h > p.y + 18 &&
+          c.y < p.y + p.h + 6
+        ) {
+          p.gifted = true;
+          p.giftAnim = 1.0;
+          const healed = c.lives < c.maxLives;
+          if (healed) c.lives = Math.min(c.maxLives, c.lives + 1);
+          if (window.Game.Store && window.Game.Store.addCoins) window.Game.Store.addCoins(30);
+          if (Audio.playTreat) Audio.playTreat();
+          else if (Audio.playPurr) Audio.playPurr();
+          haptic(16);
+          Particles.spawnDust(p.x + p.w * 0.5, p.y + 34, 14, '#fde047');
+          Particles.spawnCoinSparkle(p.x + p.w * 0.5, p.y + 24);
+          const isEn = window.Game.I18n && window.Game.I18n.isEn();
+          const icon = p.type === 'swiss_rescue_hut' ? '🍫' : '🥨';
+          const msg = healed
+            ? (isEn ? `${icon} +1 ❤️ & +30 🪙!` : `${icon} +1 ❤️ و +30 عملة!`)
+            : (isEn ? `${icon} Warm Gift +30 🪙!` : `${icon} ضيافة دافئة +30 عملة!`);
+          Particles.spawnPopup(p.x + p.w * 0.5, p.y + 8, msg, '#fde047');
+          updateHUD();
+        }
+      } else if (p.type === 'istanbul_tram_crossing') {
+        // Live Foreground Istiklal Red Streetcar Crossing Hazard!
+        const floorY = p.y + p.h;
+        const cyc = (timeSec + (p.phase || 0)) % 5.2;
+        if (cyc < 2.15) {
+          p.crossState = 'clear';
+          p.tramActive = false;
+        } else if (cyc < 3.25) {
+          p.crossState = 'warn';
+          p.tramActive = false;
+        } else if (cyc < 4.45) {
+          p.crossState = 'pass';
+          p.tramActive = true;
+          const u = (cyc - 3.25) / 1.20;
+          p.tramX = p.x + p.w + 42 - u * (p.w + 240);
+          const tramW = 156;
+          if (
+            !isInCheckpointSafeZone(level, p.tramX, floorY - 68, tramW, 68) &&
+            c.x + c.w - 10 > p.tramX + 10 &&
+            c.x + 10 < p.tramX + tramW - 10 &&
+            c.y + c.h > floorY - 64 &&
+            c.y < floorY + 2
+          ) {
+            onCatHit('ترام شارع الاستقلال السريع! اعبر من المظلة العلوية أو انتظر -1 ❤️');
+          }
+        } else {
+          p.crossState = 'clear';
+          p.tramActive = false;
+        }
+      } else if (p.type === 'istanbul_balik_grill') {
+        // Sizzling Eminönü Balık-Ekmek & Charcoal Kebab Brazier Hazard!
+        const floorY = p.y + p.h;
+        if (p.dampedTimer > 0) {
+          p.dampedTimer = Math.max(0, p.dampedTimer - dt);
+          p.grillState = 'damped';
+          p.flamePower = Math.max(0, (p.flamePower || 0) - dt * 5);
+        } else {
+          const cyc = (timeSec + (p.phase || 0)) % 4.0;
+          if (cyc < 1.75) {
+            p.grillState = 'cook';
+            p.flamePower = Math.max(0, (p.flamePower || 0) - dt * 4);
+          } else if (cyc < 2.50) {
+            p.grillState = 'warn';
+            p.flamePower = 0.2;
+          } else if (cyc < 3.55) {
+            p.grillState = 'flare';
+            p.flamePower = Math.min(1, (p.flamePower || 0) + dt * 6);
+          } else {
+            p.grillState = 'cook';
+            p.flamePower = Math.max(0, (p.flamePower || 0) - dt * 4);
+          }
+        }
+        if (p.grillState === 'flare' && (p.flamePower || 0) > 0.5) {
+          if (
+            !isInCheckpointSafeZone(level, p.x + 16, floorY - 86, p.w - 32, 86) &&
+            c.x + c.w - 10 > p.x + 18 &&
+            c.x + 10 < p.x + p.w - 18 &&
+            c.y + c.h > floorY - 84 &&
+            c.y < floorY
+          ) {
+            onCatHit('لهب مشواة رصيف البوسفور! انتظر هدوء الجمر أو موء للتهدئة -1 ❤️');
+          }
+        }
+      } else if (p.type === 'istanbul_medusa_cistern') {
+        // Subterranean Basilica Cistern Inverted Marble Medusa Column & Water Surge!
+        const floorY = p.y + p.h;
+        const cx = p.x + p.w * 0.5;
+        if (p.stunTimer > 0) {
+          p.stunTimer = Math.max(0, p.stunTimer - dt);
+          p.cisternState = 'stunned';
+          p.waveDist = undefined;
+        } else {
+          const cyc = (timeSec + (p.phase || 0)) % 4.3;
+          if (cyc < 1.8) {
+            p.cisternState = 'calm';
+            p.waveDist = undefined;
+          } else if (cyc < 2.6) {
+            p.cisternState = 'warn';
+            p.waveDist = undefined;
+          } else if (cyc < 3.85) {
+            p.cisternState = 'surge';
+            const u = (cyc - 2.6) / 1.25;
+            p.waveDist = 26 + u * 150;
+            const catCx2 = c.x + c.w * 0.5;
+            for (const dir of [-1, 1]) {
+              const wx = cx + dir * p.waveDist;
+              if (
+                !isInCheckpointSafeZone(level, wx - 18, floorY - 32, 36, 32) &&
+                Math.abs(catCx2 - wx) < 19 &&
+                c.y + c.h > floorY - 28 &&
+                c.y < floorY + 2
+              ) {
+                onCatHit('موجة صهريج ميدوسا الأثري! اقفز فوق الموجة أو موء لكسر السحر -1 ❤️');
+              }
+            }
+          } else {
+            p.cisternState = 'calm';
+            p.waveDist = undefined;
+          }
+        }
+      } else if (p.type === 'istanbul_whirling_censer') {
+        // Grand Bazaar Ablaq Arch & Swinging Pierced Ottoman Brass Censer Pendulum!
+        const ax = p.x + p.w * 0.5;
+        const ay = p.y;
+        const len = p.chainLen || 155;
+        const ang = Math.sin(timeSec * (p.swingSpeed || 2.15) + (p.phase || 0)) * (p.swingAmp || 1.05);
+        p.censerAngle = ang;
+        const bx = ax + Math.sin(ang) * len;
+        const by = ay + Math.cos(ang) * len;
+        const catCx2 = c.x + c.w * 0.5;
+        const catCy2 = c.y + (c.crouching ? c.h * 0.68 : c.h * 0.5);
+        if (
+          !isInCheckpointSafeZone(level, bx - 22, by - 22, 44, 44) &&
+          Math.hypot(catCx2 - bx, catCy2 - by) < 25
+        ) {
+          onCatHit('مبخرة البازار النحاسية المتأرجحة! احسب التوقيت بدقة -1 ❤️');
+        }
+      } else if (p.type === 'istanbul_dondurma_trick') {
+        // Maraş Dondurma Trickster Sweeping Brass Ice-Cream Paddle Hazard!
+        const floorY = p.y + p.h;
+        const cx = p.x + p.w * 0.5;
+        const dir = p.paddleDir || -1;
+        if (!(p.charmedTimer > 0)) {
+          const cyc = timeSec * 2.2 + (p.phase || 0);
+          const thrust = Math.max(0, Math.sin(cyc));
+          p.paddleReach = 36 + thrust * 80;
+          p.paddleWaveY = Math.cos(cyc * 2) * 7;
+          if (thrust > 0.35) {
+            const tipX = cx + dir * p.paddleReach;
+            const tipY = floorY - 36 + p.paddleWaveY;
+            const catCx2 = c.x + c.w * 0.5;
+            const catCy2 = c.y + c.h * 0.5;
+            if (
+              !isInCheckpointSafeZone(level, tipX - 24, tipY - 24, 48, 48) &&
+              Math.hypot(catCx2 - tipX, catCy2 - tipY) < 23 &&
+              !c.crouching
+            ) {
+              onCatHit('مقلب عصا بوظة مرعش! اقفز فوقها أو موء لتحويلها لوسادة قفز -1 ❤️');
+            }
+          }
+        }
+      } else if (p.type === 'istanbul_kestane_cart') {
+        // Istiklal Street Roasted-Chestnut Cart (Kestane Kebap) Popping Glowing Embers!
+        if (!p.embers) p.embers = [];
+        const floorY = p.y + p.h;
+        const cx = p.x + p.w * 0.5;
+        if (p.dampedTimer > 0) {
+          p.dampedTimer = Math.max(0, p.dampedTimer - dt);
+          p.kestaneWarn = false;
+        } else {
+          const cyc = (timeSec + (p.phase || 0)) % 3.6;
+          p.kestaneWarn = cyc >= 1.45 && cyc < 2.05;
+          if (cyc >= 2.05 && cyc < 2.25 && !p.poppedThisCycle) {
+            p.poppedThisCycle = true;
+            p.embers.push(
+              { x: cx - 6, y: floorY - 52, vx: -130, vy: -365 },
+              { x: cx + 14, y: floorY - 52, vx: 130, vy: -365 }
+            );
+          } else if (cyc < 1.45) {
+            p.poppedThisCycle = false;
+          }
+        }
+        const catCx2 = c.x + c.w * 0.5;
+        const catCy2 = c.y + c.h * 0.5;
+        for (let ei = p.embers.length - 1; ei >= 0; ei--) {
+          const em = p.embers[ei];
+          em.vy += 690 * dt;
+          em.x += em.vx * dt;
+          em.y += em.vy * dt;
+          if (em.y > floorY + 14) {
+            p.embers.splice(ei, 1);
+            continue;
+          }
+          if (
+            !isInCheckpointSafeZone(level, em.x - 16, em.y - 16, 32, 32) &&
+            Math.hypot(catCx2 - em.x, catCy2 - em.y) < 19
+          ) {
+            p.embers.splice(ei, 1);
+            onCatHit('جمر الكستناء المشوية المتطاير! انتظر أو موء لإغلاق الغطاء -1 ❤️');
+          }
+        }
+      } else if (p.type === 'istanbul_drawbridge_leaf') {
+        // Steaming Bosphorus ferry funnel hazard in the center gap when bascule leaves are wide open!
+        if ((p.liftT || 0) > 0.68) {
+          const baseY = p.baseY !== undefined ? p.baseY : p.y;
+          const midX = p.x + p.w * 0.5;
+          const catCx2 = c.x + c.w * 0.5;
+          if (
+            !isInCheckpointSafeZone(level, midX - 28, baseY - 36, 56, 48) &&
+            Math.abs(catCx2 - midX) < 28 &&
+            c.y + c.h > baseY - 30 &&
+            c.y < baseY + 24
+          ) {
+            onCatHit('بخار باخرة مضيق البوسفور! اقفز من طرف الجسر المائل -1 ❤️');
+          }
+        }
+      } else if (p.type === 'swiss_cheese_wheel') {
+        // Giant Rolling Swiss Emmental Cheese Wheel along pasture chute (1:1 synced with art-swiss.js!)
+        const r = p.wheelR || 26;
+        const minX = p.minX !== undefined ? p.minX : p.x;
+        const maxX = p.maxX !== undefined ? p.maxX : (p.x + (p.w || 340));
+        if (p.wheelX === undefined) p.wheelX = maxX;
+        if (p.rollDir === undefined) p.rollDir = -1;
+        if (p.wheelRot === undefined) p.wheelRot = 0;
+        if (p.wedgedTimer > 0) {
+          p.wedgedTimer = Math.max(0, p.wedgedTimer - dt);
+        } else {
+          const spd = p.speed || 180;
+          const prevRx = p.wheelX;
+          p.wheelX += p.rollDir * spd * dt;
+          if (p.wheelX <= minX) { p.wheelX = minX; p.rollDir = 1; }
+          else if (p.wheelX >= maxX) { p.wheelX = maxX; p.rollDir = -1; }
+          p.wheelRot += (p.wheelX - prevRx) / r;
+          const wy = p.y + p.h - r;
+          const catCx2 = c.x + c.w * 0.5;
+          const catCy2 = c.y + c.h * 0.5;
+          if (
+            !isInCheckpointSafeZone(level, p.wheelX - r, wy - r, r * 2, r * 2) &&
+            Math.hypot(catCx2 - p.wheelX, catCy2 - wy) < r + 9
+          ) {
+            onCatHit('دولاب جبن الإيمنتال السويسري المتدحرج! اقفز فوقه أو موء لإيقافه -1 ❤️');
+          }
+        }
+      } else if (p.type === 'swiss_cuckoo_clock') {
+        // Carved Wooden Alpine Cuckoo Clock: pop-out walkable perch + swinging brass pinecone pendulum (1:1 synced with art-swiss.js!)
+        if (p.cuckooBoostTimer > 0) p.cuckooBoostTimer = Math.max(0, p.cuckooBoostTimer - dt);
+        const cyc = (timeSec + (p.phase || 0)) % 4.4;
+        const targetOut = (p.cuckooBoostTimer > 0 || (cyc >= 0.9 && cyc <= 3.1)) ? 1 : 0;
+        if (p.cuckooOut === undefined) p.cuckooOut = targetOut;
+        const prevOut = p.cuckooOut;
+        p.cuckooOut += (targetOut - p.cuckooOut) * Math.min(1, dt * 8.5);
+        if (prevOut < 0.45 && p.cuckooOut >= 0.45 && Audio.playCuckooChime && Math.abs((p.x + p.w * 0.5) - (c.x + c.w * 0.5)) < 460) {
+          Audio.playCuckooChime();
+        }
+        // Swinging brass pinecone pendulum bob beneath the clockhouse (exact match to art-swiss.js)
+        const len = p.chainLen || 156;
+        const pendAng = Math.sin(timeSec * (p.swingSpeed || 2.0) + (p.phase || 0)) * (p.swingAmp || 0.84);
+        p.pendulumAngle = pendAng;
+        const pivotX = p.x + p.w * 0.5;
+        const pivotY = p.y + 12;
+        const bobX = pivotX + Math.sin(pendAng) * len;
+        const bobY = pivotY + Math.cos(pendAng) * len;
+        const catCx2 = c.x + c.w * 0.5;
+        const catCy2 = c.y + c.h * 0.5;
+        if (
+          !isInCheckpointSafeZone(level, bobX - 18, bobY - 18, 36, 36) &&
+          Math.hypot(catCx2 - bobX, catCy2 - bobY) < 20
+        ) {
+          onCatHit('بندول ساعة الوقواق السويسرية! احسب التأرجح بدقة -1 ❤️');
+        }
+      } else if (p.type === 'swiss_fondue_cauldron') {
+        const floorY = p.y + p.h;
+        const cx = p.x + p.w * 0.5;
+        if (p.bridgeTimer > 0) {
+          p.bridgeTimer = Math.max(0, p.bridgeTimer - dt);
+          p.fondueErupting = false;
+          p.fondueWarn = false;
+        } else {
+          const cyc = (timeSec + (p.phase || 0)) % 4.2;
+          p.fondueWarn = cyc >= 1.2 && cyc < 1.95;
+          p.fondueErupting = cyc >= 1.95 && cyc <= 3.35;
+          if (p.fondueErupting) {
+            const catCx2 = c.x + c.w * 0.5;
+            const catCy2 = c.y + c.h * 0.5;
+            if (
+              !isInCheckpointSafeZone(level, cx - 26, floorY - 142, 52, 96) &&
+              Math.abs(catCx2 - cx) < 24 &&
+              catCy2 < floorY - 46 && catCy2 > floorY - 144
+            ) {
+              onCatHit('قدر الفوندو السويسري الفوّار! موء لتحويله لجسر جبن -1 ❤️');
+            }
+          }
+        }
+      } else if (p.type === 'swiss_avalanche_bell') {
+        if (!p.snowballs) p.snowballs = [];
+        const floorY = p.y + p.h;
+        const cx = p.x + p.w * 0.5;
+        const topY = floorY - (p.archH || 172);
+        const catCx2 = c.x + c.w * 0.5;
+        const catCy2 = c.y + c.h * 0.5;
+        const noisySprint = !c.crouching && Math.abs(c.vx || 0) > 75 && Math.abs(catCx2 - cx) < p.w * 0.52 && Math.abs(catCy2 - (floorY - 30)) < 70;
+        const cyc = (timeSec + (p.phase || 0)) % 4.6;
+        if (p.bellCooldown > 0) p.bellCooldown = Math.max(0, p.bellCooldown - dt);
+        const scheduledRing = (cyc >= 2.25 && cyc < 2.45 && !p.rangThisCycle);
+        p.bellWarn = (cyc >= 1.65 && cyc < 2.25) || noisySprint;
+        if (p.ringTrigger || scheduledRing || (noisySprint && !(p.bellCooldown > 0))) {
+          p.ringTrigger = false;
+          if (scheduledRing) p.rangThisCycle = true;
+          p.bellCooldown = 1.6;
+          p.bellRingAnim = 1.0;
+          if (Audio.playCowbell && Math.abs(catCx2 - cx) < 520) Audio.playCowbell();
+          for (const dx0 of [-32, 0, 32]) {
+            p.snowballs.push({ x: cx + dx0, y: topY - 4, vx: dx0 * 1.4, vy: 20, r: 12 });
+          }
+        } else if (cyc < 1.65) {
+          p.rangThisCycle = false;
+        }
+        if (p.bellRingAnim > 0) {
+          p.bellRingAnim = Math.max(0, p.bellRingAnim - dt * 1.6);
+          p.bellSwing = Math.sin(timeSec * 22) * 0.45 * p.bellRingAnim;
+        } else {
+          p.bellSwing = Math.sin(timeSec * 2.2 + (p.phase || 0)) * 0.08;
+        }
+        for (let si = p.snowballs.length - 1; si >= 0; si--) {
+          const sb = p.snowballs[si];
+          sb.vy += 680 * dt;
+          sb.x += sb.vx * dt;
+          sb.y += sb.vy * dt;
+          if (sb.y > floorY + 14) { p.snowballs.splice(si, 1); continue; }
+          if (
+            !isInCheckpointSafeZone(level, sb.x - 14, sb.y - 14, 28, 28) &&
+            Math.hypot(catCx2 - sb.x, catCy2 - sb.y) < (sb.r || 12) + 12
+          ) {
+            p.snowballs.splice(si, 1);
+            onCatHit('انهيار ثلجي من جرس الألب! انحنِ للمرور بهدوء -1 ❤️');
+          }
+        }
+      } else if (p.type === 'airport_conveyor_belt') {
+        if (p.revCd > 0) p.revCd = Math.max(0, p.revCd - dt);
+      } else if (p.type === 'airport_coffee_kiosk') {
+        if (
+          !p.giftedHeart &&
+          c.x + c.w > p.x + 8 &&
+          c.x < p.x + p.w - 8 &&
+          c.y + c.h > p.y + 12 &&
+          c.y < p.y + p.h + 8
+        ) {
+          p.giftedHeart = true;
+          c.purpleLives = (c.purpleLives || 0) + 1;
+          if (window.Game.Store && window.Game.Store.addCoins) window.Game.Store.addCoins(30);
+          if (Audio.playTreat) Audio.playTreat();
+          else if (Audio.playPurr) Audio.playPurr();
+          haptic(16);
+          Particles.spawnDust(p.x + p.w * 0.5, p.y + 28, 14, '#c084fc');
+          Particles.spawnCoinSparkle(p.x + p.w * 0.5, p.y + 20);
+          const isEn = window.Game.I18n && window.Game.I18n.isEn();
+          Particles.spawnPopup(p.x + p.w * 0.5, p.y - 6, isEn ? '🎫 VIP Lounge! +1 💜 & +30 🪙' : '🎫 ضيافة الدرجة الأولى! +1 💜 و +30 🪙', '#d8b4fe');
+          updateHUD();
+        }
+      } else if (p.type === 'airport_security_scanner') {
+        if (p.clearTimer > 0) {
+          p.clearTimer = Math.max(0, p.clearTimer - dt);
+          p.scanActive = false;
+          p.scanWarn = false;
+        } else {
+          const cyc = (timeSec + (p.phase || 0)) % 4.0;
+          p.scanWarn = cyc >= 1.30 && cyc < 1.95;
+          p.scanActive = cyc >= 1.95 && cyc <= 3.15;
+          if (
+            p.scanActive &&
+            !isInCheckpointSafeZone(level, p.x + 12, p.y + 22, p.w - 24, p.h - 24) &&
+            c.x + c.w - 8 > p.x + 14 &&
+            c.x + 8 < p.x + p.w - 14 &&
+            c.y + c.h > p.y + 24 &&
+            c.y < p.y + p.h
+          ) {
+            onCatHit('ليزر بوابة التفتيش! انتظر الأخضر أو موء -1 ❤️');
+          }
+        }
+      } else if (p.type === 'airport_jet_blast') {
+        if (p.baffleTimer > 0) {
+          p.baffleTimer = Math.max(0, p.baffleTimer - dt);
+          p.jetFiring = false;
+          p.jetWarn = false;
+        } else {
+          const cyc = (timeSec + (p.phase || 0)) % 4.4;
+          p.jetWarn = cyc >= 1.35 && cyc < 2.05;
+          p.jetFiring = cyc >= 2.05 && cyc <= 3.40;
+          if (p.jetFiring) {
+            const dir = p.blastDir || -1;
+            const cx = p.x + p.w * 0.5;
+            const floorY = p.y + p.h;
+            const coneMinX = dir < 0 ? cx - 172 : cx + 34;
+            const coneMaxX = dir < 0 ? cx - 34 : cx + 172;
+            if (
+              !isInCheckpointSafeZone(level, coneMinX, floorY - 56, coneMaxX - coneMinX, 42) &&
+              c.x + c.w - 6 > coneMinX &&
+              c.x + 6 < coneMaxX &&
+              c.y + c.h > floorY - 56 &&
+              c.y < floorY - 14
+            ) {
+              onCatHit('نفث محرك الطائرة النفاث! اقفز فوق الممر العلوي أو موء -1 ❤️');
+            }
+          }
         }
       }
     }
@@ -2106,6 +2771,23 @@ window.Game = window.Game || {};
     if (coinComboTimer > 0) {
       coinComboTimer -= dt;
       if (coinComboTimer <= 0) coinCombo = 0;
+    }
+
+    // Close-up foreground hillside cows (Stage 28): moo ONCE warmly when Mashmasha passes behind them!
+    if (level.swiss_foreground_cows) {
+      for (const fc of level.swiss_foreground_cows) {
+        if (fc.mooAnim > 0) fc.mooAnim = Math.max(0, fc.mooAnim - dt);
+        if (!fc.mooed) {
+          const fcCx = fc.x + (fc.w || 152) * 0.5;
+          if (Math.abs(catCx - fcCx) < 170 && Math.abs(catCy - (fc.y - 78)) < 145) {
+            fc.mooed = true;
+            fc.mooAnim = 1.65;
+            if (Audio.playCowMoo) Audio.playCowMoo(fc.pitch || 1.0);
+            const isEnCow = I18n && I18n.isEn && I18n.isEn();
+            Particles.spawnPopup(fcCx, fc.y - 116, isEnCow ? '🐄 Moooo~ 🎵' : '🐄 مووو~ 🎵', '#fef08a');
+          }
+        }
+      }
     }
 
     // Water hazards
@@ -2530,6 +3212,8 @@ window.Game = window.Game || {};
     else if (theme === 'greece') Art.drawGreeceSkyAndHorizon(targetCtx, cx, w, h, tSec);
     else if (theme === 'battir') Art.drawBattirSkyAndHorizon(targetCtx, cx, w, h, tSec);
     else if (theme === 'istanbul' && Art.drawIstanbulSkyAndHorizon) Art.drawIstanbulSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'swiss' && Art.drawSwissSkyAndHorizon) Art.drawSwissSkyAndHorizon(targetCtx, cx, w, h, tSec);
+    else if (theme === 'airport' && Art.drawAirportSkyAndHorizon) Art.drawAirportSkyAndHorizon(targetCtx, cx, w, h, tSec);
     else if (theme === 'construction') Art.drawConstructionSkyAndHorizon(targetCtx, cx, w, h, tSec);
     else if (theme === 'subway') Art.drawSubwaySkyAndHorizon(targetCtx, cx, w, h, tSec);
     else if (theme === 'rooftop') Art.drawRooftopSkyAndHorizon(targetCtx, cx, w, h, tSec);
@@ -2558,6 +3242,8 @@ window.Game = window.Game || {};
     else if (theme === 'greece') Art.drawGreeceMidground(targetCtx, cx, w, h, tSec);
     else if (theme === 'battir') Art.drawBattirMidground(targetCtx, cx, w, h, tSec);
     else if (theme === 'istanbul' && Art.drawIstanbulMidground) Art.drawIstanbulMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'swiss' && Art.drawSwissMidground) Art.drawSwissMidground(targetCtx, cx, w, h, tSec);
+    else if (theme === 'airport' && Art.drawAirportMidground) Art.drawAirportMidground(targetCtx, cx, w, h, tSec);
     else if (theme === 'construction') Art.drawConstructionMidground(targetCtx, cx, w, h, tSec);
     else if (theme === 'subway') Art.drawSubwayMidground(targetCtx, cx, w, h, tSec);
     else if (theme === 'rooftop') Art.drawRooftopMidground(targetCtx, cx, w, h, tSec);
@@ -2576,12 +3262,12 @@ window.Game = window.Game || {};
     ensureBgCacheCanvases();
     ctx.save();
     try {
-      // 1. Sky & Far Horizon Layer (cached at ~6 Hz or >=24px camera delta -> 1 drawImage blit!)
-      if (bgSkyCache.canvas && bgSkyCache.ctx) {
+      // 1. Sky & Far Horizon Layer (cached at 5 Hz or >=72px camera delta -> 1 fast GPU drawImage blit; airport uses direct 60fps 1:1 terminal split!)
+      if (theme !== 'airport' && bgSkyCache.canvas && bgSkyCache.ctx) {
         const skyDirty =
           bgSkyCache.theme !== theme ||
-          Math.abs(camX - bgSkyCache.camX) >= 24 ||
-          Math.abs(time - bgSkyCache.time) >= 0.16;
+          Math.abs(camX - bgSkyCache.camX) >= 72 ||
+          Math.abs(time - bgSkyCache.time) >= 0.20;
         if (skyDirty) {
           bgSkyCache.theme = theme;
           bgSkyCache.camX = camX;
@@ -2600,9 +3286,9 @@ window.Game = window.Game || {};
       }
 
       // 2. Midground Layer:
-      //    - Battir (Stage 26) & Greenhouse (Stage 13) run bespoke 60fps Offscreen Tile Baking directly.
-      //    - All other 24 stages use the overscanned sliding-window Offscreen Canvas cache (~8.3 Hz refresh + 60fps parallax blit!).
-      if (theme === 'battir' || theme === 'greenhouse' || theme === 'istanbul' || !bgMidCache.canvas || !bgMidCache.ctx) {
+      //    - Battir, Greenhouse, Istanbul, Swiss & Airport run bespoke 60fps Offscreen Tile Baking directly.
+      //    - All other stages use the overscanned sliding-window Offscreen Canvas cache (~8.3 Hz refresh + 60fps parallax blit!).
+      if (theme === 'battir' || theme === 'greenhouse' || theme === 'istanbul' || theme === 'swiss' || theme === 'airport' || !bgMidCache.canvas || !bgMidCache.ctx) {
         renderThemeMidground(ctx, theme, camX, LOGICAL_W, LOGICAL_H, time);
       } else {
         const p = BG_MID_PARALLAX[theme] || 0.40;
@@ -2663,12 +3349,12 @@ window.Game = window.Game || {};
       if (p.hiddenInDay && !nv) continue;
       if (p.bounceAnim && p.bounceAnim > 0) p.bounceAnim = Math.max(0, p.bounceAnim - 0.08);
       const px = p.x - camX;
-      const py = p.y - camY + (p.type !== 'flower_bounce' && p.bounceAnim ? Math.sin(p.bounceAnim * Math.PI) * 6 : 0);
-      const pad = (p.type === 'maya_dart_totem' || p.type === 'maya_twin_scale' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk')
-        ? 540
-        : (p.type === 'pendulum_censer' || p.type === 'waterwheel_arm' || p.type === 'pressure_boiler_valve' || p.type === 'switch_rail_bridge' || p.type === 'carnival_bell_swing' || p.type === 'gondola_boat' || p.type === 'moulin_sail_wheel' || p.type === 'paris_balcony_drawbridge' || p.type === 'morocco_lantern_swing' || p.type === 'morocco_magic_carpet' || p.type === 'morocco_cedar_bridge' || p.type === 'maya_vine_swing' || p.type === 'maya_sun_disc' || p.type === 'maya_stone_bridge' || p.type === 'maya_serpent_ring' || p.type === 'maya_rolling_wheel' || p.type === 'maya_serpent_spine' || p.type === 'maya_vault_door' || p.type === 'greece_sun_mirror' || p.type === 'greece_light_bridge' || p.type === 'greece_chariot_track' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_marble_lift' || p.type === 'battir_madud_gate' || p.type === 'battir_pool_bridge' || p.type === 'battir_press_pad' || p.type === 'battir_olive_basket' || p.type === 'battir_roman_bath_vent' || p.type === 'battir_hosh_arch_swing' || p.type === 'battir_olive_bough' || p.type === 'battir_alley_wall')
-        ? 280
-        : 40;
+      const py = p.y - camY + (p.type !== 'flower_bounce' && p.type !== 'swiss_hay_bounce' && p.type !== 'airport_suitcase_bounce' && p.bounceAnim ? Math.sin(p.bounceAnim * Math.PI) * 6 : 0);
+      const pad = (p.type === 'maya_dart_totem' || p.type === 'maya_twin_scale' || p.type === 'greece_medusa_aegis' || p.type === 'greece_discobolus' || p.type === 'greece_zeus_obelisk' || p.type === 'battir_grape_zipline' || p.type === 'battir_locomotive_crossing' || p.type === 'istanbul_tram_crossing' || p.type === 'istanbul_medusa_cistern' || p.type === 'istanbul_drawbridge_leaf' || p.type === 'airport_exit_portal' || p.type === 'airport_jet_blast')
+        ? 380
+        : (p.type === 'pendulum_censer' || p.type === 'waterwheel_arm' || p.type === 'pressure_boiler_valve' || p.type === 'switch_rail_bridge' || p.type === 'carnival_bell_swing' || p.type === 'gondola_boat' || p.type === 'moulin_sail_wheel' || p.type === 'paris_balcony_drawbridge' || p.type === 'morocco_lantern_swing' || p.type === 'morocco_magic_carpet' || p.type === 'morocco_cedar_bridge' || p.type === 'maya_vine_swing' || p.type === 'maya_sun_disc' || p.type === 'maya_stone_bridge' || p.type === 'maya_serpent_ring' || p.type === 'maya_rolling_wheel' || p.type === 'maya_serpent_spine' || p.type === 'maya_vault_door' || p.type === 'greece_sun_mirror' || p.type === 'greece_light_bridge' || p.type === 'greece_chariot_track' || p.type === 'greece_poseidon_wave' || p.type === 'greece_lyre_pillar' || p.type === 'greece_marble_lift' || p.type === 'battir_madud_gate' || p.type === 'battir_pool_bridge' || p.type === 'battir_press_pad' || p.type === 'battir_olive_basket' || p.type === 'battir_roman_bath_vent' || p.type === 'battir_hosh_arch_swing' || p.type === 'battir_olive_bough' || p.type === 'battir_alley_wall' || p.type === 'battir_noria_wheel' || p.type === 'battir_shadoof_beam' || p.type === 'battir_fig_canopy' || p.type === 'battir_taboon_oven' || p.type === 'battir_sabr_hedge' || p.type === 'battir_flash_sluice' || p.type === 'battir_beehive_swarm' || p.type === 'battir_farmer_stall' || p.type === 'istanbul_whirling_censer' || p.type === 'istanbul_mosaic_chandelier' || p.type === 'istanbul_tram_car' || p.type === 'istanbul_vapur_boat' || p.type === 'istanbul_fishing_float' || p.type === 'istanbul_balik_grill' || p.type === 'istanbul_samovar_vent' || p.type === 'istanbul_hammam_valve' || p.type === 'istanbul_hammam_lift' || p.type === 'istanbul_simit_vendor' || p.type === 'istanbul_dondurma_trick' || p.type === 'istanbul_kestane_cart' || p.type === 'istanbul_floating_pontoon' || p.type === 'istanbul_tulip_fountain' || p.type === 'swiss_cable_car' || p.type === 'swiss_funicular_car' || p.type === 'swiss_cheese_wheel' || p.type === 'swiss_cuckoo_clock' || p.type === 'swiss_waterwheel_mill' || p.type === 'swiss_alphorn_gust' || p.type === 'swiss_rescue_hut' || p.type === 'swiss_hay_bounce' || p.type === 'swiss_fondue_cauldron' || p.type === 'swiss_avalanche_bell' || p.type === 'airport_conveyor_belt' || p.type === 'airport_security_scanner' || p.type === 'airport_suitcase_bounce' || p.type === 'airport_baggage_shuttle' || p.type === 'airport_cargo_scissor_lift' || p.type === 'airport_coffee_kiosk')
+        ? 195
+        : 36;
       if (px + p.w < -pad || px > cullW + pad) continue;
       Art.drawPlatform(ctx, p, px, py, nv, time);
     }
@@ -2680,7 +3366,15 @@ window.Game = window.Game || {};
     for (const p of level.puddles) {
       const px = p.x - camX;
       if (px + p.w < -40 || px > cullW + 40) continue;
-      Art.drawPuddle(ctx, px, p.y - camY, p.w, p.h, time, level.theme === 'harbor' || level.theme === 'harbor_storm' || level.theme === 'snow');
+      if (level.theme === 'istanbul' && Art.drawIstanbulWaterChannel) {
+        Art.drawIstanbulWaterChannel(ctx, px, p.y - camY, p.w, p.h, time);
+      } else if (level.theme === 'swiss' && Art.drawSwissAlpineStream) {
+        Art.drawSwissAlpineStream(ctx, px, p.y - camY, p.w, p.h, time);
+      } else if (level.theme === 'airport' && Art.drawAirportTarmacHazard) {
+        Art.drawAirportTarmacHazard(ctx, px, p.y - camY, p.w, p.h, time);
+      } else {
+        Art.drawPuddle(ctx, px, p.y - camY, p.w, p.h, time, level.theme === 'harbor' || level.theme === 'harbor_storm' || level.theme === 'snow');
+      }
     }
 
     for (const cp of level.checkpoints) {
@@ -2790,28 +3484,36 @@ window.Game = window.Game || {};
     }
 
     const g = level.goal;
-    if (level.theme === 'desert' && Art.drawPharaonicMuseumGate) {
-      Art.drawPharaonicMuseumGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
-    } else if (level.theme === 'japan' && Art.drawJapaneseShrineGate) {
-      Art.drawJapaneseShrineGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
-    } else if (level.theme === 'steam_train' && Art.drawGrandTrainStationGate) {
-      Art.drawGrandTrainStationGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
-    } else if (level.theme === 'venice' && Art.drawVenicePiazzaGate) {
-      Art.drawVenicePiazzaGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
-    } else if (level.theme === 'paris' && Art.drawParisArcGate) {
-      Art.drawParisArcGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
-    } else if (level.theme === 'marrakech' && Art.drawMarrakechBabGate) {
-      Art.drawMarrakechBabGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
-    } else if (level.theme === 'maya' && Art.drawMayaTempleGate) {
-      Art.drawMayaTempleGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
-    } else if (level.theme === 'greece' && Art.drawGreeceAcropolisGate) {
-      Art.drawGreeceAcropolisGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
-    } else if (level.theme === 'battir' && Art.drawBattirFinishGate) {
-      Art.drawBattirFinishGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
-    } else if (level.theme === 'istanbul' && Art.drawIstanbulGalataGate) {
-      Art.drawIstanbulGalataGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
-    } else {
-      Art.drawMarketGate(ctx, g, g.x - camX, g.y - camY, time, level.goalLabel);
+    const gxScreen = g.x - camX;
+    const goalPad = level.theme === 'airport' ? 560 : 220;
+    if (gxScreen < cullW + goalPad && gxScreen + g.w > -goalPad) {
+      if (level.theme === 'desert' && Art.drawPharaonicMuseumGate) {
+        Art.drawPharaonicMuseumGate(ctx, g, gxScreen, g.y - camY, time, level.goalLabel);
+      } else if (level.theme === 'japan' && Art.drawJapaneseShrineGate) {
+        Art.drawJapaneseShrineGate(ctx, g, gxScreen, g.y - camY, time, level.goalLabel);
+      } else if (level.theme === 'steam_train' && Art.drawGrandTrainStationGate) {
+        Art.drawGrandTrainStationGate(ctx, g, gxScreen, g.y - camY, time, level.goalLabel);
+      } else if (level.theme === 'venice' && Art.drawVenicePiazzaGate) {
+        Art.drawVenicePiazzaGate(ctx, g, gxScreen, g.y - camY, time, level.goalLabel);
+      } else if (level.theme === 'paris' && Art.drawParisArcGate) {
+        Art.drawParisArcGate(ctx, g, gxScreen, g.y - camY, time, level.goalLabel);
+      } else if (level.theme === 'marrakech' && Art.drawMarrakechBabGate) {
+        Art.drawMarrakechBabGate(ctx, g, gxScreen, g.y - camY, time, level.goalLabel);
+      } else if (level.theme === 'maya' && Art.drawMayaTempleGate) {
+        Art.drawMayaTempleGate(ctx, g, gxScreen, g.y - camY, time, level.goalLabel);
+      } else if (level.theme === 'greece' && Art.drawGreeceAcropolisGate) {
+        Art.drawGreeceAcropolisGate(ctx, g, gxScreen, g.y - camY, time, level.goalLabel);
+      } else if (level.theme === 'battir' && Art.drawBattirFinishGate) {
+        Art.drawBattirFinishGate(ctx, g, gxScreen, g.y - camY, time, level.goalLabel);
+      } else if (level.theme === 'istanbul' && Art.drawIstanbulGalataGate) {
+        Art.drawIstanbulGalataGate(ctx, g, gxScreen, g.y - camY, time, level.goalLabel);
+      } else if (level.theme === 'swiss' && Art.drawSwissGoalGate) {
+        Art.drawSwissGoalGate(ctx, g, gxScreen, g.y - camY, time, level.goalLabel);
+      } else if (level.theme === 'airport' && Art.drawAirportBaggageGoalGate) {
+        Art.drawAirportBaggageGoalGate(ctx, g, gxScreen, g.y - camY, time, level.goalLabel);
+      } else {
+        Art.drawMarketGate(ctx, g, gxScreen, g.y - camY, time, level.goalLabel);
+      }
     }
   }
 
@@ -2822,8 +3524,14 @@ window.Game = window.Game || {};
   }
 
   function loop(timestamp) {
+    if (document.hidden) {
+      lastTime = timestamp;
+      requestAnimationFrame(loop);
+      return;
+    }
     if (!lastTime) lastTime = timestamp;
-    const dt = Math.min(0.033, (timestamp - lastTime) / 1000);
+    const rawDt = (timestamp - lastTime) / 1000;
+    const dt = Math.min(0.033, Math.max(0, rawDt));
     lastTime = timestamp;
     const timeSec = timestamp / 1000;
 
@@ -2843,11 +3551,32 @@ window.Game = window.Game || {};
       return;
     }
 
+    // Sleep rendering loop when idle on Main Menu, Shop, Pause, or Victory overlay (0% wasted CPU/GPU!)
+    const activelyPlaying = running && !paused;
+    if (!activelyPlaying && !needsStaticFrame) {
+      requestAnimationFrame(loop);
+      return;
+    }
+
+    // Adaptive Resolution Guard: smoothly step down from 1.35x to 1.0x native HD if device struggles (<44fps sustained)
+    if (activelyPlaying && RENDER_SCALE > 1.02 && rawDt > 0.005 && rawDt < 0.25) {
+      if (rawDt > 0.0228) {
+        slowFrameStreak++;
+        if (slowFrameStreak >= 45) {
+          applyCanvasScale(1.0);
+          slowFrameStreak = 0;
+        }
+      } else {
+        slowFrameStreak = Math.max(0, slowFrameStreak - 2);
+      }
+    }
+
     const viewZoom = 1.3;
     const viewW = LOGICAL_W / viewZoom;
     const viewH = LOGICAL_H / viewZoom;
+    ctx._viewW = viewW;
 
-    if (running && !paused) {
+    if (activelyPlaying) {
       elapsedTime += dt;
       if (shakeTimer > 0) shakeTimer = Math.max(0, shakeTimer - dt);
 
@@ -2924,10 +3653,14 @@ window.Game = window.Game || {};
     ctx.translate(shakeX, shakeY);
     drawLevel(timeSec, viewW);
     catCtrl.draw(ctx, camX, camY);
+    if (level.theme === 'swiss' && Art.drawSwissForegroundCows) {
+      Art.drawSwissForegroundCows(ctx, level, camX, camY, timeSec, viewW);
+    }
     Particles.draw(ctx, camX, camY);
     ctx.restore();
     drawNightVisionOverlay();
     ctx.restore();
+    if (!activelyPlaying) needsStaticFrame = false;
 
     requestAnimationFrame(loop);
   }
@@ -2989,6 +3722,7 @@ window.Game = window.Game || {};
     catCtrl.cat.nightVision = !catCtrl.cat.nightVision;
     Audio.playNightVision(catCtrl.cat.nightVision);
     haptic(10);
+    needsStaticFrame = true;
     updateHUD();
   }
 
@@ -3187,6 +3921,7 @@ window.Game = window.Game || {};
     btnDimBg.addEventListener('click', () => {
       Audio.playUiClick();
       dimBackground = !dimBackground;
+      needsStaticFrame = true;
       try { localStorage.setItem(DIM_BG_KEY, dimBackground ? '1' : '0'); } catch (e) {}
       syncToggleButtons();
     });

@@ -1,8 +1,8 @@
-const CACHE_NAME = 'cat-game-touch-v167';
+const CACHE_NAME = 'cat-game-touch-v199';
 const CORE_ASSETS = [
   './',
   './index.html',
-  './style.css?v=24',
+  './style.css?v=25',
   './manifest.json',
   './images/icon-192.png',
   './images/icon-512.png',
@@ -11,16 +11,18 @@ const CORE_ASSETS = [
   './sounds/Dog.wav',
   './sounds/Lion.wav',
   './sounds/save-point.wav',
-  './js/i18n.js?v=43',
-  './js/store.js?v=47',
-  './js/audio.js?v=35',
-  './js/particles.js?v=18',
+  './js/i18n.js?v=48',
+  './js/store.js?v=50',
+  './js/audio.js?v=40',
+  './js/particles.js?v=19',
   './js/art.js?v=24',
-  './js/art-extended.js?v=133',
-  './js/art-istanbul.js?v=1',
-  './js/enemies-extended.js?v=55',
-  './js/cat-procedural.js?v=48',
-  './js/cat.js?v=59',
+  './js/art-extended.js?v=136',
+  './js/art-istanbul.js?v=13',
+  './js/art-swiss.js?v=15',
+  './js/art-airport.js?v=1',
+  './js/enemies-extended.js?v=72',
+  './js/cat-procedural.js?v=50',
+  './js/cat.js?v=68',
   './js/level1.js?v=5',
   './js/level2.js?v=5',
   './js/level3.js?v=11',
@@ -46,9 +48,11 @@ const CORE_ASSETS = [
   './js/level23.js?v=1',
   './js/level24.js?v=5',
   './js/level25.js?v=4',
-  './js/level26.js?v=10',
-  './js/level27.js?v=3',
-  './js/game.js?v=60'
+  './js/level26.js?v=11',
+  './js/level27.js?v=9',
+  './js/level28.js?v=10',
+  './js/level29.js?v=2',
+  './js/game.js?v=73'
 ];
 
 self.addEventListener('install', (event) => {

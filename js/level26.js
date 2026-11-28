@@ -175,13 +175,53 @@
       { x: 12540, y: groundY - 34, w: 54, h: 34, minX: 12420, maxX: 12720, speed: 92, facing: 1, walkDist: 0 },
     ];
 
+    // 72 Curated Gold Coins guiding Waterwheels, Ziplines, Fig Bounces, Wall-Jump Shafts & Upper Footbridges!
+    const coins = [
+      // Chapter 1 (0 .. 3050): Qantara Arches, Noria #1, Courtyard Shaft & Fig Canopy #1
+      { x: 220, y: 576 }, { x: 270, y: 576 },
+      { x: 405, y: 468 }, { x: 460, y: 422 }, { x: 515, y: 468 },
+      { x: 845, y: 412 }, { x: 940, y: 386 }, { x: 1035, y: 412 },
+      { x: 1190, y: 360 }, { x: 1255, y: 360 }, { x: 1320, y: 360 },
+      { x: 1628, y: 495 }, { x: 1628, y: 435 }, { x: 1628, y: 375 },
+      { x: 1765, y: 348 }, { x: 1875, y: 348 },
+      { x: 2298, y: 505 }, { x: 2358, y: 450 }, { x: 2425, y: 495 },
+      { x: 2690, y: 576 },
+
+      // Chapter 2 (3050 .. 6100): Roman Aqueduct #1, Shadoof -> High Crown, Noria #2 & Fig Canopy #2
+      { x: 3460, y: 474 }, { x: 3565, y: 374 }, { x: 3675, y: 374 },
+      { x: 4048, y: 430 },
+      { x: 4265, y: 270 }, { x: 4335, y: 226 }, { x: 4405, y: 270 },
+      { x: 4820, y: 576 }, { x: 4880, y: 576 },
+      { x: 5324, y: 488 }, { x: 5390, y: 428 },
+      { x: 5495, y: 350 }, { x: 5615, y: 350 },
+      { x: 5980, y: 576 },
+
+      // Chapter 3 (6100 .. 9300): Grape Zipline #1, Sabr/Aqueduct #2, Fig Canopy #3 & Noria #3
+      { x: 6250, y: 532 }, { x: 6355, y: 516 }, { x: 6475, y: 498 }, { x: 6590, y: 478 }, { x: 6695, y: 462 },
+      { x: 7303, y: 525 }, { x: 7420, y: 576 },
+      { x: 7995, y: 338 }, { x: 8115, y: 338 },
+      { x: 8360, y: 412 }, { x: 8450, y: 386 }, { x: 8540, y: 412 },
+      { x: 8995, y: 576 },
+
+      // Chapter 4 (9300 .. 12350): Beehive #1 Stone Footbridge & Wadi al-Makhrour Zipline #2
+      { x: 9498, y: 468 }, { x: 9645, y: 388 }, { x: 9765, y: 388 }, { x: 9918, y: 468 },
+      { x: 10605, y: 530 }, { x: 10715, y: 514 }, { x: 10830, y: 498 }, { x: 10945, y: 480 }, { x: 11055, y: 464 },
+      { x: 11357, y: 485 }, { x: 11893, y: 525 }, { x: 12030, y: 576 },
+
+      // Chapter 5 (12350 .. 15200): Khirbet al-Yahud Citadel Shaft, Beehive #2 Bridge & Ain al-Balad Finale!
+      { x: 12898, y: 492 }, { x: 12898, y: 432 }, { x: 12898, y: 372 },
+      { x: 13045, y: 344 }, { x: 13165, y: 344 },
+      { x: 13315, y: 468 }, { x: 13460, y: 384 }, { x: 13575, y: 384 }, { x: 13720, y: 468 },
+      { x: 14534, y: 488 }, { x: 14625, y: 358 }, { x: 14735, y: 358 }, { x: 14765, y: 576 },
+    ].map((c, idx) => ({ x: c.x, y: c.y, value: 1, phase: idx * 0.43, collected: false }));
+
     return {
       id: 26,
       stage: 26,
       name: 'قرية بتّير • بيت لحم والقدس',
       nameEn: 'Battir • Bethlehem & Jerusalem',
-      subtitle: 'غروب الجبل المدرج، نواعير عين البلد، قناطر السبع أرامل ومعبر قطار ١٨٩٢',
-      subtitleEn: 'Sunset Terraced Gorge, Ain al-Balad Waterwheels, Qantara Alleys & 1892 Train',
+      subtitle: 'غروب الجبل المدرج، نواعير عين البلد، قناطر السبع أرامل وقطار الوادي',
+      subtitleEn: 'Sunset Terraced Gorge, Ain al-Balad Waterwheels, Qantara Alleys & Valley Train',
       theme: 'battir',
       battirOutfit: true,
       width: 15200,
@@ -196,7 +236,7 @@
       checkpoints,
       treats,
       puddles: [],
-      coins: [],
+      coins,
       rats: [],
       falcons: [],
       dogs: [],

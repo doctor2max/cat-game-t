@@ -2,38 +2,59 @@ window.Game = window.Game || {};
 
 window.Game.Particles = (function () {
   const particles = [];
+  const freeParticles = [];
+  const MAX_PARTICLES = 110;
   const rings = [];
   const popups = [];
 
+  function pushParticle(x, y, vx, vy, size, life, maxLife, color, gravity, kind, sway, rot, rotSpd) {
+    if (particles.length >= MAX_PARTICLES) return;
+    const p = freeParticles.length > 0 ? freeParticles.pop() : {};
+    p.x = x;
+    p.y = y;
+    p.vx = vx;
+    p.vy = vy;
+    p.size = size;
+    p.life = life;
+    p.maxLife = maxLife;
+    p.color = color;
+    p.gravity = gravity;
+    p.kind = kind || '';
+    p.sway = sway || 0;
+    p.rot = rot || 0;
+    p.rotSpd = rotSpd || 0;
+    particles.push(p);
+  }
+
   function spawnDust(x, y, count = 6, color = 'rgba(235, 220, 195, 0.65)') {
     for (let i = 0; i < count; i++) {
-      particles.push({
-        x: x + (Math.random() - 0.5) * 16,
-        y: y + (Math.random() - 0.5) * 6,
-        vx: (Math.random() - 0.5) * 90,
-        vy: -20 - Math.random() * 60,
-        size: 3 + Math.random() * 4,
-        life: 0.35 + Math.random() * 0.2,
-        maxLife: 0.55,
+      pushParticle(
+        x + (Math.random() - 0.5) * 16,
+        y + (Math.random() - 0.5) * 6,
+        (Math.random() - 0.5) * 90,
+        -20 - Math.random() * 60,
+        3 + Math.random() * 4,
+        0.35 + Math.random() * 0.2,
+        0.55,
         color,
-        gravity: 140,
-      });
+        140
+      );
     }
   }
 
   function spawnSplash(x, y) {
-    for (let i = 0; i < 14; i++) {
-      particles.push({
-        x: x + (Math.random() - 0.5) * 20,
+    for (let i = 0; i < 12; i++) {
+      pushParticle(
+        x + (Math.random() - 0.5) * 20,
         y,
-        vx: (Math.random() - 0.5) * 200,
-        vy: -120 - Math.random() * 170,
-        size: 3 + Math.random() * 4,
-        life: 0.55,
-        maxLife: 0.55,
-        color: '#6ce5ff',
-        gravity: 650,
-      });
+        (Math.random() - 0.5) * 200,
+        -120 - Math.random() * 170,
+        3 + Math.random() * 4,
+        0.55,
+        0.55,
+        '#6ce5ff',
+        650
+      );
     }
   }
 
@@ -78,17 +99,17 @@ window.Game.Particles = (function () {
     for (let i = 0; i < 8; i++) {
       const ang = (Math.PI * 2 * i) / 8 + Math.random() * 0.4;
       const spd = 65 + Math.random() * 95;
-      particles.push({
+      pushParticle(
         x,
         y,
-        vx: Math.cos(ang) * spd,
-        vy: Math.sin(ang) * spd - 35,
-        size: 2.2 + Math.random() * 2.5,
-        life: 0.36 + Math.random() * 0.16,
-        maxLife: 0.52,
-        color: colors[i % colors.length],
-        gravity: 220,
-      });
+        Math.cos(ang) * spd,
+        Math.sin(ang) * spd - 35,
+        2.2 + Math.random() * 2.5,
+        0.36 + Math.random() * 0.16,
+        0.52,
+        colors[i % colors.length],
+        220
+      );
     }
   }
 
@@ -103,39 +124,38 @@ window.Game.Particles = (function () {
       color: '#fde68a',
     });
     const burstColors = ['#d6a76c', '#b07b42', '#fef08a', '#fffbeb'];
-    for (let i = 0; i < 14; i++) {
-      const ang = (Math.PI * 2 * i) / 14;
-      particles.push({
+    for (let i = 0; i < 12; i++) {
+      const ang = (Math.PI * 2 * i) / 12;
+      pushParticle(
         x,
         y,
-        vx: Math.cos(ang) * (120 + (i % 3) * 28),
-        vy: Math.sin(ang) * (120 + (i % 3) * 28) - 20,
-        size: 3 + Math.random() * 2.2,
-        life: 0.44,
-        maxLife: 0.44,
-        color: burstColors[i % burstColors.length],
-        gravity: 220,
-      });
+        Math.cos(ang) * (120 + (i % 3) * 28),
+        Math.sin(ang) * (120 + (i % 3) * 28) - 20,
+        3 + Math.random() * 2.2,
+        0.44,
+        0.44,
+        burstColors[i % burstColors.length],
+        220
+      );
     }
   }
 
   function spawnTrailDot(x, y, color) {
-    if (particles.length > 90) return;
-    particles.push({
-      x: x + (Math.random() - 0.5) * 8,
-      y: y + (Math.random() - 0.5) * 8,
-      vx: (Math.random() - 0.5) * 18,
-      vy: -12 - Math.random() * 18,
-      size: 2 + Math.random() * 2.2,
-      life: 0.34,
-      maxLife: 0.34,
+    if (particles.length > 75) return;
+    pushParticle(
+      x + (Math.random() - 0.5) * 8,
+      y + (Math.random() - 0.5) * 8,
+      (Math.random() - 0.5) * 18,
+      -12 - Math.random() * 18,
+      2 + Math.random() * 2.2,
+      0.34,
+      0.34,
       color,
-      gravity: 10,
-    });
+      10
+    );
   }
 
   function spawnNectarBurst(x, y) {
-    // Soft golden pollen mist ring
     rings.push({
       x,
       y: y - 4,
@@ -146,59 +166,57 @@ window.Game.Particles = (function () {
       color: '#fde047',
     });
 
-    // Shimmering liquid golden nectar droplets arcing gracefully outward
     const nectarCols = ['#fef08a', '#fbbf24', '#fde68a', '#fffbeb'];
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 10; i++) {
       const ang = -Math.PI * (0.12 + Math.random() * 0.76);
       const spd = 85 + Math.random() * 145;
-      particles.push({
-        x: x + (Math.random() - 0.5) * 28,
-        y: y - 2 + (Math.random() - 0.5) * 6,
-        vx: Math.cos(ang) * spd,
-        vy: Math.sin(ang) * spd - 30,
-        size: 2.2 + Math.random() * 2.4,
-        life: 0.55 + Math.random() * 0.35,
-        maxLife: 0.9,
-        color: nectarCols[i % nectarCols.length],
-        gravity: 260,
-        kind: 'nectar',
-      });
+      pushParticle(
+        x + (Math.random() - 0.5) * 28,
+        y - 2 + (Math.random() - 0.5) * 6,
+        Math.cos(ang) * spd,
+        Math.sin(ang) * spd - 30,
+        2.2 + Math.random() * 2.4,
+        0.55 + Math.random() * 0.35,
+        0.9,
+        nectarCols[i % nectarCols.length],
+        260,
+        'nectar'
+      );
     }
 
-    // Weightless glowing golden pollen motes drifting gently upward
-    for (let i = 0; i < 10; i++) {
-      particles.push({
-        x: x + (Math.random() - 0.5) * 38,
-        y: y - 4 + (Math.random() - 0.5) * 10,
-        vx: (Math.random() - 0.5) * 65,
-        vy: -45 - Math.random() * 75,
-        size: 1.6 + Math.random() * 1.8,
-        life: 0.75 + Math.random() * 0.45,
-        maxLife: 1.2,
-        color: i % 2 === 0 ? '#fef9c3' : '#facc15',
-        gravity: 28,
-        sway: (Math.random() - 0.5) * 6,
-        kind: 'pollen',
-      });
+    for (let i = 0; i < 8; i++) {
+      pushParticle(
+        x + (Math.random() - 0.5) * 38,
+        y - 4 + (Math.random() - 0.5) * 10,
+        (Math.random() - 0.5) * 65,
+        -45 - Math.random() * 75,
+        1.6 + Math.random() * 1.8,
+        0.75 + Math.random() * 0.45,
+        1.2,
+        i % 2 === 0 ? '#fef9c3' : '#facc15',
+        28,
+        'pollen',
+        (Math.random() - 0.5) * 6
+      );
     }
 
-    // Delicate fluttering lavender-violet flower micro-petals
     const petalCols = ['#f3e8ff', '#d8b4fe', '#c084fc'];
-    for (let i = 0; i < 5; i++) {
-      particles.push({
-        x: x + (Math.random() - 0.5) * 44,
-        y: y - 2,
-        vx: (Math.random() - 0.5) * 95,
-        vy: -75 - Math.random() * 65,
-        size: 3.6 + Math.random() * 1.8,
-        life: 0.85 + Math.random() * 0.45,
-        maxLife: 1.3,
-        color: petalCols[i % petalCols.length],
-        gravity: 75,
-        rot: Math.random() * Math.PI * 2,
-        rotSpd: (Math.random() - 0.5) * 7,
-        kind: 'petal',
-      });
+    for (let i = 0; i < 4; i++) {
+      pushParticle(
+        x + (Math.random() - 0.5) * 44,
+        y - 2,
+        (Math.random() - 0.5) * 95,
+        -75 - Math.random() * 65,
+        3.6 + Math.random() * 1.8,
+        0.85 + Math.random() * 0.45,
+        1.3,
+        petalCols[i % petalCols.length],
+        75,
+        'petal',
+        0,
+        Math.random() * Math.PI * 2,
+        (Math.random() - 0.5) * 7
+      );
     }
   }
 
@@ -207,7 +225,9 @@ window.Game.Particles = (function () {
       const p = particles[i];
       p.life -= dt;
       if (p.life <= 0) {
-        particles.splice(i, 1);
+        freeParticles.push(p);
+        const last = particles.pop();
+        if (i < particles.length) particles[i] = last;
         continue;
       }
       p.vy += p.gravity * dt;
@@ -221,7 +241,8 @@ window.Game.Particles = (function () {
       const r = rings[i];
       r.life -= dt;
       if (r.life <= 0) {
-        rings.splice(i, 1);
+        const last = rings.pop();
+        if (i < rings.length) rings[i] = last;
         continue;
       }
       const progress = 1 - r.life / r.maxLife;
@@ -232,7 +253,8 @@ window.Game.Particles = (function () {
       const pop = popups[i];
       pop.life -= dt;
       if (pop.life <= 0) {
-        popups.splice(i, 1);
+        const last = popups.pop();
+        if (i < popups.length) popups[i] = last;
         continue;
       }
       pop.y += pop.vy * dt;
@@ -240,22 +262,28 @@ window.Game.Particles = (function () {
   }
 
   function draw(ctx, camX, camY) {
-    for (const p of particles) {
-      const alpha = Math.max(0, p.life / p.maxLife);
+    if (particles.length === 0 && rings.length === 0 && popups.length === 0) return;
+    const viewW = ctx._viewW || 1024;
+    ctx.save();
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
       const sx = p.x - camX;
       const sy = p.y - camY;
-      ctx.save();
+      if (sx < -24 || sx > viewW + 24 || sy < -60 || sy > 760) continue;
+      const alpha = Math.max(0, p.life / p.maxLife);
       ctx.globalAlpha = alpha;
       ctx.fillStyle = p.color;
       if (p.kind === 'petal') {
+        ctx.save();
         ctx.translate(sx, sy);
         ctx.rotate(p.rot || 0);
         ctx.beginPath();
         ctx.ellipse(0, 0, p.size, p.size * 0.52, 0, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
       } else if (p.kind === 'nectar') {
-        // Teardrop shimmering nectar droplet with specular dot
         const ang = Math.atan2(p.vy, p.vx) + Math.PI / 2;
+        ctx.save();
         ctx.translate(sx, sy);
         ctx.rotate(ang);
         ctx.beginPath();
@@ -265,42 +293,47 @@ window.Game.Particles = (function () {
         ctx.beginPath();
         ctx.arc(-p.size * 0.2, -p.size * 0.3, p.size * 0.28, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
       } else {
         ctx.beginPath();
         ctx.arc(sx, sy, p.size, 0, Math.PI * 2);
         ctx.fill();
       }
-      ctx.restore();
     }
 
-    for (const r of rings) {
-      const alpha = Math.max(0, r.life / r.maxLife);
-      ctx.save();
-      ctx.globalAlpha = alpha * 0.78;
-      ctx.strokeStyle = r.color || '#ffd36e';
+    if (rings.length > 0) {
       ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(r.x - camX, r.y - camY, r.radius, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
+      for (let i = 0; i < rings.length; i++) {
+        const r = rings[i];
+        const alpha = Math.max(0, r.life / r.maxLife);
+        ctx.globalAlpha = alpha * 0.78;
+        ctx.strokeStyle = r.color || '#ffd36e';
+        ctx.beginPath();
+        ctx.arc(r.x - camX, r.y - camY, r.radius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
     }
 
-    for (const pop of popups) {
-      const alpha = Math.max(0, pop.life / pop.maxLife);
-      ctx.save();
-      ctx.globalAlpha = alpha;
+    if (popups.length > 0) {
       ctx.font = 'bold 16px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#090d16';
-      ctx.fillText(pop.text, pop.x - camX + 1, pop.y - camY + 1);
-      ctx.fillStyle = pop.color;
-      ctx.fillText(pop.text, pop.x - camX, pop.y - camY);
-      ctx.restore();
+      for (let i = 0; i < popups.length; i++) {
+        const pop = popups[i];
+        const px = pop.x - camX;
+        if (px < -140 || px > viewW + 140) continue;
+        const alpha = Math.max(0, pop.life / pop.maxLife);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = '#090d16';
+        ctx.fillText(pop.text, px + 1, pop.y - camY + 1);
+        ctx.fillStyle = pop.color;
+        ctx.fillText(pop.text, px, pop.y - camY);
+      }
     }
+    ctx.restore();
   }
 
   function clear() {
-    particles.length = 0;
+    while (particles.length > 0) freeParticles.push(particles.pop());
     rings.length = 0;
     popups.length = 0;
   }

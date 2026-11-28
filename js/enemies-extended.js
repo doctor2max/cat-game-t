@@ -59,9 +59,69 @@ window.Game.EnemiesExtended = (function () {
     repelPatrol(level.greece_hoplites, 2.4);
     repelPatrol(level.battir_porcupines, 2.4);
     repelPatrol(level.battir_boars, 2.5);
+    repelPatrol(level.battir_hoopoes, 2.3);
     repelPatrol(level.battir_scorpions, 2.3);
     repelPatrol(level.istanbul_kangals, 2.5);
     repelPatrol(level.istanbul_merchants, 2.4);
+    repelPatrol(level.istanbul_gulls, 2.3);
+    repelPatrol(level.istanbul_janissaries, 2.4);
+    if (level.istanbul_alley_cats) {
+      for (const ac of level.istanbul_alley_cats) {
+        const ax = ac.x + ac.w * 0.5, ay = ac.y + ac.h * 0.5;
+        if (Math.hypot(mx - ax, my - ay) < r) {
+          ac.loving = true;
+          ac.rubbing = true;
+          ac.playingTimer = 2.45;
+          pop(ax, ac.y - 20, '🐾💕');
+        }
+      }
+    }
+    repelPatrol(level.swiss_ibex, 2.5);
+    repelPatrol(level.swiss_marmots, 2.4);
+    repelPatrol(level.swiss_eagles, 2.4);
+    if (level.swiss_eagles) {
+      for (const eg of level.swiss_eagles) {
+        const ex = eg.x + eg.w * 0.5, ey = eg.y + eg.h * 0.5;
+        if (Math.hypot(mx - ex, my - ey) < r) {
+          eg.swooping = false;
+          eg.diveWarn = 0;
+          if (eg.baseY !== undefined) eg.y = Math.min(eg.y, eg.baseY - 28);
+          pop(ex, ey - 16, '💨');
+        }
+      }
+    }
+    if (level.swiss_nutcrackers) {
+      for (const nc of level.swiss_nutcrackers) {
+        const nx = nc.x + nc.w * 0.5, ny = nc.y + nc.h * 0.5;
+        if (Math.hypot(mx - nx, my - ny) < r) {
+          nc.unwoundTimer = 3.8;
+          pop(nx, nc.y - 24, '🔑💤');
+        }
+      }
+    }
+    repelPatrol(level.swiss_snow_foxes, 2.5);
+    if (level.swiss_clockwork_owls) {
+      for (const ow of level.swiss_clockwork_owls) {
+        const ox = ow.x + ow.w * 0.5, oy = ow.y + ow.h * 0.5;
+        if (Math.hypot(mx - ox, my - oy) < r + 40) {
+          ow.jammedTimer = 3.6;
+          ow.lockWarn = 0;
+          if (ow.gear) ow.gear.active = false;
+          pop(ox, oy - 24, '⚙️💤');
+        }
+      }
+    }
+    if (level.swiss_st_bernards) {
+      for (const sb of level.swiss_st_bernards) {
+        const bx = sb.x + sb.w * 0.5, by = sb.y + sb.h * 0.5;
+        if (Math.hypot(mx - bx, my - by) < r + 35) {
+          sb.loving = true;
+          sb.playingTimer = 2.8;
+          pop(bx, sb.y - 22, '🐶💕');
+        }
+      }
+    }
+
     if (level.mail_owls) {
       for (const ow of level.mail_owls) {
         const ox = ow.x + ow.w * 0.5, oy = ow.y + ow.h * 0.5;
@@ -209,6 +269,61 @@ window.Game.EnemiesExtended = (function () {
         if (Math.hypot(mx - tent.x, my - ty) < r) {
           tent.repelTimer = 2.6;
           pop(tent.x, tent.baseY - Math.max(30, tent.height || 0), '💨');
+        }
+      }
+    }
+
+    // Stage 29 International Airport Enemies: Standby / Brake / K9 Distract / Drone Repel / Marshal Salute!
+    if (level.airport_luggage_bots) {
+      for (const bot of level.airport_luggage_bots) {
+        const bx = bot.x + bot.w * 0.5, by = bot.y + bot.h * 0.5;
+        if (Math.hypot(mx - bx, my - by) < r) {
+          bot.standbyTimer = 3.8;
+          pop(bx, bot.y - 14, '🤖💚');
+        }
+      }
+    }
+    if (level.airport_runaway_carts) {
+      for (const rc of level.airport_runaway_carts) {
+        const cx = rc.x + rc.w * 0.5, cy = rc.y + rc.h * 0.5;
+        if (Math.hypot(mx - cx, my - cy) < r) {
+          rc.brakeTimer = 3.6;
+          pop(cx, rc.y - 12, '🧳🛑');
+        }
+      }
+    }
+    if (level.airport_customs_dogs) {
+      for (const kd of level.airport_customs_dogs) {
+        const kx = kd.x + kd.w * 0.5, ky = kd.y + kd.h * 0.5;
+        if (Math.hypot(mx - kx, my - ky) < r) {
+          const dir = kx >= mx ? 1 : -1;
+          kd.repelTimer = 2.7;
+          kd.repelDir = dir;
+          kd.facing = dir;
+          kd.alert = false;
+          pop(kx, kd.y - 14, '💨');
+        }
+      }
+    }
+    if (level.airport_tarmac_drones) {
+      for (const dr of level.airport_tarmac_drones) {
+        const dx = dr.x + dr.w * 0.5, dy = dr.y + dr.h * 0.5;
+        if (Math.hypot(mx - dx, my - dy) < r) {
+          const dir = dx >= mx ? 1 : -1;
+          dr.repelTimer = 2.6;
+          dr.repelDir = dir;
+          dr.facing = dir;
+          pop(dx, dr.y - 14, '💨');
+        }
+      }
+    }
+    if (level.airport_ground_marshals) {
+      for (const gm of level.airport_ground_marshals) {
+        const gx = gm.x + gm.w * 0.5, gy = gm.y + gm.h * 0.5;
+        if (Math.hypot(mx - gx, my - gy) < r) {
+          gm.saluteTimer = 3.8;
+          gm.facing = mx >= gx ? 1 : -1;
+          pop(gx, gm.y - 16, '🫡✈');
         }
       }
     }
@@ -1371,16 +1486,20 @@ window.Game.EnemiesExtended = (function () {
       }
     }
 
-    // 52. Wild Wadi Boars (Stage 26: Battir — الخنزير البري الجبلي في وادي المخرور — tusks, bristle mane & brisk trot!)
+    // 52. Wild Wadi Boars (Stage 26: Battir — الخنزير البري الجبلي في وادي المخرور — smart directional charge + stealth crouch!)
     if (level.battir_boars) {
       for (const b of level.battir_boars) {
         const prevX = b.x;
         if (stepRepelled(b, 215)) { b.walkDist = (b.walkDist || 0) + Math.abs(b.x - prevX); continue; }
         const dxCat = catCx - (b.x + b.w * 0.5);
         const dyCat = Math.abs(catCy - (b.y + b.h * 0.5));
-        const charging = Math.abs(dxCat) < 190 && dyCat < 68;
-        b.snortAnim = charging ? Math.min(1, (b.snortAnim || 0) + dt * 4.5) : Math.max(0, (b.snortAnim || 0) - dt * 3.0);
-        const spd = (b.speed || 96) * (charging ? 1.42 : 1.0);
+        const inFront = dxCat * (b.facing || 1) > 0;
+        const spotted = dyCat < 68 && ((inFront && Math.abs(dxCat) < (c.crouching ? 115 : 195)) || (!c.crouching && Math.abs(dxCat) < 62));
+        if (spotted && !inFront) b.facing = dxCat >= 0 ? 1 : -1;
+        b.snortAnim = spotted ? Math.min(1, (b.snortAnim || 0) + dt * 4.2) : Math.max(0, (b.snortAnim || 0) - dt * 3.0);
+        // Smooth windup: snort telegraph builds first (0..0.35), then brisk trot kicks in cleanly!
+        const chargeBoost = (b.snortAnim || 0) > 0.35 ? (1 + ((b.snortAnim - 0.35) / 0.65) * 0.38) : 1.0;
+        const spd = (b.speed || 96) * chargeBoost;
         b.x += (b.facing || 1) * spd * dt;
         if (b.x <= b.minX) { b.x = b.minX; b.facing = 1; }
         else if (b.x >= b.maxX) { b.x = b.maxX; b.facing = -1; }
@@ -1421,27 +1540,28 @@ window.Game.EnemiesExtended = (function () {
       }
     }
 
-    // Stage 27: Istanbul — Anatolian Kangal Guard Dogs (Stealth-Aware AI + walkDist stride)
+    // Stage 27: Istanbul — Anatolian Kangal Guard Dogs (Stealth-Aware AI + Sight Cone + walkDist stride)
     if (level.istanbul_kangals) {
       for (const k of level.istanbul_kangals) {
         const prevX = k.x;
         if (k.repelTimer > 0) {
           k.repelTimer -= dt;
           k.facing = k.repelDir || 1;
+          k.state = 'patrol';
           k.x = Math.max(k.minX, Math.min(k.maxX, k.x + k.facing * 205 * dt));
           k.walkDist = (k.walkDist || 0) + Math.abs(k.x - prevX);
           continue;
         }
         const kCx = k.x + k.w * 0.5, kCy = k.y + k.h * 0.5;
-        const catCx = c.x + c.w * 0.5, catCy = c.y + c.h * 0.5;
         const dist = Math.hypot(catCx - kCx, catCy - kCy);
-        const sight = c.crouching ? 120 : 215;
+        const sight = c.crouching ? 115 : 225;
         const sameH = Math.abs(catCy - kCy) < 82;
-        if (dist < sight && sameH && c.invulnTimer <= 0) {
-          if (k.state !== "alert") {
-            k.state = "alert";
+        const facingCat = (catCx - kCx) * (k.facing || 1) > -24;
+        if (dist < sight && sameH && facingCat && c.invulnTimer <= 0) {
+          if (k.state !== 'alert') {
+            k.state = 'alert';
             if (Audio && Audio.playBark) Audio.playBark();
-            if (Particles && Particles.spawnPopup) Particles.spawnPopup(kCx, k.y - 12, "❗ WOOF!", "#fb7185");
+            if (Particles && Particles.spawnPopup) Particles.spawnPopup(kCx, k.y - 14, '❗ WOOF!', '#fb7185');
           }
           anyChasing = true;
           const dx = catCx - kCx;
@@ -1450,41 +1570,47 @@ window.Game.EnemiesExtended = (function () {
             k.x = Math.max(k.minX, Math.min(k.maxX, k.x + k.facing * (k.speed * 1.65) * dt));
           }
         } else {
-          k.state = "patrol";
+          k.state = 'patrol';
           k.x += k.facing * k.speed * dt;
           if (k.x <= k.minX) { k.x = k.minX; k.facing = 1; }
           else if (k.x >= k.maxX) { k.x = k.maxX; k.facing = -1; }
         }
         k.walkDist = (k.walkDist || 0) + Math.abs(k.x - prevX);
-        if (hitBox(k.x, k.y, k.w, k.h, 8)) onHit("كلب كانغال التركي! -1 ❤️");
+        if (hitBox(k.x, k.y, k.w, k.h, 8)) onHit('كلب كانغال التركي! -1 ❤️');
       }
     }
 
-    // Stage 27: Istanbul — Grand Bazaar Spice Merchants (walkDist stride)
+    // Stage 27: Istanbul — Grand Bazaar Tea & Spice Merchants (Stealth-Aware Brisk Pace + walkDist stride)
     if (level.istanbul_merchants) {
       for (const m of level.istanbul_merchants) {
         const prevX = m.x;
         if (m.repelTimer > 0) {
           m.repelTimer -= dt;
           m.facing = m.repelDir || 1;
+          m.alert = false;
           m.x = Math.max(m.minX, Math.min(m.maxX, m.x + m.facing * 190 * dt));
           m.walkDist = (m.walkDist || 0) + Math.abs(m.x - prevX);
           continue;
         }
-        m.x += m.facing * m.speed * dt;
+        const mCx = m.x + m.w * 0.5, mCy = m.y + m.h * 0.5;
+        const ahead = (catCx - mCx) * (m.facing || 1);
+        m.alert = ahead > 0 && ahead < (c.crouching ? 90 : 185) && Math.abs(catCy - mCy) < 68 && c.invulnTimer <= 0;
+        const spd = m.speed * (m.alert ? 1.48 : 1.0);
+        m.x += m.facing * spd * dt;
         if (m.x <= m.minX) { m.x = m.minX; m.facing = 1; }
         else if (m.x >= m.maxX) { m.x = m.maxX; m.facing = -1; }
         m.walkDist = (m.walkDist || 0) + Math.abs(m.x - prevX);
-        if (hitBox(m.x, m.y, m.w, m.h, 8)) onHit("تاجر البازار الكبير! -1 ❤️");
+        if (hitBox(m.x, m.y, m.w, m.h, 8)) onHit('تاجر البازار الكبير! -1 ❤️');
       }
     }
 
-    // Stage 27: Istanbul — Bosphorus Swooping Seagulls
+    // Stage 27: Istanbul — Bosphorus Swooping Herring Gulls (Stealth-Aware Swoop Arc!)
     if (level.istanbul_gulls) {
       for (const g of level.istanbul_gulls) {
         if (g.repelTimer > 0) {
           g.repelTimer -= dt;
           g.facing = g.repelDir || 1;
+          g.swooping = false;
           g.x = Math.max(g.minX, Math.min(g.maxX, g.x + g.facing * 210 * dt));
           g.y = g.baseY - 60 + Math.sin(timeSec * 8) * 6;
           continue;
@@ -1492,12 +1618,616 @@ window.Game.EnemiesExtended = (function () {
         g.x += g.facing * g.speed * dt;
         if (g.x <= g.minX) { g.x = g.minX; g.facing = 1; }
         else if (g.x >= g.maxX) { g.x = g.maxX; g.facing = -1; }
-        g.y = g.baseY + Math.sin(timeSec * 2.8 + (g.phase || 0)) * (g.ampY || 26);
-        if (hitBox(g.x, g.y, g.w, g.h, 6)) onHit("نورس البوسفور! -1 ❤️");
+        const hDist = Math.abs(catCx - (g.x + g.w * 0.5));
+        if (!g.swooping && !c.crouching && hDist < 175 && catCy > g.baseY + 55 && catCy < g.baseY + 340 && c.invulnTimer <= 0) {
+          g.swooping = true;
+          g.swoopT = 0;
+          if (Audio && Audio.playFalconCry) Audio.playFalconCry();
+        }
+        if (g.swooping) {
+          g.swoopT += dt * 1.35;
+          g.y = g.baseY + Math.sin(g.swoopT * Math.PI) * 118;
+          if (g.swoopT >= 1) { g.swooping = false; g.y = g.baseY; }
+        } else {
+          g.y = g.baseY + Math.sin(timeSec * 2.6 + (g.phase || 0)) * (g.ampY || 24);
+        }
+        if (hitBox(g.x, g.y, g.w, g.h, 7)) onHit('نورس البوسفور! -1 ❤️');
       }
     }
 
-    // Universal Runtime Checkpoint Sanctuary Barrier across all extended enemies (Stages 5-27)
+    // Stage 27: Istanbul — Topkapı Palace Ceremonial Janissary Guards (حارس قصر توبكابي العثماني!)
+    if (level.istanbul_janissaries) {
+      for (const jn of level.istanbul_janissaries) {
+        const prevX = jn.x;
+        if (stepRepelled(jn, 195)) {
+          jn.alert = false;
+          jn.walkDist = (jn.walkDist || 0) + Math.abs(jn.x - prevX);
+          continue;
+        }
+        const jCx = jn.x + jn.w * 0.5, jCy = jn.y + jn.h * 0.5;
+        const ahead = (catCx - jCx) * (jn.facing || 1);
+        const alert = ahead > -12 && ahead < (c.crouching ? 95 : 190) && Math.abs(catCy - jCy) < 70 && c.invulnTimer <= 0;
+        jn.alert = alert;
+        const spd = (jn.speed || 92) * (alert ? 1.46 : 1.0);
+        jn.x += (jn.facing || 1) * spd * dt;
+        if (jn.x <= jn.minX) { jn.x = jn.minX; jn.facing = 1; }
+        else if (jn.x >= jn.maxX) { jn.x = jn.maxX; jn.facing = -1; }
+        jn.walkDist = (jn.walkDist || 0) + Math.abs(jn.x - prevX);
+        if (hitBox(jn.x, jn.y, jn.w, jn.h, 8)) onHit('حارس قصر توبكابي العثماني! -1 ❤️');
+      }
+    }
+
+    // Stage 27: Istanbul — Affectionate Pure-White Istanbul Angora Cat (Weaves, rubs & sits to play paw-to-paw on Meow!)
+    if (level.istanbul_alley_cats) {
+      for (const ac of level.istanbul_alley_cats) {
+        if (ac.homeX === undefined) ac.homeX = ac.x;
+        if (ac.homeFacing === undefined) ac.homeFacing = ac.facing || -1;
+        if (ac.walkDist === undefined) ac.walkDist = 0;
+        if (ac.walkBlend === undefined) ac.walkBlend = 0;
+        if (ac.nuzzlePhase === undefined) ac.nuzzlePhase = 0;
+        if (ac.purrCd > 0) ac.purrCd = Math.max(0, ac.purrCd - dt);
+        const prevX = ac.x;
+        const acCx = ac.x + ac.w * 0.5, acCy = ac.y + ac.h * 0.5;
+        const dist = Math.hypot(catCx - acCx, catCy - acCy);
+        const sameTier = Math.abs(catCy - acCy) < 98;
+        const nearMashmasha = dist < 210 && sameTier;
+
+        if (ac.playingTimer > 0) {
+          ac.playingTimer = Math.max(0, ac.playingTimer - dt);
+          ac.loving = true;
+          ac.returning = false;
+          ac.rubbing = true;
+          // Gently pad right in front of Mashmasha to sit and play paw-to-paw!
+          const playSide = c.facing || 1;
+          const desiredX = Math.max(ac.minX, Math.min(ac.maxX, catCx + playSide * 42 - ac.w * 0.5));
+          const pDiff = desiredX - ac.x;
+          if (Math.abs(pDiff) > 2.0) {
+            ac.x += Math.sign(pDiff) * Math.min(Math.abs(pDiff), 76 * dt);
+          }
+          ac.facing = (catCx >= ac.x + ac.w * 0.5) ? 1 : -1;
+          const playDx = Math.abs(ac.x - prevX);
+          if (playDx > 0.08) { ac.walkDist += playDx; ac.walkBlend = Math.min(1, ac.walkBlend + dt * 6); }
+          else { ac.walkBlend = Math.max(0, ac.walkBlend - dt * 8); }
+          continue;
+        }
+
+        if (nearMashmasha) {
+          if (!ac.loving) {
+            ac.loving = true;
+            ac.returning = false;
+            if (ac.purrCd <= 0) {
+              ac.purrCd = 7.0;
+              if (Audio && Audio.playPurr) Audio.playPurr();
+              if (Particles && Particles.spawnPopup) {
+                const isEn = window.Game.I18n && window.Game.I18n.isEn();
+                Particles.spawnPopup(acCx, ac.y - 24, isEn ? '💕 White Cat Cuddles! [Meow to Play]' : '💕 القطة البيضاء تلاطفك! [موء للعب]', '#f472b6');
+              }
+            }
+          }
+          // Slow, tender, affectionate figure-8 weaving & cheek-rubbing around Mashmasha!
+          ac.nuzzlePhase += dt * 1.28;
+          const orbitOffset = Math.sin(ac.nuzzlePhase) * 34;
+          const targetX = Math.max(ac.minX, Math.min(ac.maxX, (catCx - ac.w * 0.5) + orbitOffset));
+          const diff = targetX - ac.x;
+          if (Math.abs(diff) > 1.8) {
+            ac.facing = diff > 0 ? 1 : -1;
+            ac.x += Math.sign(diff) * Math.min(Math.abs(diff), 58 * dt);
+          } else {
+            ac.facing = Math.cos(ac.nuzzlePhase) >= 0 ? 1 : -1;
+          }
+          ac.rubbing = Math.abs(catCx - (ac.x + ac.w * 0.5)) < 38;
+        } else if (ac.loving || ac.returning) {
+          ac.loving = false;
+          ac.rubbing = false;
+          ac.returning = true;
+          const hDiff = ac.homeX - ac.x;
+          if (Math.abs(hDiff) > 3) {
+            ac.facing = hDiff > 0 ? 1 : -1;
+            ac.x += ac.facing * Math.min(Math.abs(hDiff), 64 * dt);
+          } else {
+            ac.x = ac.homeX;
+            ac.returning = false;
+            ac.facing = ac.homeFacing;
+          }
+        } else {
+          ac.x = ac.homeX;
+        }
+        const dxMove = Math.abs(ac.x - prevX);
+        if ((ac.loving || ac.returning) && dxMove > 0.08) {
+          ac.walkDist += dxMove;
+          ac.walkBlend += (1 - ac.walkBlend) * Math.min(1, dt * 8);
+        } else {
+          ac.walkBlend = Math.max(0, ac.walkBlend - dt * 8);
+        }
+      }
+    }
+
+    // STAGE 28: SWISS COUNTRYSIDE — 4 NEW ENEMIES + LOVING ST. BERNARD BUDDY
+    if (level.swiss_ibex) {
+      for (const ib of level.swiss_ibex) {
+        const prevX = ib.x;
+        if (ib.walkDist === undefined) ib.walkDist = 0;
+        if (ib.repelTimer > 0) {
+          ib.repelTimer -= dt;
+          ib.chargeWarn = 0; ib.charging = false;
+          ib.x += (ib.repelDir || 1) * 145 * dt;
+          ib.x = Math.max(ib.minX, Math.min(ib.maxX, ib.x));
+          ib.facing = ib.repelDir || ib.facing;
+        } else {
+          const dx = (c.x + c.w * 0.5) - (ib.x + ib.w * 0.5);
+          const dy = Math.abs((c.y + c.h * 0.5) - (ib.y + ib.h * 0.5));
+          if (ib.chargeWarn > 0) {
+            ib.chargeWarn -= dt;
+            if (ib.chargeWarn <= 0) { ib.charging = true; ib.chargeTimer = 1.05; }
+          } else if (ib.charging) {
+            ib.chargeTimer -= dt;
+            ib.x += ib.facing * 235 * dt;
+            if (ib.x <= ib.minX || ib.x >= ib.maxX || ib.chargeTimer <= 0) {
+              ib.x = Math.max(ib.minX, Math.min(ib.maxX, ib.x));
+              ib.charging = false; ib.cooldown = 1.15;
+            }
+          } else {
+            if (ib.cooldown > 0) ib.cooldown -= dt;
+            if (!c.crouching && !(ib.cooldown > 0) && Math.abs(dx) < 275 && dy < 72 && Math.sign(dx) === (ib.facing || 1)) {
+              ib.chargeWarn = 0.58; ib.facing = dx >= 0 ? 1 : -1;
+            } else {
+              ib.x += (ib.facing || 1) * (ib.speed || 68) * dt;
+              if (ib.x <= ib.minX) { ib.x = ib.minX; ib.facing = 1; }
+              else if (ib.x >= ib.maxX) { ib.x = ib.maxX; ib.facing = -1; }
+            }
+          }
+          if (hitBox(ib.x, ib.y, ib.w, ib.h, 7)) {
+            onHit('وعل جبال الألب السويسرية! -1 ❤️');
+          }
+        }
+        ib.walkDist += Math.abs(ib.x - prevX);
+      }
+    }
+    if (level.swiss_marmots) {
+      for (const mm of level.swiss_marmots) {
+        const prevX = mm.x;
+        if (mm.homeX === undefined) mm.homeX = mm.x;
+        if (mm.walkDist === undefined) mm.walkDist = 0;
+        if (mm.repelTimer > 0) {
+          mm.repelTimer -= dt; mm.whistling = false;
+          mm.x += (mm.repelDir || 1) * 120 * dt;
+          mm.x = Math.max(mm.minX, Math.min(mm.maxX, mm.x));
+          mm.facing = mm.repelDir || mm.facing;
+        } else {
+          const dx = (c.x + c.w * 0.5) - (mm.x + mm.w * 0.5);
+          const dy = Math.abs((c.y + c.h * 0.5) - (mm.y + mm.h * 0.5));
+          if (mm.whistleTimer > 0) {
+            mm.whistleTimer -= dt; mm.whistling = true;
+            if (mm.whistleTimer <= 0) { mm.whistling = false; mm.dashTimer = 1.15; mm.facing = dx >= 0 ? 1 : -1; }
+          } else if (mm.dashTimer > 0) {
+            mm.dashTimer -= dt;
+            mm.x += (mm.facing || 1) * 165 * dt;
+            if (mm.x <= mm.minX) { mm.x = mm.minX; mm.facing = 1; mm.dashTimer = 0; }
+            else if (mm.x >= mm.maxX) { mm.x = mm.maxX; mm.facing = -1; mm.dashTimer = 0; }
+          } else {
+            if (mm.cooldown > 0) mm.cooldown -= dt;
+            if (!c.crouching && !(mm.cooldown > 0) && Math.abs(dx) < 235 && dy < 72) {
+              mm.whistleTimer = 0.55; mm.cooldown = 2.4; mm.facing = dx >= 0 ? 1 : -1;
+              if (Audio && Audio.playMarmotWhistle) Audio.playMarmotWhistle();
+            } else {
+              mm.x += (mm.facing || 1) * (mm.speed || 54) * dt;
+              if (mm.x <= mm.minX) { mm.x = mm.minX; mm.facing = 1; }
+              else if (mm.x >= mm.maxX) { mm.x = mm.maxX; mm.facing = -1; }
+            }
+          }
+          if (!mm.whistling && hitBox(mm.x, mm.y, mm.w, mm.h, 6)) {
+            onHit('مرموط جبال الألب! -1 ❤️');
+          }
+        }
+        mm.walkDist += Math.abs(mm.x - prevX);
+      }
+    }
+    if (level.swiss_eagles) {
+      for (const eg of level.swiss_eagles) {
+        if (eg.baseY === undefined) eg.baseY = eg.y;
+        if (eg.repelTimer > 0) {
+          eg.repelTimer -= dt; eg.swooping = false; eg.diveWarn = 0;
+          eg.x += (eg.repelDir || 1) * 170 * dt;
+          eg.y += (eg.baseY - 30 - eg.y) * Math.min(1, dt * 4);
+          eg.x = Math.max(eg.minX, Math.min(eg.maxX, eg.x));
+          eg.facing = eg.repelDir || eg.facing;
+        } else {
+          const dx = (c.x + c.w * 0.5) - (eg.x + eg.w * 0.5);
+          const dy = (c.y + c.h * 0.5) - (eg.y + eg.h * 0.5);
+          if (eg.diveWarn > 0) {
+            eg.diveWarn -= dt; eg.facing = dx >= 0 ? 1 : -1;
+            if (eg.diveWarn <= 0) {
+              eg.swooping = true; eg.swoopT = 0; eg.swoopStartX = eg.x; eg.swoopStartY = eg.y;
+              eg.swoopTargetX = Math.max(eg.minX, Math.min(eg.maxX, c.x));
+              eg.swoopTargetY = Math.min(eg.baseY + 135, c.y - 6);
+            }
+          } else if (eg.swooping) {
+            eg.swoopT += dt * 1.18;
+            if (eg.swoopT >= 1) { eg.swooping = false; eg.cooldown = 1.9; eg.y = eg.baseY; }
+            else {
+              const u = eg.swoopT;
+              eg.x = eg.swoopStartX + (eg.swoopTargetX - eg.swoopStartX) * u;
+              eg.y = eg.baseY + (eg.swoopTargetY - eg.baseY) * Math.sin(u * Math.PI);
+            }
+          } else {
+            if (eg.cooldown > 0) eg.cooldown -= dt;
+            eg.x += (eg.facing || 1) * (eg.speed || 108) * dt;
+            if (eg.x <= eg.minX) { eg.x = eg.minX; eg.facing = 1; }
+            else if (eg.x >= eg.maxX) { eg.x = eg.maxX; eg.facing = -1; }
+            eg.y = eg.baseY + Math.sin(timeSec * 2.4 + (eg.minX || 0) * 0.01) * 14;
+            if (!c.crouching && !(eg.cooldown > 0) && Math.abs(dx) < 175 && dy > 32 && dy < 255) {
+              eg.diveWarn = 0.48;
+              if (Audio && Audio.playFalconCry) Audio.playFalconCry();
+            }
+          }
+          if (hitBox(eg.x, eg.y, eg.w, eg.h, 8)) {
+            onHit('عقاب جبال الألب الذهبي! -1 ❤️');
+          }
+        }
+      }
+    }
+    if (level.swiss_nutcrackers) {
+      for (const nc of level.swiss_nutcrackers) {
+        const prevX = nc.x;
+        if (nc.walkDist === undefined) nc.walkDist = 0;
+        if (nc.unwoundTimer > 0) {
+          nc.unwoundTimer = Math.max(0, nc.unwoundTimer - dt);
+        } else {
+          nc.x += (nc.facing || 1) * (nc.speed || 76) * dt;
+          if (nc.x <= nc.minX) { nc.x = nc.minX; nc.facing = 1; }
+          else if (nc.x >= nc.maxX) { nc.x = nc.maxX; nc.facing = -1; }
+          if (hitBox(nc.x, nc.y, nc.w, nc.h, 6)) {
+            onHit('كسّارة البندق الخشبية السويسرية! -1 ❤️');
+          }
+        }
+        nc.walkDist += Math.abs(nc.x - prevX);
+      }
+    }
+    if (level.swiss_snow_foxes) {
+      for (const fx of level.swiss_snow_foxes) {
+        const prevX = fx.x;
+        if (fx.walkDist === undefined) fx.walkDist = 0;
+        if (fx.repelTimer > 0) {
+          fx.repelTimer -= dt; fx.pounceWarn = 0; fx.leaping = false; fx.leapH = 0;
+          fx.x += (fx.repelDir || 1) * 150 * dt;
+          fx.x = Math.max(fx.minX, Math.min(fx.maxX, fx.x));
+          fx.facing = fx.repelDir || fx.facing;
+        } else {
+          const dx = (c.x + c.w * 0.5) - (fx.x + fx.w * 0.5);
+          const dy = Math.abs((c.y + c.h * 0.5) - (fx.y + fx.h * 0.5));
+          if (fx.pounceWarn > 0) {
+            fx.pounceWarn -= dt;
+            fx.leapH = 0;
+            fx.facing = dx >= 0 ? 1 : -1;
+            if (fx.pounceWarn <= 0) { fx.leaping = true; fx.leapT = 0; }
+          } else if (fx.leaping) {
+            fx.leapT += dt * 1.65;
+            if (fx.leapT >= 1) { fx.leaping = false; fx.leapH = 0; fx.cooldown = 1.35; }
+            else {
+              fx.leapH = Math.sin(fx.leapT * Math.PI) * 76;
+              fx.x += (fx.facing || 1) * 215 * dt;
+              if (fx.x <= fx.minX || fx.x >= fx.maxX) { fx.x = Math.max(fx.minX, Math.min(fx.maxX, fx.x)); }
+            }
+          } else {
+            fx.leapH = 0;
+            if (fx.cooldown > 0) fx.cooldown -= dt;
+            if (!c.crouching && !(fx.cooldown > 0) && Math.abs(dx) < 250 && dy < 76) {
+              fx.pounceWarn = 0.45;
+              fx.facing = dx >= 0 ? 1 : -1;
+            } else {
+              fx.x += (fx.facing || 1) * (fx.speed || 98) * dt;
+              if (fx.x <= fx.minX) { fx.x = fx.minX; fx.facing = 1; }
+              else if (fx.x >= fx.maxX) { fx.x = fx.maxX; fx.facing = -1; }
+            }
+          }
+          if (hitBox(fx.x, fx.y - (fx.leapH || 0), fx.w, fx.h, 7)) {
+            onHit('ثعلب جبال الألب الثلجي القافز! -1 ❤️');
+          }
+        }
+        if (!fx.leaping) fx.walkDist += Math.abs(fx.x - prevX);
+      }
+    }
+    if (level.swiss_clockwork_owls) {
+      for (const ow of level.swiss_clockwork_owls) {
+        if (ow.baseY === undefined) ow.baseY = ow.y;
+        if (ow.jammedTimer > 0) {
+          ow.jammedTimer = Math.max(0, ow.jammedTimer - dt);
+          ow.lockWarn = 0;
+          if (ow.gear) ow.gear.active = false;
+        } else {
+          ow.x += (ow.facing || 1) * (ow.speed || 92) * dt;
+          if (ow.x <= ow.minX) { ow.x = ow.minX; ow.facing = 1; }
+          else if (ow.x >= ow.maxX) { ow.x = ow.maxX; ow.facing = -1; }
+          ow.y = ow.baseY + Math.sin(timeSec * 2.8 + (ow.phase || 0)) * 22;
+          const ox = ow.x + ow.w * 0.5, oy = ow.y + ow.h * 0.5;
+          const dx = (c.x + c.w * 0.5) - ox, dy = (c.y + c.h * 0.5) - oy;
+          if (ow.gear && ow.gear.active) {
+            ow.gear.t += dt * 0.92;
+            if (ow.gear.t >= 1) { ow.gear.active = false; ow.cooldown = 1.6; }
+            else {
+              const u = Math.sin(ow.gear.t * Math.PI);
+              ow.gear.x = ox + ow.gear.tx * u;
+              ow.gear.y = oy + ow.gear.ty * u;
+              if (Math.hypot((c.x + c.w * 0.5) - ow.gear.x, (c.y + c.h * 0.5) - ow.gear.y) < 22) {
+                ow.gear.active = false;
+                onHit('ترس بومة الساعات السويسرية! -1 ❤️');
+              }
+            }
+          } else if (ow.lockWarn > 0) {
+            ow.lockWarn -= dt;
+            ow.facing = dx >= 0 ? 1 : -1;
+            if (ow.lockWarn <= 0) {
+              ow.gear = { active: true, t: 0, x: ox, y: oy, tx: Math.max(-170, Math.min(170, dx)), ty: Math.max(40, Math.min(210, dy)) };
+            }
+          } else {
+            if (ow.cooldown > 0) ow.cooldown -= dt;
+            if (!c.crouching && !(ow.cooldown > 0) && Math.abs(dx) < 175 && dy > 25 && dy < 230) {
+              ow.lockWarn = 0.55;
+              ow.facing = dx >= 0 ? 1 : -1;
+            }
+          }
+          if (hitBox(ow.x, ow.y, ow.w, ow.h, 8)) {
+            onHit('بومة الساعات السويسرية الميكانيكية! -1 ❤️');
+          }
+        }
+      }
+    }
+    if (level.swiss_st_bernards) {
+      for (const sb of level.swiss_st_bernards) {
+        if (sb.homeX === undefined) sb.homeX = sb.x;
+        if (sb.homeFacing === undefined) sb.homeFacing = sb.facing || -1;
+        if (sb.walkDist === undefined) sb.walkDist = 0;
+        if (sb.walkBlend === undefined) sb.walkBlend = 0;
+        if (sb.sitBlend === undefined) sb.sitBlend = 0;
+        if (sb.greetCd === undefined) sb.greetCd = 0;
+        if (sb.greetCd > 0) sb.greetCd = Math.max(0, sb.greetCd - dt);
+
+        const prevX = sb.x;
+        const sbCx = sb.x + sb.w * 0.5, sbCy = sb.y + sb.h * 0.5;
+        const dist = Math.hypot(catCx - sbCx, catCy - sbCy);
+        const sameTier = Math.abs(catCy - sbCy) < 96;
+        const nearMashmasha = dist < 215 && sameTier;
+
+        if (sb.playingTimer > 0) {
+          sb.playingTimer = Math.max(0, sb.playingTimer - dt);
+          sb.loving = true;
+          sb.returning = false;
+          const playSide = c.facing || 1;
+          const desiredX = Math.max(sb.minX, Math.min(sb.maxX, catCx + playSide * 54 - sb.w * 0.5));
+          const pDiff = desiredX - sb.x;
+          if (Math.abs(pDiff) > 2.5) {
+            sb.x += Math.sign(pDiff) * Math.min(Math.abs(pDiff), 78 * dt);
+          }
+          sb.facing = (catCx >= sb.x + sb.w * 0.5) ? 1 : -1;
+          const playDx = Math.abs(sb.x - prevX);
+          if (playDx > 0.08) {
+            sb.walkDist += playDx;
+            sb.walkBlend = Math.min(1, sb.walkBlend + dt * 6);
+            sb.sitBlend = Math.max(0, sb.sitBlend - dt * 6);
+          } else {
+            sb.walkBlend = Math.max(0, sb.walkBlend - dt * 8);
+            sb.sitBlend = Math.min(1, sb.sitBlend + dt * 6.5);
+          }
+          continue;
+        }
+
+        sb.sitBlend = Math.max(0, sb.sitBlend - dt * 5.5);
+        if (nearMashmasha) {
+          if (!sb.loving) {
+            sb.loving = true;
+            sb.returning = false;
+            if (sb.greetCd <= 0) {
+              sb.greetCd = 7.5;
+              if (Audio && Audio.playPurr) Audio.playPurr();
+              if (Particles && Particles.spawnPopup) {
+                const isEn = window.Game.I18n && window.Game.I18n.isEn();
+                Particles.spawnPopup(sbCx, sb.y - 24, isEn ? '🐶 Friendly St. Bernard! [Meow to Play]' : '🐶 كلب سانت برنارد الودود! [موء للعب]', '#fbbf24');
+              }
+            }
+          }
+          const sideSign = catCx >= sbCx ? -1 : 1;
+          const targetX = Math.max(sb.minX, Math.min(sb.maxX, catCx + sideSign * 46 - sb.w * 0.5));
+          const diff = targetX - sb.x;
+          if (Math.abs(diff) > 3.0) {
+            sb.facing = diff > 0 ? 1 : -1;
+            sb.x += Math.sign(diff) * Math.min(Math.abs(diff), 64 * dt);
+          } else {
+            sb.facing = catCx >= sb.x + sb.w * 0.5 ? 1 : -1;
+          }
+        } else if (sb.loving || sb.returning) {
+          sb.loving = false;
+          sb.returning = true;
+          const hDiff = sb.homeX - sb.x;
+          if (Math.abs(hDiff) > 3) {
+            sb.facing = hDiff > 0 ? 1 : -1;
+            sb.x += sb.facing * Math.min(Math.abs(hDiff), 62 * dt);
+          } else {
+            sb.x = sb.homeX;
+            sb.returning = false;
+            sb.facing = sb.homeFacing;
+          }
+        } else {
+          sb.x = sb.homeX;
+        }
+
+        const dxMove = Math.abs(sb.x - prevX);
+        if ((sb.loving || sb.returning) && dxMove > 0.08) {
+          sb.walkDist += dxMove;
+          sb.walkBlend += (1 - sb.walkBlend) * Math.min(1, dt * 8);
+        } else {
+          sb.walkBlend = Math.max(0, sb.walkBlend - dt * 8);
+        }
+      }
+    }
+    // =======================================================================
+    // STAGE 29: INTERNATIONAL AIRPORT ENEMIES & VIP TRAVEL CAT COMPANIONS
+    // =======================================================================
+    if (level.airport_luggage_bots) {
+      for (const bot of level.airport_luggage_bots) {
+        if (bot.standbyTimer > 0) {
+          bot.standbyTimer = Math.max(0, bot.standbyTimer - dt);
+          continue;
+        }
+        const spd = bot.speed || 92;
+        const prevX = bot.x;
+        bot.x += bot.facing * spd * dt;
+        if (bot.x <= bot.minX) { bot.x = bot.minX; bot.facing = 1; }
+        else if (bot.x >= bot.maxX) { bot.x = bot.maxX; bot.facing = -1; }
+        bot.walkDist = (bot.walkDist || 0) + Math.abs(bot.x - prevX);
+        if (hitBox(bot.x, bot.y, bot.w, bot.h, 7)) {
+          onHit('روبوت أمن المطار! -1 ❤️');
+        }
+      }
+    }
+
+    if (level.airport_runaway_carts) {
+      for (const rc of level.airport_runaway_carts) {
+        if (rc.brakeTimer > 0) {
+          rc.brakeTimer = Math.max(0, rc.brakeTimer - dt);
+          continue;
+        }
+        const spd = rc.speed || 120;
+        const prevX = rc.x;
+        rc.x += rc.facing * spd * dt;
+        if (rc.x <= rc.minX) { rc.x = rc.minX; rc.facing = 1; }
+        else if (rc.x >= rc.maxX) { rc.x = rc.maxX; rc.facing = -1; }
+        rc.walkDist = (rc.walkDist || 0) + Math.abs(rc.x - prevX);
+        if (hitBox(rc.x, rc.y, rc.w, rc.h, 6)) {
+          onHit('حقيبة سفر ذكية مندفعة! -1 ❤️');
+        }
+      }
+    }
+
+    if (level.airport_customs_dogs) {
+      for (const kd of level.airport_customs_dogs) {
+        if (stepRepelled(kd, 155)) {
+          kd.walkDist = (kd.walkDist || 0) + 155 * dt;
+          continue;
+        }
+        const kdCx = kd.x + kd.w * 0.5;
+        const kdCy = kd.y + kd.h * 0.5;
+        const sightRange = c.crouching ? 110 : 195;
+        const sameFloor = Math.abs(catCy - kdCy) < 62;
+        const facingCat = (catCx - kdCx) * kd.facing > -18;
+        const seesCat = sameFloor && facingCat && Math.abs(catCx - kdCx) < sightRange && catCx >= kd.minX - 24 && catCx <= kd.maxX + 24;
+        kd.alert = seesCat;
+        if (seesCat) anyChasing = true;
+        const spd = seesCat ? 146 : (kd.speed || 95);
+        if (seesCat) kd.facing = catCx >= kdCx ? 1 : -1;
+        const prevX = kd.x;
+        kd.x += kd.facing * spd * dt;
+        if (kd.x <= kd.minX) { kd.x = kd.minX; if (!seesCat) kd.facing = 1; }
+        else if (kd.x >= kd.maxX) { kd.x = kd.maxX; if (!seesCat) kd.facing = -1; }
+        kd.walkDist = (kd.walkDist || 0) + Math.abs(kd.x - prevX);
+        if (hitBox(kd.x, kd.y, kd.w, kd.h, 7)) {
+          onHit('كلب التفتيش الجمركي! تسلل أو موء -1 ❤️');
+        }
+      }
+    }
+
+    if (level.airport_tarmac_drones) {
+      for (const dr of level.airport_tarmac_drones) {
+        if (dr.baseY === undefined) dr.baseY = dr.y;
+        if (stepRepelled(dr, 165)) {
+          dr.y = dr.baseY - 18;
+          continue;
+        }
+        const spd = dr.speed || 120;
+        dr.x += dr.facing * spd * dt;
+        if (dr.x <= dr.minX) { dr.x = dr.minX; dr.facing = 1; }
+        else if (dr.x >= dr.maxX) { dr.x = dr.maxX; dr.facing = -1; }
+        dr.y = dr.baseY + Math.sin(timeSec * 3.2 + (dr.phase || 0)) * 20;
+        if (hitBox(dr.x, dr.y, dr.w, dr.h, 7)) {
+          onHit('درون فحص المدرج! -1 ❤️');
+        }
+      }
+    }
+
+    if (level.airport_ground_marshals) {
+      for (const gm of level.airport_ground_marshals) {
+        if (gm.saluteTimer > 0) {
+          gm.saluteTimer = Math.max(0, gm.saluteTimer - dt);
+          continue;
+        }
+        const spd = gm.speed || 88;
+        const prevX = gm.x;
+        gm.x += gm.facing * spd * dt;
+        if (gm.x <= gm.minX) { gm.x = gm.minX; gm.facing = 1; }
+        else if (gm.x >= gm.maxX) { gm.x = gm.maxX; gm.facing = -1; }
+        gm.walkDist = (gm.walkDist || 0) + Math.abs(gm.x - prevX);
+        if (hitBox(gm.x, gm.y, gm.w, gm.h, 8)) {
+          onHit('عصي توجيه الطائرات! -1 ❤️');
+        }
+      }
+    }
+
+    if (level.airport_travel_cats) {
+      for (const tc of level.airport_travel_cats) {
+        if (tc.homeX === undefined) tc.homeX = tc.x;
+        if (tc.homeFacing === undefined) tc.homeFacing = tc.facing || -1;
+        if (tc.walkDist === undefined) tc.walkDist = 0;
+        if (tc.walkBlend === undefined) tc.walkBlend = 0;
+        if (tc.greetCd > 0) tc.greetCd = Math.max(0, tc.greetCd - dt);
+        if (tc.playingTimer > 0) {
+          tc.playingTimer = Math.max(0, tc.playingTimer - dt);
+          tc.walkBlend = Math.max(0, tc.walkBlend - dt * 10);
+          tc.facing = catCx >= tc.x + tc.w * 0.5 ? 1 : -1;
+          continue;
+        }
+        const tcCx = tc.x + tc.w * 0.5;
+        const tcCy = tc.y + tc.h * 0.5;
+        const distX = Math.abs(catCx - tcCx);
+        const distY = Math.abs(catCy - tcCy);
+        const nearMashmasha = distX < 185 && distY < 78;
+        const prevX = tc.x;
+        if (nearMashmasha) {
+          if (!tc.loving) {
+            tc.loving = true;
+            tc.returning = false;
+            if ((tc.greetCd || 0) <= 0) {
+              tc.greetCd = 7.5;
+              if (Audio && Audio.playPurr) Audio.playPurr();
+              if (Particles && Particles.spawnPopup) {
+                const isEn = window.Game.I18n && window.Game.I18n.isEn();
+                Particles.spawnPopup(tcCx, tc.y - 22, isEn ? '🐱 Friendly Travel Cat! [Meow to Play]' : '🐱 قطة السفر اللطيفة! [موء للعب]', '#f472b6');
+              }
+            }
+          }
+          const sideSign = catCx >= tcCx ? -1 : 1;
+          const targetX = Math.max(tc.minX, Math.min(tc.maxX, catCx + sideSign * 42 - tc.w * 0.5));
+          const diff = targetX - tc.x;
+          if (Math.abs(diff) > 3.0) {
+            tc.facing = diff > 0 ? 1 : -1;
+            tc.x += Math.sign(diff) * Math.min(Math.abs(diff), 68 * dt);
+          } else {
+            tc.facing = catCx >= tc.x + tc.w * 0.5 ? 1 : -1;
+          }
+        } else if (tc.loving || tc.returning) {
+          tc.loving = false;
+          tc.returning = true;
+          const hDiff = tc.homeX - tc.x;
+          if (Math.abs(hDiff) > 3) {
+            tc.facing = hDiff > 0 ? 1 : -1;
+            tc.x += tc.facing * Math.min(Math.abs(hDiff), 64 * dt);
+          } else {
+            tc.x = tc.homeX;
+            tc.returning = false;
+            tc.facing = tc.homeFacing;
+          }
+        } else {
+          tc.x = tc.homeX;
+        }
+        const dxMove = Math.abs(tc.x - prevX);
+        if ((tc.loving || tc.returning) && dxMove > 0.08) {
+          tc.walkDist += dxMove;
+          tc.walkBlend += (1 - tc.walkBlend) * Math.min(1, dt * 8);
+        } else {
+          tc.walkBlend = Math.max(0, tc.walkBlend - dt * 8);
+        }
+      }
+    }
+
+    // Universal Runtime Checkpoint Sanctuary Barrier across all extended enemies (Stages 5-29)
     const guardCp = window.Game && window.Game.guardCheckpointZone;
     if (guardCp && level.checkpoints && level.checkpoints.length) {
       const boxLists = [
@@ -1513,7 +2243,9 @@ window.Game.EnemiesExtended = (function () {
         level.maya_jaguars, level.maya_warriors, level.maya_quetzals,
         level.greece_goats, level.greece_hoplites, level.greece_owls,
         level.battir_porcupines, level.battir_boars, level.battir_hoopoes, level.battir_scorpions,
-        level.istanbul_kangals, level.istanbul_merchants, level.istanbul_gulls,
+        level.istanbul_kangals, level.istanbul_merchants, level.istanbul_gulls, level.istanbul_janissaries, level.istanbul_alley_cats,
+        level.swiss_ibex, level.swiss_marmots, level.swiss_eagles, level.swiss_nutcrackers, level.swiss_snow_foxes, level.swiss_clockwork_owls,
+        level.airport_luggage_bots, level.airport_runaway_carts, level.airport_customs_dogs, level.airport_tarmac_drones, level.airport_ground_marshals,
       ];
       for (const list of boxLists) {
         if (!list) continue;
@@ -7079,7 +7811,7 @@ window.Game.EnemiesExtended = (function () {
       const BATTIR_PORCUPINE_STYLE = 'enhanced';
       for (const p of level.battir_porcupines) {
         const sx = p.x - camX, sy = p.y - camY;
-        if (sx + p.w < -80 || sx > 1400) continue;
+        if (sx + p.w < -80 || sx > cullW + 80) continue;
         const face = p.facing || 1;
         const wPhase = (p.walkDist || 0) * 0.14;
         const bob = Math.abs(Math.sin(wPhase)) * 1.8;
@@ -7294,14 +8026,14 @@ window.Game.EnemiesExtended = (function () {
       }
     }
 
-    // 52. Wild Wadi Boar (Stage 26: Battir — الخنزير البري الجبلي في وادي المخرور — curved ivory tusks, spiky dorsal mane & hooves!)
+    // 52. Wild Wadi Boar (Stage 26: Battir — الخنزير البري الجبلي في وادي المخرور — sculpted 2-segment muscular legs, cloven hooves, tusks & spiky dorsal mane!)
     if (level.battir_boars) {
       for (const b of level.battir_boars) {
         const sx = b.x - camX, sy = b.y - camY;
-        if (sx + b.w < -80 || sx > 1400) continue;
+        if (sx + b.w < -80 || sx > cullW + 80) continue;
         const face = b.facing || 1;
         const wPhase = (b.walkDist || 0) * 0.15;
-        const bob = Math.abs(Math.sin(wPhase)) * 2.4;
+        const bob = Math.abs(Math.sin(wPhase)) * 2.3;
         const nearA = Math.sin(wPhase) * 7.2;
         const farA = Math.sin(wPhase + Math.PI) * 7.2;
         const snort = b.snortAnim || 0;
@@ -7311,18 +8043,54 @@ window.Game.EnemiesExtended = (function () {
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
 
-        // Ground contact shadow
+        // Ground contact shadow + charging dust kick
         ctx.fillStyle = 'rgba(24, 16, 12, 0.34)';
-        ctx.beginPath(); ctx.ellipse(0, 0, 32, 4.8, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(0, 0, 33, 4.8, 0, 0, Math.PI * 2); ctx.fill();
+        if (snort > 0.35) {
+          const dustU = (time * 3.8 + sx * 0.01) % 1;
+          ctx.fillStyle = `rgba(214, 191, 166, ${((1 - dustU) * 0.45 * snort).toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(-24 - dustU * 14, -3 - dustU * 7, 3.2 + dustU * 4.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
 
-        // Far 2-segment muscular legs + cloven hooves
-        ctx.strokeStyle = '#291d16'; ctx.lineWidth = 5.6;
-        ctx.beginPath();
-        ctx.moveTo(-16, -15 - bob); ctx.lineTo(-18 + farA * 0.5, -7 - bob * 0.4); ctx.lineTo(-15 + farA, -1.5);
-        ctx.moveTo(14, -15 - bob); ctx.lineTo(15 - farA * 0.5, -7 - bob * 0.4); ctx.lineTo(16 - farA, -1.5);
-        ctx.stroke();
+        // Helper: Sculpted 2-segment tapered muscular boar leg + split cloven hoof!
+        const drawBoarLeg = (hipX, swing, isFar) => {
+          const lift = Math.max(0, Math.cos(wPhase + (isFar ? Math.PI : 0) + (hipX > 0 ? Math.PI : 0))) * 2.4;
+          const hockX = hipX + swing * 0.45 + (hipX < 0 ? -2.0 : 1.4);
+          const hockY = -8.5 - bob * 0.4 - lift * 0.5;
+          const footX = hipX + swing;
+          const footY = -1.2 - lift;
+          ctx.fillStyle = isFar ? '#241811' : '#3f2a1d';
+          ctx.strokeStyle = '#120a06';
+          ctx.lineWidth = 1.25;
+          ctx.beginPath();
+          ctx.moveTo(hipX - 4.6, -16 - bob);
+          ctx.quadraticCurveTo(hockX - 3.4, hockY, footX - 2.8, footY - 1.5);
+          ctx.lineTo(footX + 3.4, footY - 1.5);
+          ctx.quadraticCurveTo(hockX + 2.8, hockY, hipX + 4.4, -16 - bob);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          // Split obsidian cloven hoof + dewclaw
+          ctx.fillStyle = '#0c0a09';
+          ctx.beginPath();
+          ctx.moveTo(footX - 3.0, footY - 1.8);
+          ctx.lineTo(footX + 4.2, footY - 1.8);
+          ctx.lineTo(footX + 4.8, footY + 0.8);
+          ctx.lineTo(footX + 1.2, footY + 0.8);
+          ctx.lineTo(footX + 0.5, footY - 0.8);
+          ctx.lineTo(footX - 0.2, footY + 0.8);
+          ctx.lineTo(footX - 3.2, footY + 0.8);
+          ctx.closePath();
+          ctx.fill();
+        };
 
-        // Curly tufted boar tail flicking behind
+        // 1. Far-side muscular legs
+        drawBoarLeg(-16, farA, true);
+        drawBoarLeg(14, -farA, true);
+
+        // 2. Curly tufted boar tail flicking behind
         const tailWag = Math.sin(time * 9 + sx * 0.03) * 0.25;
         ctx.strokeStyle = '#3b281c'; ctx.lineWidth = 2.6;
         ctx.beginPath();
@@ -7330,240 +8098,307 @@ window.Game.EnemiesExtended = (function () {
         ctx.quadraticCurveTo(-34, -32 - bob, -31 + tailWag * 8, -36 - bob);
         ctx.stroke();
         ctx.fillStyle = '#1c140f';
-        ctx.beginPath(); ctx.ellipse(-31 + tailWag * 8, -37 - bob, 3.8, 2.4, -0.4, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(-31 + tailWag * 8, -37 - bob, 4.0, 2.5, -0.4, 0, Math.PI * 2); ctx.fill();
 
-        // Spiky erect dorsal bristle mane ridge along spine & shoulders!
-        ctx.fillStyle = '#1c140f';
+        // 3. Layered Dual-Tone Spiky Erect Dorsal Bristle Mane Ridge!
+        ctx.fillStyle = '#140d09';
         ctx.beginPath();
         ctx.moveTo(-22, -28 - bob);
-        for (let m = 0; m < 9; m++) {
-          const mx0 = -20 + m * 4.6;
-          const mh = (m >= 3 && m <= 6 ? 9.5 : 6.5) + snort * 3.0;
+        for (let m = 0; m < 10; m++) {
+          const mx0 = -21 + m * 4.4;
+          const mh = (m >= 3 && m <= 7 ? 10.5 : 7.0) + snort * 3.4;
           ctx.lineTo(mx0, -33 - bob - mh);
-          ctx.lineTo(mx0 + 2.4, -31 - bob);
+          ctx.lineTo(mx0 + 2.3, -31 - bob);
         }
         ctx.closePath();
         ctx.fill();
+        ctx.strokeStyle = 'rgba(214, 191, 166, 0.35)';
+        ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        for (let m = 2; m <= 7; m++) {
+          const mx0 = -21 + m * 4.4;
+          ctx.moveTo(mx0 + 1, -32 - bob);
+          ctx.lineTo(mx0, -39 - bob - snort * 2.5);
+        }
+        ctx.stroke();
 
-        // Heavy front-shouldered Wild Boar torso (grizzled dark umber & chestnut coat)
-        const brG = ctx.createRadialGradient(4, -24 - bob, 5, -2, -20 - bob, 32);
-        brG.addColorStop(0.0, '#78533a');
-        brG.addColorStop(0.50, '#4e3524');
-        brG.addColorStop(0.85, '#322116');
-        brG.addColorStop(1.0, '#1c120c');
+        // 4. Heavy Front-Shouldered Wild Boar Torso (grizzled umber, chestnut & ochre coat)
+        const brG = ctx.createRadialGradient(5, -25 - bob, 5, -2, -20 - bob, 33);
+        brG.addColorStop(0.0, '#855d42');
+        brG.addColorStop(0.48, '#523826');
+        brG.addColorStop(0.84, '#322116');
+        brG.addColorStop(1.0, '#1a100a');
         ctx.fillStyle = brG;
         ctx.strokeStyle = '#140c08';
-        ctx.lineWidth = 1.6;
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(-27, -15 - bob);
-        ctx.bezierCurveTo(-29, -29 - bob, -15, -36 - bob, 6, -37 - bob);
-        ctx.bezierCurveTo(20, -37 - bob, 26, -27 - bob, 23, -13 - bob);
+        ctx.bezierCurveTo(-29, -29 - bob, -15, -36 - bob, 6, -37.5 - bob);
+        ctx.bezierCurveTo(21, -37.5 - bob, 26.5, -27 - bob, 23, -13 - bob);
         ctx.quadraticCurveTo(0, -8 - bob, -27, -15 - bob);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Coarse grizzled silver-buff shoulder & flank hair strokes
-        ctx.strokeStyle = 'rgba(214, 191, 166, 0.36)';
+        // Coarse grizzled silver-buff shoulder & flank fur locks
+        ctx.strokeStyle = 'rgba(231, 213, 192, 0.38)';
         ctx.lineWidth = 1.1;
-        for (const [hx0, hy0] of [[-14, -24], [-4, -27], [6, -28], [-9, -18], [3, -20]]) {
-          ctx.beginPath(); ctx.moveTo(hx0, hy0 - bob); ctx.lineTo(hx0 - 5, hy0 + 2 - bob); ctx.stroke();
+        ctx.beginPath();
+        for (const [hx0, hy0] of [[-16, -23], [-7, -27], [4, -29], [-11, -17], [2, -19], [11, -23]]) {
+          ctx.moveTo(hx0, hy0 - bob); ctx.lineTo(hx0 - 5.5, hy0 + 2.2 - bob);
         }
+        ctx.stroke();
 
-        // Sloping wedge-shaped boar head & snout (tilts down menacingly when snorting!)
+        // 5. Sloping Wedge-Shaped Boar Head, Shaggy Cheek Ruff & Curved Ivory Tusks!
         ctx.save();
         ctx.translate(18, -24 - bob);
-        ctx.rotate(snort * 0.14);
-        const hdG = ctx.createLinearGradient(-4, -12, 20, 8);
-        hdG.addColorStop(0, '#5c3f2b');
-        hdG.addColorStop(1, '#2b1c12');
+        ctx.rotate(snort * 0.15);
+        const hdG = ctx.createLinearGradient(-5, -12, 20, 8);
+        hdG.addColorStop(0, '#664630');
+        hdG.addColorStop(0.6, '#422c1d');
+        hdG.addColorStop(1, '#26180f');
         ctx.fillStyle = hdG;
         ctx.strokeStyle = '#140c08';
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.45;
         ctx.beginPath();
         ctx.moveTo(-6, -11);
-        ctx.lineTo(18, -2);
-        ctx.lineTo(18, 6);
-        ctx.quadraticCurveTo(4, 9, -6, 6);
+        ctx.lineTo(18.5, -2.2);
+        ctx.lineTo(18.5, 5.8);
+        ctx.quadraticCurveTo(6, 9.2, -3, 7.2);
+        // Shaggy boar jowl fur tufts!
+        ctx.lineTo(-6.5, 8.8); ctx.lineTo(-5.8, 5.8);
+        ctx.lineTo(-8.5, 6.2); ctx.lineTo(-6.5, 2.5);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Pointed furry ear
+        // Pointed furry ear with shaded rose-tan inner concha
         ctx.fillStyle = '#3b271a';
         ctx.beginPath();
-        ctx.moveTo(-3, -10); ctx.lineTo(-8, -19); ctx.lineTo(2, -13);
+        ctx.moveTo(-2.5, -9.8); ctx.quadraticCurveTo(-9, -19.5, -7.5, -19.5); ctx.quadraticCurveTo(0, -16, 2.5, -12.2);
         ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#a87b65';
+        ctx.beginPath();
+        ctx.moveTo(-2.2, -11); ctx.lineTo(-5.8, -16.8); ctx.lineTo(0.8, -12.6);
+        ctx.closePath(); ctx.fill();
 
-        // Pinkish-brown flat nasal disc & nostrils
-        ctx.fillStyle = '#a16256';
+        // Pinkish-terracotta flat nasal disc & wet nostrils
+        ctx.fillStyle = '#b06d5f';
         ctx.strokeStyle = '#29150e';
         ctx.lineWidth = 1.1;
-        ctx.beginPath(); ctx.ellipse(18.5, 2, 3.2, 4.6, 0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(19.0, 1.8, 3.3, 4.7, 0.14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#1c100b';
-        ctx.beginPath(); ctx.arc(19, 0.5, 1.0, 0, Math.PI * 2); ctx.arc(19, 3.5, 1.0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(19.5, 0.3, 1.05, 0, Math.PI * 2); ctx.arc(19.5, 3.3, 1.05, 0, Math.PI * 2); ctx.fill();
 
-        // Gleaming Curved Ivory Boar Tusks (أنياب عاجية مقوسة)!
+        // Twin Gleaming Curved Ivory Boar Tusks (upper & main lower canine!)
         ctx.fillStyle = '#fef9c3';
         ctx.strokeStyle = '#573d26';
-        ctx.lineWidth = 1.1;
+        ctx.lineWidth = 1.05;
         ctx.beginPath();
-        ctx.moveTo(11, 5);
-        ctx.quadraticCurveTo(16, 4, 17.5, -5.5);
-        ctx.quadraticCurveTo(13.5, 1, 9, 3.5);
+        ctx.moveTo(13.5, 3.8); ctx.quadraticCurveTo(18.2, 1.5, 19.8, -3.5); ctx.quadraticCurveTo(15.8, 0.2, 12.2, 2.5);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(10.5, 5.2);
+        ctx.quadraticCurveTo(16.2, 4.0, 17.6, -6.2);
+        ctx.quadraticCurveTo(13.2, 1.0, 8.6, 3.6);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Fierce amber-gold eye under heavy brow
-        ctx.fillStyle = '#f59e0b';
-        ctx.beginPath(); ctx.arc(5.5, -4.5, 2.3, 0, Math.PI * 2); ctx.fill();
+        // Fierce amber-gold eye under heavy brow + specular glint
+        ctx.fillStyle = snort > 0.35 ? '#fbbf24' : '#f59e0b';
+        ctx.beginPath(); ctx.arc(5.5, -4.5, 2.5, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#09090b';
-        ctx.beginPath(); ctx.arc(6.0, -4.5, 1.2, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#140c08'; ctx.lineWidth = 1.6;
-        ctx.beginPath(); ctx.moveTo(2.5, -7.2); ctx.lineTo(8.5, -5.8); ctx.stroke();
+        ctx.beginPath(); ctx.arc(6.0, -4.5, 1.25, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(5.2, -5.2, 0.65, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#140c08'; ctx.lineWidth = 1.7;
+        ctx.beginPath(); ctx.moveTo(2.0, -7.4); ctx.lineTo(8.8, -5.6); ctx.stroke();
 
-        // Snorting steam puff when charging
-        if (snort > 0.25) {
-          ctx.fillStyle = `rgba(254, 243, 199, ${(snort * 0.55).toFixed(2)})`;
-          ctx.beginPath(); ctx.arc(24 + Math.sin(time * 16) * 2, 3, 3.5, 0, Math.PI * 2); ctx.fill();
+        // Snorting steam puff when spotting Mashmasha
+        if (snort > 0.2) {
+          ctx.fillStyle = `rgba(254, 243, 199, ${(snort * 0.62).toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(24.5 + Math.sin(time * 16) * 2.2, 2.5, 3.6, 0, Math.PI * 2);
+          ctx.arc(28.5 + Math.cos(time * 14) * 2.0, 0.5, 2.4, 0, Math.PI * 2);
+          ctx.fill();
         }
         ctx.restore();
 
-        // Near 2-segment legs & dark cloven hooves flush at y = 0
-        ctx.strokeStyle = '#3b271a'; ctx.lineWidth = 6.0;
-        ctx.beginPath();
-        ctx.moveTo(-13, -14 - bob); ctx.lineTo(-15 + nearA * 0.5, -6.5 - bob * 0.4); ctx.lineTo(-12 + nearA, -1.8);
-        ctx.moveTo(12, -14 - bob); ctx.lineTo(14 - nearA * 0.5, -6.5 - bob * 0.4); ctx.lineTo(13 - nearA, -1.8);
-        ctx.stroke();
-        ctx.fillStyle = '#0c0a09';
-        ctx.fillRect(-15 + nearA, -2.5, 6, 2.5);
-        ctx.fillRect(10 - nearA, -2.5, 6, 2.5);
+        // 6. Near-side muscular legs & split cloven hooves flush at y = 0
+        drawBoarLeg(-12.5, nearA, false);
+        drawBoarLeg(11.5, -nearA, false);
         ctx.restore();
       }
     }
 
-    // 53. Crowned Palestinian Hoopoe (Stage 26: Battir — طائر الهدهد الفلسطيني المتوّج — fan crest & zebra-striped wings!)
+    // 53. Crowned Palestinian Hoopoe (Stage 26: Battir — طائر الهدهد الفلسطيني المتوّج — 9-feather royal fan crest & scalloped zebra wings!)
     if (level.battir_hoopoes) {
       for (const hp of level.battir_hoopoes) {
         const sx = hp.x - camX, sy = hp.y - camY;
-        if (sx + hp.w < -80 || sx > 1400) continue;
+        if (sx + hp.w < -80 || sx > cullW + 80) continue;
         const face = hp.facing || 1;
         const flap = Math.sin(time * 10.5 + (hp.phase || 0));
         const wingY = flap * 14;
-        const crestOpen = 0.65 + 0.35 * Math.sin(time * 4.8 + (hp.phase || 0));
+        const crestOpen = 0.68 + 0.32 * Math.sin(time * 4.8 + (hp.phase || 0));
         ctx.save();
         ctx.translate(sx + hp.w * 0.5, sy + hp.h * 0.5);
         ctx.scale(face, 1);
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
 
-        // 1. Bold Black-and-White Banded Hoopoe Tail
+        // 1. Bold Black-and-White Banded Hoopoe Fan Tail
         ctx.fillStyle = '#18181b';
         ctx.strokeStyle = '#09090b';
         ctx.lineWidth = 1.1;
         ctx.beginPath();
-        ctx.moveTo(-12, 0); ctx.lineTo(-31, -4.5); ctx.lineTo(-29, 6.5); ctx.lineTo(-12, 4.5);
-        ctx.closePath(); ctx.fill(); ctx.stroke();
-        // Crisp white central tail bar
+        ctx.moveTo(-11, -0.5);
+        ctx.lineTo(-32, -5.2);
+        ctx.quadraticCurveTo(-33.5, 1.0, -30, 7.0);
+        ctx.lineTo(-11, 4.8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Crisp snow-white central tail chevron bar
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.moveTo(-21, -2.2); ctx.lineTo(-25, -3.1); ctx.lineTo(-23.8, 5.2); ctx.lineTo(-19.8, 4.4);
-        ctx.closePath(); ctx.fill();
+        ctx.moveTo(-20.5, -2.5); ctx.lineTo(-25.2, -3.6);
+        ctx.lineTo(-23.6, 5.6); ctx.lineTo(-19.2, 4.7);
+        ctx.closePath();
+        ctx.fill();
 
-        // 2. Far Rounded Wing (black with white bars)
+        // 2. Far Rounded Wing (obsidian with white bar)
         ctx.fillStyle = '#27272a';
+        ctx.strokeStyle = '#09090b';
+        ctx.lineWidth = 1.0;
         ctx.beginPath();
-        ctx.moveTo(-2, -3);
-        ctx.quadraticCurveTo(-10, -18 - wingY * 0.75, -23, -11 - wingY * 0.8);
-        ctx.quadraticCurveTo(-14, -1, -2, 2);
-        ctx.closePath(); ctx.fill();
+        ctx.moveTo(-1, -3);
+        ctx.quadraticCurveTo(-10, -19 - wingY * 0.78, -24, -11.5 - wingY * 0.82);
+        ctx.quadraticCurveTo(-15, -1, -1, 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(-8, -11 - wingY * 0.6); ctx.lineTo(-17, -5 - wingY * 0.45);
+        ctx.stroke();
 
-        // 3. Warm Cinnamon-Terracotta & Salmon-Pink Hoopoe Body!
-        const hpG = ctx.createLinearGradient(0, -9, 0, 9);
-        hpG.addColorStop(0.0, '#ea580c');
-        hpG.addColorStop(0.55, '#fb923c');
-        hpG.addColorStop(1.0, '#ffedd5');
-        ctx.fillStyle = hpG;
-        ctx.strokeStyle = '#431407';
+        // 3. Tucked Avian Feet beneath lower belly
+        ctx.strokeStyle = '#57534e';
         ctx.lineWidth = 1.3;
         ctx.beginPath();
-        ctx.ellipse(2, 1.5, 16, 7.5, -0.08, 0, Math.PI * 2);
+        ctx.moveTo(-2, 7.5); ctx.lineTo(-6, 10.2); ctx.lineTo(-3.5, 10.8);
+        ctx.moveTo(2, 7.5); ctx.lineTo(-1.5, 10.2);
+        ctx.stroke();
+
+        // 4. Warm Cinnamon-Terracotta, Rose-Fawn & Cream Hoopoe Body!
+        const hpG = ctx.createLinearGradient(2, -9, 0, 9.5);
+        hpG.addColorStop(0.0, '#ea580c');
+        hpG.addColorStop(0.48, '#fb923c');
+        hpG.addColorStop(0.82, '#fed7aa');
+        hpG.addColorStop(1.0, '#fff7ed');
+        ctx.fillStyle = hpG;
+        ctx.strokeStyle = '#431407';
+        ctx.lineWidth = 1.25;
+        ctx.beginPath();
+        ctx.moveTo(-15, 1.5);
+        ctx.bezierCurveTo(-10, -7.2, 9, -8.0, 17, -1.5);
+        ctx.bezierCurveTo(18.5, 5.8, 7, 9.2, -5, 8.2);
+        ctx.quadraticCurveTo(-12, 6.8, -15, 1.5);
+        ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // 4. Near Rounded Zebra-Striped Black-and-White Hoopoe Wing!
+        // 5. Near Scalloped Rounded Zebra-Striped Black-and-White Hoopoe Wing!
+        const traceNearWing = () => {
+          ctx.beginPath();
+          ctx.moveTo(6, -1.2);
+          ctx.bezierCurveTo(-1, -19.5 - wingY, -18, -20.0 - wingY, -24.5, -8.5 - wingY * 0.9);
+          // Scalloped rounded primary feather tips characteristic of Upupa epops!
+          ctx.quadraticCurveTo(-26.5, -4.5 - wingY * 0.7, -22.5, -2.0 - wingY * 0.55);
+          ctx.quadraticCurveTo(-23.5, 1.8 - wingY * 0.35, -18.5, 3.0 - wingY * 0.25);
+          ctx.quadraticCurveTo(-12, 6.2, 4.5, 4.2);
+          ctx.closePath();
+        };
         ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(5, -1);
-        ctx.bezierCurveTo(-2, -19 - wingY, -19, -19 - wingY, -24, -7 - wingY * 0.9);
-        ctx.bezierCurveTo(-22, 3 - wingY * 0.3, -8, 6, 4, 4);
-        ctx.closePath();
+        traceNearWing();
         ctx.fillStyle = '#18181b';
         ctx.fill();
         ctx.clip();
-        // Three bold snow-white diagonal wing bands!
+        // Cinnamon shoulder covert patch + 3 crisp snow-white zebra wing bands!
+        ctx.fillStyle = '#ea580c';
+        ctx.beginPath(); ctx.ellipse(2, -1, 6.5, 4.5, -0.3, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 3.4;
-        for (const off of [-6, -13, -20]) {
+        ctx.lineWidth = 3.3;
+        for (const off of [-5.5, -12.5, -19.5]) {
           ctx.beginPath();
-          ctx.moveTo(off + 8, -22 - wingY);
-          ctx.lineTo(off - 4, 8);
+          ctx.moveTo(off + 8.5, -23 - wingY);
+          ctx.lineTo(off - 4.0, 8.5);
           ctx.stroke();
         }
         ctx.restore();
+        traceNearWing();
         ctx.strokeStyle = '#09090b';
         ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.moveTo(5, -1);
-        ctx.bezierCurveTo(-2, -19 - wingY, -19, -19 - wingY, -24, -7 - wingY * 0.9);
-        ctx.bezierCurveTo(-22, 3 - wingY * 0.3, -8, 6, 4, 4);
-        ctx.closePath();
         ctx.stroke();
 
-        // 5. Cinnamon Head + Iconic Fanning 7-Feather Black-and-White-Tipped Crown Crest (تاج الهدهد المروحي)!
-        ctx.fillStyle = '#ea580c';
+        // 6. Sculpted Cinnamon Head + Iconic 9-Feather Royal Crown Crest (تاج الهدهد المروحي)!
+        const hdG = ctx.createRadialGradient(15.5, -5, 1, 16.5, -3.2, 7.5);
+        hdG.addColorStop(0, '#fb923c');
+        hdG.addColorStop(0.65, '#ea580c');
+        hdG.addColorStop(1, '#9a3412');
+        ctx.fillStyle = hdG;
         ctx.strokeStyle = '#431407';
         ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.arc(16.5, -3.5, 6.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(16.5, -3.5, 6.4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
 
-        for (let f = 0; f < 7; f++) {
-          const frac = f / 6;
-          const baseA = -Math.PI * 0.96 + frac * (Math.PI * 0.68 * crestOpen);
-          const fLen = 14 + Math.sin(frac * Math.PI) * 5;
-          const rx0 = 15, ry0 = -7.5;
+        // 9-feather fanning royal crest with golden-amber shafts, subterminal white pearls & obsidian tips!
+        for (let f = 0; f < 9; f++) {
+          const frac = f / 8;
+          const baseA = -Math.PI * 0.98 + frac * (Math.PI * 0.72 * crestOpen);
+          const fLen = 14.2 + Math.sin(frac * Math.PI) * 5.6;
+          const rx0 = 14.8 + frac * 2.2, ry0 = -7.8;
           const ex = rx0 + Math.cos(baseA) * fLen;
           const ey = ry0 + Math.sin(baseA) * fLen;
-          // Golden-orange feather shaft
-          ctx.strokeStyle = '#f97316';
-          ctx.lineWidth = 2.8;
+          // Tapered golden-orange feather vane
+          ctx.strokeStyle = f % 2 === 0 ? '#f97316' : '#ea580c';
+          ctx.lineWidth = 2.6;
           ctx.beginPath(); ctx.moveTo(rx0, ry0); ctx.lineTo(ex, ey); ctx.stroke();
           // Subterminal snow-white band
           ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 2.6;
+          ctx.lineWidth = 2.5;
           ctx.beginPath();
-          ctx.moveTo(rx0 + Math.cos(baseA) * (fLen * 0.65), ry0 + Math.sin(baseA) * (fLen * 0.65));
-          ctx.lineTo(rx0 + Math.cos(baseA) * (fLen * 0.82), ry0 + Math.sin(baseA) * (fLen * 0.82));
+          ctx.moveTo(rx0 + Math.cos(baseA) * (fLen * 0.64), ry0 + Math.sin(baseA) * (fLen * 0.64));
+          ctx.lineTo(rx0 + Math.cos(baseA) * (fLen * 0.81), ry0 + Math.sin(baseA) * (fLen * 0.81));
           ctx.stroke();
-          // Jet-black feather tip!
+          // Rounded jet-black feather tip!
           ctx.strokeStyle = '#09090b';
-          ctx.lineWidth = 2.8;
+          ctx.lineWidth = 2.7;
           ctx.beginPath();
-          ctx.moveTo(rx0 + Math.cos(baseA) * (fLen * 0.82), ry0 + Math.sin(baseA) * (fLen * 0.82));
+          ctx.moveTo(rx0 + Math.cos(baseA) * (fLen * 0.81), ry0 + Math.sin(baseA) * (fLen * 0.81));
           ctx.lineTo(ex, ey);
           ctx.stroke();
         }
 
-        // Bright dark eye + catchlight + Long Slender Decurved Black Hoopoe Bill!
+        // Expressive dark eye with pale orbital ring + Long Slender Decurved Hoopoe Bill!
+        ctx.fillStyle = '#ffedd5';
+        ctx.beginPath(); ctx.arc(18.8, -4.2, 2.3, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#09090b';
-        ctx.beginPath(); ctx.arc(18.8, -4.2, 1.7, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(18.9, -4.2, 1.75, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#ffffff';
-        ctx.beginPath(); ctx.arc(19.3, -4.7, 0.6, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#18181b';
-        ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.arc(19.4, -4.8, 0.65, 0, Math.PI * 2); ctx.fill();
+
+        // Tapered decurved horn-and-obsidian bill
+        ctx.fillStyle = '#18181b';
+        ctx.strokeStyle = '#09090b';
+        ctx.lineWidth = 0.85;
         ctx.beginPath();
-        ctx.moveTo(21.5, -3.8);
-        ctx.quadraticCurveTo(29.5, -3.2, 33.5, 1.8);
+        ctx.moveTo(21.2, -4.8);
+        ctx.quadraticCurveTo(29.8, -3.8, 34.2, 2.2);
+        ctx.quadraticCurveTo(29.0, -2.0, 21.0, -2.4);
+        ctx.closePath();
+        ctx.fill();
         ctx.stroke();
 
         ctx.restore();
@@ -7577,7 +8412,7 @@ window.Game.EnemiesExtended = (function () {
     if (level.battir_scorpions) {
       for (const sc of level.battir_scorpions) {
         const sx = sc.x - camX, sy = sc.y - camY;
-        if (sx + sc.w < -80 || sx > 1400) continue;
+        if (sx + sc.w < -80 || sx > cullW + 80) continue;
         const face = sc.facing || 1;
         const wPhase = (sc.walkDist || 0) * 0.24;
         const threat = sc.threat || 0;
@@ -7779,109 +8614,3103 @@ window.Game.EnemiesExtended = (function () {
   }
 
   function drawIstanbulEnemies(ctx, level, camX, camY, time, cullW) {
+    // 1. Museum-Grade Anatolian Kangal Shepherd Guard Dog (Sight Cone, 3-Segment Articulated Legs, Spiked Wolf-Collar & Black Facial Mask!)
     if (level.istanbul_kangals) {
       for (const k of level.istanbul_kangals) {
         const x = k.x - camX, y = k.y - camY;
-        if (x + k.w < -80 || x > cullW + 80) continue;
-        const stride = Math.sin((k.walkDist || 0) * 0.14);
-        const bob = Math.abs(stride) * 2.2;
+        if (x + k.w < -140 || x > cullW + 140) continue;
+
+        // Visible Detection Sight Cone so player can read Kangal's alert range clearly!
+        if (!k.repelTimer || k.repelTimer <= 0) {
+          ctx.save();
+          const dir = k.facing || 1;
+          const eyeX = x + k.w * 0.5 + dir * 24;
+          const eyeY = y + 14;
+          const coneLen = 215;
+          const coneG = ctx.createLinearGradient(eyeX, eyeY, eyeX + dir * coneLen, eyeY);
+          coneG.addColorStop(0, k.state === 'alert' ? 'rgba(239, 68, 68, 0.42)' : 'rgba(249, 115, 22, 0.26)');
+          coneG.addColorStop(1, 'rgba(249, 115, 22, 0)');
+          ctx.fillStyle = coneG;
+          ctx.beginPath();
+          ctx.moveTo(eyeX, eyeY);
+          ctx.lineTo(eyeX + dir * coneLen, eyeY - 38);
+          ctx.lineTo(eyeX + dir * coneLen, eyeY + 32);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+
+        const gait = (k.walkDist || 0) * 0.16;
+        const strideA = Math.sin(gait) * 9.5;
+        const strideB = -strideA;
+        const bob = Math.abs(Math.sin(gait)) * 2.2;
         ctx.save();
         ctx.translate(x + k.w * 0.5, y + k.h);
         ctx.scale(k.facing || 1, 1);
-        ctx.fillStyle = "rgba(15, 23, 42, 0.34)";
-        ctx.beginPath(); ctx.ellipse(0, -1, 30, 5.5, 0, 0, Math.PI * 2); ctx.fill();
-        const drawLeg = (lx, ang, col) => {
-          ctx.save(); ctx.translate(lx, -22 - bob); ctx.rotate(ang);
-          ctx.fillStyle = col; ctx.strokeStyle = "#29180d"; ctx.lineWidth = 1.6;
-          ctx.beginPath(); ctx.roundRect(-4.5, 0, 9, 22, 4); ctx.fill(); ctx.stroke();
-          ctx.fillStyle = "#fef3c7"; ctx.beginPath(); ctx.ellipse(2, 21, 5.5, 3, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-          ctx.restore();
+
+        // Ground contact shadow
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.42)';
+        ctx.beginPath(); ctx.ellipse(0, -1, 34, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+
+        const drawCanineLeg = (hipX, stride, dark) => {
+          const kneeX = hipX + stride * 0.45;
+          const pawX = hipX + stride;
+          ctx.strokeStyle = '#29180d'; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+          ctx.lineWidth = dark ? 7.2 : 8.2;
+          ctx.beginPath(); ctx.moveTo(hipX, -23 - bob); ctx.lineTo(kneeX, -12); ctx.lineTo(pawX, -2.5); ctx.stroke();
+          ctx.strokeStyle = dark ? '#a67d4e' : '#e6c896';
+          ctx.lineWidth = dark ? 4.6 : 5.4;
+          ctx.beginPath(); ctx.moveTo(hipX, -23 - bob); ctx.lineTo(kneeX, -12); ctx.lineTo(pawX, -2.5); ctx.stroke();
+          ctx.fillStyle = dark ? '#d6b687' : '#fef3c7'; ctx.strokeStyle = '#29180d'; ctx.lineWidth = 1.3;
+          ctx.beginPath(); ctx.ellipse(pawX + 2.5, -2.2, 5.2, 2.8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         };
-        drawLeg(-16, -stride * 0.42, "#b48a5a");
-        drawLeg(16, stride * 0.42, "#b48a5a");
-        ctx.strokeStyle = "#29180d"; ctx.lineWidth = 6.5; ctx.lineCap = "round";
-        ctx.beginPath(); ctx.moveTo(-24, -26 - bob); ctx.bezierCurveTo(-40, -34 - bob, -38, -50 - bob, -26, -46 - bob); ctx.stroke();
-        ctx.strokeStyle = "#e7c99b"; ctx.lineWidth = 3.8;
-        ctx.beginPath(); ctx.moveTo(-24, -26 - bob); ctx.bezierCurveTo(-40, -34 - bob, -38, -50 - bob, -26, -46 - bob); ctx.stroke();
-        const bodyG = ctx.createLinearGradient(0, -40 - bob, 0, -14 - bob);
-        bodyG.addColorStop(0, "#f3dfb9"); bodyG.addColorStop(0.55, "#d6b078"); bodyG.addColorStop(1, "#a67c46");
-        ctx.fillStyle = bodyG; ctx.strokeStyle = "#29180d"; ctx.lineWidth = 1.9;
+
+        // Far shaded legs
+        drawCanineLeg(-18, strideB * 0.85, true);
+        drawCanineLeg(16, strideA * 0.85, true);
+
+        // Iconic Curled-Over-Back Plumed Anatolian Kangal Tail
+        const wag = Math.sin(time * (k.state === 'alert' ? 14 : 5) + k.x * 0.02) * 3;
+        ctx.strokeStyle = '#29180d'; ctx.lineWidth = 7.4; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-25, -28 - bob); ctx.bezierCurveTo(-43, -36 - bob, -41, -54 - bob + wag, -26, -48 - bob + wag); ctx.stroke();
+        ctx.strokeStyle = '#e7c99b'; ctx.lineWidth = 4.6;
+        ctx.beginPath(); ctx.moveTo(-25, -28 - bob); ctx.bezierCurveTo(-43, -36 - bob, -41, -54 - bob + wag, -26, -48 - bob + wag); ctx.stroke();
+
+        // Sculpted Muscular Deep-Chested Fawn-Cream Kangal Torso
+        const bodyG = ctx.createLinearGradient(0, -44 - bob, 0, -14 - bob);
+        bodyG.addColorStop(0.0, '#f7e6c4'); bodyG.addColorStop(0.45, '#d9b57c'); bodyG.addColorStop(0.85, '#ab824c'); bodyG.addColorStop(1.0, '#78552d');
+        ctx.fillStyle = bodyG; ctx.strokeStyle = '#29180d'; ctx.lineWidth = 1.9;
         ctx.beginPath();
-        ctx.moveTo(-26, -24 - bob); ctx.bezierCurveTo(-24, -38 - bob, 18, -42 - bob, 26, -28 - bob);
-        ctx.bezierCurveTo(28, -16 - bob, 10, -14 - bob, -18, -16 - bob); ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#991b1b"; ctx.strokeStyle = "#29180d"; ctx.lineWidth = 1.4;
-        ctx.beginPath(); ctx.roundRect(14, -34 - bob, 8, 16, 3); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#fde047";
-        ctx.beginPath(); ctx.arc(18, -29 - bob, 2, 0, Math.PI * 2); ctx.arc(18, -23 - bob, 2, 0, Math.PI * 2); ctx.fill();
-        drawLeg(-12, stride * 0.46, "#e3c390");
-        drawLeg(12, -stride * 0.46, "#e3c390");
-        ctx.fillStyle = "#ebd0a0"; ctx.strokeStyle = "#29180d"; ctx.lineWidth = 1.8;
-        ctx.beginPath(); ctx.ellipse(26, -36 - bob, 12, 10.5, -0.1, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#1c1917"; ctx.beginPath(); ctx.ellipse(35, -33 - bob, 7.5, 5.2, 0.08, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#292524"; ctx.beginPath(); ctx.ellipse(20, -35 - bob, 5.2, 9.5, 0.35, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = k.state === "alert" ? "#ef4444" : "#f59e0b";
-        ctx.beginPath(); ctx.arc(30, -38 - bob, 2.4, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "#09090b"; ctx.beginPath(); ctx.arc(30.8, -38 - bob, 1.2, 0, Math.PI * 2); ctx.fill();
+        ctx.moveTo(-28, -28 - bob);
+        ctx.bezierCurveTo(-24, -40 - bob, 2, -44 - bob, 22, -39 - bob);
+        ctx.bezierCurveTo(30, -32 - bob, 28, -16 - bob, 14, -15 - bob);
+        ctx.bezierCurveTo(0, -15 - bob, -10, -20 - bob, -22, -19 - bob);
+        ctx.quadraticCurveTo(-30, -21 - bob, -28, -28 - bob);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Traditional Iron-Spiked Anatolian Wolf-Guard Collar (Çoban Tasması)
+        ctx.fillStyle = '#7f1d1d'; ctx.strokeStyle = '#29180d'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(14, -39 - bob, 9, 20, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#e2e8f0'; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.0;
+        for (const sy of [-36, -30, -24]) {
+          ctx.beginPath(); ctx.moveTo(22, sy - 2 - bob); ctx.lineTo(28, sy - bob); ctx.lineTo(22, sy + 2 - bob); ctx.closePath(); ctx.fill(); ctx.stroke();
+        }
+
+        // Near articulated muscular legs
+        drawCanineLeg(-15, strideA, false);
+        drawCanineLeg(14, strideB, false);
+
+        // Sculpted Noble Kangal Head with Iconic Black Facial Mask & Velvety Droopy Ears
+        const hy = -40 - bob;
+        ctx.fillStyle = '#ebd0a0'; ctx.strokeStyle = '#29180d'; ctx.lineWidth = 1.7;
+        ctx.beginPath();
+        ctx.moveTo(16, hy - 8); ctx.quadraticCurveTo(26, hy - 12, 34, hy - 5);
+        ctx.lineTo(44, hy - 1); ctx.lineTo(43, hy + 6); ctx.lineTo(30, hy + 8);
+        ctx.quadraticCurveTo(18, hy + 8, 16, hy - 8);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Iconic jet-black Kangal muzzle mask
+        ctx.fillStyle = '#1c1917';
+        ctx.beginPath();
+        ctx.moveTo(31, hy - 4); ctx.lineTo(44, hy - 1); ctx.lineTo(43, hy + 6); ctx.lineTo(31, hy + 6);
+        ctx.closePath(); ctx.fill();
+        // Parted jaw & white fang when barking/alert!
+        if (k.state === 'alert') {
+          ctx.fillStyle = '#7f1d1d'; ctx.fillRect(34, hy + 4, 8, 4.5);
+          ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(38, hy + 4); ctx.lineTo(39.5, hy + 7.5); ctx.lineTo(41, hy + 4); ctx.closePath(); ctx.fill();
+        }
+        // Dark velvety droopy Kangal ear
+        ctx.fillStyle = '#292524'; ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.ellipse(21, hy - 1, 5.5, 10.5, 0.32, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Intense amber eye with catchlight
+        ctx.fillStyle = k.state === 'alert' ? '#ef4444' : '#f59e0b';
+        ctx.beginPath(); ctx.arc(31.5, hy - 3.5, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#09090b'; ctx.beginPath(); ctx.arc(32.2, hy - 3.5, 1.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(30.8, hy - 4.3, 0.75, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
       }
     }
+
+    // 2. Museum-Grade Grand Bazaar Tea & Spice Merchant (Embroidered Vest, Şalvar, Brass Tea Tray & Fez!)
     if (level.istanbul_merchants) {
       for (const m of level.istanbul_merchants) {
         const x = m.x - camX, y = m.y - camY;
-        if (x + m.w < -80 || x > cullW + 80) continue;
-        const stride = Math.sin((m.walkDist || 0) * 0.16);
-        const bob = Math.abs(stride) * 2.0;
+        if (x + m.w < -100 || x > cullW + 100) continue;
+        const gait = (m.walkDist || 0) * 0.16;
+        const stride = Math.sin(gait);
+        const bob = Math.abs(stride) * 2.2;
         ctx.save();
         ctx.translate(x + m.w * 0.5, y + m.h);
         ctx.scale(m.facing || 1, 1);
-        ctx.fillStyle = "rgba(15, 23, 42, 0.32)";
-        ctx.beginPath(); ctx.ellipse(0, -1, 18, 4.5, 0, 0, Math.PI * 2); ctx.fill();
-        for (const [ang, col] of [[-stride * 0.38, "#1e293b"], [stride * 0.38, "#334155"]]) {
-          ctx.save(); ctx.translate(0, -22 - bob); ctx.rotate(ang);
-          ctx.fillStyle = col; ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 1.6;
-          ctx.beginPath(); ctx.roundRect(-5, 0, 10, 21, 4); ctx.fill(); ctx.stroke();
-          ctx.fillStyle = "#78350f"; ctx.beginPath(); ctx.ellipse(2.5, 20.5, 6.5, 3.2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.36)';
+        ctx.beginPath(); ctx.ellipse(0, -1, 20, 4.8, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Articulated draped Ottoman şalvar trousers & pointed leather slippers
+        for (const [ang, col] of [[-stride * 0.40, '#1e293b'], [stride * 0.40, '#334155']]) {
+          ctx.save(); ctx.translate(0, -24 - bob); ctx.rotate(ang);
+          ctx.fillStyle = col; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(-6, 0); ctx.quadraticCurveTo(-9, 11, -4, 21);
+          ctx.lineTo(5, 21); ctx.quadraticCurveTo(9, 11, 6, 0);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          // Pointed Ottoman leather slipper
+          ctx.fillStyle = '#78350f'; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.3;
+          ctx.beginPath(); ctx.moveTo(-5, 21); ctx.lineTo(10, 21); ctx.quadraticCurveTo(13, 18, 8, 17); ctx.lineTo(-4, 18); ctx.closePath(); ctx.fill(); ctx.stroke();
           ctx.restore();
         }
-        ctx.fillStyle = "#fef3c7"; ctx.strokeStyle = "#3b1d0c"; ctx.lineWidth = 1.7;
-        ctx.beginPath(); ctx.roundRect(-13, -44 - bob, 26, 25, 7); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#9f1239"; ctx.beginPath(); ctx.roundRect(-12, -43 - bob, 24, 21, 5); ctx.fill(); ctx.stroke();
-        ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 1.5; ctx.strokeRect(-9, -40 - bob, 18, 15);
-        ctx.strokeStyle = "#fef3c7"; ctx.lineWidth = 5.5; ctx.lineCap = "round";
-        ctx.beginPath(); ctx.moveTo(8, -36 - bob); ctx.lineTo(22, -32 - bob); ctx.stroke();
-        ctx.fillStyle = "#f59e0b"; ctx.strokeStyle = "#78350f"; ctx.lineWidth = 1.4;
-        ctx.beginPath(); ctx.ellipse(24, -33 - bob, 12, 3.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#dc2626"; ctx.fillRect(18, -41 - bob, 4.5, 7); ctx.fillRect(25, -41 - bob, 4.5, 7);
-        ctx.fillStyle = "#f1c29b"; ctx.strokeStyle = "#3b1d0c"; ctx.lineWidth = 1.7;
-        ctx.beginPath(); ctx.arc(0, -51 - bob, 9.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#1c1917"; ctx.beginPath(); ctx.arc(4, -52 - bob, 1.6, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = "#1c1917"; ctx.lineWidth = 2.0;
-        ctx.beginPath(); ctx.moveTo(2, -47 - bob); ctx.quadraticCurveTo(6, -49 - bob, 10, -47 - bob); ctx.stroke();
-        ctx.fillStyle = "#be123c"; ctx.strokeStyle = "#3b1d0c"; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(-8, -58 - bob); ctx.lineTo(-6, -68 - bob); ctx.lineTo(6, -68 - bob); ctx.lineTo(8, -58 - bob); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Pleated linen shirt, crimson-and-gold embroidered Ottoman Yelek vest & turquoise sash
+        ctx.fillStyle = '#fef3c7'; ctx.strokeStyle = '#3b1d0c'; ctx.lineWidth = 1.7;
+        ctx.beginPath(); ctx.roundRect(-14, -47 - bob, 28, 26, 7); ctx.fill(); ctx.stroke();
+        const vestG = ctx.createLinearGradient(-12, -46 - bob, 12, -26 - bob);
+        vestG.addColorStop(0, '#be123c'); vestG.addColorStop(1, '#7f1d1d');
+        ctx.fillStyle = vestG;
+        ctx.beginPath(); ctx.roundRect(-13, -46 - bob, 26, 20, 5); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.5; ctx.strokeRect(-10, -43 - bob, 20, 14);
+        ctx.fillStyle = '#0284c7'; ctx.fillRect(-13, -27 - bob, 26, 5.5);
+
+        // Articulated rear swinging arm + forearm holding gleaming 3-Chain Brass Turkish Çay Askısı Tray!
+        ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 5.2; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-6, -42 - bob); ctx.lineTo(-10 - stride * 5, -28 - bob); ctx.stroke();
+
+        ctx.strokeStyle = '#fef3c7'; ctx.lineWidth = 6.0; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(8, -39 - bob); ctx.lineTo(24, -48 - bob); ctx.stroke();
+        // Traditional 3-chain arched brass Turkish Tea Carrier (Çay Askısı) hanging from merchant's hand!
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(26, -48 - bob, 3.0, 0, Math.PI * 2);
+        ctx.moveTo(26, -45 - bob); ctx.lineTo(15, -35 - bob);
+        ctx.moveTo(26, -45 - bob); ctx.lineTo(26, -35 - bob);
+        ctx.moveTo(26, -45 - bob); ctx.lineTo(37, -35 - bob);
+        ctx.stroke();
+
+        const trayG = ctx.createLinearGradient(12, -37 - bob, 40, -33 - bob);
+        trayG.addColorStop(0, '#fef9c3'); trayG.addColorStop(0.5, '#f59e0b'); trayG.addColorStop(1, '#92400e');
+        ctx.fillStyle = trayG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.ellipse(26, -34.5 - bob, 14.5, 3.8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Ruby-red tulip İnce Belli Turkish tea glasses + rising steam curls + saffron spice cone!
+        ctx.fillStyle = '#dc2626'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.0;
+        ctx.fillRect(17, -43.5 - bob, 5, 8); ctx.strokeRect(17, -43.5 - bob, 5, 8);
+        ctx.fillRect(24, -43.5 - bob, 5, 8); ctx.strokeRect(24, -43.5 - bob, 5, 8);
+        ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(19.5, -45 - bob); ctx.quadraticCurveTo(18, -49 - bob, 20.5, -52 - bob);
+        ctx.moveTo(26.5, -45 - bob); ctx.quadraticCurveTo(25, -49 - bob, 27.5, -52 - bob);
+        ctx.stroke();
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath(); ctx.moveTo(31, -35.5 - bob); ctx.lineTo(35, -43.5 - bob); ctx.lineTo(39, -35.5 - bob); ctx.closePath(); ctx.fill();
+
+        // Sculpted Head, Shaded Cheekbones, Expressive Eyes, Curled Ottoman Mustache & Tasseled Crimson Fez!
+        ctx.fillStyle = '#d99b72';
+        ctx.fillRect(-3.5, -50 - bob, 7, 5);
+        const mSkinG = ctx.createRadialGradient(-2, -58 - bob, 2, 0, -55 - bob, 11);
+        mSkinG.addColorStop(0, '#fde2cc'); mSkinG.addColorStop(0.65, '#f1be96'); mSkinG.addColorStop(1, '#c98a63');
+        ctx.fillStyle = mSkinG; ctx.strokeStyle = '#3b1d0c'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(0, -55 - bob, 10.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Ear, brow, eye with sclera & catchlight, nose
+        ctx.fillStyle = '#e5a982';
+        ctx.beginPath(); ctx.arc(-7.5, -55 - bob, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.ellipse(4.2, -56.5 - bob, 2.5, 1.9, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#1c1917';
+        ctx.beginPath(); ctx.arc(4.7, -56.5 - bob, 1.3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(4.1, -57.3 - bob, 0.9, 0.9);
+        ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(1.5, -59.5 - bob); ctx.quadraticCurveTo(4.5, -61.0 - bob, 7.2, -59.2 - bob); ctx.stroke();
+        ctx.strokeStyle = '#b4714c'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(6.8, -56.5 - bob); ctx.lineTo(9.8, -53.2 - bob); ctx.lineTo(7.0, -52.8 - bob); ctx.stroke();
+        // Lush curled Turkish mustache
+        ctx.fillStyle = '#1c1917';
+        ctx.beginPath();
+        ctx.moveTo(1, -51.5 - bob); ctx.quadraticCurveTo(6, -53.5 - bob, 12.5, -50.2 - bob);
+        ctx.quadraticCurveTo(8, -48.5 - bob, 1, -50.2 - bob);
+        ctx.closePath(); ctx.fill();
+        // Burgundy velvet Fez with gold rim & swaying black silk tassel
+        const fezG = ctx.createLinearGradient(-8, -74 - bob, 8, -62 - bob);
+        fezG.addColorStop(0, '#e11d48'); fezG.addColorStop(1, '#881337');
+        ctx.fillStyle = fezG; ctx.strokeStyle = '#3b1d0c'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(-8.8, -62 - bob); ctx.lineTo(-6.8, -73.5 - bob); ctx.lineTo(6.8, -73.5 - bob); ctx.lineTo(8.8, -62 - bob); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.moveTo(-8.5, -62.8 - bob); ctx.lineTo(8.5, -62.8 - bob); ctx.stroke();
+        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.moveTo(0, -73.5 - bob); ctx.quadraticCurveTo(-10, -71 - bob, -12, -62 - bob); ctx.stroke();
         ctx.restore();
       }
     }
+
+    // 3. Authentic Bosphorus Seagull (نورس البوسفور الأبيض — Pure Snow-White Body & Head, Pearl-Silver Mantle, M-Angled Black-Tipped Gull Wings & Red-Spotted Yellow Seagull Bill!)
     if (level.istanbul_gulls) {
       for (const g of level.istanbul_gulls) {
         const x = g.x - camX, y = g.y - camY;
-        if (x + g.w < -80 || x > cullW + 80) continue;
-        const flap = Math.sin(time * 9.2 + (g.phase || 0));
+        if (x + g.w < -120 || x > cullW + 120) continue;
+        const flap = Math.sin(time * (g.swooping ? 15 : 8.2) + (g.phase || 0));
+        const wingY = flap * 19;
         ctx.save();
         ctx.translate(x + g.w * 0.5, y + g.h * 0.5);
         ctx.scale(g.facing || 1, 1);
-        ctx.fillStyle = "#cbd5e1"; ctx.strokeStyle = "#334155"; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(-4, -2); ctx.quadraticCurveTo(-10, -18 + flap * 16, -24, -10 + flap * 20); ctx.quadraticCurveTo(-12, -2 + flap * 8, 4, 2); ctx.closePath(); ctx.fill(); ctx.stroke();
-        const bG = ctx.createLinearGradient(0, -10, 0, 10);
-        bG.addColorStop(0, "#ffffff"); bG.addColorStop(0.7, "#e2e8f0"); bG.addColorStop(1, "#94a3b8");
-        ctx.fillStyle = bG; ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 1.6;
-        ctx.beginPath(); ctx.ellipse(0, 1, 18, 8.5, -0.06, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#f8fafc"; ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 1.6;
-        ctx.beginPath(); ctx.moveTo(-2, -1); ctx.quadraticCurveTo(-4, -20 - flap * 16, -20, -12 - flap * 22); ctx.quadraticCurveTo(-8, 2 - flap * 8, 6, 3); ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#334155"; ctx.beginPath(); ctx.arc(-18, -11 - flap * 20, 4, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(15, -3, 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#f59e0b"; ctx.beginPath(); ctx.moveTo(21, -4); ctx.lineTo(29, -1.5); ctx.lineTo(21, 1); ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = "#0f172a"; ctx.beginPath(); ctx.arc(17, -4.5, 1.5, 0, Math.PI * 2); ctx.fill();
+        if (g.swooping) ctx.rotate(0.24);
+
+        // 1. Far M-Angled Silver-Grey Seagull Wing with Jet-Black Primary Tip
+        ctx.fillStyle = '#94a3b8'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(-3, -4);
+        ctx.lineTo(-14, -18 + wingY * 0.65);
+        ctx.lineTo(-38, -12 + wingY);
+        ctx.lineTo(-26, -3 + wingY * 0.55);
+        ctx.lineTo(5, 1);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.moveTo(-29, -14 + wingY * 0.88);
+        ctx.lineTo(-38, -12 + wingY);
+        ctx.lineTo(-31, -6 + wingY * 0.72);
+        ctx.closePath(); ctx.fill();
+
+        // 2. Pure Snow-White Fanned Seagull Tail & Tucked Webbed Orange-Yellow Feet
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(-16, 1);
+        ctx.lineTo(-35, -5);
+        ctx.quadraticCurveTo(-38, 1, -33, 7);
+        ctx.lineTo(-16, 5);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#92400e'; ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(-14, 8); ctx.lineTo(-22, 11); ctx.lineTo(-19, 14); ctx.lineTo(-12, 10);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // 3. Sleek Snow-White Seagull Breast & Belly + Distinct Cool Pearl-Silver Mantle Saddle
+        const bellyG = ctx.createLinearGradient(0, -9, 0, 12);
+        bellyG.addColorStop(0.0, '#ffffff');
+        bellyG.addColorStop(0.65, '#f8fafc');
+        bellyG.addColorStop(1.0, '#dbeafe');
+        ctx.fillStyle = bellyG; ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-20, 1);
+        ctx.bezierCurveTo(-14, -10, 8, -10, 18, -3);
+        ctx.bezierCurveTo(22, 4, 12, 11, -3, 11);
+        ctx.bezierCurveTo(-14, 11, -20, 6, -20, 1);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Classic Seagull Pearl-Grey Mantle across the upper back
+        ctx.fillStyle = '#cbd5e1';
+        ctx.beginPath();
+        ctx.moveTo(-16, 0);
+        ctx.quadraticCurveTo(-2, -10, 11, -4);
+        ctx.quadraticCurveTo(-2, 1, -16, 0);
+        ctx.closePath(); ctx.fill();
+
+        // 4. Near Long M-Angled Seagull Wing (Silver-Grey Upper, White Trailing Edge, Jet-Black Primaries & White Mirror Spots!)
+        ctx.save();
+        const wG = ctx.createLinearGradient(2, -4, -36, -14 - wingY);
+        wG.addColorStop(0.00, '#cbd5e1');
+        wG.addColorStop(0.55, '#e2e8f0');
+        wG.addColorStop(0.76, '#94a3b8');
+        wG.addColorStop(0.79, '#0f172a');
+        wG.addColorStop(1.00, '#020617');
+        ctx.fillStyle = wG; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(6, -2);
+        ctx.lineTo(-8, -19 - wingY * 0.65); // Gull wrist bend!
+        ctx.lineTo(-39, -15 - wingY);       // Long pointed gull primary tip!
+        ctx.lineTo(-33, -9 - wingY * 0.85);
+        ctx.lineTo(-36, -5 - wingY * 0.72);
+        ctx.quadraticCurveTo(-15, 4 - wingY * 0.30, 8, 3);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Crisp snow-white trailing secondary feather border & white primary mirror dots!
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(-25, -3 - wingY * 0.55);
+        ctx.quadraticCurveTo(-10, 3 - wingY * 0.25, 6, 2);
+        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(-34.5, -13.2 - wingY * 0.94, 1.7, 0, Math.PI * 2);
+        ctx.arc(-30.5, -9.5 - wingY * 0.82, 1.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // 5. Pure Snow-White Seagull Neck & Rounded Head + Hooked Yellow Seagull Bill with Red Gonys Spot!
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(10, -4);
+        ctx.quadraticCurveTo(14, -12, 20, -11);
+        ctx.arc(20, -5.5, 7.6, -Math.PI * 0.6, Math.PI * 0.55);
+        ctx.quadraticCurveTo(14, 3, 10, 2);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Stout Yellow Seagull Bill with Hooked Tip & Iconic Red Spot
+        const billG = ctx.createLinearGradient(25, -8, 38, -2);
+        billG.addColorStop(0, '#fde047'); billG.addColorStop(1, '#eab308');
+        ctx.fillStyle = billG; ctx.strokeStyle = '#854d0e'; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(26, -7.2);
+        ctx.quadraticCurveTo(36, -6.8, 38.5, -2.5); // Classic downward hooked gull tip!
+        ctx.lineTo(36.2, -1.2);
+        ctx.lineTo(26, -2.0);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(33.5, -2.4, 1.9, 0, Math.PI * 2); ctx.fill();
+
+        // Bright Yellow Gull Iris + Red Orbital Ring + Specular Catchlight
+        ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.arc(21.5, -6.8, 2.3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#090d16'; ctx.beginPath(); ctx.arc(22.0, -6.8, 1.1, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(21.4, -7.4, 0.6, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // 4. Museum-Grade Royal Turkish Angora Cat (القطة الأنغورية البيضاء الفاخرة — Layered Silky Fur, Feathered Plume Tail, Sapphire/Amber Jewel Eyes & Playful Yarn Batting!)
+    if (level.istanbul_alley_cats) {
+      for (const ac of level.istanbul_alley_cats) {
+        const x = ac.x - camX, y = ac.y - camY;
+        if (x + ac.w < -140 || x > cullW + 140) continue;
+        const homeDrawX = (ac.homeX !== undefined ? ac.homeX : ac.x) - camX + ac.w * 0.5;
+        const groundY = y + ac.h;
+
+        // 1. Plush Tufted Ottoman Velvet & Hand-Woven Kilim Cushion with Golden Silk Tassels
+        ctx.save();
+        ctx.translate(homeDrawX, groundY);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
+        ctx.beginPath(); ctx.ellipse(0, 0.5, 48, 5.2, 0, 0, Math.PI * 2); ctx.fill();
+        const rugG = ctx.createLinearGradient(-42, -11, 42, 0);
+        rugG.addColorStop(0, '#7f1d1d');
+        rugG.addColorStop(0.3, '#be123c');
+        rugG.addColorStop(0.5, '#e11d48');
+        rugG.addColorStop(0.7, '#be123c');
+        rugG.addColorStop(1, '#7f1d1d');
+        ctx.fillStyle = rugG;
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.roundRect(-42, -10.5, 84, 10.5, [5, 5, 2.5, 2.5]);
+        ctx.fill();
+        ctx.stroke();
+        // Woven turquoise Anatolian medallion runner & gold brocade diamonds
+        const medG = ctx.createLinearGradient(0, -8.5, 0, -2);
+        medG.addColorStop(0, '#0ea5e9');
+        medG.addColorStop(1, '#0369a1');
+        ctx.fillStyle = medG;
+        ctx.beginPath();
+        ctx.roundRect(-28, -8.2, 56, 6.0, 2);
+        ctx.fill();
+        ctx.fillStyle = '#fef08a';
+        for (const dx of [-17, 0, 17]) {
+          ctx.beginPath();
+          ctx.moveTo(dx, -8.0);
+          ctx.lineTo(dx + 4.8, -5.2);
+          ctx.lineTo(dx, -2.4);
+          ctx.lineTo(dx - 4.8, -5.2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = '#be123c';
+          ctx.beginPath();
+          ctx.arc(dx, -5.2, 1.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#fef08a';
+        }
+        // Braided golden-cream silk fringe & corner tassels
+        ctx.strokeStyle = '#fde68a';
+        ctx.lineWidth = 1.25;
+        for (const side of [-1, 1]) {
+          for (let fr = -8.5; fr <= -2.0; fr += 2.1) {
+            ctx.beginPath();
+            ctx.moveTo(side * 42, fr);
+            ctx.lineTo(side * 47.5, fr + 0.4);
+            ctx.stroke();
+          }
+          ctx.fillStyle = '#f59e0b';
+          ctx.beginPath();
+          ctx.arc(side * 42, -8.5, 2.0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+
+        // 2. Royal Snow-White Turkish Angora Cat (Ankara Kedisi — Layered Silky Fur Locks, 2-Segment Paws, Lion Ruff & Heterochromatic Jewel Eyes!)
+        const isPlaying = (ac.playingTimer || 0) > 0;
+        const standing = !isPlaying && !!(ac.loving || ac.returning);
+        const wb = standing ? Math.max(0, Math.min(1, ac.walkBlend || 0)) : 0;
+        const gait = (ac.walkDist || 0) * 0.19;
+        const strideA = Math.sin(gait) * 7.2 * wb;
+        const liftA = Math.max(0, Math.cos(gait)) * 3.2 * wb;
+        const strideB = Math.sin(gait + Math.PI) * 7.2 * wb;
+        const liftB = Math.max(0, Math.cos(gait + Math.PI)) * 3.2 * wb;
+        const bob = standing ? Math.abs(Math.sin(gait)) * 1.4 * wb : Math.sin(time * 2.1 + (ac.phase || 0)) * 0.9;
+        const tailSway = Math.sin(time * (isPlaying ? 4.4 : (ac.loving ? 3.1 : 1.5)) + (ac.phase || 0)) * 5.8;
+
+        ctx.save();
+        ctx.translate(x + ac.w * 0.5, groundY - (isPlaying || standing ? 1.5 : 6.5));
+        ctx.scale(ac.facing || -1, 1);
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+
+        if (isPlaying || standing) {
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.22)';
+          ctx.beginPath(); ctx.ellipse(1, 1.2, 23, 4.0, 0, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Helper: Sculpted Multi-Lock Feathered Angora Plume Tail!
+        ctx.save();
+        const tBaseX = isPlaying ? -12 : (standing ? -17.5 : -16);
+        const tBaseY = isPlaying ? -8.5 : (standing ? -18.5 - bob : -6);
+        const tTipX = isPlaying ? (-18 + tailSway) : (standing ? (-21 + tailSway) : -26);
+        const tTipY = isPlaying ? -44 : (standing ? (-47 - bob) : -14);
+        const tailG = ctx.createLinearGradient(tBaseX - 16, tTipY, tBaseX + 6, tBaseY);
+        tailG.addColorStop(0, '#ffffff');
+        tailG.addColorStop(0.58, '#fffdf7');
+        tailG.addColorStop(1, '#dbeafe');
+        ctx.fillStyle = tailG;
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.25;
+        ctx.beginPath();
+        ctx.moveTo(tBaseX, tBaseY - 2.6);
+        if (isPlaying || standing) {
+          // Feathered scalloped outer plume locks!
+          const midX = (tBaseX + tTipX) * 0.5 - 11;
+          const midY = (tBaseY + tTipY) * 0.5;
+          ctx.quadraticCurveTo(tBaseX - 12, tBaseY - 9, midX, midY + 5);
+          ctx.lineTo(midX - 3.5, midY + 2.5);
+          ctx.quadraticCurveTo(midX - 1, midY - 4, tTipX - 9, tTipY + 10);
+          ctx.lineTo(tTipX - 11.5, tTipY + 6.5);
+          ctx.quadraticCurveTo(tTipX - 6, tTipY - 1, tTipX, tTipY);
+          // Silky inner plume return curve with feathery tuft
+          ctx.quadraticCurveTo(tTipX + 9, tTipY + 6, midX + 13, midY + 2);
+          ctx.lineTo(midX + 15.2, midY + 4.5);
+          ctx.quadraticCurveTo(tBaseX - 3, tBaseY + 3, tBaseX, tBaseY + 3.2);
+        } else {
+          ctx.bezierCurveTo(tBaseX - 16, tBaseY - 8, tTipX - 10, tTipY + 4, tTipX, tTipY);
+          ctx.bezierCurveTo(tTipX + 8, tTipY + 8, tBaseX - 6, tBaseY + 6, tBaseX, tBaseY + 3.5);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Delicate silky inner feather-fur wisps inside the plume tail
+        if (isPlaying || standing) {
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.moveTo(tBaseX - 3, tBaseY - 2);
+          ctx.quadraticCurveTo((tBaseX + tTipX) * 0.5 - 4, (tBaseY + tTipY) * 0.5, tTipX - 1.5, tTipY + 4);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // Helper: 2-Segment Articulated Feline Limb with Dainty Divided Toe-Paw!
+        const drawAngoraLeg = (lx, ly0, sx, liftY, far) => {
+          const footX = lx + sx;
+          const footY = -1.3 - liftY;
+          const kneeX = lx + sx * 0.42 + (lx < 0 ? -1.4 : 1.0);
+          const kneeY = (ly0 + footY) * 0.52;
+          const legG = ctx.createLinearGradient(lx, ly0, footX, footY);
+          if (far) {
+            legG.addColorStop(0, '#cbd5e1');
+            legG.addColorStop(1, '#e2e8f0');
+          } else {
+            legG.addColorStop(0, '#fffdf7');
+            legG.addColorStop(0.65, '#ffffff');
+            legG.addColorStop(1, '#f1f5f9');
+          }
+          ctx.fillStyle = legG;
+          ctx.strokeStyle = far ? '#64748b' : '#475569';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(lx - 4.0, ly0);
+          ctx.quadraticCurveTo(kneeX - 3.2, kneeY, footX - 3.0, footY - 1.2);
+          // Dainty rounded feline paw cushion
+          ctx.quadraticCurveTo(footX - 3.2, footY + 1.5, footX + 1.2, footY + 1.6);
+          ctx.quadraticCurveTo(footX + 5.4, footY + 1.5, footX + 5.0, footY - 1.0);
+          ctx.quadraticCurveTo(kneeX + 2.8, kneeY, lx + 4.0, ly0);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          // Two delicate feline toe-cleft lines on near paws
+          if (!far) {
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 0.85;
+            ctx.beginPath();
+            ctx.moveTo(footX + 1.2, footY - 0.6); ctx.lineTo(footX + 1.4, footY + 1.3);
+            ctx.moveTo(footX + 3.1, footY - 0.5); ctx.lineTo(footX + 3.3, footY + 1.2);
+            ctx.stroke();
+            if (liftY > 1.2) {
+              ctx.fillStyle = '#fda4af';
+              ctx.beginPath(); ctx.arc(footX + 2.0, footY + 0.8, 1.2, 0, Math.PI * 2); ctx.fill();
+            }
+          }
+        };
+
+        // Helper: Scalloped Royal Angora Neck/Chest Lion-Ruff + Turquoise Silk Collar & 3D Golden Bell!
+        const drawAngoraRuffAndCollar = (rx, ry, tilt) => {
+          ctx.save();
+          ctx.translate(rx, ry);
+          ctx.rotate(tilt || 0);
+          // Soft under-ruff pearl shadow
+          ctx.fillStyle = '#dbeafe';
+          ctx.beginPath();
+          ctx.ellipse(0.5, 2.2, 9.2, 6.8, 0.1, 0, Math.PI * 2);
+          ctx.fill();
+          // Multi-tufted scalloped snow-white Angora chest ruff
+          const ruffG = ctx.createRadialGradient(1, -2, 1.5, 0, 0, 10.5);
+          ruffG.addColorStop(0, '#ffffff');
+          ruffG.addColorStop(0.75, '#fffdf7');
+          ruffG.addColorStop(1, '#e2e8f0');
+          ctx.fillStyle = ruffG;
+          ctx.strokeStyle = '#64748b';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.moveTo(-6.5, -4.5);
+          ctx.quadraticCurveTo(-9.2, -0.5, -7.2, 3.0);
+          ctx.lineTo(-4.8, 1.8);
+          ctx.quadraticCurveTo(-4.2, 6.2, -0.8, 7.2);
+          ctx.lineTo(0.8, 4.8);
+          ctx.quadraticCurveTo(3.8, 7.8, 6.8, 5.5);
+          ctx.lineTo(6.2, 3.0);
+          ctx.quadraticCurveTo(9.8, 2.5, 9.2, -1.8);
+          ctx.quadraticCurveTo(7.5, -5.8, -6.5, -4.5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Silky Turquoise Ottoman Satin Collar & Ribbon Bow
+          ctx.strokeStyle = '#0284c7';
+          ctx.lineWidth = 2.8;
+          ctx.beginPath();
+          ctx.moveTo(-5.8, -4.2);
+          ctx.quadraticCurveTo(1.5, -1.2, 7.5, -3.2);
+          ctx.stroke();
+          ctx.strokeStyle = '#bae6fd';
+          ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.moveTo(-5.2, -4.6);
+          ctx.quadraticCurveTo(1.5, -1.7, 7.0, -3.6);
+          ctx.stroke();
+          // Dainty twin turquoise ribbon bow loops behind bell
+          ctx.fillStyle = '#0ea5e9';
+          ctx.strokeStyle = '#0369a1';
+          ctx.lineWidth = 0.95;
+          ctx.beginPath();
+          ctx.moveTo(3.2, -2.2); ctx.lineTo(-1.8, -5.2); ctx.lineTo(-1.2, -0.2); ctx.closePath();
+          ctx.moveTo(3.2, -2.2); ctx.lineTo(8.2, -5.0); ctx.lineTo(7.6, -0.2); ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          // Gleaming 3D Golden Bell with chime slit & specular glint
+          const bellG = ctx.createRadialGradient(2.4, -2.8, 0.4, 3.2, -1.8, 3.4);
+          bellG.addColorStop(0, '#fef9c3');
+          bellG.addColorStop(0.55, '#fbbf24');
+          bellG.addColorStop(1, '#b45309');
+          ctx.fillStyle = bellG;
+          ctx.strokeStyle = '#78350f';
+          ctx.lineWidth = 0.95;
+          ctx.beginPath();
+          ctx.arc(3.2, -1.6, 3.0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = '#451a03';
+          ctx.beginPath(); ctx.arc(3.6, -0.8, 0.75, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#451a03'; ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.moveTo(3.6, -0.8); ctx.lineTo(5.2, -0.2); ctx.stroke();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath(); ctx.arc(2.2, -2.7, 0.85, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        };
+
+        let hx = 12.5, hy = -14.5 - bob * 0.5;
+        if (isPlaying) {
+          // SITTING REGALLY & PATTING TURKISH YARN BALL WITH MASHMASHA!
+          const batWave = Math.sin(time * 5.2);
+          const batCos = Math.cos(time * 5.2);
+
+          // Supporting front paw resting gracefully on the ground
+          drawAngoraLeg(2.5, -13, 2.0, 0, true);
+
+          // Sculpted tucked fluffy hind haunch & dainty hind paw with toes
+          const haunchG = ctx.createRadialGradient(-6, -11, 2, -6, -9, 13);
+          haunchG.addColorStop(0, '#ffffff');
+          haunchG.addColorStop(0.7, '#f8fafc');
+          haunchG.addColorStop(1, '#dbeafe');
+          ctx.fillStyle = haunchG;
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1.25;
+          ctx.beginPath();
+          ctx.ellipse(-7.5, -9.2, 11.8, 8.8, 0.14, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          // Upright pear-shaped silky snow-white torso with subtle fur-lock contour
+          const sitG = ctx.createLinearGradient(-12, -32, 12, -4);
+          sitG.addColorStop(0.0, '#ffffff');
+          sitG.addColorStop(0.62, '#fffdf7');
+          sitG.addColorStop(1.0, '#e2e8f0');
+          ctx.fillStyle = sitG;
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.moveTo(-13.5, -6.5);
+          ctx.bezierCurveTo(-14.5, -22, -4.5, -33.5, 6.2, -30.5);
+          ctx.bezierCurveTo(14.5, -23.5, 12.5, -8.2, 3.5, -2.5);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Tucked hind foot with divided toes
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1.15;
+          ctx.beginPath();
+          ctx.ellipse(-0.5, -2.0, 5.8, 2.7, 0.05, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(1.8, -3.2); ctx.lineTo(2.2, -0.8);
+          ctx.moveTo(3.6, -2.9); ctx.lineTo(3.9, -0.9);
+          ctx.stroke();
+
+          // Lush Angora chest ruff & turquoise bell collar
+          drawAngoraRuffAndCollar(6.8, -25.2, -0.12);
+
+          // Playful raised batting front arm, dainty paw, toe-beans & Rolling Multi-Strand Yarn Ball!
+          const pawX = 20.5 + batCos * 2.8;
+          const pawY = -20.5 + batWave * 5.2;
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1.25;
+          ctx.beginPath();
+          ctx.moveTo(5.2, -21.5);
+          ctx.quadraticCurveTo(13.5, -22.8, pawX - 0.5, pawY - 3.2);
+          ctx.arc(pawX, pawY, 3.5, -Math.PI * 0.5, Math.PI * 0.55);
+          ctx.quadraticCurveTo(12.5, -15.5, 4.2, -16.0);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          // Adorable rose-pink central palm pad + 3 tiny toe beans!
+          ctx.fillStyle = '#fb7185';
+          ctx.beginPath(); ctx.ellipse(pawX + 0.8, pawY + 0.2, 1.5, 1.2, 0.2, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#fda4af';
+          for (const [bx, by] of [[2.2, -1.3], [2.6, 0.1], [2.1, 1.5]]) {
+            ctx.beginPath(); ctx.arc(pawX + bx, pawY + by, 0.68, 0, Math.PI * 2); ctx.fill();
+          }
+
+          // Detailed Hand-Spun Rose & Turquoise Turkish Yarn Ball rolling between Mashmasha and the Angora Cat!
+          const yarnX = 21.5 + Math.sin(time * 5.2) * 5.8;
+          ctx.save();
+          ctx.translate(yarnX, -4.8);
+          ctx.rotate(time * 4.5);
+          const yG = ctx.createRadialGradient(-1.8, -2.0, 0.8, 0, 0, 5.8);
+          yG.addColorStop(0, '#fda4af');
+          yG.addColorStop(0.55, '#f43f5e');
+          yG.addColorStop(1, '#9f1239');
+          ctx.fillStyle = yG;
+          ctx.strokeStyle = '#881337';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.arc(0, 0, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          // Crisscrossing wound wool threads + turquoise accent strand
+          ctx.strokeStyle = '#ffe4e6';
+          ctx.lineWidth = 0.95;
+          ctx.beginPath();
+          ctx.arc(-1.0, 0, 3.8, -0.9, 1.5);
+          ctx.moveTo(-3.8, -2.6); ctx.quadraticCurveTo(0.5, 1.2, 3.8, 2.6);
+          ctx.moveTo(-2.6, 3.6); ctx.quadraticCurveTo(1.2, -0.5, 2.8, -3.6);
+          ctx.stroke();
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 0.95;
+          ctx.beginPath();
+          ctx.moveTo(-4.2, 0.8); ctx.quadraticCurveTo(0, -2.4, 4.2, -0.6);
+          ctx.stroke();
+          ctx.restore();
+          // Unraveled trailing yarn ribbon on ground
+          ctx.strokeStyle = '#f43f5e';
+          ctx.lineWidth = 1.25;
+          ctx.beginPath();
+          ctx.moveTo(yarnX - 4.2, -0.4);
+          ctx.quadraticCurveTo(13, 1.6, 7.5, -0.6);
+          ctx.stroke();
+
+          hx = 8.6;
+          hy = -38.0 + Math.sin(time * 3.4) * 1.3;
+        } else if (standing) {
+          // Far-side articulated legs
+          drawAngoraLeg(-12.5, -15 - bob, strideB, liftB, true);
+          drawAngoraLeg(10.0, -15 - bob, strideA, liftA, true);
+
+          // Graceful lithe Angora body with affectionate back-arch during cheek rubs & soft pearl belly shading!
+          const rubArch = ac.rubbing ? 4.2 : 0;
+          const bodyG = ctx.createLinearGradient(0, -34 - bob - rubArch, 0, -9 - bob);
+          bodyG.addColorStop(0.0, '#ffffff');
+          bodyG.addColorStop(0.62, '#fffdf7');
+          bodyG.addColorStop(1.0, '#dbeafe');
+          ctx.fillStyle = bodyG;
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.moveTo(-20.5, -17.5 - bob);
+          ctx.bezierCurveTo(-16.5, -31.5 - bob - rubArch, -2.0, -32.5 - bob - rubArch, 13.5, -27.5 - bob);
+          ctx.bezierCurveTo(21.5, -23.5 - bob, 20.5, -12.0 - bob, 10.5, -11.2 - bob);
+          // Feathery silky belly fringe lock
+          ctx.lineTo(2.5, -9.6 - bob);
+          ctx.lineTo(0.8, -11.0 - bob);
+          ctx.bezierCurveTo(-6.5, -10.2 - bob, -14.0, -12.2 - bob, -20.5, -17.5 - bob);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Subtle silky shoulder/flank fur-lock lines
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 0.85;
+          ctx.beginPath();
+          ctx.moveTo(-9, -22 - bob - rubArch * 0.5);
+          ctx.quadraticCurveTo(-5, -19 - bob, -1, -21 - bob);
+          ctx.stroke();
+
+          // Near-side articulated legs with divided toes
+          drawAngoraLeg(-10.5, -15 - bob, strideA, liftA, false);
+          drawAngoraLeg(10.5, -15 - bob, strideB, liftB, false);
+
+          // Lush Angora chest ruff & turquoise bell collar
+          drawAngoraRuffAndCollar(14.5, -21.5 - bob, 0.16);
+
+          hx = 17.8;
+          hy = -30.2 - bob;
+        } else {
+          // Cozy Curled Sleeping Snow-White Angora Crescent with Ruffled Fur & Tucked Paws!
+          const sleepG = ctx.createRadialGradient(-2, -15 - bob * 0.5, 3, -2, -10, 23);
+          sleepG.addColorStop(0, '#ffffff');
+          sleepG.addColorStop(0.68, '#fffdf7');
+          sleepG.addColorStop(1, '#dbeafe');
+          ctx.fillStyle = sleepG;
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.ellipse(-2.5, -10.2 - bob * 0.5, 21.8, 11.8, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          // Silky curled back fur lock & dainty tucked paw
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 0.95;
+          ctx.beginPath();
+          ctx.arc(-4, -10 - bob * 0.5, 11, -2.4, -0.7);
+          ctx.stroke();
+          drawAngoraRuffAndCollar(8.5, -10.5 - bob * 0.5, 0.25);
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1.15;
+          ctx.beginPath();
+          ctx.ellipse(10.5, -3.2, 5.6, 2.7, 0.1, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        // 3. Sculpted Expressive Angora Feline Head (Fluffy Ear Furnishings, Symmetrical Cheek Ruffs, Plump Whisker Pads & Multi-Stop Jewel Eyes!)
+        ctx.save();
+        ctx.translate(hx, hy);
+        if (isPlaying) ctx.rotate(-0.07 + Math.sin(time * 3.8) * 0.075);
+        else if (ac.rubbing) ctx.rotate(Math.sin(time * 3.6) * 0.14);
+
+        // A. Tall Graceful Angora Ears with Shaded Rose-Pink Concha & Silky White Ear-Furnishing Wisps!
+        for (const [ex0, ex1, ex2, ey1, dirE] of [[-8.2, -10.2, -1.2, -19.8, -1], [1.2, 6.4, 9.4, -19.2, 1]]) {
+          const earOuterG = ctx.createLinearGradient(ex0, ey1, ex2, -6);
+          earOuterG.addColorStop(0, '#ffffff');
+          earOuterG.addColorStop(1, '#e2e8f0');
+          ctx.fillStyle = earOuterG;
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1.25;
+          ctx.beginPath();
+          ctx.moveTo(ex0, -6.5);
+          ctx.quadraticCurveTo(ex1 - dirE * 1.2, ey1 + 2, ex1, ey1);
+          ctx.quadraticCurveTo(ex1 + dirE * 2.6, ey1 + 2.5, ex2, -7.0);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // 3D shaded rose-petal inner ear concha
+          const earInG = ctx.createLinearGradient(ex1, ey1 + 3, ex1, -7.5);
+          earInG.addColorStop(0, '#fb7185');
+          earInG.addColorStop(0.55, '#fda4af');
+          earInG.addColorStop(1, '#ffe4e6');
+          ctx.fillStyle = earInG;
+          ctx.beginPath();
+          ctx.moveTo(ex0 + 1.8, -7.4);
+          ctx.quadraticCurveTo(ex1, ey1 + 3.2, ex1, ey1 + 3.2);
+          ctx.quadraticCurveTo(ex2 - 1.8, -8.0, ex2 - 1.8, -7.8);
+          ctx.closePath();
+          ctx.fill();
+
+          // Fluffy snow-white Angora ear-furnishing wisps fanning from inner ear!
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.15;
+          ctx.beginPath();
+          ctx.moveTo(ex1 - dirE * 1.5, -8.2);
+          ctx.quadraticCurveTo(ex1, -11.5, ex1 + dirE * 2.2, -12.4);
+          ctx.moveTo(ex1 - dirE * 1.0, -7.5);
+          ctx.quadraticCurveTo(ex1 + dirE * 0.8, -9.6, ex1 + dirE * 2.6, -9.8);
+          ctx.stroke();
+        }
+
+        // B. Anatomically Sculpted Feline Head with Crown Tuft & Symmetrical 3-Lock Fluffy Cheek Ruffs!
+        const hdG = ctx.createRadialGradient(-0.5, -3.5, 2, 0.5, 0, 14.5);
+        hdG.addColorStop(0.0, '#ffffff');
+        hdG.addColorStop(0.7, '#fffdf7');
+        hdG.addColorStop(1.0, '#dbeafe');
+        ctx.fillStyle = hdG;
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        // Forehead crown with dainty fluffy fur tuft
+        ctx.moveTo(-1.8, -10.4);
+        ctx.lineTo(-0.4, -12.1);
+        ctx.lineTo(1.0, -10.5);
+        ctx.lineTo(2.4, -11.7);
+        ctx.lineTo(3.4, -10.2);
+        // Right temple & 2-tuft right cheek ruff
+        ctx.bezierCurveTo(8.8, -9.6, 11.8, -5.2, 11.8, -0.8);
+        ctx.lineTo(13.8, 0.5);
+        ctx.lineTo(11.6, 1.9);
+        ctx.lineTo(13.2, 3.6);
+        ctx.lineTo(10.8, 4.8);
+        // Rounded dainty chin
+        ctx.bezierCurveTo(8.8, 8.8, 5.2, 10.0, 1.6, 10.0);
+        ctx.bezierCurveTo(-3.6, 10.0, -8.6, 8.6, -11.0, 4.8);
+        // Fluffy 3-tuft left Angora cheek ruff!
+        ctx.lineTo(-13.8, 3.8);
+        ctx.lineTo(-11.8, 2.0);
+        ctx.lineTo(-14.8, 0.4);
+        ctx.lineTo(-12.2, -1.4);
+        ctx.bezierCurveTo(-11.8, -6.4, -7.5, -10.2, -1.8, -10.4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Soft luminous snow-white muzzle whisker-pads (خدود الشوارب اللطيفة)
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.ellipse(-0.2, 4.1, 3.6, 2.5, -0.08, 0, Math.PI * 2);
+        ctx.ellipse(4.4, 4.1, 3.4, 2.4, 0.08, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Warm rose-petal cheek blush on both cheeks
+        ctx.fillStyle = (ac.loving || isPlaying) ? 'rgba(251, 113, 133, 0.40)' : 'rgba(251, 113, 133, 0.22)';
+        ctx.beginPath();
+        ctx.ellipse(-5.8, 3.2, 3.1, 1.7, 0, 0, Math.PI * 2);
+        ctx.ellipse(8.2, 3.2, 2.8, 1.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // C. Famous Turkish Angora Heterochromatic Jewel Eyes (Bosphorus Sapphire Left + Anatolian Honey-Amber Right!)
+        // Show sparkling open jewel eyes both while standing AND while playing (with a natural slow affectionate blink!), and blissful lashed crescents when cheek-rubbing!
+        const playSlowBlink = isPlaying && Math.sin(time * 2.4 + (ac.phase || 0)) > 0.86;
+        if (ac.rubbing || playSlowBlink) {
+          // Blissful smiling crescent eyes with delicate curved outer eyelashes!
+          ctx.strokeStyle = '#1e293b';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(-5.6, -0.5); ctx.quadraticCurveTo(-2.4, -4.5, 0.5, -0.6);
+          ctx.moveTo(-5.4, -0.7); ctx.lineTo(-6.9, -1.9);
+          ctx.moveTo(3.2, -0.6); ctx.quadraticCurveTo(5.8, -4.3, 8.4, -0.5);
+          ctx.moveTo(8.2, -0.7); ctx.lineTo(9.6, -1.9);
+          ctx.stroke();
+        } else if (standing || isPlaying) {
+          const pupilRx = isPlaying ? 1.55 : 1.25; // Playfully dilated pupils when batting yarn!
+          // 1) Left Eye — Deep Multi-Stop Bosphorus Sapphire Blue
+          ctx.fillStyle = '#f8fafc';
+          ctx.beginPath(); ctx.ellipse(-2.3, -1.6, 3.55, 3.55, -0.06, 0, Math.PI * 2); ctx.fill();
+          const eyeLG = ctx.createRadialGradient(-2.6, -0.4, 0.4, -2.3, -1.6, 3.5);
+          eyeLG.addColorStop(0, '#bae6fd');
+          eyeLG.addColorStop(0.45, '#0ea5e9');
+          eyeLG.addColorStop(0.82, '#0369a1');
+          eyeLG.addColorStop(1, '#082f49');
+          ctx.fillStyle = eyeLG;
+          ctx.strokeStyle = '#1e293b';
+          ctx.lineWidth = 0.95;
+          ctx.beginPath(); ctx.ellipse(-2.3, -1.6, 3.35, 3.45, -0.05, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          // Lower sapphire crescent rim glow
+          ctx.strokeStyle = 'rgba(186, 230, 253, 0.75)';
+          ctx.lineWidth = 0.85;
+          ctx.beginPath(); ctx.arc(-2.3, -1.5, 2.4, 0.35, Math.PI - 0.35); ctx.stroke();
+          // Vertical-almond pupil & dual starlight catchlights
+          ctx.fillStyle = '#090d16';
+          ctx.beginPath(); ctx.ellipse(-1.9, -1.6, pupilRx, 2.25, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(-3.2, -2.9, 1.22, 0, Math.PI * 2);
+          ctx.arc(-1.0, -0.4, 0.55, 0, Math.PI * 2);
+          ctx.fill();
+          // Defined upper lash arch + twin dainty outer eyelashes
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 1.35;
+          ctx.beginPath();
+          ctx.moveTo(-5.8, -2.6);
+          ctx.quadraticCurveTo(-2.3, -5.6, 0.9, -2.8);
+          ctx.moveTo(-5.5, -2.5); ctx.lineTo(-6.9, -3.7);
+          ctx.moveTo(-4.6, -3.5); ctx.lineTo(-5.7, -4.8);
+          ctx.stroke();
+
+          // 2) Right Eye — Warm Multi-Stop Anatolian Honey-Amber Gold
+          ctx.fillStyle = '#f8fafc';
+          ctx.beginPath(); ctx.ellipse(5.7, -1.6, 3.15, 3.35, 0.05, 0, Math.PI * 2); ctx.fill();
+          const eyeRG = ctx.createRadialGradient(5.5, -0.4, 0.4, 5.7, -1.6, 3.3);
+          eyeRG.addColorStop(0, '#fef9c3');
+          eyeRG.addColorStop(0.45, '#fbbf24');
+          eyeRG.addColorStop(0.82, '#d97706');
+          eyeRG.addColorStop(1, '#78350f');
+          ctx.fillStyle = eyeRG;
+          ctx.strokeStyle = '#1e293b';
+          ctx.lineWidth = 0.95;
+          ctx.beginPath(); ctx.ellipse(5.7, -1.6, 3.0, 3.25, 0.05, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          // Lower honey crescent rim glow
+          ctx.strokeStyle = 'rgba(254, 249, 195, 0.78)';
+          ctx.lineWidth = 0.85;
+          ctx.beginPath(); ctx.arc(5.7, -1.5, 2.15, 0.35, Math.PI - 0.35); ctx.stroke();
+          // Vertical-almond pupil & dual starlight catchlights
+          ctx.fillStyle = '#090d16';
+          ctx.beginPath(); ctx.ellipse(6.0, -1.6, pupilRx * 0.9, 2.15, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(4.8, -2.85, 1.12, 0, Math.PI * 2);
+          ctx.arc(6.7, -0.45, 0.52, 0, Math.PI * 2);
+          ctx.fill();
+          // Defined upper lash arch + dainty outer eyelash
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.moveTo(2.8, -2.8);
+          ctx.quadraticCurveTo(5.7, -5.5, 8.7, -2.6);
+          ctx.moveTo(8.4, -2.6); ctx.lineTo(9.7, -3.8);
+          ctx.stroke();
+        } else {
+          // Peaceful sleeping eyelids with delicate resting eyelashes
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1.55;
+          ctx.beginPath();
+          ctx.moveTo(-5.0, -0.9); ctx.quadraticCurveTo(-2.2, 1.7, 0.4, -0.9);
+          ctx.moveTo(-4.8, -0.7); ctx.lineTo(-6.0, 0.2);
+          ctx.moveTo(3.2, -0.9); ctx.quadraticCurveTo(5.7, 1.7, 8.2, -0.9);
+          ctx.moveTo(8.0, -0.7); ctx.lineTo(9.1, 0.2);
+          ctx.stroke();
+        }
+
+        // D. Contoured 3D Rose-Pink Heart Nose, Sweet :3 Mouth (with tiny pink tongue peek when playing!) & Curved Silky Whiskers
+        const noseG = ctx.createLinearGradient(2.1, 1.0, 2.1, 3.6);
+        noseG.addColorStop(0, '#fda4af');
+        noseG.addColorStop(1, '#e11d48');
+        ctx.fillStyle = noseG;
+        ctx.beginPath();
+        ctx.moveTo(2.1, 3.6);
+        ctx.quadraticCurveTo(0.2, 2.3, 0.4, 1.6);
+        ctx.quadraticCurveTo(2.1, 0.9, 3.8, 1.6);
+        ctx.quadraticCurveTo(4.0, 2.3, 2.1, 3.6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+        ctx.beginPath(); ctx.ellipse(1.7, 1.7, 0.7, 0.35, -0.2, 0, Math.PI * 2); ctx.fill();
+
+        // Tiny joyful rosy tongue peek when playing or rubbing!
+        if (isPlaying || ac.rubbing) {
+          ctx.fillStyle = '#fb7185';
+          ctx.beginPath();
+          ctx.arc(2.1, 5.1, 1.35, 0, Math.PI);
+          ctx.fill();
+        }
+
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.arc(0.6, 3.9, 1.55, 0.08, Math.PI * 0.88);
+        ctx.moveTo(2.1, 3.6); ctx.lineTo(2.1, 4.2);
+        ctx.arc(3.6, 3.9, 1.55, 0.12, Math.PI * 0.92);
+        ctx.stroke();
+
+        // Gracefully arched silvery-pearl whiskers + dainty brow whiskers
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 0.82;
+        ctx.beginPath();
+        // Right cheek arched whiskers
+        ctx.moveTo(6.8, 2.4); ctx.quadraticCurveTo(11.2, 1.3, 15.6, 1.8);
+        ctx.moveTo(6.9, 3.5); ctx.quadraticCurveTo(11.5, 3.3, 16.0, 4.2);
+        ctx.moveTo(6.5, 4.6); ctx.quadraticCurveTo(10.8, 5.3, 14.6, 6.8);
+        // Left cheek arched whiskers
+        ctx.moveTo(-4.2, 2.4); ctx.quadraticCurveTo(-8.8, 1.3, -13.4, 1.8);
+        ctx.moveTo(-4.3, 3.5); ctx.quadraticCurveTo(-9.0, 3.3, -13.8, 4.2);
+        ctx.moveTo(-3.9, 4.6); ctx.quadraticCurveTo(-8.2, 5.3, -12.2, 6.8);
+        ctx.stroke();
+
+        ctx.restore();
+        ctx.restore();
+
+        // Gentle slow-floating pastel love hearts when cuddling/playing!
+        if (isPlaying || ac.loving) {
+          const heartCount = isPlaying ? 3 : 2;
+          for (let hIdx = 0; hIdx < heartCount; hIdx++) {
+            const hp = (time * 0.65 + hIdx * 0.44 + (ac.phase || 0)) % 1.4;
+            if (hp < 1.2) {
+              const hu = hp / 1.2;
+              ctx.save();
+              ctx.globalAlpha = (1 - hu) * 0.92;
+              ctx.font = `${Math.round(12 + hu * 5)}px sans-serif`;
+              ctx.textAlign = 'center';
+              const sym = hIdx === 2 ? '🐾' : (hIdx === 0 ? '💕' : '💖');
+              ctx.fillText(sym, x + ac.w * 0.5 + Math.sin(time * 2.4 + hIdx * 2.1) * 14, y - 10 - hu * 34);
+              ctx.restore();
+            }
+          }
+        } else if (!standing) {
+          const zp = (time * 0.65 + (ac.phase || 0)) % 1.6;
+          if (zp < 1.3) {
+            const zu = zp / 1.3;
+            ctx.save();
+            ctx.fillStyle = `rgba(255, 255, 255, ${(0.88 * (1 - zu)).toFixed(2)})`;
+            ctx.font = `bold ${Math.round(11 + zu * 5)}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText('Z', x + ac.w * 0.5 + Math.sin(time * 2.5) * 5, y - 4 - zu * 22);
+            ctx.restore();
+          }
+        }
+      }
+    }
+
+    // 5. Museum-Grade Topkapı Palace Ceremonial Janissary Guard (حارس قصر توبكابي العثماني — Ivory Börk Plume Crest, Crimson-Gold Brocade Kaftan & Gleaming Brass Crescent Halberd!)
+    if (level.istanbul_janissaries) {
+      for (const jn of level.istanbul_janissaries) {
+        const sx = jn.x - camX, sy = jn.y - camY;
+        if (sx + jn.w < -110 || sx > cullW + 110) continue;
+        const gait = (jn.walkDist || 0) * 0.16;
+        const stride = Math.sin(gait);
+        const bob = Math.abs(stride) * 2.2;
+        ctx.save();
+        ctx.translate(sx + jn.w * 0.5, sy + jn.h);
+        ctx.scale(jn.facing || 1, 1);
+
+        // Ground shadow
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.38)';
+        ctx.beginPath(); ctx.ellipse(0, -1, 22, 5.0, 0, 0, Math.PI * 2); ctx.fill();
+
+        // 1. Articulated Cobalt-Blue Şalvar Trousers & Red Leather Ottoman Boots
+        for (const [ang, col] of [[-stride * 0.42, '#1e3a8a'], [stride * 0.42, '#1d4ed8']]) {
+          ctx.save();
+          ctx.translate(0, -25 - bob);
+          ctx.rotate(ang);
+          ctx.fillStyle = col; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(-6.5, 0); ctx.quadraticCurveTo(-10, 11, -4.5, 19);
+          ctx.lineTo(5.5, 19); ctx.quadraticCurveTo(10, 11, 6.5, 0);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          // Crimson leather Ottoman Yemeni boot with upturned toe
+          ctx.fillStyle = '#be123c'; ctx.strokeStyle = '#4c0519'; ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(-5, 18); ctx.lineTo(11, 19); ctx.quadraticCurveTo(14, 15, 9, 15); ctx.lineTo(-4, 15);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.restore();
+        }
+
+        // 2. Royal Crimson-and-Gold Brocade Janissary Kaftan + Jeweled Belt & Curved Scimitar Hilt
+        const kafG = ctx.createLinearGradient(-15, -50 - bob, 15, -18 - bob);
+        kafG.addColorStop(0.0, '#e11d48'); kafG.addColorStop(0.55, '#be123c'); kafG.addColorStop(1.0, '#881337');
+        ctx.fillStyle = kafG; ctx.strokeStyle = '#3b0712'; ctx.lineWidth = 1.7;
+        ctx.beginPath();
+        ctx.moveTo(-14, -49 - bob);
+        ctx.lineTo(14, -49 - bob);
+        ctx.lineTo(17, -19 - bob);
+        ctx.lineTo(-17, -19 - bob);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Gold brocade lapels & trim
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(-4, -49 - bob); ctx.lineTo(-4, -19 - bob);
+        ctx.moveTo(4, -49 - bob); ctx.lineTo(4, -19 - bob);
+        ctx.stroke();
+        // Wide golden ceremonial belt & emerald medallion buckle
+        ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.3;
+        ctx.fillRect(-15, -31 - bob, 30, 6); ctx.strokeRect(-15, -31 - bob, 30, 6);
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath(); ctx.arc(2, -28 - bob, 2.8, 0, Math.PI * 2); ctx.fill();
+        // Curved Ottoman Kilij scabbard pommel at hip
+        ctx.strokeStyle = '#fde047'; ctx.lineWidth = 2.4;
+        ctx.beginPath(); ctx.moveTo(-6, -29 - bob); ctx.quadraticCurveTo(-20, -22 - bob, -24, -14 - bob); ctx.stroke();
+
+        // 3. Sculpted Noble Face, Expressive Brows/Eyes & Magnificent Curled Mustache!
+        ctx.fillStyle = '#d99b72';
+        ctx.fillRect(-3.5, -53 - bob, 7, 5);
+        const fSkinG = ctx.createRadialGradient(-1, -59 - bob, 2, 0, -57 - bob, 11);
+        fSkinG.addColorStop(0, '#fde2cc'); fSkinG.addColorStop(0.65, '#f1be96'); fSkinG.addColorStop(1, '#c98a63');
+        ctx.fillStyle = fSkinG; ctx.strokeStyle = '#3b1d0c'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(0, -57 - bob, 9.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.ellipse(4.2, -58.5 - bob, 2.5, 1.8, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = jn.alert ? '#dc2626' : '#1c1917';
+        ctx.beginPath(); ctx.arc(4.8, -58.5 - bob, 1.3, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.moveTo(1.2, -61.2 - bob); ctx.lineTo(7.5, -60.2 - bob); ctx.stroke();
+        // Grand curled Janissary handlebar mustache (Pala Bıyık)!
+        ctx.fillStyle = '#1c1917';
+        ctx.beginPath();
+        ctx.moveTo(0, -54.0 - bob);
+        ctx.quadraticCurveTo(6.5, -55.8 - bob, 13.5, -52.0 - bob);
+        ctx.quadraticCurveTo(8.5, -50.2 - bob, 0, -52.2 - bob);
+        ctx.closePath(); ctx.fill();
+
+        // 4. Iconic Tall Ivory-and-Gold Janissary Börk Headdress + Swaying Ostrich Plume Crest!
+        // Trailing ivory felt drape behind neck
+        ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(-9.5, -64 - bob);
+        ctx.quadraticCurveTo(-18, -56 - bob, -15, -42 - bob);
+        ctx.lineTo(-7, -45 - bob);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Tall Börk crown + gilded headband & Kaşıklık plume holder
+        ctx.fillStyle = '#fffbeb'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(-9.5, -77 - bob, 19, 14, [5, 5, 1, 1]); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(-9.8, -67 - bob, 19.6, 4.5);
+        ctx.fillRect(3.5, -75 - bob, 4.2, 9);
+        // Tall swaying white-and-turquoise Sorguç plume
+        const plumeSway = Math.sin(time * 5.5 + sx * 0.03) * 2.5;
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(5.5, -75 - bob);
+        ctx.quadraticCurveTo(13 + plumeSway, -88 - bob, 4 + plumeSway, -93 - bob);
+        ctx.quadraticCurveTo(1, -83 - bob, 5.5, -75 - bob);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // 5. Shaded Forearm & Ceremonial Gilded Ottoman Crescent Halberd!
+        ctx.save();
+        const pikeTilt = jn.alert ? 0.52 : 0.14 + Math.sin(gait) * 0.06;
+        ctx.translate(8, -38 - bob);
+        ctx.rotate(pikeTilt);
+        // Crimson sleeve & gripping hand
+        ctx.strokeStyle = '#be123c'; ctx.lineWidth = 6.2; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-4, 0); ctx.lineTo(8, 2); ctx.stroke();
+        ctx.fillStyle = '#f1be96';
+        ctx.beginPath(); ctx.arc(9, 2, 3.2, 0, Math.PI * 2); ctx.fill();
+        // Hardwood & brass polearm shaft
+        ctx.strokeStyle = '#451a03'; ctx.lineWidth = 3.8;
+        ctx.beginPath(); ctx.moveTo(8, 24); ctx.lineTo(8, -42); ctx.stroke();
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.moveTo(8, -24); ctx.lineTo(8, -42); ctx.stroke();
+        // Gleaming steel & gold Ottoman crescent axe-blade + spear tip + crimson tassel
+        ctx.fillStyle = '#e2e8f0'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(8, -56); ctx.lineTo(4.5, -41); ctx.lineTo(11.5, -41); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f';
+        ctx.beginPath();
+        ctx.moveTo(9, -40);
+        ctx.quadraticCurveTo(23, -38, 20, -25);
+        ctx.quadraticCurveTo(15, -31, 9, -29);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 2.0;
+        ctx.beginPath(); ctx.moveTo(8, -26); ctx.lineTo(3, -19); ctx.stroke();
+        ctx.restore();
+
+        ctx.restore();
+      }
+    }
+  }
+
+  function drawSwissEnemies(ctx, level, camX, camY, time, cullW) {
+    const viewW = cullW || 1100;
+
+    // 1. ALPINE IBEX (وعل جبال الألب السويسرية — Museum-Grade Zoological Realism: Muscular Withers, Articulated Cloven-Hoof Legs, Scimitar Knotted Horns & Horizontal-Pupil Eye!)
+    if (level.swiss_ibex) {
+      for (const ib of level.swiss_ibex) {
+        const sx = ib.x - camX, sy = ib.y - camY;
+        if (sx + ib.w < -110 || sx > viewW + 110) continue;
+        const cx = sx + ib.w * 0.5, fy = sy + ib.h;
+        const gait = (ib.walkDist || 0) * 0.145;
+        const warning = (ib.chargeWarn || 0) > 0;
+        const charging = !!ib.charging;
+        const bob = charging ? Math.abs(Math.sin(gait * 1.35)) * 3.2 : Math.abs(Math.sin(gait)) * 1.5;
+
+        ctx.save();
+        ctx.translate(cx, fy);
+        ctx.scale(ib.facing || 1, 1);
+
+        // Grounded soft contact shadow
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
+        ctx.beginPath(); ctx.ellipse(0, 0, 30, 5.8, 0, 0, Math.PI * 2); ctx.fill();
+
+        // 1. ARTICULATED 4-LEG IBEX ANATOMY (Upper thigh/shoulder -> knee/hock -> slender dark cannon bone -> dewclaw -> split cloven black alpine hoof!)
+        const drawIbexLeg = (hipX, hipY, phaseOff, isFront, isFar) => {
+          ctx.save();
+          ctx.translate(hipX, hipY);
+          const scrape = (warning && isFront && !isFar) ? Math.sin(time * 24) * 0.55 : 0;
+          const amp = charging ? 0.72 : 0.44;
+          const ang = (warning ? scrape : Math.sin(gait + phaseOff) * amp);
+          const upperCol = isFar ? '#57534e' : '#857a6e';
+          const lowerCol = isFar ? '#292524' : '#3f3832';
+          const kneeX = Math.sin(ang) * 7.5 + (isFront ? 1.0 : -3.5);
+          const kneeY = 10.5;
+          const fetlockX = kneeX + Math.sin(ang * 1.15) * 6.5 + (isFront ? 0.5 : 2.0);
+          const fetlockY = 20.5;
+
+          // Muscular upper thigh / shoulder
+          ctx.strokeStyle = upperCol;
+          ctx.lineWidth = isFront ? 6.4 : 7.6;
+          ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(kneeX, kneeY); ctx.stroke();
+          // Knee/hock joint bulge + slender dark lower cannon bone
+          ctx.strokeStyle = lowerCol;
+          ctx.lineWidth = 4.2;
+          ctx.beginPath(); ctx.moveTo(kneeX, kneeY); ctx.lineTo(fetlockX, fetlockY); ctx.stroke();
+          // Authentic Cloven (Two-Toed) Alpine Black Hoof + Dewclaw!
+          ctx.fillStyle = '#0c0a09';
+          ctx.beginPath();
+          ctx.moveTo(fetlockX - 2.2, fetlockY - 1);
+          ctx.lineTo(fetlockX + 4.8, fetlockY + 2.4);
+          ctx.lineTo(fetlockX + 1.2, fetlockY + 2.8);
+          ctx.lineTo(fetlockX - 3.2, fetlockY + 2.0);
+          ctx.closePath();
+          ctx.fill();
+          // Subtle pale hoof-wall highlight
+          ctx.strokeStyle = 'rgba(214,211,209,0.45)'; ctx.lineWidth = 0.9;
+          ctx.beginPath(); ctx.moveTo(fetlockX - 1, fetlockY); ctx.lineTo(fetlockX + 3.2, fetlockY + 2.0); ctx.stroke();
+          ctx.restore();
+        };
+
+        // Far-side legs (behind torso)
+        drawIbexLeg(-17, -23 - bob * 0.5, Math.PI, false, true);
+        drawIbexLeg(12, -23 - bob * 0.5, 0, true, true);
+
+        // 2. SCULPTED MUSCULAR ALPINE IBEX TORSO (High arched withers, deep chest brisket, tucked flank, authentic dark dorsal & belly stripes!)
+        const coatG = ctx.createLinearGradient(0, -47 - bob, 0, -14 - bob);
+        coatG.addColorStop(0.0, '#c7bdb0');   // sunlit alpine taupe-grey upper back
+        coatG.addColorStop(0.32, '#968b7d');  // warm granite-brown flank
+        coatG.addColorStop(0.70, '#635a50');  // deep shaded ribcage
+        coatG.addColorStop(1.0, '#292524');   // dark chocolate ventral brisket
+        ctx.fillStyle = coatG;
+        ctx.strokeStyle = '#1c1917';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(-24, -27 - bob);
+        ctx.bezierCurveTo(-24, -40 - bob, -10, -43 - bob, 2, -43 - bob);  // muscular croup to spine
+        ctx.bezierCurveTo(10, -45 - bob, 19, -43 - bob, 23, -34 - bob);   // high arched withers/shoulders
+        ctx.bezierCurveTo(25, -24 - bob, 18, -16 - bob, 6, -16 - bob);    // deep chest brisket
+        ctx.bezierCurveTo(-5, -15 - bob, -15, -18 - bob, -22, -20 - bob); // tucked athletic flank
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Authentic dark dorsal spine stripe & warm pale flank saddle
+        ctx.strokeStyle = '#292524'; ctx.lineWidth = 2.8;
+        ctx.beginPath(); ctx.moveTo(-20, -39 - bob); ctx.quadraticCurveTo(0, -43.5 - bob, 18, -41 - bob); ctx.stroke();
+        ctx.fillStyle = 'rgba(245, 240, 230, 0.26)';
+        ctx.beginPath(); ctx.ellipse(-2, -31 - bob, 15, 6.2, -0.06, 0, Math.PI * 2); ctx.fill();
+        // Subtle muscular shoulder & haunch contour shading
+        ctx.strokeStyle = 'rgba(41, 37, 36, 0.35)'; ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.arc(13, -29 - bob, 8.5, 0.5, 2.3);
+        ctx.stroke();
+
+        // Short upright dark-brown tufted ibex tail
+        ctx.fillStyle = '#1c1917';
+        ctx.beginPath();
+        ctx.moveTo(-23, -32 - bob);
+        ctx.quadraticCurveTo(-29, -36 - bob, -28, -28 - bob);
+        ctx.quadraticCurveTo(-25, -26 - bob, -23, -29 - bob);
+        ctx.closePath();
+        ctx.fill();
+
+        // Near-side legs (in front of torso)
+        drawIbexLeg(-13, -23 - bob * 0.5, 0, false, false);
+        drawIbexLeg(16, -23 - bob * 0.5, Math.PI, true, false);
+
+        // 3. THICK MUSCULAR NECK, SHAGGY WINTER MANE & SCULPTED HEAD (Lowers smoothly into ramming stance on chargeWarn/charging!)
+        const headDrop = (warning || charging) ? 9.5 : 0;
+        const headTilt = (warning || charging) ? 0.44 : 0;
+        ctx.save();
+        ctx.translate(18, -36 - bob + headDrop * 0.65);
+        ctx.rotate(headTilt);
+
+        // Thick shaggy ibex neck & chest mane
+        const neckG = ctx.createLinearGradient(-6, -12, 8, 12);
+        neckG.addColorStop(0, '#857a6e'); neckG.addColorStop(0.55, '#57534e'); neckG.addColorStop(1, '#292524');
+        ctx.fillStyle = neckG; ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-8, 6);
+        ctx.quadraticCurveTo(-4, -12, 4, -14);
+        ctx.lineTo(12, -8);
+        ctx.quadraticCurveTo(9, 6, 2, 12);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // ICONIC SWEEPING SCIMITAR IBEX HORNS (Back horn slightly darker, Front horn richly sculpted with 10 raised growth knots!)
+        const drawScimitarHorn = (ox, oy, scale, isBack) => {
+          ctx.save();
+          ctx.translate(ox, oy);
+          ctx.scale(scale, scale);
+          // Tapered horn silhouette (thick ribbed base -> dramatic high backward arc -> sharp tip)
+          const hG = ctx.createLinearGradient(0, 0, -34, -22);
+          if (isBack) {
+            hG.addColorStop(0, '#3f3832'); hG.addColorStop(0.6, '#292524'); hG.addColorStop(1, '#1c1917');
+          } else {
+            hG.addColorStop(0, '#78716c'); hG.addColorStop(0.45, '#57534e'); hG.addColorStop(0.85, '#292524'); hG.addColorStop(1, '#1c1917');
+          }
+          ctx.fillStyle = hG; ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.25;
+          ctx.beginPath();
+          ctx.moveTo(4, -2);
+          ctx.bezierCurveTo(10, -26, -10, -40, -33, -24); // outer sweeping curve
+          ctx.quadraticCurveTo(-39, -19, -37, -14);       // curved pointed tip
+          ctx.bezierCurveTo(-18, -29, -1, -21, -2.5, -1); // inner curve back to base
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Prominent raised transverse Alpine Ibex horn knots/ridges along the front curve!
+          if (!isBack) {
+            ctx.strokeStyle = '#d6d3d1';
+            ctx.lineWidth = 1.55;
+            ctx.lineCap = 'round';
+            const knots = [
+              [5, -8, 1, -6], [5, -14, 0, -12], [2, -20, -3, -17],
+              [-3, -25, -7, -21], [-9, -28, -12, -23], [-16, -29, -18, -24],
+              [-23, -28, -24, -23], [-29, -25, -29, -21],
+            ];
+            for (const [x1, y1, x2, y2] of knots) {
+              ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+            }
+          }
+          ctx.restore();
+        };
+        drawScimitarHorn(3, -12, 0.94, true);
+
+        // Pointed alert Alpine goat ear behind horn base
+        ctx.fillStyle = '#57534e'; ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(-1, -10); ctx.quadraticCurveTo(-11, -14, -12, -6); ctx.quadraticCurveTo(-6, -4, 0, -6);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#a89f91';
+        ctx.beginPath(); ctx.ellipse(-6.5, -8.5, 3.2, 1.4, -0.2, 0, Math.PI * 2); ctx.fill();
+
+        // Sculpted angular Alpine Ibex head & Roman-nosed muzzle
+        const headG = ctx.createLinearGradient(0, -14, 18, 4);
+        headG.addColorStop(0, '#968b7d'); headG.addColorStop(0.6, '#78716c'); headG.addColorStop(1, '#44403c');
+        ctx.fillStyle = headG; ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 1.45;
+        ctx.beginPath();
+        ctx.moveTo(-2, -12);
+        ctx.quadraticCurveTo(6, -15, 13, -10); // strong brow ridge
+        ctx.lineTo(22, -4);                     // Roman nose bridge
+        ctx.quadraticCurveTo(24, 0, 20, 2.5);   // muzzle tip
+        ctx.lineTo(9, 2.5);                     // jawline
+        ctx.quadraticCurveTo(1, 2, -2, -3);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // Pale muzzle highlight, dark nostril slit & mouth line
+        ctx.fillStyle = '#d6cfc2';
+        ctx.beginPath(); ctx.ellipse(19.5, -1.5, 3.5, 2.2, 0.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0c0a09';
+        ctx.beginPath(); ctx.ellipse(20.6, -2.2, 1.5, 0.9, -0.3, 0, Math.PI * 2); ctx.fill();
+
+        // Shaggy dark-chocolate Alpine Ibex Goatee Beard with layered hair tufts!
+        ctx.fillStyle = '#292524'; ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(14, 2);
+        ctx.lineTo(12, 12.5);
+        ctx.lineTo(9.5, 8.5);
+        ctx.lineTo(7.5, 11.5);
+        ctx.lineTo(6.5, 2.2);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+
+        // Front sweeping knotted scimitar horn (drawn in front of ear/forehead!)
+        drawScimitarHorn(5.5, -11.5, 1.0, false);
+
+        // Realistic Alpine Ibex Eye (Pale glowing amber iris + authentic HORIZONTAL rectangular goat pupil + catchlight!)
+        ctx.fillStyle = '#1c1917';
+        ctx.beginPath(); ctx.ellipse(10.5, -8.5, 3.3, 2.6, 0.08, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = warning ? '#fbbf24' : '#fde68a';
+        ctx.beginPath(); ctx.ellipse(10.6, -8.5, 2.6, 2.0, 0.08, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0c0a09';
+        ctx.fillRect(8.9, -9.1, 3.4, 1.25);
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(9.8, -9.4, 0.7, 0, Math.PI * 2); ctx.fill();
+
+        // Warm misty mountain breath puffing from nostrils during chargeWarn!
+        if (warning) {
+          const bp = (time * 3.8) % 1;
+          ctx.fillStyle = `rgba(241, 245, 249, ${(0.75 * (1 - bp)).toFixed(2)})`;
+          ctx.beginPath(); ctx.arc(23 + bp * 14, -2 + bp * 5, 2.6 + bp * 4.2, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+
+        // Charge telegraph exclamation + hoof-scrape / charge pebble dust cloud
+        if (warning || charging) {
+          if (warning) {
+            ctx.fillStyle = '#f59e0b'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('!', 18, -64 - bob);
+          }
+          for (let d = 0; d < 3; d++) {
+            const dp = ((time * (charging ? 6 : 4) + d * 0.33) % 1);
+            ctx.fillStyle = `rgba(214, 211, 209, ${(0.78 * (1 - dp)).toFixed(2)})`;
+            ctx.beginPath(); ctx.arc(10 - dp * 22, -3 - dp * 9, 2.8 + dp * 2.6, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+        ctx.restore();
+      }
+    }
+
+    // 2. ALPINE MARMOT (مرموط جبال الألب السويسرية — Museum-Grade Zoological Realism: Mossy Granite & Edelweiss Burrow Mound, Articulated Clawed Limbs, Grizzled Golden-Walnut Fur, Buck-Teeth Incisors & Whistle Rings!)
+    if (level.swiss_marmots) {
+      for (const mm of level.swiss_marmots) {
+        const homeSx = (mm.homeX !== undefined ? mm.homeX : mm.x) - camX;
+        const sx = mm.x - camX, sy = mm.y - camY;
+        if (sx + mm.w < -120 && homeSx < -120) continue;
+        if (sx > viewW + 120 && homeSx > viewW + 120) continue;
+        const fy = sy + mm.h;
+
+        // 1. Detailed Alpine Marmot Burrow Mound (Granite cobbles, emerald moss cushions, tiny fern & Edelweiss!)
+        ctx.save();
+        const bCx = homeSx + mm.w * 0.5;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.24)';
+        ctx.beginPath(); ctx.ellipse(bCx, fy + 1, 33, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+        // Granite sentinel rocks beside burrow
+        ctx.fillStyle = '#94a3b8'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.ellipse(bCx - 21, fy - 5, 11, 6.5, -0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#64748b';
+        ctx.beginPath(); ctx.ellipse(bCx + 22, fy - 4, 8.5, 5.0, 0.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Earthy burrow dome + mossy turf rim + dark tunnel entrance
+        const mdG = ctx.createLinearGradient(bCx, fy - 13, bCx, fy);
+        mdG.addColorStop(0, '#92400e'); mdG.addColorStop(1, '#451a03');
+        ctx.fillStyle = mdG; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.ellipse(bCx, fy, 28, 11, 0, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#16a34a';
+        ctx.beginPath(); ctx.ellipse(bCx - 8, fy - 9.5, 10, 2.8, -0.1, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(bCx + 10, fy - 9, 8, 2.5, 0.12, 0, Math.PI * 2); ctx.fill();
+        // Tiny white Edelweiss blooming on burrow stone
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(bCx - 23, fy - 11.5, 2.6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#eab308';
+        ctx.beginPath(); ctx.arc(bCx - 23, fy - 11.5, 1.1, 0, Math.PI * 2); ctx.fill();
+        // Deep shaded burrow entrance
+        ctx.fillStyle = '#0c0a09';
+        ctx.beginPath(); ctx.ellipse(bCx, fy - 0.5, 14, 6.0, 0, Math.PI, 0); ctx.fill();
+        ctx.restore();
+
+        // 2. Sculpted Anatomical Alpine Marmot (Marmota marmota)
+        const cx = sx + mm.w * 0.5;
+        const gait = (mm.walkDist || 0) * 0.17;
+        const standUp = !!mm.whistling;
+        const dashing = (mm.dashTimer || 0) > 0;
+        const hop = standUp ? 0 : Math.abs(Math.sin(gait)) * (dashing ? 3.4 : 2.0);
+        const swing = standUp ? 0 : Math.sin(gait) * (dashing ? 6.5 : 4.5);
+
+        ctx.save();
+        ctx.translate(cx, fy);
+        ctx.scale(mm.facing || 1, 1);
+
+        // Ground contact shadow
+        ctx.fillStyle = 'rgba(15,23,42,0.24)';
+        ctx.beginPath(); ctx.ellipse(0, 0, standUp ? 16 : 21, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Bushy, flattened chestnut-to-black-tipped Alpine Marmot tail!
+        const tailFlick = Math.sin(time * (standUp ? 12 : 6) + (mm.phase || 0)) * 0.14;
+        ctx.save();
+        ctx.translate(standUp ? -10 : -16, standUp ? -6 : (-11 - hop));
+        ctx.rotate((standUp ? -0.15 : -0.28) + tailFlick);
+        const tlG = ctx.createLinearGradient(0, 0, -19, -4);
+        tlG.addColorStop(0, '#92400e'); tlG.addColorStop(0.55, '#5c2d0c'); tlG.addColorStop(1, '#1c1917');
+        ctx.fillStyle = tlG; ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(2, -2.5);
+        ctx.bezierCurveTo(-7, -7, -16, -6, -19, -1);
+        ctx.bezierCurveTo(-16, 4.5, -7, 5, 2, 2.5);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.restore();
+
+        if (standUp) {
+          // UPRIGHT SENTINEL POSE (Standing tall on sturdy hindfeet, plump golden-cream belly, forepaws tucked on chest!)
+          // Hind legs & clawed feet planted firmly
+          ctx.fillStyle = '#5c2d0c'; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.2;
+          for (const hxOff of [-6, 5]) {
+            ctx.beginPath(); ctx.ellipse(hxOff, -3.5, 6.2, 3.2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.0;
+            ctx.beginPath();
+            ctx.moveTo(hxOff + 4.5, -3.5); ctx.lineTo(hxOff + 7.2, -2.5);
+            ctx.moveTo(hxOff + 4.0, -2.0); ctx.lineTo(hxOff + 6.8, -1.2);
+            ctx.stroke();
+            ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.2;
+          }
+
+          // Plump pear-shaped upright torso with grizzled golden-walnut coat
+          const upG = ctx.createLinearGradient(-13, -34, 12, -4);
+          upG.addColorStop(0, '#78350f'); upG.addColorStop(0.45, '#b45309'); upG.addColorStop(1, '#d97706');
+          ctx.fillStyle = upG; ctx.strokeStyle = '#3b1b06'; ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(-11, -6);
+          ctx.bezierCurveTo(-15, -18, -11, -33, -1, -34);
+          ctx.bezierCurveTo(9, -34, 14, -20, 11, -6);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+
+          // Warm golden-cream ventral belly patch
+          const belG = ctx.createLinearGradient(0, -30, 8, -6);
+          belG.addColorStop(0, '#fef3c7'); belG.addColorStop(1, '#fde68a');
+          ctx.fillStyle = belG;
+          ctx.beginPath(); ctx.ellipse(4.2, -18.5, 6.8, 11.5, 0.05, 0, Math.PI * 2); ctx.fill();
+
+          // Cute articulated forelimbs & dark digging claws resting over chest!
+          ctx.fillStyle = '#78350f'; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.ellipse(5.5, -22, 5.5, 2.8, 0.32, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.beginPath(); ctx.ellipse(8.0, -19.5, 4.8, 2.4, 0.25, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.moveTo(11.5, -19); ctx.lineTo(14, -17.5);
+          ctx.moveTo(10.8, -17.8); ctx.lineTo(13.2, -16.2);
+          ctx.stroke();
+        } else {
+          // QUADRUPEDAL SCURRY POSE (4 articulated legs with digging claws, grizzled arched back & warm cream underbelly!)
+          const drawMarmotLeg = (lx, ly, ph, isFar) => {
+            ctx.save();
+            ctx.translate(lx, ly);
+            const sx0 = Math.sin(gait + ph) * (dashing ? 5.8 : 4.0);
+            ctx.strokeStyle = isFar ? '#451a03' : '#78350f';
+            ctx.lineWidth = 5.4; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(sx0, 7.5); ctx.stroke();
+            ctx.fillStyle = isFar ? '#291509' : '#451a03';
+            ctx.beginPath(); ctx.ellipse(sx0 + 1.8, 8.2, 4.4, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.0;
+            ctx.beginPath();
+            ctx.moveTo(sx0 + 5.2, 7.8); ctx.lineTo(sx0 + 7.6, 8.6);
+            ctx.moveTo(sx0 + 4.8, 9.0); ctx.lineTo(sx0 + 7.2, 9.6);
+            ctx.stroke();
+            ctx.restore();
+          };
+          drawMarmotLeg(-10, -10 - hop * 0.5, Math.PI, true);
+          drawMarmotLeg(9, -10 - hop * 0.5, 0, true);
+
+          // Sculpted chubby marmot torso with dark grizzled guard-hair saddle & golden flanks
+          const bodyG = ctx.createLinearGradient(0, -26 - hop, 0, -4 - hop);
+          bodyG.addColorStop(0.0, '#5c2d0c');
+          bodyG.addColorStop(0.35, '#92400e');
+          bodyG.addColorStop(0.75, '#d97706');
+          bodyG.addColorStop(1.0, '#fde68a');
+          ctx.fillStyle = bodyG; ctx.strokeStyle = '#3b1b06'; ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(-18, -12 - hop);
+          ctx.bezierCurveTo(-18, -25 - hop, -2, -27 - hop, 13, -22 - hop);
+          ctx.bezierCurveTo(18, -18 - hop, 17, -8 - hop, 8, -6 - hop);
+          ctx.bezierCurveTo(-2, -5 - hop, -15, -6 - hop, -18, -12 - hop);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+
+          // Tactile grizzled fur-tuft strokes along dorsal spine
+          ctx.strokeStyle = 'rgba(254, 243, 199, 0.45)'; ctx.lineWidth = 1.1;
+          for (let fx0 = -12; fx0 <= 6; fx0 += 6) {
+            ctx.beginPath(); ctx.moveTo(fx0, -21 - hop); ctx.lineTo(fx0 - 3, -23 - hop); ctx.stroke();
+          }
+
+          drawMarmotLeg(-8, -10 - hop * 0.5, 0, false);
+          drawMarmotLeg(11, -10 - hop * 0.5, Math.PI, false);
+        }
+
+        // Expressive Sculpted Marmot Head (Dark nose-bridge mask, chubby cream cheeks, rounded ears, buck-teeth incisors & double-catchlight eye!)
+        const hx = standUp ? 2 : 14, hy = standUp ? -38 : (-19 - hop);
+        ctx.save();
+        ctx.translate(hx, hy);
+        if (standUp) ctx.rotate(-0.14);
+
+        // Rounded furry marmot ears tucked into crown
+        ctx.fillStyle = '#5c2d0c'; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(-4.5, -7.2, 3.4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#d97706';
+        ctx.beginPath(); ctx.arc(-4.2, -7.0, 1.7, 0, Math.PI * 2); ctx.fill();
+
+        // Broad marmot skull & chubby golden-brown head
+        const hdG = ctx.createRadialGradient(-1, -2, 2, 0, 0, 10.5);
+        hdG.addColorStop(0, '#d97706'); hdG.addColorStop(0.65, '#92400e'); hdG.addColorStop(1, '#5c2d0c');
+        ctx.fillStyle = hdG; ctx.strokeStyle = '#3b1b06'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(-8.5, -3);
+        ctx.quadraticCurveTo(-6, -9.5, 3, -8.5);
+        ctx.quadraticCurveTo(10, -7, 11.5, -1.5);
+        ctx.quadraticCurveTo(11.5, 4.5, 4, 6.2);
+        ctx.quadraticCurveTo(-5, 6.5, -8.5, 1.5);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Characteristic dark walnut bridge-of-nose mask + pale buff-cream muzzle & chubby cheek!
+        ctx.fillStyle = '#3b1b06';
+        ctx.beginPath(); ctx.ellipse(6.2, -4.2, 4.2, 2.2, 0.25, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fef3c7';
+        ctx.beginPath(); ctx.ellipse(6.8, 1.8, 5.2, 3.6, 0.08, 0, Math.PI * 2); ctx.fill();
+
+        // Adorable white marmot buck-teeth incisors!
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 0.7;
+        ctx.fillRect(8.2, 3.2, 1.7, standUp ? 3.2 : 2.2);
+        ctx.fillRect(9.9, 3.2, 1.6, standUp ? 3.2 : 2.2);
+        ctx.strokeRect(8.2, 3.2, 3.3, standUp ? 3.2 : 2.2);
+
+        // Glossy black nose + twitching whiskers + expressive almond eye
+        ctx.fillStyle = '#0c0a09';
+        ctx.beginPath(); ctx.ellipse(10.8, -0.4, 2.1, 1.5, 0.1, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(69, 26, 3, 0.65)'; ctx.lineWidth = 0.8;
+        const wTw = Math.sin(time * 14) * 0.8;
+        ctx.beginPath();
+        ctx.moveTo(6.5, 1.5); ctx.lineTo(13.5, 0.8 + wTw);
+        ctx.moveTo(6.5, 2.6); ctx.lineTo(13.0, 3.2 + wTw);
+        ctx.stroke();
+
+        ctx.fillStyle = '#0c0a09';
+        ctx.beginPath(); ctx.ellipse(2.8, -2.8, 2.5, 2.2, -0.1, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(3.5, -3.5, 0.85, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(2.1, -2.0, 0.4, 0, Math.PI * 2); ctx.fill();
+
+        // Piercing alpine sentinel whistle soundwaves & musical notes!
+        if (standUp) {
+          for (let w = 0; w < 2; w++) {
+            const pulse = ((time * 4.5 + w * 0.5) % 1);
+            ctx.strokeStyle = `rgba(253, 224, 71, ${(0.92 * (1 - pulse)).toFixed(2)})`;
+            ctx.lineWidth = 2.0;
+            ctx.beginPath(); ctx.arc(13, -2, 5 + pulse * 13, -0.75, 0.75); ctx.stroke();
+          }
+          ctx.fillStyle = '#fef08a'; ctx.font = 'bold 13px sans-serif';
+          ctx.fillText('♪', 16, -12 - ((time * 5) % 1) * 7);
+        }
+        ctx.restore();
+        ctx.restore();
+      }
+    }
+
+    // 3. SWISS GOLDEN EAGLE (عقاب جبال الألب الذهبي — Aquila chrysaetos: 6 Slotted Primary Flight Feathers, Tawny Covert Wing-Bar, Barred Fan Tail, Shimmering Golden Nape Hackles, Cere Hooked Beak & Feathered Talons!)
+    if (level.swiss_eagles) {
+      for (const eg of level.swiss_eagles) {
+        const sx = eg.x - camX, sy = eg.y - camY;
+        if (sx + eg.w < -110 || sx > viewW + 110) continue;
+        const cx = sx + eg.w * 0.5, cy = sy + eg.h * 0.5;
+        const swooping = !!eg.swooping;
+        const flap = swooping ? -0.42 : Math.sin(time * 7.0 + (eg.minX || 0) * 0.02) * 0.62;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(eg.facing || 1, 1);
+        if (swooping) ctx.rotate(0.28);
+
+        // 1. Fanned Ash-and-Espresso Barred Eagle Tail (White/ash basal band + broad dark terminal band)
+        ctx.save();
+        ctx.rotate(swooping ? -0.1 : Math.sin(time * 3.5) * 0.05);
+        for (let tf = -2; tf <= 2; tf++) {
+          ctx.save();
+          ctx.translate(-14, 2);
+          ctx.rotate(tf * 0.12);
+          const tlG = ctx.createLinearGradient(0, 0, -24, 0);
+          tlG.addColorStop(0.0, '#d6d3d1');
+          tlG.addColorStop(0.45, '#a8a29e');
+          tlG.addColorStop(0.55, '#451a03');
+          tlG.addColorStop(1.0, '#1c1917');
+          ctx.fillStyle = tlG; ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.moveTo(0, -1.5);
+          ctx.lineTo(-23, -3.5);
+          ctx.quadraticCurveTo(-26, 0, -23, 3.5);
+          ctx.lineTo(0, 1.5);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.restore();
+        }
+        ctx.restore();
+
+        // 2. Far-Side Wing (Darker perspective wing with slotted primary tips)
+        ctx.save();
+        ctx.translate(-1, -4);
+        ctx.rotate(-flap * 0.85 - 0.24);
+        ctx.fillStyle = '#3b1b06'; ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(4, 0);
+        ctx.quadraticCurveTo(-10, -29, -32, -20);
+        ctx.lineTo(-26, -12); ctx.lineTo(-30, -9); ctx.lineTo(-22, -5); ctx.lineTo(-2, 3);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.restore();
+
+        // 3. Feathered Golden Tarsi ("Trousers") + Yellow Scaled Toes & Curved Black Raptor Talons!
+        const talonFwd = swooping ? 7 : 0;
+        for (const [txOff, tyOff, isBack] of [[-3, 9, true], [4, 9, false]]) {
+          ctx.save();
+          ctx.translate(txOff + talonFwd * 0.5, tyOff);
+          // Feathered upper tarsus
+          ctx.fillStyle = isBack ? '#78350f' : '#b45309';
+          ctx.beginPath(); ctx.ellipse(2, 3, 4.2, 5.0, -0.3, 0, Math.PI * 2); ctx.fill();
+          // Yellow scaled toes
+          ctx.strokeStyle = '#eab308'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(2, 6); ctx.lineTo(7 + talonFwd * 0.4, 10);
+          ctx.moveTo(2, 6); ctx.lineTo(4 + talonFwd * 0.4, 11);
+          ctx.stroke();
+          // Razor-curved black talons
+          ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(7 + talonFwd * 0.4, 10); ctx.quadraticCurveTo(10 + talonFwd * 0.4, 12, 8 + talonFwd * 0.4, 14);
+          ctx.moveTo(4 + talonFwd * 0.4, 11); ctx.quadraticCurveTo(6 + talonFwd * 0.4, 13.5, 4 + talonFwd * 0.4, 15);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // 4. Muscular Aerodynamic Bronze-Espresso Eagle Torso + Overlapping Breast Feathers
+        const torsoG = ctx.createLinearGradient(-18, -9, 18, 12);
+        torsoG.addColorStop(0, '#b45309'); torsoG.addColorStop(0.48, '#5c2d0c'); torsoG.addColorStop(1, '#291509');
+        ctx.fillStyle = torsoG; ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 1.45;
+        ctx.beginPath();
+        ctx.moveTo(-19, 1);
+        ctx.bezierCurveTo(-14, -10, 8, -11, 18, -4);
+        ctx.bezierCurveTo(22, 2, 14, 12, -2, 11);
+        ctx.bezierCurveTo(-12, 10, -19, 6, -19, 1);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Subtle breast feather scallops
+        ctx.strokeStyle = 'rgba(253, 224, 71, 0.25)'; ctx.lineWidth = 1.0;
+        for (let bx0 = -6; bx0 <= 8; bx0 += 7) {
+          ctx.beginPath(); ctx.arc(bx0, 4, 3.8, -0.4, 1.2); ctx.stroke();
+        }
+
+        // 5. Shimmering Golden-Amber Nape Hackles, Fierce Brow Ridge, Yellow Cere & Hooked Slate-Tipped Beak!
+        const headG = ctx.createRadialGradient(17, -6, 2, 18, -4, 10);
+        headG.addColorStop(0, '#fef08a'); headG.addColorStop(0.55, '#eab308'); headG.addColorStop(1, '#92400e');
+        ctx.fillStyle = headG; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.35;
+        ctx.beginPath();
+        ctx.moveTo(10, -8);
+        ctx.quadraticCurveTo(17, -14, 24, -9);
+        ctx.quadraticCurveTo(27, -4, 23, 2);
+        ctx.lineTo(13, 2);
+        ctx.lineTo(10, -2);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Pointed golden nape hackle tufts
+        ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(12, -9); ctx.lineTo(8, -8);
+        ctx.moveTo(14, -6); ctx.lineTo(9, -5);
+        ctx.stroke();
+
+        // Yellow waxy cere + powerful hooked slate-black eagle beak!
+        ctx.fillStyle = '#facc15'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.ellipse(25, -4.5, 2.8, 2.6, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        const bkG = ctx.createLinearGradient(25, -6, 33, 2);
+        bkG.addColorStop(0, '#eab308'); bkG.addColorStop(0.45, '#475569'); bkG.addColorStop(1, '#0f172a');
+        ctx.fillStyle = bkG; ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(25.5, -6.8);
+        ctx.bezierCurveTo(32, -6.5, 34, -2, 31.5, 2.8); // razor hook!
+        ctx.quadraticCurveTo(29.5, 0.2, 24.5, -1.8);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Piercing Golden Eagle Eye + Fierce Supraorbital Brow Ridge!
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath(); ctx.arc(20.5, -5.5, 2.4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); ctx.arc(21.0, -5.5, 1.15, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(20.2, -6.2, 0.65, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.moveTo(17.2, -7.8); ctx.lineTo(23.5, -6.8); ctx.stroke();
+
+        // 6. Near-Side Cambered Wing with Tawny-Gold Covert Bar & 6 Slotted Primary Flight Feathers!
+        ctx.save();
+        ctx.translate(3, -2);
+        ctx.rotate(flap);
+        // Slotted dark espresso primary finger-feathers fanning at wingtip
+        for (let pf = 0; pf < 6; pf++) {
+          const angP = -2.45 + pf * 0.16;
+          const lenP = 33 - pf * 2.2;
+          ctx.fillStyle = pf % 2 === 0 ? '#1c1917' : '#291509';
+          ctx.strokeStyle = '#0c0a09'; ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.moveTo(-10, -10);
+          ctx.lineTo(-10 + Math.cos(angP) * lenP, -10 + Math.sin(angP) * lenP);
+          ctx.lineTo(-10 + Math.cos(angP + 0.13) * (lenP - 3), -10 + Math.sin(angP + 0.13) * (lenP - 3));
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+        }
+        // Main upper covert & scalloped secondary wing surface
+        const wingG = ctx.createLinearGradient(0, -26, -18, 4);
+        wingG.addColorStop(0, '#d97706'); wingG.addColorStop(0.45, '#78350f'); wingG.addColorStop(1, '#3b1b06');
+        ctx.fillStyle = wingG; ctx.strokeStyle = '#1c1917'; ctx.lineWidth = 1.35;
+        ctx.beginPath();
+        ctx.moveTo(8, 0);
+        ctx.bezierCurveTo(2, -18, -12, -26, -26, -21);
+        ctx.lineTo(-20, -9);
+        ctx.lineTo(-14, -10);
+        ctx.lineTo(-9, -4);
+        ctx.lineTo(-3, 2);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Signature tawny-gold Golden Eagle median wing-covert bar!
+        ctx.strokeStyle = 'rgba(253, 224, 71, 0.55)'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(2, -7); ctx.quadraticCurveTo(-8, -15, -19, -15); ctx.stroke();
+        ctx.restore();
+
+        if (eg.diveWarn > 0) {
+          ctx.fillStyle = '#ef4444'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText('!', 18, -24);
+        }
+        ctx.restore();
+      }
+    }
+
+    // 4. BRIENZ CLOCKWORK WOODEN NUTCRACKER GUARD (حارس كسّارة البندق الخشبي — Turned-Wood Limbs & Brass Ball-Joints, Articulated Arms & White Gloves, Curved Ceremonial Saber, Dual Back Gears + Spinning Key, Hussar Frogging, Braided Beard & Bearskin Shako!)
+    if (level.swiss_nutcrackers) {
+      for (const nc of level.swiss_nutcrackers) {
+        const sx = nc.x - camX, sy = nc.y - camY;
+        if (sx + nc.w < -90 || sx > viewW + 90) continue;
+        const cx = sx + nc.w * 0.5, fy = sy + nc.h;
+        const unwound = (nc.unwoundTimer || 0) > 0;
+        const gait = (nc.walkDist || 0) * 0.145;
+        const bob = unwound ? 0 : Math.abs(Math.sin(gait)) * 2.4;
+        const stride = unwound ? 0 : Math.sin(gait) * 7.5;
+        const armSwing = unwound ? 0.15 : Math.sin(gait) * 0.45;
+
+        ctx.save();
+        ctx.translate(cx, fy);
+        ctx.scale(nc.facing || 1, 1);
+
+        // Ground contact shadow
+        ctx.fillStyle = 'rgba(15,23,42,0.26)';
+        ctx.beginPath(); ctx.ellipse(0, 0, 21, 4.8, 0, 0, Math.PI * 2); ctx.fill();
+
+        // 1. Dual Exposed Brass Clockwork Back-Gears + Spinning Wind-Up Key!
+        ctx.save();
+        ctx.translate(-12, -35 - bob);
+        // Meshing brass escapement cog on backpack
+        ctx.save();
+        ctx.rotate(unwound ? 0 : time * 4.5);
+        ctx.fillStyle = '#d97706'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.arc(-2, -6, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.restore();
+        // Brass key shaft & 3D bow loops
+        const keySpin = unwound ? 0.35 : Math.sin(time * 9.5) * 0.92;
+        ctx.strokeStyle = '#ca8a04'; ctx.lineWidth = 3.2;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-12, 0); ctx.stroke();
+        ctx.fillStyle = '#fde047'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.ellipse(-15.5, -5.8 * keySpin, 4.5, Math.max(1.8, Math.abs(5.8 * keySpin)), 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(-15.5, 5.8 * keySpin, 4.5, Math.max(1.8, Math.abs(5.8 * keySpin)), 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.restore();
+
+        // 2. Far-Side Swinging Articulated Wooden Arm & White-Gloved Hand
+        ctx.save();
+        ctx.translate(-4, -42 - bob);
+        ctx.rotate(-armSwing);
+        ctx.fillStyle = '#b91c1c'; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.roundRect(-3.5, 0, 7, 16, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#facc15'; ctx.fillRect(-3.5, 13, 7, 2.5);
+        ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#475569';
+        ctx.beginPath(); ctx.arc(0, 18, 3.3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.restore();
+
+        // 3. Turned-Wood Breeches with Brass Knee Ball-Joints & Glossy Hessian Boots with Gold Tassels!
+        for (const s of [-1, 1]) {
+          const lx = s * 5 + s * stride * 0.68;
+          // White wooden thigh
+          ctx.fillStyle = s < 0 ? '#e2e8f0' : '#ffffff';
+          ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.roundRect(lx - 3.8, -20 - bob * 0.5, 7.6, 11, 2); ctx.fill(); ctx.stroke();
+          // Brass knee ball-joint!
+          ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.arc(lx, -9.5 - bob * 0.25, 2.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          // Glossy black Hessian cavalry boot + gold cuff + heel + boot toe shine
+          ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#020617'; ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(lx - 4, -8.5);
+          ctx.lineTo(lx + 4, -8.5);
+          ctx.lineTo(lx + 4.5, -2.5);
+          ctx.quadraticCurveTo(lx + 8.5, -2, lx + 8, 0);
+          ctx.lineTo(lx - 4.2, 0);
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#facc15';
+          ctx.fillRect(lx - 4, -8.8, 8.2, 2.0);
+          ctx.strokeStyle = 'rgba(255,255,255,0.45)'; ctx.lineWidth = 1.0;
+          ctx.beginPath(); ctx.moveTo(lx + 1, -6); ctx.lineTo(lx + 5.5, -1.5); ctx.stroke();
+        }
+
+        // 4. Tailored Crimson Swiss Hussar Jacket + Coattails + Gold Frogging + Cross-Belts + Fringed Epaulets!
+        const tunicG = ctx.createLinearGradient(-13, -46 - bob, 13, -17 - bob);
+        tunicG.addColorStop(0, '#ef4444'); tunicG.addColorStop(0.52, '#dc2626'); tunicG.addColorStop(1, '#7f1d1d');
+        ctx.fillStyle = tunicG; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(-12.5, -46 - bob, 25, 28, 4); ctx.fill(); ctx.stroke();
+
+        // Crisp white crossed bandolier straps & horizontal gold Hussar frogging + brass buttons
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(-9, -44 - bob); ctx.lineTo(9, -24 - bob);
+        ctx.moveTo(9, -44 - bob); ctx.lineTo(-9, -24 - bob);
+        ctx.stroke();
+        ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.8;
+        for (let b = 0; b < 3; b++) {
+          const by0 = -40 + b * 5.8 - bob;
+          ctx.beginPath(); ctx.moveTo(-8, by0); ctx.lineTo(8, by0); ctx.stroke();
+          ctx.fillStyle = '#fbbf24';
+          ctx.beginPath();
+          ctx.arc(-8, by0, 1.5, 0, Math.PI * 2);
+          ctx.arc(8, by0, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        // Navy waist belt + brass Swiss cross buckle
+        ctx.fillStyle = '#0f172a'; ctx.fillRect(-12.5, -23.5 - bob, 25, 5.2);
+        ctx.fillStyle = '#facc15'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.0;
+        ctx.fillRect(-3.8, -24 - bob, 7.6, 6); ctx.strokeRect(-3.8, -24 - bob, 7.6, 6);
+        // Fringed gold bullion shoulder epaulets
+        for (const exOff of [-12, 12]) {
+          ctx.fillStyle = '#facc15'; ctx.strokeStyle = '#854d0e'; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.ellipse(exOff, -44 - bob, 5.2, 3.0, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#eab308'; ctx.lineWidth = 1.1;
+          for (let fr = -3; fr <= 3; fr += 2) {
+            ctx.beginPath(); ctx.moveTo(exOff + fr, -42 - bob); ctx.lineTo(exOff + fr, -38.5 - bob); ctx.stroke();
+          }
+        }
+
+        // 5. Carved Brienz Linden-Wood Head, Rosy Cheeks, Curled Mustache, Hinged Jaw & Braided Wooden Beard!
+        const faceG = ctx.createLinearGradient(-9, -63 - bob, 9, -46 - bob);
+        faceG.addColorStop(0, '#fef3c7'); faceG.addColorStop(0.6, '#fde68a'); faceG.addColorStop(1, '#f59e0b');
+        ctx.fillStyle = faceG; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.roundRect(-9.5, -63 - bob, 19, 17, 4); ctx.fill(); ctx.stroke();
+        // Carved wooden nose + rosy painted cheek
+        ctx.fillStyle = '#f87171';
+        ctx.beginPath(); ctx.arc(5.5, -54.5 - bob, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fcd34d'; ctx.strokeStyle = '#92400e'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.moveTo(8, -58 - bob); ctx.lineTo(12, -54.5 - bob); ctx.lineTo(8, -54 - bob); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Hinged clacking nutcracker jaw + carved white teeth + tapered white wooden beard!
+        const jawDrop = unwound ? 2.8 : Math.abs(Math.sin(gait * 2)) * 2.6;
+        ctx.fillStyle = '#291509';
+        ctx.fillRect(-3.5, -51.5 - bob, 10.5, 3 + jawDrop);
+        ctx.fillStyle = '#ffffff';
+        for (let tx0 = -2.8; tx0 <= 4.8; tx0 += 2.5) {
+          ctx.fillRect(tx0, -51.5 - bob, 1.9, 1.8);
+          ctx.fillRect(tx0, -49.2 - bob + jawDrop * 0.7, 1.9, 1.6);
+        }
+        // Tapered white wooden beard hanging from lower jaw
+        ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(-3.5, -47.5 - bob + jawDrop);
+        ctx.lineTo(7, -47.5 - bob + jawDrop);
+        ctx.lineTo(3, -38.5 - bob + jawDrop);
+        ctx.lineTo(-1, -40 - bob + jawDrop);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Swooping curled white handlebar mustache!
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(5, -52.5 - bob);
+        ctx.quadraticCurveTo(1, -50 - bob, -5, -53 - bob);
+        ctx.quadraticCurveTo(0, -54.5 - bob, 5, -53.2 - bob);
+        ctx.moveTo(5, -52.5 - bob);
+        ctx.quadraticCurveTo(10, -50 - bob, 13.5, -53 - bob);
+        ctx.quadraticCurveTo(9.5, -54.5 - bob, 5, -53.2 - bob);
+        ctx.fill(); ctx.stroke();
+
+        // Crisp painted toy-soldier eye + arched black eyebrow
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(3.8, -57.2 - bob, 2.4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); ctx.arc(4.3, -57.2 - bob, 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(4.7, -57.7 - bob, 0.55, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(1.2, -60 - bob); ctx.quadraticCurveTo(4, -61.5 - bob, 6.8, -59.8 - bob); ctx.stroke();
+
+        // 6. Tall Bearskin Shako Hat + Brass Visor + Gold Chin-Chain + Clock-Gear Swiss Cockade & Swaying Plume!
+        const shG = ctx.createLinearGradient(-11, -80 - bob, 11, -62 - bob);
+        shG.addColorStop(0, '#334155'); shG.addColorStop(0.45, '#1e293b'); shG.addColorStop(1, '#090d16');
+        ctx.fillStyle = shG; ctx.strokeStyle = '#020617'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(-10.5, -80 - bob, 21, 18, [5, 5, 2, 2]); ctx.fill(); ctx.stroke();
+        // Glossy visor & draped gold chin-chain
+        ctx.fillStyle = '#020617';
+        ctx.beginPath(); ctx.moveTo(2, -63 - bob); ctx.lineTo(13, -61 - bob); ctx.lineTo(2, -60 - bob); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.moveTo(-8, -64 - bob); ctx.quadraticCurveTo(1, -60 - bob, 10, -64 - bob); ctx.stroke();
+        // Brass clock-gear Swiss cockade + feather plume
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath(); ctx.arc(3, -72 - bob, 5.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#dc2626';
+        ctx.beginPath(); ctx.arc(3, -72 - bob, 3.8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(1.9, -74.4 - bob, 2.2, 4.8); ctx.fillRect(0.6, -73.1 - bob, 4.8, 2.2);
+        const pl = Math.sin(time * 5 + sx * 0.02) * 2.2;
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.0;
+        ctx.beginPath(); ctx.ellipse(3 + pl * 0.7, -85.5 - bob, 3.8, 6.8, 0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        // 7. Near-Side Articulated Wooden Arm, White Glove & Gleaming Curved Brass-Hilted Ceremonial Saber!
+        ctx.save();
+        ctx.translate(4, -41 - bob);
+        ctx.rotate(unwound ? 0.55 : (-0.28 + armSwing * 0.5));
+        // Crimson sleeve + gold chevron cuff + white glove
+        ctx.fillStyle = '#ef4444'; ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.roundRect(-3.5, 0, 7.2, 16, 3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fde047'; ctx.fillRect(-3.5, 12.5, 7.2, 2.5);
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.arc(1, 17.5, 3.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Curved polished steel Hussar saber + ornate golden D-guard hilt!
+        const sbG = ctx.createLinearGradient(4, 17, 18, -14);
+        sbG.addColorStop(0, '#cbd5e1'); sbG.addColorStop(0.5, '#f8fafc'); sbG.addColorStop(1, '#ffffff');
+        ctx.fillStyle = sbG; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(4, 16);
+        ctx.quadraticCurveTo(15, 2, 16, -15);
+        ctx.quadraticCurveTo(12.5, 1, 1.5, 15);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#facc15'; ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(0, 14); ctx.lineTo(6.5, 18);
+        ctx.arc(2.5, 17, 3.6, -0.5, 2.2);
+        ctx.stroke();
+        ctx.restore();
+
+        if (unwound) {
+          ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText('🔑💤', 0, -93 - bob - Math.sin(time * 3) * 3);
+        }
+        ctx.restore();
+      }
+    }
+
+    // 5. ALPINE SNOW FOX (ثعلب جبال الألب الثلجي — Museum-Grade Anatomical Fur, Articulated Stocking Legs, Sweeping S-Plume Tail & Sculpted Head!)
+    if (level.swiss_snow_foxes) {
+      for (const fx of level.swiss_snow_foxes) {
+        const sx = fx.x - camX, sy = (fx.y - (fx.leapH || 0)) - camY;
+        if (sx + fx.w < -110 || sx > viewW + 110) continue;
+        const cx = sx + fx.w * 0.5, fy = sy + fx.h;
+        const gait = (fx.walkDist || 0) * 0.16;
+        const leaping = (fx.leapH || 0) > 2;
+        const stalking = (fx.pounceWarn || 0) > 0;
+        const crouch = stalking ? 6.5 : 0;
+        const bob = leaping ? 0 : Math.abs(Math.sin(gait)) * 2.1;
+
+        ctx.save();
+        // Ground contact shadow stays anchored on the alpine meadow even while leaping!
+        const shScale = Math.max(0.55, 1 - (fx.leapH || 0) / 160);
+        ctx.fillStyle = `rgba(15, 23, 42, ${(0.24 * shScale).toFixed(2)})`;
+        ctx.beginPath();
+        ctx.ellipse(cx, (fx.y + fx.h) - camY, 26 * shScale, 4.8 * shScale, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Frost puff sparks kicking up from paws when crouching to pounce
+        if (stalking) {
+          for (let sp = 0; sp < 3; sp++) {
+            const pf = ((time * 4.5 + sp * 0.33) % 1);
+            ctx.fillStyle = `rgba(224, 242, 254, ${(0.85 * (1 - pf)).toFixed(2)})`;
+            ctx.beginPath();
+            ctx.arc(cx - (fx.facing || 1) * (10 + pf * 18), (fx.y + fx.h) - camY - 3 - pf * 11, 2.8 + pf * 2.2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        ctx.translate(cx, fy);
+        ctx.scale(fx.facing || 1, 1);
+        if (leaping) ctx.rotate(-0.22);
+
+        // 1. SWEEPING S-CURVED PLUSH FOX TAIL (Multi-layered snow-white & frost-silver fur with warm amber-russet mid-band & bright white tip)
+        const tailWag = Math.sin(time * (stalking ? 18 : 4.6) + (fx.minX || 0) * 0.02) * (stalking ? 0.28 : 0.15);
+        ctx.save();
+        ctx.translate(-19, -18 - bob + crouch * 0.8);
+        ctx.rotate((leaping ? 0.25 : -0.22) + tailWag);
+        const tailG = ctx.createLinearGradient(0, 0, -34, -8);
+        tailG.addColorStop(0.0, '#f8fafc');
+        tailG.addColorStop(0.42, '#e2e8f0');
+        tailG.addColorStop(0.72, '#ea580c');
+        tailG.addColorStop(0.88, '#fff7ed');
+        tailG.addColorStop(1.0, '#ffffff');
+        ctx.fillStyle = tailG;
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(2, -3);
+        ctx.bezierCurveTo(-10, -14, -24, -14, -34, -4);
+        ctx.bezierCurveTo(-28, 5, -14, 9, 1, 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Delicate fluffy tail fur-tuft highlight strokes
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.78)';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(-6, -6); ctx.quadraticCurveTo(-14, -9, -20, -6);
+        ctx.moveTo(-18, -3); ctx.quadraticCurveTo(-24, -4, -29, -3);
+        ctx.stroke();
+        ctx.restore();
+
+        // 2. ARTICULATED 4-LEG FOX ANATOMY (Upper thigh + slender knee + signature dark charcoal fox stockings & dainty paws!)
+        const drawFoxLeg = (hipX, hipY, swingAng, isFront, isFar) => {
+          ctx.save();
+          ctx.translate(hipX, hipY);
+          const upperCol = isFar ? '#cbd5e1' : '#f8fafc';
+          const stockCol = isFar ? '#334155' : '#1e293b';
+          const kneeX = Math.sin(swingAng) * 6.5 + (isFront ? 1.5 : -2.5);
+          const kneeY = leaping ? 6.5 : 8.5;
+          const pawX = kneeX + Math.sin(swingAng * 1.25) * 6.5 + (leaping ? (isFront ? 6 : -7) : 0);
+          const pawY = leaping ? (isFront ? 11.5 : 13) : (17.5 - crouch * 0.45);
+          // Muscular upper thigh / shoulder
+          ctx.strokeStyle = upperCol;
+          ctx.lineWidth = isFront ? 5.2 : 6.2;
+          ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(kneeX, kneeY); ctx.stroke();
+          // Signature dark charcoal fox lower leg ("stocking")
+          ctx.strokeStyle = stockCol;
+          ctx.lineWidth = 3.8;
+          ctx.beginPath(); ctx.moveTo(kneeX, kneeY); ctx.lineTo(pawX, pawY); ctx.stroke();
+          // Dainty fox paw with subtle white toe highlight
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath(); ctx.ellipse(pawX + 1.8, pawY + 0.5, 3.6, 2.1, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#e2e8f0';
+          ctx.beginPath(); ctx.arc(pawX + 3.2, pawY + 0.3, 1.0, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        };
+
+        const frontAng = leaping ? 0.85 : Math.sin(gait) * 0.68;
+        const backAng = leaping ? -0.9 : -Math.sin(gait) * 0.68;
+        // Far-side legs (behind torso)
+        drawFoxLeg(-13, -17 - bob + crouch * 0.5, -backAng, false, true);
+        drawFoxLeg(12, -17 - bob + crouch * 0.5, -frontAng, true, true);
+
+        // 3. SCULPTED LITHE ALPINE FOX TORSO (Arched spine, warm russet-frost saddle, plush snow-white chest ruff)
+        const bodyG = ctx.createLinearGradient(0, -32 + crouch, 0, -9 + crouch);
+        bodyG.addColorStop(0.0, '#ffffff');
+        bodyG.addColorStop(0.45, '#f1f5f9');
+        bodyG.addColorStop(0.82, '#cbd5e1');
+        bodyG.addColorStop(1.0, '#94a3b8');
+        ctx.fillStyle = bodyG;
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-21, -18 - bob + crouch);
+        ctx.bezierCurveTo(-18, -30 - bob + crouch, 6, -31 - bob + crouch, 18, -22 - bob + crouch);
+        ctx.bezierCurveTo(22, -14 - bob + crouch, 14, -9 - bob + crouch, 2, -10 - bob + crouch);
+        ctx.bezierCurveTo(-9, -10 - bob + crouch, -19, -11 - bob + crouch, -21, -18 - bob + crouch);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Warm winter-russet shoulder & dorsal tint (authentic Alpine red-white winter fox coat)
+        ctx.fillStyle = 'rgba(234, 88, 12, 0.22)';
+        ctx.beginPath();
+        ctx.ellipse(-2, -24 - bob + crouch, 14, 4.5, -0.05, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Plush layered snow-white chest ruff
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(11, -24 - bob + crouch);
+        ctx.quadraticCurveTo(22, -20 - bob + crouch, 19, -11 - bob + crouch);
+        ctx.lineTo(15, -13 - bob + crouch);
+        ctx.lineTo(14, -10 - bob + crouch);
+        ctx.quadraticCurveTo(7, -15 - bob + crouch, 11, -24 - bob + crouch);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Near-side legs (in front of torso)
+        drawFoxLeg(-10, -17 - bob + crouch * 0.5, backAng, false, false);
+        drawFoxLeg(14, -17 - bob + crouch * 0.5, frontAng, true, false);
+
+        // 4. EXPRESSIVE SCULPTED FOX HEAD (Cheek ruffs, slender muzzle, whiskers, pink-lined ears with russet/charcoal tips, almond golden eye!)
+        ctx.save();
+        ctx.translate(19, -26 - bob + crouch * 0.9);
+        ctx.rotate(stalking ? 0.14 : (leaping ? -0.10 : 0));
+
+        // Back pointed ear
+        ctx.fillStyle = '#e2e8f0'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.moveTo(-1, -6); ctx.lineTo(3.5, -18); ctx.lineTo(7, -6); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath(); ctx.moveTo(1.5, -13); ctx.lineTo(3.5, -18); ctx.lineTo(5.2, -13); ctx.closePath(); ctx.fill();
+
+        // Sculpted fox cranium & fluffy cheek ruff
+        const headG = ctx.createRadialGradient(-1, -2, 2, 0, 0, 12);
+        headG.addColorStop(0, '#ffffff'); headG.addColorStop(0.75, '#f1f5f9'); headG.addColorStop(1, '#cbd5e1');
+        ctx.fillStyle = headG; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(-9, -4);
+        ctx.quadraticCurveTo(-5, -11, 4, -9);
+        ctx.quadraticCurveTo(10, -6, 17, -1); // slender fox nose bridge
+        ctx.lineTo(17, 2.5);
+        ctx.quadraticCurveTo(9, 6, 1, 6.5);
+        ctx.lineTo(-4, 8); // cheek fur tuft
+        ctx.lineTo(-3, 5);
+        ctx.lineTo(-8, 4.5);
+        ctx.quadraticCurveTo(-11, 0, -9, -4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Warm russet-amber crown & cheek blaze
+        ctx.fillStyle = 'rgba(234, 88, 12, 0.32)';
+        ctx.beginPath(); ctx.ellipse(2, -5.5, 6.5, 3.0, 0.15, 0, Math.PI * 2); ctx.fill();
+
+        // Front tall pointed ear with soft pink inner ear & dark charcoal + russet tip!
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.moveTo(-6, -5); ctx.lineTo(-3.5, -19); ctx.lineTo(1.5, -6); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fda4af';
+        ctx.beginPath(); ctx.moveTo(-4.4, -7.5); ctx.lineTo(-3.2, -14.2); ctx.lineTo(-0.4, -7.8); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#ea580c';
+        ctx.beginPath(); ctx.moveTo(-4.8, -13); ctx.lineTo(-3.5, -19); ctx.lineTo(-1.3, -13.5); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath(); ctx.moveTo(-4.1, -16); ctx.lineTo(-3.5, -19); ctx.lineTo(-2.5, -16); ctx.closePath(); ctx.fill();
+
+        // Keen almond-shaped golden fox eye with vertical slit pupil & bright catchlight
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath(); ctx.ellipse(4.5, -2.2, 3.4, 2.5, -0.18, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = stalking ? '#fbbf24' : '#f59e0b';
+        ctx.beginPath(); ctx.ellipse(4.7, -2.2, 2.6, 1.9, -0.18, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); ctx.ellipse(5.1, -2.2, 0.85, 1.75, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(3.8, -3.0, 0.85, 0, Math.PI * 2); ctx.fill();
+
+        // Glossy black fox button nose, gentle mouth line & delicate whiskers
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); ctx.ellipse(17.2, 0.4, 2.4, 1.8, 0.1, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.65)';
+        ctx.beginPath(); ctx.arc(16.6, -0.2, 0.7, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#64748b'; ctx.lineWidth = 0.85;
+        ctx.beginPath();
+        ctx.moveTo(11, 2.2); ctx.lineTo(18, 3.6);
+        ctx.moveTo(11, 3.4); ctx.lineTo(17, 5.8);
+        ctx.stroke();
+        ctx.restore();
+
+        if (stalking) {
+          ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 15px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText('!', 18, -46);
+        }
+        ctx.restore();
+      }
+    }
+
+    // 6. GENEVA HOROLOGICAL SKELETON-WATCH AUTOMATON OWL (بومة الساعات السويسرية الميكانيكية — 5 Overlapping Riveted Brass/Copper/Silver Wing-Feathers, Crystal Skeleton-Watch Chest Window with Dual Counter-Rotating Cogs & Ruby Tourbillon, Jeweler's Loupe Monocle & Mechanical Brass Talons!)
+    if (level.swiss_clockwork_owls) {
+      for (const ow of level.swiss_clockwork_owls) {
+        const sx = ow.x - camX, sy = ow.y - camY;
+        if (sx + ow.w < -160 || sx > viewW + 160) continue;
+        const cx = sx + ow.w * 0.5, cy = sy + ow.h * 0.5;
+        const jammed = (ow.jammedTimer || 0) > 0;
+
+        // 1. Bi-Metallic Horological Gear-Boomerang Projectile (10 precision teeth + blued-steel inner wheel + ruby jewel + shimmer arc!)
+        if (ow.gear && ow.gear.active) {
+          const gx = ow.gear.x - camX, gy = ow.gear.y - camY;
+          ctx.save();
+          ctx.translate(gx, gy);
+          ctx.strokeStyle = 'rgba(253, 224, 71, 0.45)'; ctx.lineWidth = 2.5;
+          ctx.beginPath(); ctx.arc(0, 0, 16, time * 14, time * 14 + 2.1); ctx.stroke();
+          ctx.rotate(time * 15);
+          const grG = ctx.createRadialGradient(-3, -3, 2, 0, 0, 14);
+          grG.addColorStop(0, '#fef9c3'); grG.addColorStop(0.55, '#eab308'); grG.addColorStop(1, '#92400e');
+          ctx.fillStyle = grG; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          for (let t = 0; t < 10; t++) {
+            const a1 = (t * Math.PI * 2) / 10;
+            const a2 = a1 + Math.PI / 10;
+            const r1 = 14, r2 = 9.5;
+            if (t === 0) ctx.moveTo(Math.cos(a1) * r1, Math.sin(a1) * r1);
+            else ctx.lineTo(Math.cos(a1) * r1, Math.sin(a1) * r1);
+            ctx.lineTo(Math.cos(a2) * r2, Math.sin(a2) * r2);
+          }
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = '#1e3a8a'; ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.arc(0, 0, 6.2, 0, Math.PI * 2); ctx.stroke();
+          ctx.fillStyle = '#e11d48';
+          ctx.beginPath(); ctx.arc(0, 0, 3.2, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath(); ctx.arc(-1, -1, 1.0, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(ow.facing || 1, 1);
+
+        // Sweeping sapphire jeweler's loupe searchlight when locking on!
+        if (ow.lockWarn > 0 && !jammed) {
+          const beamG = ctx.createLinearGradient(6, -6, 44, 150);
+          beamG.addColorStop(0, 'rgba(56, 189, 248, 0.52)');
+          beamG.addColorStop(1, 'rgba(56, 189, 248, 0)');
+          ctx.fillStyle = beamG;
+          ctx.beginPath(); ctx.moveTo(6, -5); ctx.lineTo(-28, 148); ctx.lineTo(56, 148); ctx.closePath(); ctx.fill();
+        }
+
+        // 2. Scalloped Copper-and-Brass Tail Plate underneath chassis
+        ctx.fillStyle = '#b45309'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.2;
+        for (const txOff of [-6, 0, 6]) {
+          ctx.beginPath();
+          ctx.ellipse(txOff, 21, 4.2, 6.5, txOff * 0.04, 0, Math.PI * 2);
+          ctx.fill(); ctx.stroke();
+        }
+
+        // 3. Articulated Multi-Feather Clockwork Wings (5 overlapping riveted gold, copper & silver metal blades per wing!)
+        const wFlap = jammed ? 0.38 : Math.sin(time * 9.5 + (ow.phase || 0)) * 0.48;
+        for (const side of [-1, 1]) {
+          ctx.save();
+          ctx.translate(side * 14, -2);
+          ctx.rotate(side * wFlap);
+          const featherCols = ['#eab308', '#d97706', '#e2e8f0', '#f59e0b', '#b45309'];
+          for (let fi = 4; fi >= 0; fi--) {
+            ctx.save();
+            ctx.rotate(side * (-0.34 + fi * 0.20));
+            const lenF = 27 - fi * 2.2;
+            ctx.fillStyle = featherCols[fi];
+            ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.1;
+            ctx.beginPath();
+            ctx.moveTo(0, -2.5);
+            ctx.lineTo(side * lenF, -4);
+            ctx.quadraticCurveTo(side * (lenF + 3), 0, side * (lenF - 2), 3.8);
+            ctx.lineTo(0, 3.2);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.restore();
+          }
+          // Riveted brass wing-shoulder cam
+          ctx.fillStyle = '#fef08a'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.3;
+          ctx.beginPath(); ctx.arc(side * 2, 0, 4.6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#451a03';
+          ctx.beginPath(); ctx.arc(side * 2, 0, 1.4, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+
+        // 4. Engraved Geneva Rose-Gold & Polished-Brass Watchcase Chassis + Top Winding Crown!
+        ctx.fillStyle = '#facc15'; ctx.strokeStyle = '#78350f'; ctx.lineWidth = 1.3;
+        ctx.fillRect(-4, -23, 8, 4); ctx.strokeRect(-4, -23, 8, 4);
+
+        const bG = ctx.createRadialGradient(-5, -6, 3, 0, 2, 22);
+        bG.addColorStop(0, '#fef9c3'); bG.addColorStop(0.48, '#f59e0b'); bG.addColorStop(0.82, '#b45309'); bG.addColorStop(1, '#5c2d0c');
+        ctx.fillStyle = bG; ctx.strokeStyle = '#3b1b06'; ctx.lineWidth = 1.7;
+        ctx.beginPath(); ctx.ellipse(0, 2, 17, 20, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Engraved inner watchcase bezel ring
+        ctx.strokeStyle = 'rgba(254, 249, 195, 0.55)'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.ellipse(0, 2, 14.2, 17.2, 0, 0, Math.PI * 2); ctx.stroke();
+
+        // 5. Beveled Crystal Skeleton-Watch Chest Window with Dual Counter-Rotating Gears & Ruby Tourbillon!
+        ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(0, 8.5, 9.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Secondary copper gear (counter-rotating)
+        ctx.save();
+        ctx.translate(-3.5, 6.5);
+        ctx.rotate(jammed ? -0.3 : -time * 6.5);
+        ctx.strokeStyle = '#fb923c'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(0, 0, 4.2, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-4.2, 0); ctx.lineTo(4.2, 0); ctx.moveTo(0, -4.2); ctx.lineTo(0, 4.2); ctx.stroke();
+        ctx.restore();
+        // Primary blued-steel tourbillon wheel + crimson ruby jewel bearing
+        ctx.save();
+        ctx.translate(2.2, 9.5);
+        ctx.rotate(jammed ? 0.2 : time * 5.2);
+        ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1.7;
+        ctx.beginPath(); ctx.arc(0, 0, 5.5, 0, Math.PI * 2); ctx.stroke();
+        for (let s = 0; s < 3; s++) {
+          const a = (s * Math.PI) / 3;
+          ctx.beginPath(); ctx.moveTo(-Math.cos(a) * 5.5, -Math.sin(a) * 5.5); ctx.lineTo(Math.cos(a) * 5.5, Math.sin(a) * 5.5); ctx.stroke();
+        }
+        ctx.fillStyle = '#e11d48'; ctx.beginPath(); ctx.arc(0, 0, 2.3, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+        // Curved sapphire-crystal glass glare over chest window
+        ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.arc(0, 8.5, 7.4, -2.4, -1.1); ctx.stroke();
+
+        // 6. Articulated Brass Owl Ear-Tuft Horns + Filigree Facial Disc + Asymmetric Jeweler's Loupe Monocle + Mechanical Talons!
+        ctx.fillStyle = '#d97706'; ctx.strokeStyle = '#3b1b06'; ctx.lineWidth = 1.3;
+        ctx.beginPath(); ctx.moveTo(-13, -13); ctx.lineTo(-18, -25); ctx.lineTo(-5, -17); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(13, -13); ctx.lineTo(18, -25); ctx.lineTo(5, -17); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Left eye: precision iris-shutter sapphire lens
+        ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.arc(-6.8, -8, 5.4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = jammed ? '#94a3b8' : '#38bdf8';
+        ctx.beginPath(); ctx.arc(-6.8, -8, 3.0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(-5.9, -8.9, 0.95, 0, Math.PI * 2); ctx.fill();
+
+        // Right eye: oversized protruding Brass Jeweler's Loupe Monocle with hanging chain!
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.moveTo(12, -6); ctx.quadraticCurveTo(15, 2, 11, 8); ctx.stroke();
+        ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#facc15'; ctx.lineWidth = 2.4;
+        ctx.beginPath(); ctx.arc(6.8, -8, 6.4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = jammed ? '#94a3b8' : (ow.lockWarn > 0 ? '#fde047' : '#38bdf8');
+        ctx.beginPath(); ctx.arc(6.8, -8, 3.8, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.arc(6.8, -8, 4.8, -2.2, -0.8); ctx.stroke();
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(7.8, -9.1, 1.1, 0, Math.PI * 2); ctx.fill();
+
+        // Sculpted riveted bronze hooked beak
+        ctx.fillStyle = '#f59e0b'; ctx.strokeStyle = '#451a03'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(-3.5, -3.5); ctx.lineTo(3.5, -3.5); ctx.lineTo(0, 3.5); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Mechanical articulated brass talons underneath chassis
+        ctx.strokeStyle = '#d97706'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+        for (const tx0 of [-6, 6]) {
+          ctx.beginPath();
+          ctx.moveTo(tx0, 20); ctx.lineTo(tx0 - 2.5, 25);
+          ctx.moveTo(tx0, 20); ctx.lineTo(tx0 + 2.5, 25);
+          ctx.stroke();
+        }
+
+        if (jammed) {
+          ctx.fillStyle = '#fde047'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText('⚙️💤', 0, -29);
+        }
+        ctx.restore();
+      }
+    }
+
+    // 7. FRIENDLY ALPINE ST. BERNARD RESCUE COMPANION (كلب سانت برنارد السويسري الودود — Plush Mahogany-Sable & Snow-White Coat, Velvety Floppy Ears, Soulful Warm Eyes, Feathered Wagging Tail & Iconic Oak Swiss-Cross Rescue Barrel!)
+    if (level.swiss_st_bernards) {
+      for (const sb of level.swiss_st_bernards) {
+        const sx = sb.x - camX, sy = sb.y - camY;
+        if (sx + sb.w < -110 || sx > viewW + 110) continue;
+        const cx = sx + sb.w * 0.5, fy = sy + sb.h;
+        const wBlend = sb.walkBlend || 0;
+        const sit = sb.sitBlend || 0;
+        const happy = !!sb.loving || (sb.playingTimer || 0) > 0;
+        const gait = (sb.walkDist || 0) * 0.14;
+        const bob = Math.abs(Math.sin(gait)) * 2.0 * wBlend;
+
+        ctx.save();
+        ctx.translate(cx, fy);
+        ctx.scale(sb.facing || 1, 1);
+
+        // Ground contact shadow
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.24)';
+        ctx.beginPath(); ctx.ellipse(0, 0, 28, 5.2, 0, 0, Math.PI * 2); ctx.fill();
+
+        // 1. Plush Feathered Mahogany & Snow-White Tipped St. Bernard Tail (wags warmly!)
+        const wagSpd = (sb.playingTimer || 0) > 0 ? 13 : (happy ? 8.5 : 3.2);
+        const wag = Math.sin(time * wagSpd + (sb.homeX || 0) * 0.02) * (happy ? 0.36 : 0.14);
+        ctx.save();
+        ctx.translate(-21, -22 - bob + sit * 9);
+        ctx.rotate(-0.25 + wag);
+        const tlG = ctx.createLinearGradient(0, 0, -24, -6);
+        tlG.addColorStop(0, '#9a3412'); tlG.addColorStop(0.55, '#c2410c'); tlG.addColorStop(0.65, '#ffffff'); tlG.addColorStop(1, '#f1f5f9');
+        ctx.fillStyle = tlG; ctx.strokeStyle = '#431407'; ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(2, -3);
+        ctx.bezierCurveTo(-9, -10, -20, -9, -25, -2);
+        ctx.bezierCurveTo(-20, 6, -9, 7, 2, 3);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.restore();
+
+        // 2. Articulated Thick-Furred Snow-White St. Bernard Legs & Big Cushioned Paws!
+        const drawBernardLeg = (hipX, hipY, ph, isFront, isFar) => {
+          ctx.save();
+          ctx.translate(hipX, hipY);
+          const sw = Math.sin(gait + ph) * 6.0 * wBlend;
+          const legCol = isFar ? '#cbd5e1' : '#ffffff';
+          ctx.strokeStyle = legCol; ctx.lineWidth = isFront ? 7.2 : 8.0; ctx.lineCap = 'round';
+          const footX = (!isFront && sit > 0.3) ? (6 * sit) : sw;
+          const footY = (!isFront && sit > 0.3) ? (11 * (1 - sit * 0.45)) : 18;
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(footX, footY); ctx.stroke();
+          ctx.fillStyle = legCol; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.ellipse(footX + 2.2, footY + 0.5, 5.4, 2.8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.restore();
+        };
+        drawBernardLeg(-15, -19 - bob + sit * 7, Math.PI, false, true);
+        drawBernardLeg(13, -19 - bob - sit * 2, 0, true, true);
+
+        // 3. Cuddly Heavy-Boned St. Bernard Torso (Snow-white chest/shoulders + rich mahogany-chestnut mantle saddle!)
+        ctx.save();
+        ctx.translate(0, -24 - bob + sit * 4);
+        ctx.rotate(-sit * 0.28);
+        const coatG = ctx.createLinearGradient(0, -14, 0, 12);
+        coatG.addColorStop(0, '#ffffff'); coatG.addColorStop(0.65, '#f8fafc'); coatG.addColorStop(1, '#cbd5e1');
+        ctx.fillStyle = coatG; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-22, 0);
+        ctx.bezierCurveTo(-22, -13, -4, -15, 16, -12);
+        ctx.bezierCurveTo(24, -8, 23, 8, 12, 10);
+        ctx.bezierCurveTo(-2, 11, -18, 9, -22, 0);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Rich mahogany-chestnut & warm caramel St. Bernard mantle patch across back!
+        const sadG = ctx.createLinearGradient(-16, -14, 6, 4);
+        sadG.addColorStop(0, '#7c2d12'); sadG.addColorStop(0.55, '#b45309'); sadG.addColorStop(1, '#d97706');
+        ctx.fillStyle = sadG;
+        ctx.beginPath();
+        ctx.moveTo(-18, -5);
+        ctx.bezierCurveTo(-15, -13.5, 2, -14, 9, -9);
+        ctx.quadraticCurveTo(5, 2, -6, 3);
+        ctx.quadraticCurveTo(-15, 2, -18, -5);
+        ctx.closePath(); ctx.fill();
+        ctx.restore();
+
+        // Near-side plush legs
+        drawBernardLeg(-12, -19 - bob + sit * 7, 0, false, false);
+        drawBernardLeg(16, -19 - bob - sit * 2, Math.PI, true, false);
+
+        // 4. Buckled Alpine Leather Collar + Iconic Miniature Oak Rescue Barrel (✚) under Chin!
+        const headX = 20 - sit * 2, headY = -34 - bob - sit * 4;
+        ctx.save();
+        ctx.translate(headX - 4, headY + 9);
+        // Red leather collar strap
+        ctx.strokeStyle = '#991b1b'; ctx.lineWidth = 3.6; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-5, -6); ctx.lineTo(4, 3); ctx.stroke();
+        // Gently swinging miniature oak rescue barrel!
+        ctx.rotate(Math.sin(time * 5) * 0.08);
+        ctx.fillStyle = '#b45309'; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.roundRect(-2, 2, 12, 9.5, 3); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.moveTo(1, 2); ctx.lineTo(1, 11.5); ctx.moveTo(7, 2); ctx.lineTo(7, 11.5); ctx.stroke();
+        ctx.fillStyle = '#dc2626';
+        ctx.beginPath(); ctx.arc(4, 6.8, 2.8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(2.3, 6.2, 3.4, 1.2); ctx.fillRect(3.4, 5.1, 1.2, 3.4);
+        ctx.restore();
+
+        // 5. Heartwarming Expressive St. Bernard Head (White blaze, dark mahogany mask, velvety droopy ears, soulful eyes & cute pink tongue!)
+        ctx.save();
+        ctx.translate(headX, headY);
+        ctx.rotate(happy ? Math.sin(time * 3.5) * 0.06 : 0);
+
+        // Broad white skull & muzzle with mahogany-brown mask patches
+        ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.45;
+        ctx.beginPath();
+        ctx.moveTo(-10, -6);
+        ctx.quadraticCurveTo(-5, -13, 5, -11);
+        ctx.quadraticCurveTo(10, -9, 11, -5);
+        ctx.lineTo(17, -3.5);
+        ctx.quadraticCurveTo(19.5, 1, 16.5, 5.5); // soft rounded jowl!
+        ctx.quadraticCurveTo(11, 7.5, 6, 5);
+        ctx.quadraticCurveTo(-4, 6, -10, 1);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Symmetrical rich mahogany-walnut eye patch & crown mask (leaving white blaze & white muzzle!)
+        const mskG = ctx.createLinearGradient(-6, -11, 8, 1);
+        mskG.addColorStop(0, '#431407'); mskG.addColorStop(0.55, '#9a3412'); mskG.addColorStop(1, '#c2410c');
+        ctx.fillStyle = mskG;
+        ctx.beginPath();
+        ctx.ellipse(1.5, -4.5, 7.5, 5.6, -0.1, 0, Math.PI * 2);
+        ctx.fill();
+        // Crisp white forehead blaze stripe
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.ellipse(7.5, -7.5, 2.5, 3.8, -0.35, 0, Math.PI * 2); ctx.fill();
+
+        // Soft velvety pendulous mahogany floppy ear!
+        const earG = ctx.createLinearGradient(-8, -8, -4, 7);
+        earG.addColorStop(0, '#7c2d12'); earG.addColorStop(1, '#431407');
+        ctx.fillStyle = earG; ctx.strokeStyle = '#291509'; ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(-7, -8);
+        ctx.bezierCurveTo(-13, -4, -12, 6, -6, 8);
+        ctx.bezierCurveTo(-1, 8, 0, -1, -3, -7);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+
+        // Adorable peeking pink tongue when greeting/playing with Mashmasha!
+        if (happy) {
+          ctx.fillStyle = '#fb7185'; ctx.strokeStyle = '#be123c'; ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.roundRect(11.5, 3.8, 4.2, 5.2, [1, 1, 2.5, 2.5]);
+          ctx.fill(); ctx.stroke();
+        }
+
+        // Smiling jowl line + freckled muzzle dots + glossy black nose
+        ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(9, 2.5); ctx.quadraticCurveTo(13, 5.2, 16.5, 2.8); ctx.stroke();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); ctx.ellipse(17.2, -1.8, 2.8, 2.1, 0.1, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.65)';
+        ctx.beginPath(); ctx.arc(16.5, -2.5, 0.75, 0, Math.PI * 2); ctx.fill();
+
+        // Warm, gentle soulful amber-brown eye + soft tan eyebrow dot + double catchlight!
+        ctx.fillStyle = '#fde68a';
+        ctx.beginPath(); ctx.ellipse(4.8, -7.8, 1.8, 1.0, -0.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#1c1917';
+        ctx.beginPath(); ctx.arc(5.2, -4.5, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#78350f';
+        ctx.beginPath(); ctx.arc(5.3, -4.4, 1.7, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0c0a09';
+        ctx.beginPath(); ctx.arc(5.5, -4.4, 1.0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(4.7, -5.2, 0.85, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        // Floating affectionate alpine hearts when greeting or playing with Mashmasha!
+        if (happy) {
+          const hPulse = ((time * 1.4) % 1);
+          ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+          ctx.globalAlpha = Math.max(0, 1 - hPulse);
+          ctx.fillText((sb.playingTimer || 0) > 0 ? '🐾💕' : '💛', 14, -48 - hPulse * 14);
+          ctx.globalAlpha = 1;
+        }
+        ctx.restore();
+      }
+    }
+  }
+
+  function drawAirportEnemies(ctx, level, camX, camY, time, cullW) {
+    const vw = cullW || 1280;
+
+    // 1. Autonomous Terminal Security Rover (White/Sky-Blue Airport Rover with Spinning Lidar & LED Face!)
+    if (level.airport_luggage_bots) {
+      for (const bot of level.airport_luggage_bots) {
+        const bx = bot.x - camX, by = bot.y - camY;
+        if (bx + bot.w < -90 || bx > vw + 90) continue;
+        const standby = (bot.standbyTimer || 0) > 0;
+        const wheelAng = (bot.walkDist || 0) * 0.14;
+        ctx.save();
+        ctx.translate(bx + bot.w * 0.5, by + bot.h);
+        ctx.scale(bot.facing || 1, 1);
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.30)';
+        ctx.beginPath(); ctx.ellipse(0, 0, 26, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Forward optical scan cone (turns gentle green when in heart-standby)
+        if (!standby) {
+          const cG = ctx.createLinearGradient(16, -24, 96, -12);
+          cG.addColorStop(0, 'rgba(56, 189, 248, 0.32)');
+          cG.addColorStop(1, 'rgba(56, 189, 248, 0)');
+          ctx.fillStyle = cG;
+          ctx.beginPath(); ctx.moveTo(18, -28); ctx.lineTo(96, -38); ctx.lineTo(96, -6); ctx.closePath(); ctx.fill();
+        }
+
+        // Omni-directional rubber wheels
+        for (const wx of [-14, 0, 14]) {
+          ctx.save();
+          ctx.translate(wx, -6.5);
+          ctx.rotate(wheelAng);
+          ctx.fillStyle = '#0f172a';
+          ctx.strokeStyle = '#64748b';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.arc(0, 0, 6.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(-3.5, -1, 7, 2);
+          ctx.restore();
+        }
+
+        // Sleek aerodynamic white & royal-blue airport security rover shell
+        const shG = ctx.createLinearGradient(-22, -40, 22, -8);
+        shG.addColorStop(0, '#ffffff');
+        shG.addColorStop(0.55, '#e2e8f0');
+        shG.addColorStop(1, '#94a3b8');
+        ctx.fillStyle = shG;
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(-22, -38, 44, 28, [12, 14, 5, 5]);
+        ctx.fill(); ctx.stroke();
+
+        // Blue "SECURITY" livery stripe
+        ctx.fillStyle = '#0284c7';
+        ctx.fillRect(-20, -20, 40, 6);
+        ctx.fillStyle = '#fde047';
+        ctx.font = 'bold 6.5px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('AIRPORT SEC', -2, -15);
+
+        // Curved OLED Visor Screen (💚 when meowed, cyan radar eyes normally)
+        ctx.fillStyle = '#090d16';
+        ctx.beginPath(); ctx.roundRect(1, -34, 18, 11, 4); ctx.fill();
+        if (standby) {
+          ctx.fillStyle = '#4ade80';
+          ctx.font = 'bold 9px sans-serif';
+          ctx.fillText('♥', 10, -25.5);
+        } else {
+          ctx.fillStyle = '#38bdf8';
+          ctx.beginPath();
+          ctx.arc(7, -28.5, 2.2, 0, Math.PI * 2);
+          ctx.arc(14, -28.5, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Top spinning LiDAR puck + amber strobe
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(-8, -43, 14, 5);
+        ctx.fillStyle = standby ? '#22c55e' : (Math.sin(time * 10) > 0 ? '#f59e0b' : '#fbbf24');
+        ctx.beginPath(); ctx.arc(-1, -45.5, 3.2, 0, Math.PI * 2); ctx.fill();
+
+        ctx.restore();
+      }
+    }
+
+    // 2. Runaway Motorized Smart-Suitcase (Ribbed Crimson/Aluminum Spinner Luggage with Priority Tag!)
+    if (level.airport_runaway_carts) {
+      for (const rc of level.airport_runaway_carts) {
+        const cx = rc.x - camX, cy = rc.y - camY;
+        if (cx + rc.w < -80 || cx > vw + 80) continue;
+        const braked = (rc.brakeTimer || 0) > 0;
+        const tilt = braked ? 0 : -0.07;
+        const spin = (rc.walkDist || 0) * 0.22;
+        ctx.save();
+        ctx.translate(cx + rc.w * 0.5, cy + rc.h);
+        ctx.scale(rc.facing || 1, 1);
+        ctx.rotate(tilt);
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
+        ctx.beginPath(); ctx.ellipse(0, 0, 20, 3.8, 0, 0, Math.PI * 2); ctx.fill();
+
+        // 4 Dual-Spinner Caster Wheels
+        for (const wx of [-12, 12]) {
+          ctx.save();
+          ctx.translate(wx, -4.5);
+          ctx.rotate(spin);
+          ctx.fillStyle = '#0f172a';
+          ctx.beginPath(); ctx.arc(0, 0, 4.4, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillRect(-2.5, -0.8, 5, 1.6);
+          ctx.restore();
+        }
+
+        // Extended telescoping chrome handle + fluttering yellow PRIORITY tag!
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(-10, -36); ctx.lineTo(-10, -47);
+        ctx.moveTo(-3, -36); ctx.lineTo(-3, -47);
+        ctx.stroke();
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath(); ctx.roundRect(-12, -49, 11, 3.5, 1.5); ctx.fill();
+
+        // Fluttering orange PRIORITY baggage tag
+        const flutter = braked ? 0.2 : Math.sin(time * 14) * 0.28;
+        ctx.save();
+        ctx.translate(-11, -46);
+        ctx.rotate(-0.45 + flutter);
+        ctx.fillStyle = '#f97316';
+        ctx.fillRect(-11, -2.5, 11, 5);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-9, -1, 6, 2);
+        ctx.restore();
+
+        // Glossy ribbed crimson polycarbonate hardshell body with silver corner guards
+        const bagG = ctx.createLinearGradient(-16, -38, 16, -8);
+        bagG.addColorStop(0, '#fb7185');
+        bagG.addColorStop(0.45, '#e11d48');
+        bagG.addColorStop(1, '#881337');
+        ctx.fillStyle = bagG;
+        ctx.strokeStyle = '#4c0519';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(-16, -38, 32, 30, 6); ctx.fill(); ctx.stroke();
+
+        // Rimowa-style vertical aluminum ribs + travel stickers
+        ctx.strokeStyle = 'rgba(255,255,255,0.32)';
+        ctx.lineWidth = 1.1;
+        for (const rx of [-9, -3, 3, 9]) {
+          ctx.beginPath(); ctx.moveTo(rx, -35); ctx.lineTo(rx, -11); ctx.stroke();
+        }
+        // Smart LED strip on front edge
+        ctx.fillStyle = braked ? '#ef4444' : '#38bdf8';
+        ctx.fillRect(12, -32, 2.8, 18);
+
+        ctx.restore();
+      }
+    }
+
+    // 3. Uniformed Airport Customs K9 Dog (Sleek Shepherd/Malinois in Neon-Lime High-Vis "K9" Harness!)
+    if (level.airport_customs_dogs) {
+      for (const kd of level.airport_customs_dogs) {
+        const kx = kd.x - camX, ky = kd.y - camY;
+        if (kx + kd.w < -90 || kx > vw + 90) continue;
+        const stride = Math.sin((kd.walkDist || 0) * 0.14);
+        ctx.save();
+        ctx.translate(kx + kd.w * 0.5, ky + kd.h);
+        ctx.scale(kd.facing || 1, 1);
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
+        ctx.beginPath(); ctx.ellipse(0, 0, 26, 4.2, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Wagging/alert sable tail
+        ctx.strokeStyle = '#451a03';
+        ctx.lineWidth = 4.2;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-18, -24);
+        ctx.quadraticCurveTo(-28, -30 + Math.sin(time * 9) * 3, -25, -36);
+        ctx.stroke();
+
+        // Articulated sable-tan legs
+        const drawLeg = (ox, ph, dark) => {
+          const sw = Math.sin((kd.walkDist || 0) * 0.14 + ph) * 6;
+          ctx.strokeStyle = dark ? '#78350f' : '#b45309';
+          ctx.lineWidth = 4.6;
+          ctx.beginPath();
+          ctx.moveTo(ox, -17);
+          ctx.lineTo(ox + sw * 0.5, -8);
+          ctx.lineTo(ox + sw, -1.5);
+          ctx.stroke();
+          ctx.fillStyle = '#292524';
+          ctx.beginPath(); ctx.ellipse(ox + sw + 1.5, -1.2, 3.4, 2.0, 0, 0, Math.PI * 2); ctx.fill();
+        };
+        drawLeg(-12, Math.PI, true);
+        drawLeg(11, 0, true);
+
+        // Sleek muscular Belgian Malinois / German Shepherd torso
+        const furG = ctx.createLinearGradient(-20, -32, 18, -14);
+        furG.addColorStop(0, '#78350f');
+        furG.addColorStop(0.5, '#d97706');
+        furG.addColorStop(1, '#92400e');
+        ctx.fillStyle = furG;
+        ctx.strokeStyle = '#451a03';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.ellipse(-1, -22, 20, 9.5, -0.05, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+
+        // Neon-Lime High-Visibility Airport "CUSTOMS K9" Vest with Silver Reflective Tape!
+        ctx.fillStyle = '#a3e635';
+        ctx.strokeStyle = '#365314';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.roundRect(-10, -31.5, 20, 15, 4);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(-9, -21, 18, 2.6);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 7.5px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('K9', 0, -23.5);
+
+        drawLeg(-10, 0, false);
+        drawLeg(13, Math.PI, false);
+
+        // Alert pointed-ear K9 head & dark sable muzzle
+        ctx.save();
+        ctx.translate(16, -30 + Math.abs(stride) * 1.2);
+        // Pointed ears
+        ctx.fillStyle = '#451a03';
+        ctx.beginPath();
+        ctx.moveTo(-4, -6); ctx.lineTo(-1, -16); ctx.lineTo(3, -6); ctx.closePath(); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(1, -6); ctx.lineTo(5, -15); ctx.lineTo(7, -5); ctx.closePath(); ctx.fill();
+        // Skull & dark mask muzzle
+        ctx.fillStyle = '#d97706';
+        ctx.strokeStyle = '#451a03';
+        ctx.beginPath(); ctx.arc(1, -2, 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#292524';
+        ctx.beginPath(); ctx.roundRect(4, -4.5, 10.5, 6.8, 3); ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); ctx.arc(14, -2.5, 2.0, 0, Math.PI * 2); ctx.fill();
+        // Bright amber eye
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath(); ctx.arc(4.5, -4, 1.9, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); ctx.arc(5.0, -4, 1.0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        if (kd.alert) {
+          ctx.fillStyle = '#ef4444';
+          ctx.font = 'bold 13px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('!', 18, -48);
+        }
+
+        ctx.restore();
+      }
+    }
+
+    // 4. Airfield Quadcopter Inspection Drone (Carbon & Aviation-Yellow 4-Rotor Drone with Nav Strobes!)
+    if (level.airport_tarmac_drones) {
+      for (const dr of level.airport_tarmac_drones) {
+        const dx = dr.x - camX, dy = dr.y - camY;
+        if (dx + dr.w < -90 || dx > vw + 90) continue;
+        ctx.save();
+        ctx.translate(dx + dr.w * 0.5, dy + dr.h * 0.5);
+        ctx.scale(dr.facing || 1, 1);
+        ctx.rotate(0.08);
+
+        // Carbon-fiber rotor arms & landing skids
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 2.6;
+        ctx.beginPath();
+        ctx.moveTo(-26, -4); ctx.lineTo(26, -4);
+        ctx.moveTo(-12, 5); ctx.lineTo(-16, 14);
+        ctx.moveTo(12, 5); ctx.lineTo(16, 14);
+        ctx.moveTo(-20, 14); ctx.lineTo(20, 14);
+        ctx.stroke();
+
+        // High-speed blurred twin rotor discs + aviation red/green nav tips
+        const blurW = 13 + Math.sin(time * 42) * 3;
+        for (const [rx, navCol] of [[-24, '#ef4444'], [24, '#22c55e']]) {
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(rx - 2.5, -9, 5, 6);
+          ctx.fillStyle = 'rgba(226, 232, 240, 0.65)';
+          ctx.beginPath(); ctx.ellipse(rx, -10, blurW, 2.3, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = navCol;
+          ctx.beginPath(); ctx.arc(rx, -5, 2.3, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Aviation-yellow & slate central fuselage pod + stabilized gimbal camera lens
+        const bodyG = ctx.createLinearGradient(0, -9, 0, 8);
+        bodyG.addColorStop(0, '#fde047');
+        bodyG.addColorStop(0.6, '#eab308');
+        bodyG.addColorStop(1, '#854d0e');
+        ctx.fillStyle = bodyG;
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.roundRect(-14, -8, 28, 14, 6); ctx.fill(); ctx.stroke();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); ctx.arc(6, 9, 4.8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath(); ctx.arc(7.2, 9, 2.2, 0, Math.PI * 2); ctx.fill();
+
+        ctx.restore();
+      }
+    }
+
+    // 5. Tarmac Ground-Crew Marshaller with Glowing Orange LED Wands & Ear-Defenders!
+    if (level.airport_ground_marshals) {
+      for (const gm of level.airport_ground_marshals) {
+        const gx = gm.x - camX, gy = gm.y - camY;
+        if (gx + gm.w < -90 || gx > vw + 90) continue;
+        const saluting = (gm.saluteTimer || 0) > 0;
+        const step = saluting ? 0 : Math.sin((gm.walkDist || 0) * 0.12) * 5;
+        const wandWave = saluting ? -0.35 : Math.sin(time * 7.5 + gm.x * 0.01) * 0.52;
+        ctx.save();
+        ctx.translate(gx + gm.w * 0.5, gy + gm.h);
+        ctx.scale(gm.facing || 1, 1);
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
+        ctx.beginPath(); ctx.ellipse(0, 0, 19, 4, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Navy tarmac trousers & safety boots
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 5.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-4, -22); ctx.lineTo(-4 - step, -2);
+        ctx.moveTo(4, -22); ctx.lineTo(4 + step, -2);
+        ctx.stroke();
+
+        // High-Visibility Neon-Yellow Safety Jacket with Silver Reflective Cross-Bands
+        ctx.fillStyle = '#facc15';
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.roundRect(-10, -45, 20, 24, 5); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(-9.5, -34, 19, 3.2);
+        ctx.fillRect(-9.5, -27, 19, 3.2);
+
+        // Head + Sunglass Visor + Big Red Acoustic Aviation Ear-Defenders!
+        ctx.fillStyle = '#fed7aa';
+        ctx.strokeStyle = '#7c2d12';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath(); ctx.arc(0, -54, 7.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Sunglasses
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(1, -56.5, 6.5, 3.2);
+        // Over-head headband & red acoustic ear-muff cups
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.arc(0, -55, 8.8, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.ellipse(-2, -54, 3.2, 4.6, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Twin Arms Waving Glowing Orange LED Aircraft Marshalling Wands!
+        const drawWandArm = (sx, sy, baseAng) => {
+          ctx.save();
+          ctx.translate(sx, sy);
+          ctx.rotate(baseAng);
+          ctx.strokeStyle = '#eab308';
+          ctx.lineWidth = 4.2;
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(11, -7); ctx.stroke();
+          // Black grip + glowing neon-orange marshalling baton!
+          ctx.strokeStyle = '#0f172a';
+          ctx.lineWidth = 3.0;
+          ctx.beginPath(); ctx.moveTo(11, -7); ctx.lineTo(14, -10); ctx.stroke();
+          ctx.strokeStyle = saluting ? '#4ade80' : '#f97316';
+          ctx.lineWidth = 4.0;
+          ctx.beginPath(); ctx.moveTo(14, -10); ctx.lineTo(26, -22); ctx.stroke();
+          ctx.strokeStyle = '#fef08a';
+          ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.moveTo(15, -11); ctx.lineTo(25, -21); ctx.stroke();
+          ctx.restore();
+        };
+        drawWandArm(-7, -41, -0.55 - wandWave);
+        drawWandArm(7, -41, -0.15 + wandWave);
+
+        ctx.restore();
+      }
+    }
+
+    // 6. Friendly VIP Ragdoll Travel Cat Companion (Fluffy Cream/Seal-Point Cat with Aviator Scarf & Pet Carrier!)
+    if (level.airport_travel_cats) {
+      for (const tc of level.airport_travel_cats) {
+        const tx = tc.x - camX, ty = tc.y - camY;
+        if (tx + tc.w < -110 || tx > vw + 110) continue;
+        const happy = !!tc.loving || (tc.playingTimer || 0) > 0;
+        const walkPh = (tc.walkDist || 0) * 0.16;
+        const blend = tc.walkBlend || 0;
+
+        // Cozy Airline-Approved Hard-Shell Pet Carrier parked at her home spot!
+        const homeScreenX = (tc.homeX !== undefined ? tc.homeX : tc.x) - camX;
+        if (homeScreenX > -90 && homeScreenX < vw + 90) {
+          ctx.save();
+          ctx.translate(homeScreenX + 44, ty + tc.h);
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.22)';
+          ctx.beginPath(); ctx.ellipse(0, 0, 20, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#38bdf8';
+          ctx.strokeStyle = '#0369a1';
+          ctx.lineWidth = 1.3;
+          ctx.beginPath(); ctx.roundRect(-17, -24, 34, 24, 6); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#f8fafc';
+          ctx.fillRect(-17, -13, 34, 4);
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(-12, -20, 10, 14);
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 1.0;
+          for (const gx0 of [-9, -6]) {
+            ctx.beginPath(); ctx.moveTo(gx0, -20); ctx.lineTo(gx0, -6); ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        ctx.save();
+        ctx.translate(tx + tc.w * 0.5, ty + tc.h);
+        ctx.scale(tc.facing || -1, 1);
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.22)';
+        ctx.beginPath(); ctx.ellipse(0, 0, 19, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+
+        // Plush plumed seal-point Ragdoll tail swaying affectionately
+        const tailSway = Math.sin(time * (happy ? 6.5 : 3.0)) * 5;
+        ctx.strokeStyle = '#57534e';
+        ctx.lineWidth = 6.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-13, -14);
+        ctx.bezierCurveTo(-24, -18, -26 + tailSway * 0.5, -32, -17 + tailSway, -36);
+        ctx.stroke();
+
+        // Silky cream-ivory paws
+        for (const [lx, ph] of [[-8, 0], [-3, Math.PI], [6, Math.PI], [10, 0]]) {
+          const sw = Math.sin(walkPh + ph) * 4 * blend;
+          ctx.strokeStyle = '#f5f5f4';
+          ctx.lineWidth = 4.2;
+          ctx.beginPath(); ctx.moveTo(lx, -12); ctx.lineTo(lx + sw, -2); ctx.stroke();
+          ctx.fillStyle = '#57534e';
+          ctx.beginPath(); ctx.ellipse(lx + sw + 1, -1.5, 2.6, 1.6, 0, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Fluffy cream Ragdoll body + Royal-Blue & Gold First-Class Flight Neckerchief!
+        const furG = ctx.createLinearGradient(-15, -24, 14, -8);
+        furG.addColorStop(0, '#ffffff');
+        furG.addColorStop(0.65, '#fafaf9');
+        furG.addColorStop(1, '#e7e5e4');
+        ctx.fillStyle = furG;
+        ctx.strokeStyle = '#a8a29e';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.ellipse(-1, -15, 14.5, 8.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        // Cute red-and-gold flight attendant neckerchief with gold wing pin
+        ctx.fillStyle = '#e11d48';
+        ctx.beginPath();
+        ctx.moveTo(6, -19); ctx.lineTo(13, -17); ctx.lineTo(10, -9); ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath(); ctx.arc(10, -15, 1.6, 0, Math.PI * 2); ctx.fill();
+
+        // Rounded fluffy head with seal-point mask, ears & sparkling sapphire-blue eyes!
+        ctx.save();
+        ctx.translate(11, -23 + ((tc.playingTimer || 0) > 0 ? Math.sin(time * 9) * 1.5 : 0));
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#a8a29e';
+        ctx.beginPath(); ctx.arc(0, 0, 8.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        // Seal-brown ears
+        ctx.fillStyle = '#57534e';
+        ctx.beginPath(); ctx.moveTo(-5, -5); ctx.lineTo(-3, -13); ctx.lineTo(1, -6); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(1, -6); ctx.lineTo(5, -13); ctx.lineTo(7, -4); ctx.closePath(); ctx.fill();
+
+        // Soft seal-point facial mask + Sapphire-blue Ragdoll eye!
+        ctx.fillStyle = 'rgba(87, 83, 78, 0.78)';
+        ctx.beginPath(); ctx.ellipse(3.5, 0.5, 4.2, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0ea5e9';
+        ctx.beginPath(); ctx.arc(3.5, -1.2, 2.1, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath(); ctx.arc(3.8, -1.2, 1.0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(3.1, -1.8, 0.65, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fb7185';
+        ctx.beginPath(); ctx.arc(7.4, 0.5, 1.2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        if (happy) {
+          const hp = (time * 1.4) % 1;
+          ctx.font = '12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.globalAlpha = Math.max(0, 1 - hp);
+          ctx.fillText((tc.playingTimer || 0) > 0 ? '🐾💕' : '✈💖', 12, -38 - hp * 13);
+          ctx.globalAlpha = 1;
+        }
         ctx.restore();
       }
     }
@@ -7892,6 +11721,8 @@ window.Game.EnemiesExtended = (function () {
     drawAll: function (ctx, level, camX, camY, time, cullW, nv) {
       drawAll(ctx, level, camX, camY, time, cullW, nv);
       drawIstanbulEnemies(ctx, level, camX, camY, time, cullW);
+      drawSwissEnemies(ctx, level, camX, camY, time, cullW);
+      drawAirportEnemies(ctx, level, camX, camY, time, cullW);
     },
     applyMeowRepel,
   };

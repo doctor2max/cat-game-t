@@ -3,7 +3,7 @@ window.Game = window.Game || {};
 window.Game.Store = (function () {
   const SAVE_KEY = 'theWayHome_saveData_v2';
   const LEGACY_UNLOCK_KEY = 'theWayHome_maxUnlockedStage';
-  const TOTAL_STAGES = 27;
+  const TOTAL_STAGES = 29;
   const SEASON1_STAGES = 15;
   const TEMP_UNLOCK_ALL = true; // وضع التجربة: فتح جميع المراحل تلقائياً
 
@@ -399,6 +399,9 @@ window.Game.Store = (function () {
       'battir_railway_semaphore', 'battir_aqueduct_surge',
       'battir_noria_wheel', 'battir_taboon_oven', 'battir_sabr_hedge',
       'battir_flash_sluice', 'battir_locomotive_crossing', 'battir_beehive_swarm',
+      'istanbul_chestnut_cart', 'istanbul_steam_kettle', 'istanbul_simit_vendor',
+      'swiss_cheese_wheel', 'swiss_cuckoo_clock', 'swiss_alphorn_gust', 'swiss_rescue_hut', 'swiss_waterwheel_mill', 'swiss_fondue_cauldron', 'swiss_avalanche_bell',
+      'airport_security_scanner', 'airport_jet_blast', 'airport_coffee_kiosk', 'airport_exit_portal',
     ]);
     const groundTypes = new Set([
       'asphalt', 'cobble', 'grass', 'pier', 'rooftop',
@@ -408,6 +411,8 @@ window.Game.Store = (function () {
       'paris_zinc_roof', 'kasbah_terrace', 'maya_stone_terrace', 'greece_terrace',
       'battir_terrace', 'battir_hosh_roof', 'battir_fortress_wall',
       'battir_cliff_terrace', 'battir_qantara_arcade',
+      'istanbul_cobble', 'istanbul_bosphorus_quay', 'swiss_meadow', 'swiss_chalet_deck',
+      'airport_terminal_floor', 'airport_mezzanine_deck', 'airport_tarmac_deck', 'airport_jetway_deck',
     ]);
 
     function isSafeCoinPos(x, y) {
